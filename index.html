@@ -427,7 +427,7 @@
     <div class="order-bar-total" id="grand-total">₩0</div>
     <div class="order-bar-items" id="item-summary" data-t="select_items">Please select items</div>
   </div>
-  <button class="order-btn" onclick="openModal()" data-t="order_btn">Order Now →</button>
+  <button class="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
@@ -572,7 +572,7 @@ function setLang(lang) {
    ===================================================== */
 const catalog = {
   frozen: {
-    label: 'A 냉동음식',
+    label: { en: 'A Frozen Food', th: 'A อาหารแช่แข็ง', ko: 'A 냉동음식' },
     emoji: '🧊',
     items: [
       { id:'a1', name_en:'A1. ROOGSINKOONG 500g', name_ko:'A1. 루싱쿵 500g',         emoji:'🧊', image:'https://asia-mart.co.kr/web/product/big/202008/98a1988761568a55ad1a27dad976aaa0.jpg', price1:5000, price2:9000,  price3:16000 },
@@ -601,7 +601,7 @@ const catalog = {
     ]
   },
   noodle: {
-    label: 'B 면 종류',
+    label: { en: 'B Noodles', th: 'B เส้นก๋วยเตี๋ยว', ko: 'B 면 종류' },
     emoji: '🍜',
     items: [
       { id:'b01', name_en:'B01. MAMA TOMYUM CUP 70g', name_ko:'B01. 마마 똠얌 컵 70g',         emoji:'🍜', image:'https://storage.tally.so/8b497784-dd8c-4dce-8d77-f7f5c8495e1b/hoejeon-tomnyamkeob.png', price1:1400, price3:4000,  price5:6500 },
@@ -631,7 +631,7 @@ const catalog = {
     ]
   },
   sauce: {
-    label: 'C 각종 소스',
+    label: { en: 'C Sauces', th: 'C ซอสต่างๆ', ko: 'C 각종 소스' },
     emoji: '🥫',
     items: [
       { id:'c01', name_en:'C1. TIPAROS Vinegar 700ml', name_ko:'C1. 티파로스 식초 700ml',              emoji:'🥫', image:'https://www.yejoo153.co.kr/data/file/b0301/thumb-2949830214_0muw4CTL_a77d2553fe8d75d90eae3a3a37e0d6be0d3f6db4_258x258.jpg', price1:2500, price2:4800,  price3:6800 },
@@ -674,14 +674,14 @@ const catalog = {
       { id:'c31', name_en:'C32. Joti PALO Mix 60g', name_ko:'C32. 조띠 PALO 60g',                  emoji:'🥫', image:'https://storage.tally.so/9232ea8b-2dcd-4c28-a39d-c8b1395b903f/hoejeon-roddipalro.png', price1:3000, price3:8500,  price5:13500 },
       { id:'c32', name_en:'C33. Joti KA PRAO Mix 50g', name_ko:'C33. 조띠 KA PRAO 50g',               emoji:'🥫', image:'https://storage.tally.so/d38da2c5-5662-4590-ae6c-c8d24e387934/hoejeon-roddikapeurao.png', price1:3000, price3:8500,  price5:13500 },
       { id:'c33', name_en:'C34. Aroy Seasoning 67g', name_ko:'C34. 과용시즈닝 67g',                 emoji:'🥫', image:'https://storage.tally.so/d032f220-b403-4ff2-9ffa-29132255ad1a/hoejeon-raimsijeuningpaudeo.png', price1:2500, price3:7000,  price5:10500 },
+      { id:'d01', name_en:'C35. Sardines 155g', name_ko:'C35. 사딘 155g',              emoji:'🥫', image:'https://storage.tally.so/826859d7-f212-4b1e-b8ec-3358002423f8/hoejeon-sadin.png', price1:5000, price3:8000,  price10:17000 },
     ]
   },
   other: {
-    label: 'D 음료 및 기타',
+    label: { en: 'D Drinks & More', th: 'D เครื่องดื่ม & อื่นๆ', ko: 'D 음료 및 기타' },
     emoji: '🧃',
     items: [
-      { id:'d01', name_en:'D01. Sardines 155g', name_ko:'D01. 사딘 155g',              emoji:'🥫', image:'https://storage.tally.so/826859d7-f212-4b1e-b8ec-3358002423f8/hoejeon-sadin.png', price1:5000, price3:8000,  price10:17000 },
-      { id:'d02', name_en:'D02. Rambutan in Syrup 565g', name_ko:'D02. 람부탄 시럽 565g',             emoji:'🍈', image:'https://storage.tally.so/2206a51b-e7b7-46b2-bdaa-eaa2d07ceaf7/hoejeon-rambutan.png', price1:5500, price3:15000, price5:25000 },
+      { id:'d02', name_en:'D01. Rambutan in Syrup 565g', name_ko:'D01. 람부탄 시럽 565g',             emoji:'🍈', image:'https://storage.tally.so/2206a51b-e7b7-46b2-bdaa-eaa2d07ceaf7/hoejeon-rambutan.png', price1:5500, price3:15000, price5:25000 },
       { id:'d03', name_en:'D03. Longan in Syrup 565g', name_ko:'D03. 용간 시럽 565g',               emoji:'🍈', image:'https://storage.tally.so/758daaec-62eb-4f71-84c9-186077c43868/hoejeon-ronggan.png', price1:5500, price3:15000, price5:25000 },
       { id:'d04', name_en:'D04. Carnation Condensed Milk 405g', name_ko:'D04. 카네이션 연유 405g',      emoji:'🥛', image:'https://storage.tally.so/73cdeeac-cc34-4d04-8291-fa5c2d1b2a04/hoejeon-kaneisyeon.png', price1:2800, price3:8500,  price5:13500 },
       { id:'d05', name_en:'D05. Ali Condensed Milk 355g', name_ko:'D05. 알리 연유 355g',          emoji:'🥛', image:'https://storage.tally.so/da5593b4-b8fb-4efe-ae3c-92fbdc573f66/hoejeon-malriyeonyu.png', price1:2800, price3:8500,  price5:13500 },
@@ -788,7 +788,25 @@ function playReset() {
   } catch(e) {}
 }
 
-// 첫 터치시 AudioContext 활성화
+function playFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784, 1047]; // C E G C 화음
+    notes.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.type = 'triangle';
+      const start = ctx.currentTime + i * 0.07;
+      o.frequency.setValueAtTime(freq, start);
+      g.gain.setValueAtTime(0.25, start);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+      o.start(start);
+      o.stop(start + 0.2);
+    });
+  } catch(e) {}
+}
 document.addEventListener('touchstart', () => getAudioCtx(), { once: true });
 document.addEventListener('click', () => getAudioCtx(), { once: true });
 
@@ -820,7 +838,8 @@ function renderTab(tab) {
 
   const cat = catalog[tab];
   const section = document.createElement('div');
-  section.innerHTML = `<div class="section-title">${cat.emoji} ${cat.label}</div>`;
+  const catLabel = typeof cat.label === 'object' ? cat.label[currentLang] || cat.label.en : cat.label;
+  section.innerHTML = `<div class="section-title">${cat.emoji} ${catLabel}</div>`;
 
   cat.items.forEach(item => {
     const qty = quantities[item.id] || 0;
