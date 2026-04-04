@@ -201,6 +201,7 @@
     padding: 2px 10px;
     color: var(--muted);
     transition: background 0.15s, transform 0.1s;
+    display: inline-block;
   }
   .price-tag:hover { background: var(--border); }
   .price-tag:active { transform: scale(0.95); }
@@ -211,6 +212,13 @@
     font-weight: 500;
   }
   .price-tag.deal:hover { background: #d4eee0; }
+  @keyframes tagBounce {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.35) translateY(-4px); }
+    60%  { transform: scale(0.95) translateY(1px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  .price-tag.bounce { animation: tagBounce 0.3s ease; }
   .deal-badge {
     display: inline-flex;
     align-items: center;
@@ -729,22 +737,16 @@ function getUnit(n) {
   return n === 1 ? `${n}pc` : `${n}pcs`;
 }
 
-const selectedTags = {};
-
 function getPriceTags(item) {
-  const tags_selected = selectedTags[item.id] || [];
   const makeTag = (n, price, isDeal) => {
-    const selected = tags_selected.includes(n);
     const cls = isDeal ? 'price-tag deal' : 'price-tag';
-    const selectedStyle = selected ? 'background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;' : '';
-    return `<span class="${cls}" onclick="toggleQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${selectedStyle}">${getUnit(n)} ${fmt(price)}</span>`;
+    return `<span class="${cls}">${getUnit(n)} ${fmt(price)}</span>`;
   };
   const tags = [makeTag(1, item.price1, false)];
   if (item.price2)  tags.push(makeTag(2, item.price2, true));
   if (item.price3)  tags.push(makeTag(3, item.price3, true));
   if (item.price5)  tags.push(makeTag(5, item.price5, true));
   if (item.price10) tags.push(makeTag(10, item.price10, true));
-  tags.push(`<span class="price-tag" onclick="resetQty('${item.id}')" style="cursor:pointer;transition:all 0.15s;background:#f5f5f5;color:#aaa;border-color:#ddd;">🔄</span>`);
   return tags.join('');
 }
 
@@ -812,24 +814,16 @@ function playFanfare() {
 document.addEventListener('touchstart', () => getAudioCtx(), { once: true });
 document.addEventListener('click', () => getAudioCtx(), { once: true });
 
-function resetQty(id) {
-  quantities[id] = 0;
-  selectedTags[id] = [];
-  playReset();
-  updateCard(id);
-  updateSummary();
+function getDiscount(item, qty) {
+  if (!qty || qty <= 0) return 0;
+  const fullPrice = qty * item.price1;
+  const discounted = getPrice(item, qty);
+  return fullPrice - discounted;
 }
 
-function toggleQty(id, n) {
-  if (!selectedTags[id]) selectedTags[id] = [];
-  const idx = selectedTags[id].indexOf(n);
-  if (idx > -1) {
-    selectedTags[id].splice(idx, 1);
-  } else {
-    selectedTags[id].push(n);
-    playDing();
-  }
-  quantities[id] = selectedTags[id].reduce((sum, v) => sum + v, 0);
+function resetQty(id) {
+  quantities[id] = 0;
+  playReset();
   updateCard(id);
   updateSummary();
 }
@@ -875,7 +869,12 @@ function renderTab(tab) {
             <input class="qty-input" type="number" min="0" value="${qty}" id="input-${item.id}" onchange="setQty('${item.id}',this.value)" />
             <button class="qty-btn" onclick="changeQty('${item.id}',1,event)">+</button>
           </div>
-          <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">${qty > 0 ? fmt(subtotal) : ''}</div>
+          <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">
+            ${qty > 0 ? `
+              <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
+              ${getDiscount(item, qty) > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(getDiscount(item, qty))} 할인!</div>` : ''}
+            ` : ''}
+          </div>
         </div>
       </div>
     `;
@@ -897,8 +896,17 @@ function updateCard(id) {
 
   if (inp) inp.value = qty;
   if (subEl) {
-    subEl.textContent = qty > 0 ? fmt(subtotal) : '';
-    subEl.className = 'item-subtotal' + (qty > 0 ? ' visible' : '');
+    if (qty > 0) {
+      const discount = getDiscount(item, qty);
+      subEl.innerHTML = `
+        <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
+        ${discount > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(discount)} 할인!</div>` : ''}
+      `;
+      subEl.className = 'item-subtotal visible';
+    } else {
+      subEl.innerHTML = '';
+      subEl.className = 'item-subtotal';
+    }
   }
   if (priceEl) priceEl.innerHTML = getPriceTags(item);
   card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
@@ -920,7 +928,20 @@ function updateSummary() {
 function changeQty(id, delta, e) {
   e && e.stopPropagation();
   quantities[id] = Math.max(0, (quantities[id] || 0) + delta);
-  if (delta > 0 && quantities[id] > 0) playDing();
+  if (delta > 0 && quantities[id] > 0) {
+    playDing();
+    // 1pc 태그에 바운스 애니메이션
+    const priceEl = document.getElementById('prices-' + id);
+    if (priceEl) {
+      const firstTag = priceEl.querySelector('.price-tag');
+      if (firstTag) {
+        firstTag.classList.remove('bounce');
+        void firstTag.offsetWidth; // reflow
+        firstTag.classList.add('bounce');
+        setTimeout(() => firstTag.classList.remove('bounce'), 350);
+      }
+    }
+  }
   updateCard(id);
   updateSummary();
 }
