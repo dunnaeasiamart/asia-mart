@@ -729,10 +729,12 @@ function getUnit(n) {
   return n === 1 ? `${n}pc` : `${n}pcs`;
 }
 
+const selectedTags = {};
+
 function getPriceTags(item) {
-  const qty = quantities[item.id] || 0;
+  const tags_selected = selectedTags[item.id] || [];
   const makeTag = (n, price, isDeal) => {
-    const selected = qty === n;
+    const selected = tags_selected.includes(n);
     const cls = isDeal ? 'price-tag deal' : 'price-tag';
     const selectedStyle = selected ? 'background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;' : '';
     return `<span class="${cls}" onclick="toggleQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${selectedStyle}">${getUnit(n)} ${fmt(price)}</span>`;
@@ -812,15 +814,22 @@ document.addEventListener('click', () => getAudioCtx(), { once: true });
 
 function resetQty(id) {
   quantities[id] = 0;
+  selectedTags[id] = [];
   playReset();
   updateCard(id);
   updateSummary();
 }
 
 function toggleQty(id, n) {
-  const current = quantities[id] || 0;
-  quantities[id] = current === n ? 0 : current + n;
-  if (quantities[id] > 0) playDing();
+  if (!selectedTags[id]) selectedTags[id] = [];
+  const idx = selectedTags[id].indexOf(n);
+  if (idx > -1) {
+    selectedTags[id].splice(idx, 1);
+  } else {
+    selectedTags[id].push(n);
+    playDing();
+  }
+  quantities[id] = selectedTags[id].reduce((sum, v) => sum + v, 0);
   updateCard(id);
   updateSummary();
 }
