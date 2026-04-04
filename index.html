@@ -499,6 +499,7 @@ const i18n = {
     addr_uploaded: 'Photo uploaded',
     addr_example: 'Example',
     max_qty: '⚠️ Maximum 10 items per product.',
+    discount: 'OFF!',
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -529,6 +530,7 @@ const i18n = {
     addr_uploaded: 'อัพโหลดรูปแล้ว',
     addr_example: 'ตัวอย่าง',
     max_qty: '⚠️ สูงสุด 10 ชิ้นต่อสินค้า',
+    discount: 'ลด!',
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -559,6 +561,7 @@ const i18n = {
     addr_uploaded: '사진 업로드 완료',
     addr_example: '예시',
     max_qty: '⚠️ 상품당 최대 10개까지 구매 가능합니다.',
+    discount: '할인!',
   }
 };
 
@@ -907,7 +910,7 @@ function renderTab(tab) {
           <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">
             ${qty > 0 ? `
               <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
-              ${getDiscount(item, qty) > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(getDiscount(item, qty))} 할인!</div>` : ''}
+              ${getDiscount(item, qty) > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(getDiscount(item, qty))} ${i18n[currentLang].discount}</div>` : ''}
             ` : ''}
           </div>
         </div>
@@ -935,7 +938,7 @@ function updateCard(id) {
       const discount = getDiscount(item, qty);
       subEl.innerHTML = `
         <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
-        ${discount > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(discount)} 할인!</div>` : ''}
+        ${discount > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(discount)} ${i18n[currentLang].discount}</div>` : ''}
       `;
       subEl.className = 'item-subtotal visible';
     } else {
@@ -980,6 +983,8 @@ function changeQty(id, delta, e) {
         setTimeout(() => firstTag.classList.remove('bounce'), 350);
       }
     }
+  } else if (delta < 0 && quantities[id] >= 0) {
+    playReset();
   }
   updateCard(id);
   updateSummary();
