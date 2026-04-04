@@ -735,6 +735,7 @@ let currentTab = 'frozen';
 
 function getPrice(item, qty) {
   if (!qty || qty <= 0) return 0;
+  if (qty === 1) return item.price1;
 
   const tiers = [];
   if (item.price10) tiers.push({ qty: 10, price: item.price10 });
@@ -742,26 +743,19 @@ function getPrice(item, qty) {
   if (item.price3)  tiers.push({ qty: 3,  price: item.price3 });
   if (item.price2)  tiers.push({ qty: 2,  price: item.price2 });
 
+  // qty 이하의 가장 큰 묶음 찾기
+  const applicableTier = tiers.find(t => qty >= t.qty);
+  if (!applicableTier) return qty * item.price1;
+
   let total = 0, remaining = qty;
-  let bestTierUsed = null;
+  const sets = Math.floor(remaining / applicableTier.qty);
+  total += sets * applicableTier.price;
+  remaining -= sets * applicableTier.qty;
 
-  for (const tier of tiers) {
-    if (remaining >= tier.qty) {
-      const sets = Math.floor(remaining / tier.qty);
-      total += sets * tier.price;
-      remaining -= sets * tier.qty;
-      bestTierUsed = tier;
-    }
-  }
-
+  // 나머지는 applicableTier 단가로 계산
   if (remaining > 0) {
-    if (bestTierUsed) {
-      // 사용된 최고 묶음의 단가로 계산 후 100원 올림
-      const unitPrice = bestTierUsed.price / bestTierUsed.qty;
-      total += Math.ceil(remaining * unitPrice / 100) * 100;
-    } else {
-      total += remaining * item.price1;
-    }
+    const unitPrice = applicableTier.price / applicableTier.qty;
+    total += Math.ceil(remaining * unitPrice / 100) * 100;
   }
 
   return total;
