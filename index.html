@@ -743,18 +743,12 @@ function getPrice(item, qty) {
   const applicableTier = tiers.find(t => qty >= t.qty);
   if (!applicableTier) return qty * item.price1;
 
-  let total = 0, remaining = qty;
-  const sets = Math.floor(remaining / applicableTier.qty);
-  total += sets * applicableTier.price;
-  remaining -= sets * applicableTier.qty;
+  // 묶음 단가를 100원 내림으로 고정 (일관된 할인)
+  const unitPrice = Math.floor(applicableTier.price / applicableTier.qty / 100) * 100;
 
-  // 나머지는 applicableTier 단가로 계산
-  if (remaining > 0) {
-    const unitPrice = applicableTier.price / applicableTier.qty;
-    total += Math.ceil(remaining * unitPrice / 100) * 100;
-  }
-
-  return total;
+  const sets = Math.floor(qty / applicableTier.qty);
+  const remainder = qty % applicableTier.qty;
+  return sets * applicableTier.price + remainder * unitPrice;
 }
 
 function getUnit(n) {
@@ -764,15 +758,15 @@ function getUnit(n) {
 }
 
 function getPriceTags(item) {
-  const makeTag = (n, price, isDeal) => {
-    const cls = isDeal ? 'price-tag deal' : 'price-tag';
-    return `<span class="${cls}">${getUnit(n)} ${fmt(price)}</span>`;
+  const makeTag = (n, price, style) => {
+    return `<span class="price-tag" style="cursor:pointer;transition:all 0.15s;${style}">${getUnit(n)} ${fmt(price)}</span>`;
   };
-  const tags = [makeTag(1, item.price1, false)];
-  if (item.price2)  tags.push(makeTag(2, item.price2, true));
-  if (item.price3)  tags.push(makeTag(3, item.price3, true));
-  if (item.price5)  tags.push(makeTag(5, item.price5, true));
-  if (item.price10) tags.push(makeTag(10, item.price10, true));
+  const tags = [makeTag(1, item.price1, 'background:#f0f0f0;border-color:#ccc;color:#666;')];
+  if (item.price2)  tags.push(makeTag(2, item.price2, 'background:#e8f0fe;border-color:#90b4f5;color:#1a56db;font-weight:500;'));
+  if (item.price3)  tags.push(makeTag(3, item.price3, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  if (item.price5)  tags.push(makeTag(5, item.price5, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  if (item.price10) tags.push(makeTag(10, item.price10, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  tags.push(`<span class="price-tag" onclick="resetQty('${item.id}')" style="cursor:pointer;background:#f5f5f5;color:#aaa;border-color:#ddd;">🔄</span>`);
   return tags.join('');
 }
 
