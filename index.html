@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asia Mart — 온라인 주문</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --border: #e8e4dc;
+    --text: #1a1814;
+    --muted: #7a7570;
+    --accent: #c84b2f;
+    --accent-light: #fdf0ed;
+    --success: #2d7a4f;
+    --success-light: #edf7f2;
+    --gold: #b8860b;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+  .logo span { color: #e8a87c; }
+  .header-cart {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .header-cart:hover { opacity: 0.85; }
+  .cart-count {
+    background: #fff;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 11px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--text);
+    color: #fff;
+    padding: 40px 24px 48px;
+    text-align: center;
+  }
+  .hero-sub { font-size: 12px; letter-spacing: 0.12em; color: #e8a87c; text-transform: uppercase; margin-bottom: 12px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 44px); line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 14px; color: #aaa; max-width: 400px; margin: 0 auto; }
+
+  /* CATEGORY TABS */
+  .tabs-wrap {
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tabs {
+    display: flex;
+    padding: 0 16px;
+    min-width: max-content;
+  }
+  .tab {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* MAIN */
+  main { max-width: 680px; margin: 0 auto; padding: 20px 16px 120px; }
+
+  .category-section { display: none; }
+  .category-section.active { display: block; }
+
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* PRODUCT CARD */
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .product-card.has-qty {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .product-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .product-body { flex: 1; min-width: 0; }
+  .product-name { font-size: 14px; font-weight: 500; margin-bottom: 5px; line-height: 1.3; }
+  .product-prices { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .price-tag {
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 2px 10px;
+    color: var(--muted);
+  }
+  .price-tag.deal {
+    background: var(--success-light);
+    border-color: #b2dbc5;
+    color: var(--success);
+    font-weight: 500;
+  }
+  .deal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .qty-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .qty-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .qty-btn:hover { background: var(--border); }
+  .qty-input {
+    width: 40px;
+    height: 32px;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+    background: #fff;
+    color: var(--text);
+    -moz-appearance: textfield;
+  }
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .item-subtotal {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-left: auto;
+    min-width: 72px;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .item-subtotal.visible { opacity: 1; }
+
+  /* STICKY FOOTER */
+  .order-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 200;
+  }
+  .order-bar-info { flex: 1; }
+  .order-bar-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .order-bar-total { font-size: 22px; font-weight: 700; color: var(--text); }
+  .order-bar-items { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .order-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .order-btn:hover { opacity: 0.9; }
+  .order-btn:active { transform: scale(0.97); }
+
+  /* ORDER MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(40px);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  .modal-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .modal-item:last-child { border-bottom: none; }
+  .modal-item-name { color: var(--muted); }
+  .modal-item-price { font-weight: 500; }
+  .modal-total { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--text); font-size: 18px; font-weight: 700; }
+  .confirm-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.15s;
+  }
+  .confirm-btn:hover { opacity: 0.9; }
+  .empty-cart { text-align: center; color: var(--muted); padding: 32px 0; font-size: 14px; }
+
+  /* Customer info */
+  .customer-form { margin-top: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Asia <span>Mart</span></div>
+  <button class="header-cart" onclick="openModal()">
+    🛒 장바구니
+    <span class="cart-count" id="header-count">0</span>
+  </button>
+</header>
+
+<div class="hero">
+  <div class="hero-sub">Fresh from Southeast Asia</div>
+  <h1>정통 아시아 식품<br>온라인 주문</h1>
+  <p>수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!</p>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this,'fishball')">🐟 어묵·피시볼</button>
+    <button class="tab" onclick="switchTab(this,'noodle')">🍜 면류</button>
+    <button class="tab" onclick="switchTab(this,'sauce')">🌶 소스·양념</button>
+    <button class="tab" onclick="switchTab(this,'snack')">🍘 과자·스낵</button>
+    <button class="tab" onclick="switchTab(this,'drink')">🧃 음료</button>
+  </div>
+</div>
+
+<main id="main-content"></main>
+
+<div class="order-bar">
+  <div class="order-bar-info">
+    <div class="order-bar-label">합계 금액</div>
+    <div class="order-bar-total" id="grand-total">₩0</div>
+    <div class="order-bar-items" id="item-summary">상품을 선택해 주세요</div>
+  </div>
+  <button class="order-btn" onclick="openModal()">주문하기 →</button>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">주문 확인</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const catalog = {
+  fishball: {
+    label: '어묵 · 피시볼',
+    emoji: '🐟',
+    items: [
+      { id:'a1', name:'A1. Roogsinkoong 어묵볼 500g', emoji:'🍡', price1:6000, price3:16000, deal:true },
+      { id:'a2', name:'A2. Bakso Sapi 소고기볼 400g', emoji:'🥩', price1:7000, price3:18000, deal:false },
+      { id:'a3', name:'A3. Fish Tofu 피시두부 300g', emoji:'🐠', price1:5500, price3:14000, deal:true },
+      { id:'a4', name:'A4. Crab Stick 크랩스틱 200g', emoji:'🦀', price1:4500, price3:12000, deal:false },
+    ]
+  },
+  noodle: {
+    label: '면류',
+    emoji: '🍜',
+    items: [
+      { id:'b1', name:'B1. Indomie 미고렝 5봉', emoji:'🍜', price1:5000, price3:13000, deal:true },
+      { id:'b2', name:'B2. Bihun 쌀국수 400g', emoji:'🍝', price1:4000, price3:10000, deal:false },
+      { id:'b3', name:'B3. Kway Teow 볶음면 500g', emoji:'🥡', price1:5500, price3:null, deal:false },
+    ]
+  },
+  sauce: {
+    label: '소스 · 양념',
+    emoji: '🌶',
+    items: [
+      { id:'c1', name:'C1. Sambal Oelek 삼발소스 250g', emoji:'🌶', price1:6500, price3:17000, deal:true },
+      { id:'c2', name:'C2. Kecap Manis 달콤간장 600ml', emoji:'🍶', price1:7500, price3:null, deal:false },
+      { id:'c3', name:'C3. Oyster Sauce 굴소스 300g', emoji:'🦪', price1:5000, price3:13000, deal:false },
+    ]
+  },
+  snack: {
+    label: '과자 · 스낵',
+    emoji: '🍘',
+    items: [
+      { id:'d1', name:'D1. Kerupuk Udang 새우칩 200g', emoji:'🍤', price1:4000, price3:10000, deal:true },
+      { id:'d2', name:'D2. Pandan Wafer 판단웨이퍼 150g', emoji:'🟩', price1:3500, price3:null, deal:false },
+      { id:'d3', name:'D3. Taro Chips 타로칩 180g', emoji:'🥔', price1:4500, price3:11000, deal:false },
+    ]
+  },
+  drink: {
+    label: '음료',
+    emoji: '🧃',
+    items: [
+      { id:'e1', name:'E1. Teh Botol 자스민티 500ml', emoji:'🍵', price1:3000, price3:7500, deal:true },
+      { id:'e2', name:'E2. Soy Milk 두유 250ml', emoji:'🥛', price1:2500, price3:null, deal:false },
+      { id:'e3', name:'E3. Coco Pandan 코코넛음료 330ml', emoji:'🥥', price1:3500, price3:9000, deal:false },
+    ]
+  }
+};
+
+const quantities = {};
+let currentTab = 'fishball';
+
+function getPrice(item, qty) {
+  if (!qty || qty <= 0) return 0;
+  if (item.price3 && qty >= 3) {
+    const sets = Math.floor(qty / 3);
+    const rem = qty % 3;
+    return sets * item.price3 + rem * item.price1;
+  }
+  return qty * item.price1;
+}
+
+function fmt(n) { return '₩' + n.toLocaleString(); }
+
+function renderTab(tab) {
+  const container = document.getElementById('main-content');
+  container.innerHTML = '';
+
+  const cat = catalog[tab];
+  const section = document.createElement('div');
+  section.innerHTML = `<div class="section-title">${cat.emoji} ${cat.label}</div>`;
+
+  cat.items.forEach(item => {
+    const qty = quantities[item.id] || 0;
+    const subtotal = getPrice(item, qty);
+    const card = document.createElement('div');
+    card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'card-' + item.id;
+    card.innerHTML = `
+      <div class="product-thumb">${item.emoji}</div>
+      <div class="product-body">
+        <div class="product-name">${item.name}</div>
+        ${item.deal ? '<div class="deal-badge">🔥 Best Deal</div>' : ''}
+        <div class="product-prices">
+          <span class="price-tag">1개 ${fmt(item.price1)}</span>
+          ${item.price3 ? `<span class="price-tag deal">3개 ${fmt(item.price3)} (${fmt(item.price1*3 - item.price3)} 할인)</span>` : ''}
+        </div>
+        <div class="qty-area">
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty('${item.id}',-1,event)">−</button>
+            <input class="qty-input" type="number" min="0" value="${qty}" id="input-${item.id}" onchange="setQty('${item.id}',this.value)" />
+            <button class="qty-btn" onclick="changeQty('${item.id}',1,event)">+</button>
+          </div>
+          <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">${qty > 0 ? fmt(subtotal) : ''}</div>
+        </div>
+      </div>
+    `;
+    section.appendChild(card);
+  });
+  container.appendChild(section);
+}
+
+function updateCard(id) {
+  const qty = quantities[id] || 0;
+  const card = document.getElementById('card-' + id);
+  const subEl = document.getElementById('sub-' + id);
+  const inp = document.getElementById('input-' + id);
+  if (!card) return;
+
+  const item = Object.values(catalog).flatMap(c => c.items).find(p => p.id === id);
+  const subtotal = getPrice(item, qty);
+
+  if (inp) inp.value = qty;
+  if (subEl) {
+    subEl.textContent = qty > 0 ? fmt(subtotal) : '';
+    subEl.className = 'item-subtotal' + (qty > 0 ? ' visible' : '');
+  }
+  card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
+}
+
+function updateSummary() {
+  let grand = 0, count = 0;
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  allItems.forEach(item => {
+    const qty = quantities[item.id] || 0;
+    if (qty > 0) { grand += getPrice(item, qty); count++; }
+  });
+  document.getElementById('grand-total').textContent = fmt(grand);
+  document.getElementById('item-summary').textContent = count > 0 ? `${count}종류 선택됨` : '상품을 선택해 주세요';
+  document.getElementById('header-count').textContent = count;
+}
+
+function changeQty(id, delta, e) {
+  e && e.stopPropagation();
+  quantities[id] = Math.max(0, (quantities[id] || 0) + delta);
+  updateCard(id);
+  updateSummary();
+}
+
+function setQty(id, val) {
+  quantities[id] = Math.max(0, parseInt(val) || 0);
+  updateCard(id);
+  updateSummary();
+}
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  renderTab(tab);
+}
+
+function openModal() {
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
+  const body = document.getElementById('modal-body');
+
+  if (selected.length === 0) {
+    body.innerHTML = '<div class="empty-cart">장바구니가 비어있어요.<br>상품을 선택해 주세요.</div>';
+  } else {
+    let grand = 0;
+    const rows = selected.map(item => {
+      const qty = quantities[item.id];
+      const price = getPrice(item, qty);
+      grand += price;
+      return `<div class="modal-item">
+        <span class="modal-item-name">${item.emoji} ${item.name} × ${qty}</span>
+        <span class="modal-item-price">${fmt(price)}</span>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = `
+      ${rows}
+      <div class="modal-total"><span>합계</span><span>${fmt(grand)}</span></div>
+      <div class="customer-form">
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input class="form-input" type="text" id="cust-name" placeholder="홍길동" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input class="form-input" type="tel" id="cust-phone" placeholder="010-0000-0000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">메모 (선택)</label>
+          <input class="form-input" type="text" id="cust-note" placeholder="배달 요청사항 등" />
+        </div>
+      </div>
+      <button class="confirm-btn" onclick="confirmOrder()">주문 완료하기</button>
+    `;
+  }
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeOnOverlay(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+function confirmOrder() {
+  const name = document.getElementById('cust-name')?.value.trim();
+  const phone = document.getElementById('cust-phone')?.value.trim();
+  if (!name || !phone) { alert('이름과 연락처를 입력해 주세요.'); return; }
+  alert(`✅ 주문이 완료되었습니다!\n\n이름: ${name}\n연락처: ${phone}\n\n곧 연락드리겠습니다. 감사합니다!`);
+  closeModal();
+}
+
+renderTab('fishball');
+</script>
+</body>
+</html>
