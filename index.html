@@ -451,9 +451,14 @@ const i18n = {
     items_selected: (n) => `${n} item(s) selected`,
     empty_cart: 'Your cart is empty.<br>Please select items.',
     field_name: 'Name', field_phone: 'Phone', field_note: 'Note (optional)',
+    field_facebook: 'Facebook Name', ph_facebook: 'Your name on Facebook (e.g. Maria Santos)', optional: 'Optional',
     ph_name: 'Your name', ph_phone: '010-0000-0000', ph_note: 'Delivery requests, etc.',
     confirm_btn: 'Place Order', grand_total: 'Total',
-    alert_fill: 'Please enter your name and phone number.',
+    alert_fill: 'Please enter your name.',
+    alert_contact: 'Please enter at least your phone number or Facebook name.',
+    order_done_title: 'Order Placed!',
+    order_done_desc: 'We received your order. Please message us on Facebook to confirm.',
+    order_done_fb: '📘 Tap below to send us a message on Facebook Messenger',
     alert_done: (name, phone) => `✅ Order placed!\n\nName: ${name}\nPhone: ${phone}\n\nWe will contact you soon. Thank you!`,
     pay_title: 'Payment on Delivery Only',
     pay_desc: 'Cash & Card accepted · No online payment',
@@ -475,9 +480,14 @@ const i18n = {
     items_selected: (n) => `เลือก ${n} รายการ`,
     empty_cart: 'ตะกร้าว่างเปล่า<br>กรุณาเลือกสินค้า',
     field_name: 'ชื่อ', field_phone: 'เบอร์โทร', field_note: 'หมายเหตุ (ถ้ามี)',
+    field_facebook: 'ชื่อ Facebook', ph_facebook: 'ชื่อที่แสดงใน Facebook ของคุณ', optional: 'ไม่บังคับ',
     ph_name: 'ชื่อของคุณ', ph_phone: '010-0000-0000', ph_note: 'คำขอจัดส่ง ฯลฯ',
     confirm_btn: 'ยืนยันคำสั่งซื้อ', grand_total: 'ยอดรวม',
-    alert_fill: 'กรุณากรอกชื่อและเบอร์โทรศัพท์',
+    alert_fill: 'กรุณากรอกชื่อ',
+    alert_contact: 'กรุณากรอกเบอร์โทรหรือชื่อ Facebook อย่างน้อยหนึ่งอย่าง',
+    order_done_title: 'สั่งซื้อสำเร็จ!',
+    order_done_desc: 'เราได้รับคำสั่งซื้อของคุณแล้ว กรุณาส่งข้อความมาที่ Facebook เพื่อยืนยัน',
+    order_done_fb: '📘 แตะด้านล่างเพื่อส่งข้อความหาเราทาง Facebook Messenger',
     alert_done: (name, phone) => `✅ สั่งซื้อสำเร็จ!\n\nชื่อ: ${name}\nเบอร์โทร: ${phone}\n\nเราจะติดต่อกลับเร็วๆ นี้ ขอบคุณ!`,
     pay_title: 'ชำระเงินเมื่อรับสินค้าเท่านั้น',
     pay_desc: 'รับเงินสดและบัตร · ไม่มีการชำระออนไลน์',
@@ -499,9 +509,14 @@ const i18n = {
     items_selected: (n) => `${n}종류 선택됨`,
     empty_cart: '장바구니가 비어있어요.<br>상품을 선택해 주세요.',
     field_name: '이름', field_phone: '연락처', field_note: '메모 (선택)',
+    field_facebook: '페이스북 이름', ph_facebook: '페이스북에 표시된 이름 (예: Maria Santos)', optional: '선택',
     ph_name: '홍길동', ph_phone: '010-0000-0000', ph_note: '배달 요청사항 등',
     confirm_btn: '주문 완료하기', grand_total: '합계',
-    alert_fill: '이름과 연락처를 입력해 주세요.',
+    alert_fill: '이름을 입력해 주세요.',
+    alert_contact: '전화번호 또는 페이스북 중 하나는 입력해 주세요.',
+    order_done_title: '주문 완료!',
+    order_done_desc: '주문을 받았어요. 페이스북으로 메시지를 보내 확인해 주세요.',
+    order_done_fb: '📘 아래를 눌러 페이스북 메신저로 연락해 주세요',
     alert_done: (name, phone) => `✅ 주문이 완료되었습니다!\n\n이름: ${name}\n연락처: ${phone}\n\n곧 연락드리겠습니다. 감사합니다!`,
     pay_title: '현장결제 전용',
     pay_desc: '현금 및 카드 가능 · 온라인 결제 불가',
@@ -846,15 +861,19 @@ function openModal() {
           <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" />
         </div>
         <div class="form-group">
-          <label class="form-label">${t.field_phone}</label>
+          <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
           <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
           <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;">
             <div style="flex-shrink:0;text-align:center;">
-              <img src="https://i.namu.wiki/i/m6zML1AJPjXWr2RZmCqfi-AUfmrE4qpXU13okVzP2RKJKNaryGJRTT4oPmia7MOUXveYHq7UJUCeLTtRIsZzqQ.webp" style="width:80px;border-radius:8px;border:1px solid var(--border);" />
-              <div style="font-size:10px;color:var(--muted);margin-top:4px;">${t.addr_example}</div>
+              <img src="https://i.namu.wiki/i/m6zML1AJPjXWr2RZmCqfi-AUfmrE4qpXU13okVzP2RKJKNaryGJRTT4oPmia7MOUXveYHq7UJUCeLTtRIsZzqQ.webp" style="width:120px;border-radius:8px;border:1px solid var(--border);" />
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">${t.addr_example}</div>
             </div>
             <div style="flex:1;border:2px dashed var(--border);border-radius:8px;padding:12px;text-align:center;background:var(--bg);">
               <div id="addr-preview" style="display:none;margin-bottom:12px;">
@@ -942,11 +961,13 @@ async function sendToTelegram(text, photoFile) {
 function confirmOrder() {
   const t = i18n[currentLang];
   const name  = document.getElementById('cust-name')?.value.trim();
-  const phone = document.getElementById('cust-phone')?.value.trim();
-  const note  = document.getElementById('cust-note')?.value.trim();
+  const phone    = document.getElementById('cust-phone')?.value.trim();
+  const facebook = document.getElementById('cust-facebook')?.value.trim();
+  const note     = document.getElementById('cust-note')?.value.trim();
   const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0];
 
-  if (!name || !phone) { alert(t.alert_fill); return; }
+  if (!name) { alert(t.alert_fill); return; }
+  if (!phone && !facebook) { alert(t.alert_contact); return; }
 
   // 주문 내역 텍스트 작성
   const allItems = Object.values(catalog).flatMap(c => c.items);
@@ -959,11 +980,27 @@ function confirmOrder() {
     return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
-  const msg = `🛒 새 주문!\n\n👤 이름: ${name}\n📞 연락처: ${phone}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n💵 현장결제${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
+  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n💵 현장결제${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
 
   sendToTelegram(msg, photoFile);
-  alert(t.alert_done(name, phone));
-  closeModal();
+
+  // 주문 완료 화면 표시
+  const t2 = i18n[currentLang];
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div style="text-align:center;padding:32px 16px;">
+      <div style="font-size:48px;margin-bottom:16px;">✅</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${t2.order_done_title}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">${t2.order_done_desc}</div>
+      <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t2.order_done_fb}</div>
+        <a href="https://m.me/KoSeungHee?text=Hi!%20I%20just%20placed%20an%20order%20on%20Asia%20Mart.%0AName%3A%20${encodeURIComponent(name)}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#1877f2;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;">
+          📘 Message Ko Seung Hee
+        </a>
+      </div>
+      <button onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">닫기 / Close</button>
+    </div>
+  `;
 }
 
 renderTab('frozen');
