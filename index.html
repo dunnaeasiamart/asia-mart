@@ -730,12 +730,26 @@ function getUnit(n) {
 }
 
 function getPriceTags(item) {
-  const tags = [`<span class="price-tag" onclick="setQty('${item.id}',1)" style="cursor:pointer;" title="${getUnit(1)}">${getUnit(1)} ${fmt(item.price1)}</span>`];
-  if (item.price2)  tags.push(`<span class="price-tag deal" onclick="setQty('${item.id}',2)" style="cursor:pointer;">${getUnit(2)} ${fmt(item.price2)}</span>`);
-  if (item.price3)  tags.push(`<span class="price-tag deal" onclick="setQty('${item.id}',3)" style="cursor:pointer;">${getUnit(3)} ${fmt(item.price3)}</span>`);
-  if (item.price5)  tags.push(`<span class="price-tag deal" onclick="setQty('${item.id}',5)" style="cursor:pointer;">${getUnit(5)} ${fmt(item.price5)}</span>`);
-  if (item.price10) tags.push(`<span class="price-tag deal" onclick="setQty('${item.id}',10)" style="cursor:pointer;">${getUnit(10)} ${fmt(item.price10)}</span>`);
+  const qty = quantities[item.id] || 0;
+  const makeTag = (n, price, isDeal) => {
+    const selected = qty === n;
+    const cls = isDeal ? 'price-tag deal' : 'price-tag';
+    const selectedStyle = selected ? 'background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;' : '';
+    return `<span class="${cls}" onclick="toggleQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${selectedStyle}">${getUnit(n)} ${fmt(price)}</span>`;
+  };
+  const tags = [makeTag(1, item.price1, false)];
+  if (item.price2)  tags.push(makeTag(2, item.price2, true));
+  if (item.price3)  tags.push(makeTag(3, item.price3, true));
+  if (item.price5)  tags.push(makeTag(5, item.price5, true));
+  if (item.price10) tags.push(makeTag(10, item.price10, true));
   return tags.join('');
+}
+
+function toggleQty(id, n) {
+  const current = quantities[id] || 0;
+  quantities[id] = current === n ? 0 : n;
+  updateCard(id);
+  updateSummary();
 }
 
 function getItemName(item) {
@@ -769,7 +783,7 @@ function renderTab(tab) {
       </div>
       <div class="product-body">
         <div class="product-name">${displayName}</div>
-        <div class="product-prices">
+        <div class="product-prices" id="prices-${item.id}">
           ${getPriceTags(item)}
         </div>
         <div class="qty-area">
@@ -792,6 +806,7 @@ function updateCard(id) {
   const card = document.getElementById('card-' + id);
   const subEl = document.getElementById('sub-' + id);
   const inp = document.getElementById('input-' + id);
+  const priceEl = document.getElementById('prices-' + id);
   if (!card) return;
 
   const item = Object.values(catalog).flatMap(c => c.items).find(p => p.id === id);
@@ -802,6 +817,7 @@ function updateCard(id) {
     subEl.textContent = qty > 0 ? fmt(subtotal) : '';
     subEl.className = 'item-subtotal' + (qty > 0 ? ' visible' : '');
   }
+  if (priceEl) priceEl.innerHTML = getPriceTags(item);
   card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
 }
 
