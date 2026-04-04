@@ -742,6 +742,7 @@ function getPriceTags(item) {
   if (item.price3)  tags.push(makeTag(3, item.price3, true));
   if (item.price5)  tags.push(makeTag(5, item.price5, true));
   if (item.price10) tags.push(makeTag(10, item.price10, true));
+  tags.push(`<span class="price-tag" onclick="resetQty('${item.id}')" style="cursor:pointer;transition:all 0.15s;background:#f5f5f5;color:#aaa;border-color:#ddd;">🔄</span>`);
   return tags.join('');
 }
 
@@ -780,19 +781,18 @@ function playReset() {
   } catch(e) {}
 }
 
-const tapCount = {};
+function resetQty(id) {
+  quantities[id] = 0;
+  tapCount[id] = 0;
+  playReset();
+  updateCard(id);
+  updateSummary();
+}
 
 function toggleQty(id, n) {
-  tapCount[id] = (tapCount[id] || 0) + 1;
-  if (tapCount[id] >= 4) {
-    quantities[id] = 0;
-    tapCount[id] = 0;
-    playReset();
-  } else {
-    const current = quantities[id] || 0;
-    quantities[id] = current === n ? 0 : current + n;
-    if (quantities[id] > 0) playDing();
-  }
+  const current = quantities[id] || 0;
+  quantities[id] = current === n ? 0 : current + n;
+  if (quantities[id] > 0) playDing();
   updateCard(id);
   updateSummary();
 }
