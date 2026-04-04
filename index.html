@@ -452,6 +452,7 @@
     <div class="order-bar-total" id="grand-total">₩0</div>
     <div class="order-bar-items" id="item-summary" data-t="select_items">Please select items</div>
     <div id="total-discount" style="font-size:12px;color:var(--success);font-weight:600;margin-top:2px;display:none;"></div>
+    <div id="min-order-notice" style="font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;"></div>
   </div>
   <button class="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
 </div>
@@ -502,6 +503,8 @@ const i18n = {
     max_qty: '⚠️ Maximum 10 items per product.',
     discount: 'OFF!',
     total_discount: (n) => `Total saved: -${n}`,
+    min_order: (n) => `⚠️ ₩${n} more for minimum order (₩50,000)`,
+    min_order_ok: '✅ Free delivery included!',
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -534,6 +537,8 @@ const i18n = {
     max_qty: '⚠️ สูงสุด 10 ชิ้นต่อสินค้า',
     discount: 'ลด!',
     total_discount: (n) => `ประหยัดรวม: -${n}`,
+    min_order: (n) => `⚠️ ต้องการอีก ₩${n} (ขั้นต่ำ ₩50,000)`,
+    min_order_ok: '✅ จัดส่งฟรี!',
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -566,6 +571,8 @@ const i18n = {
     max_qty: '⚠️ 상품당 최대 10개까지 구매 가능합니다.',
     discount: '할인!',
     total_discount: (n) => `총 할인: -${n}`,
+    min_order: (n) => `⚠️ ${n} 더 담으면 주문 가능 (최소 ₩50,000)`,
+    min_order_ok: '✅ 무료배송 포함!',
   }
 };
 
@@ -965,6 +972,24 @@ function updateSummary() {
     discEl.style.display = 'block';
   } else {
     discEl.style.display = 'none';
+  }
+
+  const minOrderEl = document.getElementById('min-order-notice');
+  const orderBtn = document.querySelector('.order-btn');
+  const MIN_ORDER = 50000;
+  if (count > 0 && grand >= MIN_ORDER) {
+    minOrderEl.textContent = t.min_order_ok;
+    minOrderEl.style.color = 'var(--success)';
+    if (orderBtn) { orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; }
+  } else if (count > 0 && grand < MIN_ORDER) {
+    const need = (MIN_ORDER - grand).toLocaleString();
+    minOrderEl.textContent = t.min_order(need);
+    minOrderEl.style.color = 'var(--accent)';
+    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
+  } else {
+    minOrderEl.textContent = t.min_order('50,000');
+    minOrderEl.style.color = 'var(--muted)';
+    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
   }
 }
 
