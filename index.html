@@ -459,7 +459,11 @@ const i18n = {
     pay_desc: 'Cash & Card accepted · No online payment',
     pay_modal: '💵 Payment is made in person at delivery (Cash or Card)',
     field_addr: 'Address Photo (Street Sign)',
-    ph_addr: 'Tap to upload your street sign photo',
+    ph_addr: 'Please upload a photo of your street sign',
+    btn_camera: 'Take Photo',
+    btn_gallery: 'Choose from Gallery',
+    addr_uploaded: 'Photo uploaded',
+    addr_example: 'Example',
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -479,7 +483,11 @@ const i18n = {
     pay_desc: 'รับเงินสดและบัตร · ไม่มีการชำระออนไลน์',
     pay_modal: '💵 ชำระเงินเมื่อรับสินค้า (เงินสดหรือบัตร)',
     field_addr: 'รูปภาพที่อยู่ (ป้ายถนน)',
-    ph_addr: 'แตะเพื่ออัพโหลดรูปป้ายถนนของคุณ',
+    ph_addr: 'กรุณาอัพโหลดรูปป้ายถนนของคุณ',
+    btn_camera: 'ถ่ายรูป',
+    btn_gallery: 'เลือกจากแกลเลอรี่',
+    addr_uploaded: 'อัพโหลดรูปแล้ว',
+    addr_example: 'ตัวอย่าง',
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -500,6 +508,10 @@ const i18n = {
     pay_modal: '💵 결제는 배달 시 현장에서 진행됩니다 (현금 또는 카드)',
     field_addr: '주소 사진 (도로명 표지판)',
     ph_addr: '표지판 사진을 찍어서 올려주세요',
+    btn_camera: '사진 촬영',
+    btn_gallery: '갤러리에서 선택',
+    addr_uploaded: '사진 업로드 완료',
+    addr_example: '예시',
   }
 };
 
@@ -839,16 +851,32 @@ function openModal() {
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
-          <div style="border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:var(--bg);" onclick="document.getElementById('addr-photo').click()">
-            <div id="addr-preview" style="display:none;margin-bottom:8px;">
-              <img id="addr-img" style="max-width:100%;max-height:200px;border-radius:6px;" />
+          <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;">
+            <div style="flex-shrink:0;text-align:center;">
+              <img src="https://i.namu.wiki/i/m6zML1AJPjXWr2RZmCqfi-AUfmrE4qpXU13okVzP2RKJKNaryGJRTT4oPmia7MOUXveYHq7UJUCeLTtRIsZzqQ.webp" style="width:80px;border-radius:8px;border:1px solid var(--border);" />
+              <div style="font-size:10px;color:var(--muted);margin-top:4px;">${t.addr_example}</div>
             </div>
-            <div id="addr-placeholder">
-              <div style="font-size:28px;margin-bottom:6px;">📸</div>
-              <div style="font-size:13px;color:var(--muted);">${t.ph_addr}</div>
+            <div style="flex:1;border:2px dashed var(--border);border-radius:8px;padding:12px;text-align:center;background:var(--bg);">
+              <div id="addr-preview" style="display:none;margin-bottom:12px;">
+                <img id="addr-img" style="max-width:100%;max-height:200px;border-radius:6px;" />
+                <div style="margin-top:8px;font-size:12px;color:var(--success);">✅ ${t.addr_uploaded}</div>
+              </div>
+              <div id="addr-placeholder" style="margin-bottom:12px;">
+                <div style="font-size:24px;margin-bottom:4px;">📸</div>
+                <div style="font-size:11px;color:var(--muted);">${t.ph_addr}</div>
+              </div>
+              <div style="display:flex;gap:6px;justify-content:center;">
+                <button type="button" onclick="document.getElementById('addr-camera').click()" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;">
+                  📷 ${t.btn_camera}
+                </button>
+                <button type="button" onclick="document.getElementById('addr-gallery').click()" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;">
+                  🖼️ ${t.btn_gallery}
+                </button>
+              </div>
+              <input type="file" id="addr-camera"  accept="image/*" capture="environment" style="display:none;" onchange="previewAddr(this)" />
+              <input type="file" id="addr-gallery" accept="image/*" style="display:none;" onchange="previewAddr(this)" />
             </div>
           </div>
-          <input type="file" id="addr-photo" accept="image/*" style="display:none;" onchange="previewAddr(this)" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_note}</label>
@@ -878,6 +906,9 @@ const TG_CHAT  = '8626199213';
 function previewAddr(input) {
   const file = input.files[0];
   if (!file) return;
+  // 다른 input 초기화
+  const otherId = input.id === 'addr-camera' ? 'addr-gallery' : 'addr-camera';
+  document.getElementById(otherId).value = '';
   const reader = new FileReader();
   reader.onload = e => {
     document.getElementById('addr-img').src = e.target.result;
@@ -913,7 +944,7 @@ function confirmOrder() {
   const name  = document.getElementById('cust-name')?.value.trim();
   const phone = document.getElementById('cust-phone')?.value.trim();
   const note  = document.getElementById('cust-note')?.value.trim();
-  const photoFile = document.getElementById('addr-photo')?.files[0];
+  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0];
 
   if (!name || !phone) { alert(t.alert_fill); return; }
 
