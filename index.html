@@ -451,6 +451,7 @@
     <div class="order-bar-label" data-t="total_label">Total</div>
     <div class="order-bar-total" id="grand-total">₩0</div>
     <div class="order-bar-items" id="item-summary" data-t="select_items">Please select items</div>
+    <div id="total-discount" style="font-size:12px;color:var(--success);font-weight:600;margin-top:2px;display:none;"></div>
   </div>
   <button class="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
 </div>
@@ -500,6 +501,7 @@ const i18n = {
     addr_example: 'Example',
     max_qty: '⚠️ Maximum 10 items per product.',
     discount: 'OFF!',
+    total_discount: (n) => `Total saved: -${n}`,
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -531,6 +533,7 @@ const i18n = {
     addr_example: 'ตัวอย่าง',
     max_qty: '⚠️ สูงสุด 10 ชิ้นต่อสินค้า',
     discount: 'ลด!',
+    total_discount: (n) => `ประหยัดรวม: -${n}`,
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -562,6 +565,7 @@ const i18n = {
     addr_example: '예시',
     max_qty: '⚠️ 상품당 최대 10개까지 구매 가능합니다.',
     discount: '할인!',
+    total_discount: (n) => `총 할인: -${n}`,
   }
 };
 
@@ -948,15 +952,26 @@ function updateCard(id) {
 
 function updateSummary() {
   const t = i18n[currentLang];
-  let grand = 0, count = 0;
+  let grand = 0, count = 0, totalDiscount = 0;
   const allItems = Object.values(catalog).flatMap(c => c.items);
   allItems.forEach(item => {
     const qty = quantities[item.id] || 0;
-    if (qty > 0) { grand += getPrice(item, qty); count++; }
+    if (qty > 0) {
+      grand += getPrice(item, qty);
+      totalDiscount += getDiscount(item, qty);
+      count++;
+    }
   });
   document.getElementById('grand-total').textContent = fmt(grand);
   document.getElementById('item-summary').textContent = count > 0 ? t.items_selected(count) : t.select_items;
   document.getElementById('header-count').textContent = count;
+  const discEl = document.getElementById('total-discount');
+  if (totalDiscount > 0) {
+    discEl.textContent = t.total_discount(fmt(totalDiscount));
+    discEl.style.display = 'block';
+  } else {
+    discEl.style.display = 'none';
+  }
 }
 
 function changeQty(id, delta, e) {
