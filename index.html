@@ -743,17 +743,27 @@ function getPrice(item, qty) {
   if (item.price2)  tiers.push({ qty: 2,  price: item.price2 });
 
   let total = 0, remaining = qty;
+  let bestTierUsed = null;
 
   for (const tier of tiers) {
     if (remaining >= tier.qty) {
       const sets = Math.floor(remaining / tier.qty);
       total += sets * tier.price;
       remaining -= sets * tier.qty;
+      bestTierUsed = tier;
     }
   }
 
-  // 남은 수량은 무조건 price1(1개 단가)로 계산
-  total += remaining * item.price1;
+  if (remaining > 0) {
+    if (bestTierUsed) {
+      // 사용된 최고 묶음의 단가로 계산 후 100원 올림
+      const unitPrice = bestTierUsed.price / bestTierUsed.qty;
+      total += Math.ceil(remaining * unitPrice / 100) * 100;
+    } else {
+      total += remaining * item.price1;
+    }
+  }
+
   return total;
 }
 
