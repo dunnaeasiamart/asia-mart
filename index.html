@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asia Mart — 온라인 주문</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<title>Asia Mart — Online Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,11 +22,32 @@
   }
 
   body {
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: 'Noto Sans KR', 'Noto Sans Thai', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
+
+  /* LANG SWITCHER */
+  .lang-switcher {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .lang-btn {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 4px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .lang-btn.active { background: #fff; color: var(--text); }
+  .lang-btn:hover:not(.active) { background: rgba(255,255,255,0.25); }
 
   /* HEADER */
   header {
@@ -362,25 +383,31 @@
 
 <header>
   <div class="logo">Asia <span>Mart</span></div>
-  <button class="header-cart" onclick="openModal()">
-    🛒 장바구니
-    <span class="cart-count" id="header-count">0</span>
-  </button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('th')">TH</button>
+      <button class="lang-btn" onclick="setLang('ko')">KO</button>
+    </div>
+    <button class="header-cart" onclick="openModal()">
+      🛒 <span data-t="cart">Cart</span>
+      <span class="cart-count" id="header-count">0</span>
+    </button>
+  </div>
 </header>
 
 <div class="hero">
   <div class="hero-sub">Fresh from Southeast Asia</div>
-  <h1>정통 아시아 식품<br>온라인 주문</h1>
-  <p>수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!</p>
+  <h1 data-t="hero_title">Authentic Asian<br>Online Order</h1>
+  <p data-t="hero_desc">Select quantity to calculate price instantly. Discount applied for 3+ items!</p>
 </div>
 
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab active" onclick="switchTab(this,'fishball')">🐟 어묵·피시볼</button>
-    <button class="tab" onclick="switchTab(this,'noodle')">🍜 면류</button>
-    <button class="tab" onclick="switchTab(this,'sauce')">🌶 소스·양념</button>
-    <button class="tab" onclick="switchTab(this,'snack')">🍘 과자·스낵</button>
-    <button class="tab" onclick="switchTab(this,'drink')">🧃 음료</button>
+    <button class="tab active" onclick="switchTab(this,'frozen')" data-t="cat_frozen">🧊 A Frozen Food</button>
+    <button class="tab" onclick="switchTab(this,'noodle')" data-t="cat_noodle">🍜 B Noodles</button>
+    <button class="tab" onclick="switchTab(this,'sauce')" data-t="cat_sauce">🥫 C Sauces</button>
+    <button class="tab" onclick="switchTab(this,'other')" data-t="cat_other">🧃 D Drinks & More</button>
   </div>
 </div>
 
@@ -388,17 +415,17 @@
 
 <div class="order-bar">
   <div class="order-bar-info">
-    <div class="order-bar-label">합계 금액</div>
+    <div class="order-bar-label" data-t="total_label">Total</div>
     <div class="order-bar-total" id="grand-total">₩0</div>
-    <div class="order-bar-items" id="item-summary">상품을 선택해 주세요</div>
+    <div class="order-bar-items" id="item-summary" data-t="select_items">Please select items</div>
   </div>
-  <button class="order-btn" onclick="openModal()">주문하기 →</button>
+  <button class="order-btn" onclick="openModal()" data-t="order_btn">Order Now →</button>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">주문 확인</div>
+      <div class="modal-title" data-t="order_confirm">Order Summary</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div id="modal-body"></div>
@@ -406,66 +433,260 @@
 </div>
 
 <script>
+/* ===================================================
+   🌐 LANGUAGE SYSTEM
+   =================================================== */
+const i18n = {
+  en: {
+    cart: 'Cart', hero_title: 'Authentic Asian<br>Online Order',
+    hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
+    cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
+    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks & More',
+    total_label: 'Total', select_items: 'Please select items',
+    order_btn: 'Order Now →', order_confirm: 'Order Summary',
+    items_selected: (n) => `${n} item(s) selected`,
+    empty_cart: 'Your cart is empty.<br>Please select items.',
+    field_name: 'Name', field_phone: 'Phone', field_note: 'Note (optional)',
+    ph_name: 'Your name', ph_phone: '010-0000-0000', ph_note: 'Delivery requests, etc.',
+    confirm_btn: 'Place Order', grand_total: 'Total',
+    alert_fill: 'Please enter your name and phone number.',
+    alert_done: (name, phone) => `✅ Order placed!\n\nName: ${name}\nPhone: ${phone}\n\nWe will contact you soon. Thank you!`,
+  },
+  th: {
+    cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
+    hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
+    cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
+    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม & อื่นๆ',
+    total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
+    order_btn: 'สั่งซื้อเลย →', order_confirm: 'สรุปคำสั่งซื้อ',
+    items_selected: (n) => `เลือก ${n} รายการ`,
+    empty_cart: 'ตะกร้าว่างเปล่า<br>กรุณาเลือกสินค้า',
+    field_name: 'ชื่อ', field_phone: 'เบอร์โทร', field_note: 'หมายเหตุ (ถ้ามี)',
+    ph_name: 'ชื่อของคุณ', ph_phone: '010-0000-0000', ph_note: 'คำขอจัดส่ง ฯลฯ',
+    confirm_btn: 'ยืนยันคำสั่งซื้อ', grand_total: 'ยอดรวม',
+    alert_fill: 'กรุณากรอกชื่อและเบอร์โทรศัพท์',
+    alert_done: (name, phone) => `✅ สั่งซื้อสำเร็จ!\n\nชื่อ: ${name}\nเบอร์โทร: ${phone}\n\nเราจะติดต่อกลับเร็วๆ นี้ ขอบคุณ!`,
+  },
+  ko: {
+    cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
+    hero_desc: '수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!',
+    cat_frozen: '🧊 A 냉동음식', cat_noodle: '🍜 B 면 종류',
+    cat_sauce: '🥫 C 각종 소스', cat_other: '🧃 D 음료 및 기타',
+    total_label: '합계 금액', select_items: '상품을 선택해 주세요',
+    order_btn: '주문하기 →', order_confirm: '주문 확인',
+    items_selected: (n) => `${n}종류 선택됨`,
+    empty_cart: '장바구니가 비어있어요.<br>상품을 선택해 주세요.',
+    field_name: '이름', field_phone: '연락처', field_note: '메모 (선택)',
+    ph_name: '홍길동', ph_phone: '010-0000-0000', ph_note: '배달 요청사항 등',
+    confirm_btn: '주문 완료하기', grand_total: '합계',
+    alert_fill: '이름과 연락처를 입력해 주세요.',
+    alert_done: (name, phone) => `✅ 주문이 완료되었습니다!\n\n이름: ${name}\n연락처: ${phone}\n\n곧 연락드리겠습니다. 감사합니다!`,
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = i18n[lang];
+
+  // Update all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (t[key] && typeof t[key] === 'string') el.innerHTML = t[key];
+  });
+
+  // Update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === lang.toUpperCase());
+  });
+
+  // Re-render current tab to update product names
+  renderTab(currentTab);
+  updateSummary();
+}
+
+/* =====================================================
+   📸 상품 이미지 넣는 방법
+   =====================================================
+   각 상품의 image:'' 안에 URL을 넣으면 됩니다.
+
+   ① GitHub에 이미지 올린 경우:
+      image: 'https://dunnaeasiamart.github.io/asia-mart/images/a1.jpg'
+
+   ② 외부 링크 (구글드라이브, 이미지호스팅 등):
+      image: 'https://drive.google.com/uc?id=파일ID'
+      image: 'https://i.imgur.com/xxxxx.jpg'
+
+   ③ 이미지 없으면 이모지가 자동으로 표시됩니다.
+   ===================================================== */
 const catalog = {
-  fishball: {
-    label: '어묵 · 피시볼',
-    emoji: '🐟',
+  frozen: {
+    label: 'A 냉동음식',
+    emoji: '🧊',
     items: [
-      { id:'a1', name:'A1. Roogsinkoong 어묵볼 500g', emoji:'🍡', price1:6000, price3:16000, deal:true },
-      { id:'a2', name:'A2. Bakso Sapi 소고기볼 400g', emoji:'🥩', price1:7000, price3:18000, deal:false },
-      { id:'a3', name:'A3. Fish Tofu 피시두부 300g', emoji:'🐠', price1:5500, price3:14000, deal:true },
-      { id:'a4', name:'A4. Crab Stick 크랩스틱 200g', emoji:'🦀', price1:4500, price3:12000, deal:false },
+      { id:'a1', name_en:'A1. ROOGSINKOONG 500g', name_ko:'A1. 루싱쿵 500g',         emoji:'🧊', image:'', price1:5000, price2:9000,  price3:16000 },
+      { id:'a2', name_en:'A2. ROOGSINHUA 320g', name_ko:'A2. 루싱후아 320g',            emoji:'🧊', image:'', price1:5500, price2:9500,  price3:15000 },
+      { id:'a3', name_en:'A3. ROOGSINMOO 320g', name_ko:'A3. 루싱무 320g',            emoji:'🧊', image:'', price1:5500, price2:9500,  price3:15000 },
+      { id:'a4', name_en:'A4. Pig Intestine 700g', name_ko:'A4. 돼지고리 700g',              emoji:'🧊', image:'', price1:4500, price2:5500,  price3:13500 },
+      { id:'a5', name_en:'A5. Pig Ear x2 500g', name_ko:'A5. 돼지 귀 2개 500g',           emoji:'🧊', image:'', price1:4000, price2:5500,  price3:13500 },
+      { id:'a6', name_en:'A6. Chicken Gizzard 500g', name_ko:'A6. 닭근위 500g',                emoji:'🐔', image:'', price1:5400, price2:10500, price3:15500 },
+      { id:'a7', name_en:'A7. Chicken Liver 400g', name_ko:'A7. 닭간 400g',                  emoji:'🐔', image:'', price1:3900, price2:7500,  price3:11000 },
+      { id:'a8', name_en:'A8. Chicken Heart 500g', name_ko:'A8. 닭열집 500g',                emoji:'🐔', image:'', price1:3000, price2:7500,  price3:11000 },
+      { id:'a9', name_en:'A9. (TBC) 500g', name_ko:'A9. (미확인) 500g',              emoji:'🧊', image:'', price1:3000, price2:7500,  price3:11000 },
+      { id:'a10', name_en:'A10. Chicken Cartilage 500g', name_ko:'A10. 닭두물련골 500g',           emoji:'🐔', image:'', price1:5500, price2:10500, price3:15500 },
+      { id:'a11', name_en:'A11. Frozen Puffer Fish 500g', name_ko:'A11. 냉동 동복어 500g',          emoji:'🐡', image:'', price1:5500, price2:10500, price3:15500 },
+      { id:'a12', name_en:'A12. Frozen Squid Tentacles 450g', name_ko:'A12. 냉동 사두가올치접단 450g',  emoji:'🦑', image:'', price1:6500, price2:12500, price3:18000 },
+      { id:'a13', name_en:'A13. Frozen Red Tilapia 2P 900g', name_ko:'A13. 냉동 레드틸라피아 2P 900g', emoji:'🐟', image:'', price1:6900, price2:13500, price3:19500 },
+      { id:'a14', name_en:'A14. Frozen Tilapia 2P 900g', name_ko:'A14. 냉동 틸라피아 2P 900g',     emoji:'🐟', image:'', price1:6500, price2:12500, price3:18000 },
+      { id:'a14b', name_en:'A14-2. Frozen Pangasius 450g', name_ko:'A14-2. 냉동 판카시우스매기 450g',emoji:'🐟', image:'', price1:6500, price2:12500, price3:18000 },
+      { id:'a15', name_en:'A15. Frozen Squid 450g', name_ko:'A15. 냉동 구리미 450g',          emoji:'🦑', image:'', price1:7400, price2:14500, price3:21000 },
+      { id:'a16', name_en:'A16. Frozen Mackerel 700g', name_ko:'A16. 냉동 재기 700g',            emoji:'🐟', image:'', price1:5500, price2:10500, price3:15500 },
+      { id:'a17', name_en:'A17. Frozen Dried Fish 180g', name_ko:'A17. 냉동 배두냉 180g',          emoji:'🐟', image:'', price1:4900, price2:8500,  price3:13500 },
+      { id:'a18', name_en:'A18. Frozen Dried Fish 250g', name_ko:'A18. 냉동 배두냉 250g',          emoji:'🐟', image:'', price1:5500, price2:10500, price3:15000 },
+      { id:'a19', name_en:'A19. Frozen Semi-Dried Mackerel 450g', name_ko:'A19. 냉동 반건조재기 450g',      emoji:'🐟', image:'', price1:7900, price2:15500, price3:22000 },
+      { id:'a20', name_en:'A20. Frozen Edible Frog 450g', name_ko:'A20. 냉동 식용게구리 450g',      emoji:'🐸', image:'', price1:6500, price2:12500, price3:18000 },
+      { id:'a21', name_en:'A21. Frozen Cuttlefish 400g', name_ko:'A21. 냉동 갑오징어 400g',        emoji:'🦑', image:'', price1:8000, price2:15000, price3:21000 },
+      { id:'a22', name_en:'A22. Frozen Octopus 450g', name_ko:'A22. 냉동 문어미 450g',          emoji:'🐙', image:'', price1:8500, price2:16500, price3:24000 },
+      { id:'a23', name_en:'A23. Frozen Papaya 700g', name_ko:'A23. 냉동 파파이면 700g',        emoji:'🧊', image:'', price1:6000, price2:11000, price3:15000 },
     ]
   },
   noodle: {
-    label: '면류',
+    label: 'B 면 종류',
     emoji: '🍜',
     items: [
-      { id:'b1', name:'B1. Indomie 미고렝 5봉', emoji:'🍜', price1:5000, price3:13000, deal:true },
-      { id:'b2', name:'B2. Bihun 쌀국수 400g', emoji:'🍝', price1:4000, price3:10000, deal:false },
-      { id:'b3', name:'B3. Kway Teow 볶음면 500g', emoji:'🥡', price1:5500, price3:null, deal:false },
+      { id:'b01', name_en:'B01. MAMA TOMYUM CUP 70g', name_ko:'B01. 마마 똠얌 컵 70g',         emoji:'🍜', image:'', price1:1400, price3:4000,  price5:6500 },
+      { id:'b02', name_en:'B02. MAMA CREAMY TOMYUM CUP 70g', name_ko:'B02. 마마 크리미 똠얌 컵 70g',    emoji:'🍜', image:'', price1:1400, price3:4000,  price5:6500 },
+      { id:'b03', name_en:'B03. MAMA PORK CUP 70g', name_ko:'B03. 마마 포크 컵 70g',           emoji:'🍜', image:'', price1:1400, price3:4000,  price5:6500 },
+      { id:'b04', name_en:'B04. MAMA Southern Style 55g 1set(5pcs)', name_ko:'B04. 마마 남배미 55g 1set(5pcs)',   emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b05', name_en:'B05. MAMA Green Chicken Curry 55g 1set(5pcs)', name_ko:'B05. 마마 치킨그린커리 55g 1set(5pcs)', emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b06', name_en:'B06. ACECOOK Pho Noodle 71g 1set(5pcs)', name_ko:'B06. 아쎄쿡 남송 후띠우 71g 1set(5pcs)', emoji:'🍜', image:'', price1:5000, price2:9500 },
+      { id:'b06b', name_en:'B06-1. HAOHAO ORIGINAL 78g 1set(5pcs)', name_ko:'B06-1. 하오하오 오리지널 78g 1set(5pcs)', emoji:'🍜', image:'', price1:3500, price2:6900 },
+      { id:'b07', name_en:'B07. ACECOOK Pho Bo 70g 1set(5pcs)', name_ko:'B07. 아쎄쿡 포보 70g 1set(5pcs)',  emoji:'🍜', image:'', price1:5000, price2:8500 },
+      { id:'b08', name_en:'B08. WAIWAI Oriental 60g 1set(5pcs)', name_ko:'B08. 와이와이 오리엔탈 60g 1set(5pcs)', emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b09', name_en:'B09. WAIWAI Southern 60g 1set(5pcs)', name_ko:'B09. 와이와이 동남부국 60g 1set(5pcs)', emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b10', name_en:'B10. WAIWAI Dongkulong 60g 1set(5pcs)', name_ko:'B10. 와이와이 동굴용 60g 1set(5pcs)', emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b11', name_en:'B11. WAIWAI Crab 55g 1set(5pcs)', name_ko:'B11. 와이와이 크랩 55g 1set(5pcs)',   emoji:'🦀', image:'', price1:3500, price2:6800 },
+      { id:'b12', name_en:'B12. MAMA Southern 55g 1set(5pcs)', name_ko:'B12. 마마 동남 55g 1set(5pcs)',     emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b13', name_en:'B13. MAMA Creamy 55g 1set(5pcs)', name_ko:'B13. 마마 크리미 55g 1set(5pcs)',   emoji:'🍜', image:'', price1:3500, price2:6800 },
+      { id:'b14', name_en:'B14. MAMA Pork 60g 1set(5pcs)', name_ko:'B14. 마마 포크 60g 1set(5pcs)',      emoji:'🍜', image:'', price1:3500, price2:6500 },
+      { id:'b15', name_en:'B15. SAFOCO Rice Vermicelli 300g', name_ko:'B15. 사포코 쌀국수 300g',                  emoji:'🍝', image:'', price1:2000, price3:7800,  price5:9500 },
+      { id:'b16', name_en:'B16. CHANTABURI Rice Noodle 500g', name_ko:'B16. 찬타부리 쌀국수 500g',              emoji:'🍝', image:'', price1:2000, price3:6500,  price5:13500 },
+      { id:'b17', name_en:'B17. DATA BUNKO Vermicelli 300g', name_ko:'B17. 데이터 분코 당면 300g',              emoji:'🍝', image:'', price1:1800, price3:5500,  price5:8000 },
+      { id:'b18', name_en:'B18. BICH CHI Hu Tieu Kho 500g', name_ko:'B18. 빅찌 쌀국수 500g',   emoji:'🍝', image:'', price1:4000, price3:7000,  price5:17000 },
+      { id:'b19', name_en:'B19. BICH CHI Banh Pho Kho 500g', name_ko:'B19. 빅찌 쌀국수(넓은) 500g',  emoji:'🍝', image:'', price1:3500, price3:10000, price5:15500 },
+      { id:'b20', name_en:'B20. VIFON Hu Tieu Kho 500g', name_ko:'B20. 비폰 쌀국수 500g',      emoji:'🍝', image:'', price1:4000, price3:11000, price5:17000 },
+      { id:'b21', name_en:'B21. VIFON Banh Pho Kho 500g', name_ko:'B21. 비폰 쌀국수(넓은) 500g',     emoji:'🍝', image:'', price1:3500, price3:10000, price5:15500 },
+      { id:'b22', name_en:'B22. WAIWAI Noodle 200g', name_ko:'B22. 와이와이 면 200g',                  emoji:'🍝', image:'', price1:1500, price3:7000,  price10:13000 },
+      { id:'b23', name_en:'B23. WOONSEN LEK 1pack(10pcs) 400g', name_ko:'B23. 운쎈렉 당면 1팩(10개) 400g',emoji:'🍝', image:'', price1:6000, price3:16000, price5:25000 },
     ]
   },
   sauce: {
-    label: '소스 · 양념',
-    emoji: '🌶',
+    label: 'C 각종 소스',
+    emoji: '🥫',
     items: [
-      { id:'c1', name:'C1. Sambal Oelek 삼발소스 250g', emoji:'🌶', price1:6500, price3:17000, deal:true },
-      { id:'c2', name:'C2. Kecap Manis 달콤간장 600ml', emoji:'🍶', price1:7500, price3:null, deal:false },
-      { id:'c3', name:'C3. Oyster Sauce 굴소스 300g', emoji:'🦪', price1:5000, price3:13000, deal:false },
+      { id:'c01', name_en:'C1. TIPAROS Vinegar 700ml', name_ko:'C1. 티파로스 식초 700ml',              emoji:'🥫', image:'', price1:2500, price2:4800,  price3:6800 },
+      { id:'c01b', name_en:'C1-1. Garlic Oil 600ml', name_ko:'C1-1. 마늘올 600ml',                  emoji:'🥫', image:'', price1:3000, price2:5800,  price3:8400 },
+      { id:'c02', name_en:'C2. YWY Black Sweet Soy Sauce 410g', name_ko:'C2. YWY 블랙스위트 간장 410g',  emoji:'🥫', image:'', price1:3200, price2:6000,  price3:8800 },
+      { id:'c03', name_en:'C3. YWY Oyster Sauce 370g', name_ko:'C3. YWY 굴소스 370g',               emoji:'🥫', image:'', price1:3500, price2:6800,  price3:9500 },
+      { id:'c04', name_en:'C4. YWY Seasoning Sauce 300g', name_ko:'C4. YWY 반수이 소스 300g',           emoji:'🥫', image:'', price1:3500, price2:6800,  price3:9800 },
+      { id:'c05', name_en:'C5. YWY Seasoning Paste 350g', name_ko:'C5. YWY 조미한장 350g',               emoji:'🥫', image:'', price1:3200, price2:6000,  price3:8700 },
+      { id:'c06', name_en:'C6. YWY Black Sauce 410g', name_ko:'C6. YWY 블랙소스 410g',               emoji:'🥫', image:'', price1:3200, price2:6000,  price3:8700 },
+      { id:'c07', name_en:'C7. Soft BBQ Sauce 700ml', name_ko:'C7. 소프트바베큐소스 700ml',           emoji:'🥫', image:'', price1:3000, price2:5800,  price3:8400 },
+      { id:'c08', name_en:'C8. Maekong Red Sauce 400ml', name_ko:'C8. 메콩샹(red) 소스 400ml',         emoji:'🥫', image:'', price1:2900, price2:5600,  price3:8000 },
+      { id:'c09', name_en:'C9. Maekong Yellow Sauce 400ml', name_ko:'C9. 메콩샹(Yellow) 소스 400ml',      emoji:'🥫', image:'', price1:2900, price2:5600,  price3:8000 },
+      { id:'c10', name_en:'C10. Maekong White Sauce 400ml', name_ko:'C10. 메콩샹(White) 소스 400ml',      emoji:'🥫', image:'', price1:2900, price2:5600,  price3:8000 },
+      { id:'c11', name_en:'C11. Piki Dipping Sauce 200ml', name_ko:'C11. 피키 디렁소스 200ml',            emoji:'🥫', image:'', price1:3000, price2:5800,  price3:8500 },
+      { id:'c12', name_en:'C12. KHONKAEN Sauce 400ml', name_ko:'C12. 콘켄 소스 400ml',           emoji:'🥫', image:'', price1:3500, price2:6700,  price3:9500 },
+      { id:'c13', name_en:'C13. ZAB MIKE Sauce 330ml', name_ko:'C13. 잡마이크 소스 330ml',           emoji:'🥫', image:'', price1:3800, price2:7900,  price3:10500 },
+      { id:'c14', name_en:'C14. Megachef Fish Sauce 700ml', name_ko:'C14. 메가쉐프 피시소스 700ml',      emoji:'🥫', image:'', price1:5500, price2:10000, price3:14500 },
+      { id:'c15', name_en:'C15. Tamarind Paste Sauce 300g', name_ko:'C15. 타마린드페이스트 소스 300g',      emoji:'🥫', image:'', price1:3000, price2:5800,  price3:8000 },
+      { id:'c16', name_en:'C16. Hot Spice SUKI Sauce 342g', name_ko:'C16. 핫스파이스 수키 소스 342g',     emoji:'🥫', image:'', price1:5500, price2:10500, price3:15000 },
+      { id:'c17', name_en:'C17. Pantai Sweet Chili Sauce 342g', name_ko:'C17. 판타이 스위트칠리 소스 342g',  emoji:'🥫', image:'', price1:4000, price2:7500,  price3:10500 },
+      { id:'c17b', name_en:'C17-1. Nam Prik Pao 513g', name_ko:'C17-1. 남프릭파우 513g',              emoji:'🥫', image:'', price1:8000, price2:17000, price3:24000 },
+      { id:'c18', name_en:'C18. Sour Curry Paste 100g', name_ko:'C18. 사워커리 페이스트 100g',          emoji:'🥫', image:'', price1:1500, price3:5000,  price5:8000 },
+      { id:'c19', name_en:'C19. Nam Ya Curry Paste 100g', name_ko:'C19. 남야커리 페이스트 100g',        emoji:'🥫', image:'', price1:1500, price3:5000,  price5:8000 },
+      { id:'c20', name_en:'C20. Country Style Red Curry Paste 100g', name_ko:'C20. 컨트리 레드커리 페이스트 100g', emoji:'🥫', image:'', price1:1500, price3:5000, price5:8000 },
+      { id:'c21', name_en:'C21. Green Curry Paste 100g', name_ko:'C21. 그린커리 페이스트 100g',         emoji:'🥫', image:'', price1:1500, price3:5000,  price5:8000 },
+      { id:'c22', name_en:'C22. Panang Curry Paste 100g', name_ko:'C22. 파낭커리 페이스트 100g',        emoji:'🥫', image:'', price1:1500, price3:5000,  price5:8000 },
+      { id:'c23', name_en:'C23. Red Curry Paste 100g', name_ko:'C23. 레드커리 페이스트 100g',           emoji:'🥫', image:'', price1:1500, price3:5000,  price5:8000 },
+      { id:'c23a', name_en:'C23-1. Lobo Kaeng Paste 400g', name_ko:'C23-1. 낙닝스 카렝 페이스트 400g',   emoji:'🥫', image:'', price1:5000, price3:14500, price5:23000 },
+      { id:'c23b', name_en:'C23-2. Goldie Paste 200g', name_ko:'C23-2. 골디 하임 페이스트 200g',     emoji:'🥫', image:'', price1:3400, price3:9500,  price5:15000 },
+      { id:'c23c', name_en:'C23-3. Pantai Galangal Paste 454g', name_ko:'C23-3. 판타이 갈랑봉 454g',           emoji:'🥫', image:'', price1:6900, price3:20000, price5:32000 },
+      { id:'c24', name_en:'C24. Dried Chili 100g', name_ko:'C24. 건고추 100g',                emoji:'🌶', image:'', price1:2500, price3:4800,  price5:11000 },
+      { id:'c25', name_en:'C25. Tamarind Seedless 170g', name_ko:'C25. 타마린드 씨없봉 170g',           emoji:'🥫', image:'', price1:2500, price3:4800,  price5:11000 },
+      { id:'c26', name_en:'C26. Power Seasoning 250g', name_ko:'C26. 파워 시즈닝 250g',                      emoji:'🥫', image:'', price1:2500, price3:4800,  price5:11000 },
+      { id:'c26b', name_en:'C26. Tapioca Pearl Green 400g', name_ko:'C26. 타피오카펄 그린 400g',           emoji:'🥫', image:'', price1:2500, price3:4800,  price5:11000 },
+      { id:'c27', name_en:'C27. Lemongrass Paste 800g', name_ko:'C27. 로그솔레이머 800g',              emoji:'🥫', image:'', price1:9000, price3:17000, price5:24000 },
+      { id:'c27b', name_en:'C28. Kaffir Lime Leaf 70g', name_ko:'C28. 지진돌채이버 70g',               emoji:'🥫', image:'', price1:2500, price3:7000,  price5:11000 },
+      { id:'c28', name_en:'C29. Joti LAAB Mix 30g', name_ko:'C29. 조띠 LAAB 30g',                  emoji:'🥫', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'c29', name_en:'C30. Joti TOM YUM KUNG Mix 60g', name_ko:'C30. 조띠 TOM YUM KUNG 60g',          emoji:'🥫', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'c30', name_en:'C31. Joti YUM WOON SEN Mix 40g', name_ko:'C31. 조띠 YUM WOON SEN 40g',          emoji:'🥫', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'c31', name_en:'C32. Joti PALO Mix 60g', name_ko:'C32. 조띠 PALO 60g',                  emoji:'🥫', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'c32', name_en:'C33. Joti KA PRAO Mix 50g', name_ko:'C33. 조띠 KA PRAO 50g',               emoji:'🥫', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'c33', name_en:'C34. Aroy Seasoning 67g', name_ko:'C34. 과용시즈닝 67g',                 emoji:'🥫', image:'', price1:2500, price3:7000,  price5:10500 },
     ]
   },
-  snack: {
-    label: '과자 · 스낵',
-    emoji: '🍘',
-    items: [
-      { id:'d1', name:'D1. Kerupuk Udang 새우칩 200g', emoji:'🍤', price1:4000, price3:10000, deal:true },
-      { id:'d2', name:'D2. Pandan Wafer 판단웨이퍼 150g', emoji:'🟩', price1:3500, price3:null, deal:false },
-      { id:'d3', name:'D3. Taro Chips 타로칩 180g', emoji:'🥔', price1:4500, price3:11000, deal:false },
-    ]
-  },
-  drink: {
-    label: '음료',
+  other: {
+    label: 'D 음료 및 기타',
     emoji: '🧃',
     items: [
-      { id:'e1', name:'E1. Teh Botol 자스민티 500ml', emoji:'🍵', price1:3000, price3:7500, deal:true },
-      { id:'e2', name:'E2. Soy Milk 두유 250ml', emoji:'🥛', price1:2500, price3:null, deal:false },
-      { id:'e3', name:'E3. Coco Pandan 코코넛음료 330ml', emoji:'🥥', price1:3500, price3:9000, deal:false },
+      { id:'d01', name_en:'D01. Sardines 155g', name_ko:'D01. 사딘 155g',              emoji:'🥫', image:'', price1:5000, price3:8000,  price10:17000 },
+      { id:'d02', name_en:'D02. Rambutan in Syrup 565g', name_ko:'D02. 람부탄 시럽 565g',             emoji:'🍈', image:'', price1:5500, price3:15000, price5:25000 },
+      { id:'d03', name_en:'D03. Longan in Syrup 565g', name_ko:'D03. 용간 시럽 565g',               emoji:'🍈', image:'', price1:5500, price3:15000, price5:25000 },
+      { id:'d04', name_en:'D04. Carnation Condensed Milk 405g', name_ko:'D04. 카네이션 연유 405g',      emoji:'🥛', image:'', price1:2800, price3:8500,  price5:13500 },
+      { id:'d05', name_en:'D05. Ali Condensed Milk 355g', name_ko:'D05. 알리 연유 355g',          emoji:'🥛', image:'', price1:2800, price3:8500,  price5:13500 },
+      { id:'d06', name_en:'D06. Coconut Milk 400ml', name_ko:'D06. 코코낫밀크 400ml',        emoji:'🥥', image:'', price1:4000, price3:11500, price5:18500 },
+      { id:'d07', name_en:'D07. Wangma Coconut Milk 1000ml', name_ko:'D07. 왕마 코코낫밀크 1000ml',  emoji:'🥥', image:'', price1:6900, price3:19500, price5:31000 },
+      { id:'e01', name_en:'E01. SAHA Bamboo Shoot 350g', name_ko:'E01. SAHA 죽순채 350g',        emoji:'🧃', image:'', price1:2500, price3:7000,  price5:11000 },
+      { id:'e02', name_en:'E02. SAHA Bamboo Shoot Sliced 350g', name_ko:'E02. SAHA 죽순 슬라이스 350g', emoji:'🧃', image:'', price1:2500, price3:7000,  price5:11000 },
+      { id:'e03', name_en:'E03. Bamboo Shoot with Herb 400g', name_ko:'E03. 뱀부 숲 위드 야냉 400g',  emoji:'🧃', image:'', price1:4500, price3:12500, price5:19000 },
+      { id:'e04', name_en:'E04. Fish Snack BBQ 80g', name_ko:'E04. 피어스낙 바베큐맛 80g',   emoji:'🐟', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'e05', name_en:'E05. Fish Snack Hot Chili 80g', name_ko:'E05. 피어스낙 핫칠리맛 80g',   emoji:'🐟', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'e05b', name_en:'E05-2. Fish Snack Hot Chili 80g', name_ko:'E05-2. 피어스낙 핫칠리맛 80g',   emoji:'🐟', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'e06', name_en:'E06. Fish Snack Chicken BBQ 80g', name_ko:'E06. 피어스낙 치킨베큐맛 80g',emoji:'🐟', image:'', price1:3000, price3:8500,  price5:13500 },
+      { id:'e07', name_en:'E07. Fish Snack Crab 80g', name_ko:'E07. 피어스낙 게살맛 80g',     emoji:'🦀', image:'', price1:3000, price3:8500,  price5:13500 },
     ]
   }
 };
 
 const quantities = {};
-let currentTab = 'fishball';
+let currentTab = 'frozen';
 
 function getPrice(item, qty) {
   if (!qty || qty <= 0) return 0;
-  if (item.price3 && qty >= 3) {
-    const sets = Math.floor(qty / 3);
-    const rem = qty % 3;
-    return sets * item.price3 + rem * item.price1;
+  // 가격 티어: price1(1개), price2(2개), price3(3개), price5(5개), price10(10개)
+  const tiers = [];
+  if (item.price10) tiers.push({ qty: 10, price: item.price10 });
+  if (item.price5)  tiers.push({ qty: 5,  price: item.price5 });
+  if (item.price3)  tiers.push({ qty: 3,  price: item.price3 });
+  if (item.price2)  tiers.push({ qty: 2,  price: item.price2 });
+
+  let total = 0, remaining = qty;
+  for (const tier of tiers) {
+    if (remaining >= tier.qty) {
+      const sets = Math.floor(remaining / tier.qty);
+      total += sets * tier.price;
+      remaining -= sets * tier.qty;
+    }
   }
-  return qty * item.price1;
+  total += remaining * item.price1;
+  return total;
+}
+
+function getPriceTags(item) {
+  const t = i18n[currentLang];
+  const tags = [`<span class="price-tag">1 ${fmt(item.price1)}</span>`];
+  if (item.price2)  tags.push(`<span class="price-tag deal">2 ${fmt(item.price2)}</span>`);
+  if (item.price3)  tags.push(`<span class="price-tag deal">3 ${fmt(item.price3)}</span>`);
+  if (item.price5)  tags.push(`<span class="price-tag deal">5 ${fmt(item.price5)}</span>`);
+  if (item.price10) tags.push(`<span class="price-tag deal">10 ${fmt(item.price10)}</span>`);
+  return tags.join('');
+}
+
+function getItemName(item) {
+  if (currentLang === 'ko') return item.name_ko || item.name_en || '';
+  return item.name_en || item.name_ko || '';
 }
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
@@ -481,17 +702,21 @@ function renderTab(tab) {
   cat.items.forEach(item => {
     const qty = quantities[item.id] || 0;
     const subtotal = getPrice(item, qty);
+    const displayName = getItemName(item);
     const card = document.createElement('div');
     card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
     card.id = 'card-' + item.id;
     card.innerHTML = `
-      <div class="product-thumb">${item.emoji}</div>
+      <div class="product-thumb">
+        ${item.image
+          ? `<img src="${item.image}" alt="${displayName}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+          : ''}
+        <span style="display:${item.image ? 'none' : 'flex'};align-items:center;justify-content:center;width:100%;height:100%;font-size:28px;">${item.emoji}</span>
+      </div>
       <div class="product-body">
-        <div class="product-name">${item.name}</div>
-        ${item.deal ? '<div class="deal-badge">🔥 Best Deal</div>' : ''}
+        <div class="product-name">${displayName}</div>
         <div class="product-prices">
-          <span class="price-tag">1개 ${fmt(item.price1)}</span>
-          ${item.price3 ? `<span class="price-tag deal">3개 ${fmt(item.price3)} (${fmt(item.price1*3 - item.price3)} 할인)</span>` : ''}
+          ${getPriceTags(item)}
         </div>
         <div class="qty-area">
           <div class="qty-controls">
@@ -527,6 +752,7 @@ function updateCard(id) {
 }
 
 function updateSummary() {
+  const t = i18n[currentLang];
   let grand = 0, count = 0;
   const allItems = Object.values(catalog).flatMap(c => c.items);
   allItems.forEach(item => {
@@ -534,7 +760,7 @@ function updateSummary() {
     if (qty > 0) { grand += getPrice(item, qty); count++; }
   });
   document.getElementById('grand-total').textContent = fmt(grand);
-  document.getElementById('item-summary').textContent = count > 0 ? `${count}종류 선택됨` : '상품을 선택해 주세요';
+  document.getElementById('item-summary').textContent = count > 0 ? t.items_selected(count) : t.select_items;
   document.getElementById('header-count').textContent = count;
 }
 
@@ -559,12 +785,13 @@ function switchTab(el, tab) {
 }
 
 function openModal() {
+  const t = i18n[currentLang];
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
   const body = document.getElementById('modal-body');
 
   if (selected.length === 0) {
-    body.innerHTML = '<div class="empty-cart">장바구니가 비어있어요.<br>상품을 선택해 주세요.</div>';
+    body.innerHTML = `<div class="empty-cart">${t.empty_cart}</div>`;
   } else {
     let grand = 0;
     const rows = selected.map(item => {
@@ -572,29 +799,29 @@ function openModal() {
       const price = getPrice(item, qty);
       grand += price;
       return `<div class="modal-item">
-        <span class="modal-item-name">${item.emoji} ${item.name} × ${qty}</span>
+        <span class="modal-item-name">${item.emoji} ${getItemName(item)} × ${qty}</span>
         <span class="modal-item-price">${fmt(price)}</span>
       </div>`;
     }).join('');
 
     body.innerHTML = `
       ${rows}
-      <div class="modal-total"><span>합계</span><span>${fmt(grand)}</span></div>
+      <div class="modal-total"><span>${t.grand_total}</span><span>${fmt(grand)}</span></div>
       <div class="customer-form">
         <div class="form-group">
-          <label class="form-label">이름</label>
-          <input class="form-input" type="text" id="cust-name" placeholder="홍길동" />
+          <label class="form-label">${t.field_name}</label>
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" />
         </div>
         <div class="form-group">
-          <label class="form-label">연락처</label>
-          <input class="form-input" type="tel" id="cust-phone" placeholder="010-0000-0000" />
+          <label class="form-label">${t.field_phone}</label>
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" />
         </div>
         <div class="form-group">
-          <label class="form-label">메모 (선택)</label>
-          <input class="form-input" type="text" id="cust-note" placeholder="배달 요청사항 등" />
+          <label class="form-label">${t.field_note}</label>
+          <input class="form-input" type="text" id="cust-note" placeholder="${t.ph_note}" />
         </div>
       </div>
-      <button class="confirm-btn" onclick="confirmOrder()">주문 완료하기</button>
+      <button class="confirm-btn" onclick="confirmOrder()">${t.confirm_btn}</button>
     `;
   }
 
@@ -612,14 +839,15 @@ function closeOnOverlay(e) {
 }
 
 function confirmOrder() {
+  const t = i18n[currentLang];
   const name = document.getElementById('cust-name')?.value.trim();
   const phone = document.getElementById('cust-phone')?.value.trim();
-  if (!name || !phone) { alert('이름과 연락처를 입력해 주세요.'); return; }
-  alert(`✅ 주문이 완료되었습니다!\n\n이름: ${name}\n연락처: ${phone}\n\n곧 연락드리겠습니다. 감사합니다!`);
+  if (!name || !phone) { alert(t.alert_fill); return; }
+  alert(t.alert_done(name, phone));
   closeModal();
 }
 
-renderTab('fishball');
+renderTab('frozen');
 </script>
 </body>
 </html>
