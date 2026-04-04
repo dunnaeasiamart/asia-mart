@@ -739,16 +739,16 @@ function getPrice(item, qty) {
   if (item.price3)  tiers.push({ qty: 3,  price: item.price3 });
   if (item.price2)  tiers.push({ qty: 2,  price: item.price2 });
 
-  // qty 이하의 가장 큰 묶음 찾기
+  // qty 이하의 가장 큰 묶음 1번만 적용
   const applicableTier = tiers.find(t => qty >= t.qty);
   if (!applicableTier) return qty * item.price1;
 
-  // 묶음 단가를 100원 내림으로 고정 (일관된 할인)
+  // 묶음 단가 100원 내림으로 고정
   const unitPrice = Math.floor(applicableTier.price / applicableTier.qty / 100) * 100;
+  const remainder = qty - applicableTier.qty;
 
-  const sets = Math.floor(qty / applicableTier.qty);
-  const remainder = qty % applicableTier.qty;
-  return sets * applicableTier.price + remainder * unitPrice;
+  // 묶음 1번 + 나머지는 단가로 1개씩 추가
+  return applicableTier.price + remainder * unitPrice;
 }
 
 function getUnit(n) {
