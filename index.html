@@ -1257,53 +1257,87 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 재고 불러오기
 async function loadStock() {
   try {
     const snapshot = await get(ref(db, 'stock'));
-    const stockData = snapshot.val() || {};
-    window._stock = stockData;
-    // 현재 탭 다시 렌더링
+    window._stock = snapshot.val() || {};
     renderTab(currentTab);
   } catch(e) {
     console.log('재고 로드 실패:', e);
   }
 }
 
-// 기존 renderTab 오버라이드 - 재고 표시 추가
-const _origRenderTab = window.renderTab;
-window.renderTab = function(tab) {
-  _origRenderTab(tab);
-  applyStock();
-};
-
-function applyStock() {
+// 재고 적용 함수
+window.applyStock = function() {
   const stock = window._stock || {};
   const allItems = Object.values(catalog).flatMap(c => c.items);
   allItems.forEach(item => {
     const s = stock[item.id];
     const card = document.getElementById('card-' + item.id);
     if (!card) return;
+
+    // 기존 배지 제거
+    card.querySelectorAll('.sold-out-badge, .stock-badge').forEach(b => b.remove());
+
     if (s === 0) {
-      // 품절
+      // 품절 처리
       card.style.opacity = '0.5';
       card.style.pointerEvents = 'none';
-      if (!card.querySelector('.sold-out-badge')) {
-        const badge = document.createElement('div');
-        badge.className = 'sold-out-badge';
-        badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.7);color:#fff;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;';
-        badge.textContent = '품절 / Sold Out';
-        card.style.position = 'relative';
-        card.appendChild(badge);
-      }
+      card.style.position = 'relative';
+      const badge = document.createElement('div');
+      badge.className = 'sold-out-badge';
+      badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;';
+      badge.textContent = '품절 / Sold Out';
+      card.appendChild(badge);
+      // 수량 0으로
+      quantities[item.id] = 0;
+      const inp = document.getElementById('input-' + item.id);
+      if (inp) inp.value = 0;
     } else {
       card.style.opacity = '1';
       card.style.pointerEvents = 'auto';
-      const badge = card.querySelector('.sold-out-badge');
-      if (badge) badge.remove();
+
+      if (s > 0 && s !== undefined) {
+        // 재고 수량 표시
+        const badge = document.createElement('div');
+        badge.className = 'stock-badge';
+        badge.style.cssText = 'font-size:11px;color:var(--muted);margin-top:2px;';
+        badge.textContent = currentLang === 'ko' ? `재고: ${s}개` : currentLang === 'th' ? `คงเหลือ: ${s}` : `Stock: ${s}`;
+        const body = card.querySelector('.product-body');
+        if (body) body.appendChild(badge);
+
+        // 수량이 재고 초과하면 줄이기
+        if ((quantities[item.id] || 0) > s) {
+          quantities[item.id] = s;
+          const inp = document.getElementById('input-' + item.id);
+          if (inp) inp.value = s;
+        }
+
+        // + 버튼 재고 초과 방지
+        const plusBtn = card.querySelector('.qty-btn:last-child');
+        if (plusBtn) {
+          plusBtn.onclick = (e) => {
+            e && e.stopPropagation();
+            const cur = quantities[item.id] || 0;
+            if (cur >= s) {
+              showToast(currentLang === 'ko' ? `재고가 ${s}개뿐이에요!` : currentLang === 'th' ? `มีสินค้าเพียง ${s} ชิ้น!` : `Only ${s} in stock!`);
+              return;
+            }
+            changeQty(item.id, 1, e);
+          };
+        }
+      }
     }
   });
-}
+  updateSummary();
+};
+
+// renderTab 후 재고 적용
+const _origRender = window.renderTab;
+window.renderTab = function(tab) {
+  _origRender(tab);
+  if (window._stock) applyStock();
+};
 
 loadStock();
 </script>
