@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asia Mart — 재고 관리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', sans-serif; background: #f5f5f5; }
+  .header { background: #1a1814; color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 18px; }
+  .header-btns { display: flex; gap: 10px; }
+  .btn { padding: 8px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-save { background: #c84b2f; color: #fff; }
+  .btn-reload { background: #fff; color: #1a1814; }
+  .login-wrap { max-width: 400px; margin: 100px auto; background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+  .login-wrap h2 { text-align: center; margin-bottom: 24px; }
+  .login-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 12px; }
+  .main-wrap { max-width: 900px; margin: 24px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; }
+  tr:hover td { background: #fafafa; }
+  tr td { border-bottom: 1px solid #f0f0f0; }
+  .stock-info { padding: 12px 24px; background: #e8f5e9; font-size: 13px; color: #2d7a4f; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; z-index: 999; display: none; }
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login-wrap" class="login-wrap">
+  <h2>🔒 관리자 로그인</h2>
+  <input type="password" id="pw-input" class="login-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+  <button class="btn btn-save" style="width:100%;padding:12px;" onclick="login()">로그인</button>
+</div>
+
+<!-- 메인 -->
+<div id="main-wrap" style="display:none;">
+  <div class="header">
+    <h1>🛒 Asia Mart 재고 관리</h1>
+    <div class="header-btns">
+      <button class="btn btn-reload" onclick="loadStock()">🔄 새로고침</button>
+      <button class="btn btn-save" onclick="saveAll()">💾 전체 저장</button>
+    </div>
+  </div>
+  <div class="stock-info">
+    💡 재고: <b>-1</b> = 무제한 &nbsp;|&nbsp; <b>0</b> = 품절 &nbsp;|&nbsp; <b>1 이상</b> = 재고 수량
+  </div>
+  <div class="main-wrap">
+    <table>
+      <thead>
+        <tr style="background:#f5f5f5;">
+          <th style="padding:10px 16px;text-align:left;font-size:12px;color:#888;">번호</th>
+          <th style="padding:10px 16px;text-align:left;font-size:12px;color:#888;">영문명</th>
+          <th style="padding:10px 16px;text-align:left;font-size:12px;color:#888;">한국명</th>
+          <th style="padding:10px 16px;text-align:left;font-size:12px;color:#888;">재고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="4" style="background:#1a1814;color:#fff;font-weight:700;padding:10px 16px;">A 냉동음식</td></tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A1</td>
+  <td style="padding:10px 16px;font-size:13px;">A1. Shrimp Ball 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A1. 새우볼 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a1"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a1')">
+    <span id="badge_a1" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A2</td>
+  <td style="padding:10px 16px;font-size:13px;">A2. Beef Meatball 320g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A2. 소고기미트볼 320g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a2"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a2')">
+    <span id="badge_a2" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A3</td>
+  <td style="padding:10px 16px;font-size:13px;">A3. Pork Meatball 320g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A3. 돼지고기미트볼 320g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a3"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a3')">
+    <span id="badge_a3" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A4</td>
+  <td style="padding:10px 16px;font-size:13px;">A4. Pig Tail 700g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A4. 돼지꼬리 700g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a4"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a4')">
+    <span id="badge_a4" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A5</td>
+  <td style="padding:10px 16px;font-size:13px;">A5. Pig Ear x2 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A5. 돼지귀 2개 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a5"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a5')">
+    <span id="badge_a5" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A6</td>
+  <td style="padding:10px 16px;font-size:13px;">A6. Chicken Gizzard 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A6. 닭근위 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a6"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a6')">
+    <span id="badge_a6" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A7</td>
+  <td style="padding:10px 16px;font-size:13px;">A7. Chicken Liver 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A7. 닭간 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a7"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a7')">
+    <span id="badge_a7" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A8</td>
+  <td style="padding:10px 16px;font-size:13px;">A8. Chicken Heart 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A8. 닭알집 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a8"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a8')">
+    <span id="badge_a8" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A9</td>
+  <td style="padding:10px 16px;font-size:13px;">A9. Chicken Knee Cartilage 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A9. 닭무릎연골 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a9"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a9')">
+    <span id="badge_a9" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A10</td>
+  <td style="padding:10px 16px;font-size:13px;">A10. Frozen Striped Snakehead 3pcs 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A10. 냉동 등목어 3마리 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a10"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a10')">
+    <span id="badge_a10" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A11</td>
+  <td style="padding:10px 16px;font-size:13px;">A11. Frozen Striped Snakehead 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A11. 냉동 줄무늬가물치 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a11"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a11')">
+    <span id="badge_a11" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A12</td>
+  <td style="padding:10px 16px;font-size:13px;">A12. Frozen Red Tilapia 2pcs 900g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A12. 냉동 레드틸라피아 2마리 900g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a12"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a12')">
+    <span id="badge_a12" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A13</td>
+  <td style="padding:10px 16px;font-size:13px;">A13. Frozen Tilapia 2pcs 900g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A13. 냉동 틸라피아 2마리 900g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a13"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a13')">
+    <span id="badge_a13" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A14</td>
+  <td style="padding:10px 16px;font-size:13px;">A14. Frozen Gourami 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A14. 냉동 구라미 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a14"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a14')">
+    <span id="badge_a14" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A15</td>
+  <td style="padding:10px 16px;font-size:13px;">A15. Frozen Cut Catfish 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A15. 냉동 절단한 메기 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a15"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a15')">
+    <span id="badge_a15" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A16</td>
+  <td style="padding:10px 16px;font-size:13px;">A16. Frozen Catfish 700g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A16. 냉동 메기 700g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a16"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a16')">
+    <span id="badge_a16" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A17</td>
+  <td style="padding:10px 16px;font-size:13px;">A17. Pla Tu Khem 180g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A17. 빠뚜캠 180g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a17"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a17')">
+    <span id="badge_a17" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A18</td>
+  <td style="padding:10px 16px;font-size:13px;">A18. Frozen Mackerel 250g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A18. 냉동 고등어 250g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a18"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a18')">
+    <span id="badge_a18" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A19</td>
+  <td style="padding:10px 16px;font-size:13px;">A19. Seasoned Semi-Dried Catfish 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A19. 양념 반건조 메기 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a19"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a19')">
+    <span id="badge_a19" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A20</td>
+  <td style="padding:10px 16px;font-size:13px;">A20. Frozen Frog 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A20. 냉동 개구리 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a20"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a20')">
+    <span id="badge_a20" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A21</td>
+  <td style="padding:10px 16px;font-size:13px;">A21. Frozen Cuttlefish 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A21. 냉동 갑오징어 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a21"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a21')">
+    <span id="badge_a21" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A22</td>
+  <td style="padding:10px 16px;font-size:13px;">A22. Frozen Baby Octopus 450g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A22. 냉동 쭈꾸미 450g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a22"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a22')">
+    <span id="badge_a22" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">A23</td>
+  <td style="padding:10px 16px;font-size:13px;">A23. Frozen Beef Offal Papayatan 700g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">A23. 냉동 소 부속물 고기 파파이딴 700g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_a23"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('a23')">
+    <span id="badge_a23" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr><td colspan="4" style="background:#1a1814;color:#fff;font-weight:700;padding:10px 16px;">B 면 종류</td></tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B01</td>
+  <td style="padding:10px 16px;font-size:13px;">B01. MAMA TOMYUM CUP 70g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B01. 마마 똠얌 컵 70g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b01"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b01')">
+    <span id="badge_b01" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B02</td>
+  <td style="padding:10px 16px;font-size:13px;">B02. MAMA CREAMY TOMYUM CUP 70g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B02. 마마 크리미 똠얌 컵 70g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b02"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b02')">
+    <span id="badge_b02" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B03</td>
+  <td style="padding:10px 16px;font-size:13px;">B03. MAMA PORK CUP 70g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B03. 마마 포크 컵 70g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b03"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b03')">
+    <span id="badge_b03" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B04</td>
+  <td style="padding:10px 16px;font-size:13px;">B04. MAMA Instant Rice Vermicelli Clear Soup 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B04. MAMA 인스턴트 쌀국수 클리어수프 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b04"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b04')">
+    <span id="badge_b04" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B05</td>
+  <td style="padding:10px 16px;font-size:13px;">B05. MAMA Instant Noodle Chicken Green Curry 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B05. MAMA 인스턴트 누들 치킨그린커리 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b05"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b05')">
+    <span id="badge_b05" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B06</td>
+  <td style="padding:10px 16px;font-size:13px;">B06. ACECOOK Rice Noodle 71g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B06. ACECOOK 쌀국수 71g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b06"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b06')">
+    <span id="badge_b06" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B07</td>
+  <td style="padding:10px 16px;font-size:13px;">B07. HAOHAO ORIGINAL 78g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B07. 하오하오 오리지널 78g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b07"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b07')">
+    <span id="badge_b07" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B08</td>
+  <td style="padding:10px 16px;font-size:13px;">B08. ACECOOK Pho Bo 70g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B08. ACECOOK 포보 70g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b08"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b08')">
+    <span id="badge_b08" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B09</td>
+  <td style="padding:10px 16px;font-size:13px;">B09. WAIWAI Oriental 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B09. WAIWAI 오리엔탈 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b09"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b09')">
+    <span id="badge_b09" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B10</td>
+  <td style="padding:10px 16px;font-size:13px;">B10. WAIWAI Tom Yum Red 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B10. WAIWAI 똠얌 RED 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b10"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b10')">
+    <span id="badge_b10" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B11</td>
+  <td style="padding:10px 16px;font-size:13px;">B11. WAIWAI Tom Yum Blue 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B11. WAIWAI 똠얌 BLUE 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b11"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b11')">
+    <span id="badge_b11" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B12</td>
+  <td style="padding:10px 16px;font-size:13px;">B12. WAIWAI Crab 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B12. WAIWAI 크랩 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b12"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b12')">
+    <span id="badge_b12" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B13</td>
+  <td style="padding:10px 16px;font-size:13px;">B13. MAMA Tom Yum 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B13. MAMA 똠얌 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b13"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b13')">
+    <span id="badge_b13" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B14</td>
+  <td style="padding:10px 16px;font-size:13px;">B14. MAMA Creamy 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B14. MAMA 크리미 55g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b14"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b14')">
+    <span id="badge_b14" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B15</td>
+  <td style="padding:10px 16px;font-size:13px;">B15. MAMA Pork 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B15. MAMA 포크 60g 1set(5pcs)</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b15"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b15')">
+    <span id="badge_b15" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B16</td>
+  <td style="padding:10px 16px;font-size:13px;">B16. SAFOCO Rice Vermicelli 300g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B16. SAFOCO 쌀국수 300g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b16"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b16')">
+    <span id="badge_b16" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B17</td>
+  <td style="padding:10px 16px;font-size:13px;">B17. CHANTABURI Rice Noodle 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B17. CHANTABURI 쌀국수 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b17"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b17')">
+    <span id="badge_b17" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B18</td>
+  <td style="padding:10px 16px;font-size:13px;">B18. BUNKO Vermicelli 300g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B18. BUNKO 당면 300g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b18"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b18')">
+    <span id="badge_b18" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B19</td>
+  <td style="padding:10px 16px;font-size:13px;">B19. BICH CHI Hu Tieu Kho 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B19. BICH CHI 건면 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b19"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b19')">
+    <span id="badge_b19" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B20</td>
+  <td style="padding:10px 16px;font-size:13px;">B20. BICH CHI Banh Pho Kho 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B20. BICH CHI 넓은건면 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b20"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b20')">
+    <span id="badge_b20" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B21</td>
+  <td style="padding:10px 16px;font-size:13px;">B21. VIFON Hu Tieu Kho 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B21. VIFON 건면 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b21"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b21')">
+    <span id="badge_b21" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B22</td>
+  <td style="padding:10px 16px;font-size:13px;">B22. VIFON Banh Pho Kho 500g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B22. VIFON 넓은건면 500g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b22"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b22')">
+    <span id="badge_b22" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B23</td>
+  <td style="padding:10px 16px;font-size:13px;">B23. WAIWAI Noodle 200g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B23. WAIWAI 면 200g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b23"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b23')">
+    <span id="badge_b23" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B24</td>
+  <td style="padding:10px 16px;font-size:13px;">B24. WOONSEN LEK 1pack(10pcs) 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B24. WOONSEN LEK 1팩(10개) 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b24"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b24')">
+    <span id="badge_b24" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B25</td>
+  <td style="padding:10px 16px;font-size:13px;">B25. Shin Ramyun 5pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B25. 신라면 5개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b25"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b25')">
+    <span id="badge_b25" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B26</td>
+  <td style="padding:10px 16px;font-size:13px;">B26. Jin Ramyun Mild 5pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B26. 진라면 순한맛 5개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b26"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b26')">
+    <span id="badge_b26" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B27</td>
+  <td style="padding:10px 16px;font-size:13px;">B27. Jin Ramyun Spicy 5pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B27. 진라면 매운맛 5개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b27"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b27')">
+    <span id="badge_b27" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B28</td>
+  <td style="padding:10px 16px;font-size:13px;">B28. Jin Ramyun Cup Mild 6pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B28. 진라면 컵라면 순한맛 6개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b28"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b28')">
+    <span id="badge_b28" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">B29</td>
+  <td style="padding:10px 16px;font-size:13px;">B29. Jin Ramyun Cup Spicy 6pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">B29. 진라면 컵라면 매운맛 6개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_b29"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('b29')">
+    <span id="badge_b29" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr><td colspan="4" style="background:#1a1814;color:#fff;font-weight:700;padding:10px 16px;">C 각종 소스</td></tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C01</td>
+  <td style="padding:10px 16px;font-size:13px;">C1. TIPAROS Fish Sauce 700ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C1. TIPAROS 피시소스 700ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c01"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c01')">
+    <span id="badge_c01" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C02</td>
+  <td style="padding:10px 16px;font-size:13px;">C2. TIPAROS Vinegar 600ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C2. TIPAROS 식초 600ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c02"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c02')">
+    <span id="badge_c02" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C03</td>
+  <td style="padding:10px 16px;font-size:13px;">C3. YWY Black Sweet Soy Sauce 410g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C3. YWY 블랙스위트 간장 410g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c03"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c03')">
+    <span id="badge_c03" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C04</td>
+  <td style="padding:10px 16px;font-size:13px;">C4. YWY Oyster Sauce 370g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C4. YWY 굴소스 370g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c04"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c04')">
+    <span id="badge_c04" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C05</td>
+  <td style="padding:10px 16px;font-size:13px;">C5. YWY Seasoning Sauce 300g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C5. YWY 시즈닝소스 300g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c05"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c05')">
+    <span id="badge_c05" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C06</td>
+  <td style="padding:10px 16px;font-size:13px;">C6. YWY Seasoning Paste 350g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C6. YWY 시즈닝페이스트 350g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c06"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c06')">
+    <span id="badge_c06" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C07</td>
+  <td style="padding:10px 16px;font-size:13px;">C7. YWY Black Sauce 410g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C7. YWY 블랙소스 410g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c07"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c07')">
+    <span id="badge_c07" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C08</td>
+  <td style="padding:10px 16px;font-size:13px;">C8. Squid Fish Sauce 700ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C8. 오징어 피시소스 700ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c08"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c08')">
+    <span id="badge_c08" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C09</td>
+  <td style="padding:10px 16px;font-size:13px;">C9. Maekong Red Sauce 400ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C9. 메콩 레드소스 400ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c09"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c09')">
+    <span id="badge_c09" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C10</td>
+  <td style="padding:10px 16px;font-size:13px;">C10. Maekong Yellow Sauce 400ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C10. 메콩 옐로우소스 400ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c10"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c10')">
+    <span id="badge_c10" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C11</td>
+  <td style="padding:10px 16px;font-size:13px;">C11. Maekong White Sauce 400ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C11. 메콩 화이트소스 400ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c11"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c11')">
+    <span id="badge_c11" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C12</td>
+  <td style="padding:10px 16px;font-size:13px;">C12. Magi Dipping Sauce 200ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C12. 마기 딥핑소스 200ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c12"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c12')">
+    <span id="badge_c12" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C13</td>
+  <td style="padding:10px 16px;font-size:13px;">C13. KHONKAEN Fish Sauce 400ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C13. KHONKAEN 피시소스 400ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c13"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c13')">
+    <span id="badge_c13" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C14</td>
+  <td style="padding:10px 16px;font-size:13px;">C14. ZAB MIKE Fish Sauce 330ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C14. ZAB MIKE 피시소스 330ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c14"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c14')">
+    <span id="badge_c14" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C15</td>
+  <td style="padding:10px 16px;font-size:13px;">C15. Megachef Fish Sauce 700ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C15. 메가쉐프 피시소스 700ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c15"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c15')">
+    <span id="badge_c15" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C16</td>
+  <td style="padding:10px 16px;font-size:13px;">C16. Tamarind Paste Sauce 300g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C16. 타마린드 페이스트 300g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c16"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c16')">
+    <span id="badge_c16" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C17</td>
+  <td style="padding:10px 16px;font-size:13px;">C17. Hot Spice SUKI Sauce 342g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C17. 핫스파이스 수키소스 342g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c17"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c17')">
+    <span id="badge_c17" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C18</td>
+  <td style="padding:10px 16px;font-size:13px;">C18. Pantai Sweet Chili Sauce 342g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C18. 판타이 스위트칠리소스 342g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c18"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c18')">
+    <span id="badge_c18" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C19</td>
+  <td style="padding:10px 16px;font-size:13px;">C19. Nam Prik Pao 513g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C19. 남프릭파우 513g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c19"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c19')">
+    <span id="badge_c19" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C20</td>
+  <td style="padding:10px 16px;font-size:13px;">C20. Sour Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C20. 사워커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c20"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c20')">
+    <span id="badge_c20" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C21</td>
+  <td style="padding:10px 16px;font-size:13px;">C21. Nam Ya Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C21. 남야커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c21"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c21')">
+    <span id="badge_c21" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C22</td>
+  <td style="padding:10px 16px;font-size:13px;">C22. Country Style Red Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C22. 컨트리 레드커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c22"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c22')">
+    <span id="badge_c22" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C23</td>
+  <td style="padding:10px 16px;font-size:13px;">C23. Green Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C23. 그린커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c23"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c23')">
+    <span id="badge_c23" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C24</td>
+  <td style="padding:10px 16px;font-size:13px;">C24. Panang Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C24. 파낭커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c24"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c24')">
+    <span id="badge_c24" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C25</td>
+  <td style="padding:10px 16px;font-size:13px;">C25. Red Curry Paste 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C25. 레드커리 페이스트 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c25"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c25')">
+    <span id="badge_c25" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C26</td>
+  <td style="padding:10px 16px;font-size:13px;">C26. Salted Shrimp Paste 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C26. 쏠티드 쉬림페이스트 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c26"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c26')">
+    <span id="badge_c26" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C26B</td>
+  <td style="padding:10px 16px;font-size:13px;">C26-1. Salted Shrimp Paste 200g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C26-1. 쏠티드 쉬림페이스트 200g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c26b"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c26b')">
+    <span id="badge_c26b" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C26C</td>
+  <td style="padding:10px 16px;font-size:13px;">C26-2. Pickled Gouramy Fish 454g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C26-2. 피클드 구라미피시 454g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c26c"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c26c')">
+    <span id="badge_c26c" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C27</td>
+  <td style="padding:10px 16px;font-size:13px;">C27. Dried Chili 100g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C27. 매운고추 100g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c27"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c27')">
+    <span id="badge_c27" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C28</td>
+  <td style="padding:10px 16px;font-size:13px;">C28. Tamarind Seedless 170g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C28. 타마린드 씨없봉 170g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c28"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c28')">
+    <span id="badge_c28" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C29</td>
+  <td style="padding:10px 16px;font-size:13px;">C29. MSG 250g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C29. 미원 250g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c29"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c29')">
+    <span id="badge_c29" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C30</td>
+  <td style="padding:10px 16px;font-size:13px;">C30. Tapioca Pearl Green 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C30. 타피오카펄 그린 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c30"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c30')">
+    <span id="badge_c30" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C31</td>
+  <td style="padding:10px 16px;font-size:13px;">C31. ROSDEE Pork Flavor 800g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C31. ROSDEE 포크플레이버 800g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c31"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c31')">
+    <span id="badge_c31" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C32</td>
+  <td style="padding:10px 16px;font-size:13px;">C32. ROSDEE Chicken Flavor 70g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C32. ROSDEE 치킨플레이버 70g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c32"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c32')">
+    <span id="badge_c32" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C33</td>
+  <td style="padding:10px 16px;font-size:13px;">C33. ROSDEE LAAB Mix 30g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C33. ROSDEE LAAB 믹스 30g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c33"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c33')">
+    <span id="badge_c33" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C34</td>
+  <td style="padding:10px 16px;font-size:13px;">C34. ROSDEE TOM YUM KUNG Mix 60g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C34. ROSDEE 똠얌꿍 믹스 60g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c34"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c34')">
+    <span id="badge_c34" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C35</td>
+  <td style="padding:10px 16px;font-size:13px;">C35. ROSDEE YUM WOON SEN Mix 40g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C35. ROSDEE 얌운센 믹스 40g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c35"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c35')">
+    <span id="badge_c35" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C36</td>
+  <td style="padding:10px 16px;font-size:13px;">C36. ROSDEE PALO Mix 60g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C36. ROSDEE 팔로 믹스 60g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c36"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c36')">
+    <span id="badge_c36" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C37</td>
+  <td style="padding:10px 16px;font-size:13px;">C37. ROSDEE KA PRAO Mix 50g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C37. ROSDEE 카프라오 믹스 50g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c37"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c37')">
+    <span id="badge_c37" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C38</td>
+  <td style="padding:10px 16px;font-size:13px;">C38. Lime Seasoning Powder 67g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C38. 라임 시즈닝 파우더 67g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c38"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c38')">
+    <span id="badge_c38" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C39</td>
+  <td style="padding:10px 16px;font-size:13px;">C39. Chicken Cube 20g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C39. 치킨큐브 20g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c39"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c39')">
+    <span id="badge_c39" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C40</td>
+  <td style="padding:10px 16px;font-size:13px;">C40. Pork Cube 20g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C40. 포크큐브 20g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c40"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c40')">
+    <span id="badge_c40" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">C41</td>
+  <td style="padding:10px 16px;font-size:13px;">C41. Tom Yum Kung Cube 20g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">C41. 톰얌꿍큐브 20g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_c41"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('c41')">
+    <span id="badge_c41" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr><td colspan="4" style="background:#1a1814;color:#fff;font-weight:700;padding:10px 16px;">D 음료 및 기타</td></tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D01</td>
+  <td style="padding:10px 16px;font-size:13px;">D1. Rambutan in Syrup 565g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D1. 람부탄 시럽 565g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d01"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d01')">
+    <span id="badge_d01" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D02</td>
+  <td style="padding:10px 16px;font-size:13px;">D2. Longan in Syrup 565g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D2. 용안 시럽 565g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d02"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d02')">
+    <span id="badge_d02" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D03</td>
+  <td style="padding:10px 16px;font-size:13px;">D3. Carnation Condensed Milk 405g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D3. 카네이션 연유 405g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d03"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d03')">
+    <span id="badge_d03" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D04</td>
+  <td style="padding:10px 16px;font-size:13px;">D4. Mali Condensed Milk 355g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D4. 말리 연유 355g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d04"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d04')">
+    <span id="badge_d04" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D05</td>
+  <td style="padding:10px 16px;font-size:13px;">D5. Coconut Milk 400ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D5. 코코낫밀크 400ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d05"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d05')">
+    <span id="badge_d05" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D06</td>
+  <td style="padding:10px 16px;font-size:13px;">D6. Ampawa Coconut Milk 1000ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D6. 암파와 코코낫밀크 1000ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d06"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d06')">
+    <span id="badge_d06" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D07</td>
+  <td style="padding:10px 16px;font-size:13px;">D7. SAHA Bamboo Shoot 350g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D7. SAHA 죽순채 350g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d07"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d07')">
+    <span id="badge_d07" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D08</td>
+  <td style="padding:10px 16px;font-size:13px;">D8. SAHA Bamboo Shoot Sliced 350g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D8. SAHA 죽순 슬라이스 350g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d08"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d08')">
+    <span id="badge_d08" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D09</td>
+  <td style="padding:10px 16px;font-size:13px;">D9. Bamboo Shoot with Herb 400g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D9. 뱀부 허브 400g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d09"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d09')">
+    <span id="badge_d09" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D10</td>
+  <td style="padding:10px 16px;font-size:13px;">D10. Fish Snack BBQ 80g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D10. 피시스낵 바베큐맛 80g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d10"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d10')">
+    <span id="badge_d10" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D11</td>
+  <td style="padding:10px 16px;font-size:13px;">D11. Fish Snack Hot Chili 80g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D11. 피시스낵 핫칠리맛 80g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d11"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d11')">
+    <span id="badge_d11" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D12</td>
+  <td style="padding:10px 16px;font-size:13px;">D12. Fish Snack Chicken BBQ 80g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D12. 피시스낵 치킨바베큐맛 80g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d12"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d12')">
+    <span id="badge_d12" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D13</td>
+  <td style="padding:10px 16px;font-size:13px;">D13. Fish Snack Crab 80g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D13. 피시스낵 게살맛 80g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d13"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d13')">
+    <span id="badge_d13" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D14</td>
+  <td style="padding:10px 16px;font-size:13px;">D14. Italian Lemon Juice 200ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D14. 이태리 레몬주스 200ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d14"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d14')">
+    <span id="badge_d14" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D14B</td>
+  <td style="padding:10px 16px;font-size:13px;">D14-1. Italian Lime Juice 200ml</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D14-1. 이태리 라임주스 200ml</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d14b"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d14b')">
+    <span id="badge_d14b" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D15</td>
+  <td style="padding:10px 16px;font-size:13px;">D15. Red Sunflower Seeds 260g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D15. 해바라기씨 빨간색 260g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d15"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d15')">
+    <span id="badge_d15" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D16</td>
+  <td style="padding:10px 16px;font-size:13px;">D16. Coffee Mix 160pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D16. 커피믹스 160개입</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d16"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d16')">
+    <span id="badge_d16" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">D17</td>
+  <td style="padding:10px 16px;font-size:13px;">D17. Paper Cup 1000pcs</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">D17. 종이컵 1000개</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_d17"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('d17')">
+    <span id="badge_d17" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr><td colspan="4" style="background:#1a1814;color:#fff;font-weight:700;padding:10px 16px;">E 생활용품</td></tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">E01</td>
+  <td style="padding:10px 16px;font-size:13px;">E01. Colgate Icy Cool Mint Toothpaste 200g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">E01. 콜게이트 아이시 쿨민트 치약 200g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_e01"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('e01')">
+    <span id="badge_e01" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">E02</td>
+  <td style="padding:10px 16px;font-size:13px;">E02. Colgate Great Regular Flavor Toothpaste 200g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">E02. 콜게이트 그레이트 레귤러 치약 200g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_e02"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('e02')">
+    <span id="badge_e02" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">E03</td>
+  <td style="padding:10px 16px;font-size:13px;">E03. Twelve Plus Extra Cool Powder Cooling Blue 270g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">E03. 트웰브플러스 엑스트라쿨파우더 쿨링블루 270g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_e03"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('e03')">
+    <span id="badge_e03" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+<tr>
+  <td style="padding:10px 16px;font-size:13px;color:#555;">E04</td>
+  <td style="padding:10px 16px;font-size:13px;">E04. Twelve Plus Extra Cool Powder Cooling Pink 270g</td>
+  <td style="padding:10px 16px;font-size:13px;color:#888;">E04. 트웰브플러스 엑스트라쿨파우더 쿨링핑크 270g</td>
+  <td style="padding:10px 16px;">
+    <input type="number" min="-1" value="-1" id="stock_e04"
+      style="width:80px;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;"
+      onchange="markChanged('e04')">
+    <span id="badge_e04" style="display:none;margin-left:6px;font-size:11px;color:#c84b2f;font-weight:700;">변경됨</span>
+  </td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
+  authDomain: "asia-mart-a0292.firebaseapp.com",
+  databaseURL: "https://asia-mart-a0292-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "asia-mart-a0292",
+  storageBucket: "asia-mart-a0292.firebasestorage.app",
+  messagingSenderId: "6786874274",
+  appId: "1:6786874274:web:50f7bec4fb3668cb4c10fb"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const ADMIN_PW = "asia1234"; // 비밀번호 변경 가능
+
+window.login = function() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('main-wrap').style.display = 'block';
+    loadStock();
+  } else {
+    alert('비밀번호가 틀렸습니다.');
+  }
+};
+
+window.loadStock = async function() {
+  const snapshot = await get(ref(db, 'stock'));
+  const data = snapshot.val() || {};
+  document.querySelectorAll('input[id^="stock_"]').forEach(input => {
+    const id = input.id.replace('stock_', '');
+    input.value = data[id] !== undefined ? data[id] : -1;
+    document.getElementById('badge_' + id).style.display = 'none';
+  });
+  showToast('✅ 재고 불러오기 완료!');
+};
+
+window.markChanged = function(id) {
+  document.getElementById('badge_' + id).style.display = 'inline';
+};
+
+window.saveAll = async function() {
+  const updates = {};
+  document.querySelectorAll('input[id^="stock_"]').forEach(input => {
+    const id = input.id.replace('stock_', '');
+    updates['stock/' + id] = parseInt(input.value);
+    document.getElementById('badge_' + id).style.display = 'none';
+  });
+  await update(ref(db), updates);
+  showToast('💾 전체 저장 완료!');
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2000);
+}
+</script>
+</body>
+</html>
