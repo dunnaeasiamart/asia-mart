@@ -1271,15 +1271,15 @@ function openModal() {
       <div class="customer-form">
         <div class="form-group">
           <label class="form-label">${t.field_name}</label>
-          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" value="${localStorage.getItem('cust_name') || ''}" oninput="localStorage.setItem('cust_name', this.value)" />
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" oninput="localStorage.setItem('cust_name', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" value="${localStorage.getItem('cust_phone') || ''}" oninput="localStorage.setItem('cust_phone', this.value)" />
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" oninput="localStorage.setItem('cust_phone', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" value="${localStorage.getItem('cust_facebook') || ''}" oninput="localStorage.setItem('cust_facebook', this.value)" />
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" oninput="localStorage.setItem('cust_facebook', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
@@ -1321,8 +1321,16 @@ function openModal() {
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
-  // 저장된 주소 이미지 불러오기
-  setTimeout(loadSavedAddrImg, 50);
+  // 저장된 고객 정보 불러오기
+  setTimeout(() => {
+    const nameEl = document.getElementById('cust-name');
+    const phoneEl = document.getElementById('cust-phone');
+    const fbEl = document.getElementById('cust-facebook');
+    if (nameEl) nameEl.value = localStorage.getItem('cust_name') || '';
+    if (phoneEl) phoneEl.value = localStorage.getItem('cust_phone') || '';
+    if (fbEl) fbEl.value = localStorage.getItem('cust_facebook') || '';
+    loadSavedAddrImg();
+  }, 50);
 
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
