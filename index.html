@@ -141,8 +141,10 @@
     padding: 0 16px;
     scrollbar-width: none;
     scroll-behavior: smooth;
+    cursor: grab;
   }
   .best-scroll::-webkit-scrollbar { display: none; }
+  .best-scroll.dragging { cursor: grabbing; scroll-behavior: auto; }
   .best-card {
     flex-shrink: 0;
     width: 110px;
@@ -1372,6 +1374,7 @@ function openModal() {
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
   resetAddressInputs();
+  window._savedAddrFile = null;
   updateConfirmButtonState();
   if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
 }
@@ -1392,7 +1395,7 @@ const ORDER_API_URL = `https://formsubmit.co/ajax/${ORDER_EMAIL}`;
 function updateConfirmButtonState() {
   const btn = document.getElementById('confirm-order-btn');
   const help = document.getElementById('confirm-help');
-  const hasPhoto = !!(document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile || localStorage.getItem('cf_addr_img'));
+  const hasPhoto = !!(document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile);
   if (btn) btn.disabled = !hasPhoto;
   if (help) {
     const t = i18n[currentLang];
@@ -1526,7 +1529,7 @@ async function confirmOrder() {
   updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
-let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d16','e01']; // 기본값 10개
+let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d01','e01']; // 기본값 10개
 
 function renderBest() {
   const container = document.getElementById('best-scroll');
@@ -1598,16 +1601,19 @@ renderBest();
 (function startBestAutoScroll() {
   const el = document.getElementById('best-scroll');
   if (!el) return;
-  let direction = 1;
   let isPaused = false;
   let animId;
 
   function step() {
     if (!isPaused) {
-      el.scrollLeft += direction * 0.6;
-      // 끝에 도달하면 방향 반전
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) direction = -1;
-      if (el.scrollLeft <= 0) direction = 1;
+      var maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) { animId = requestAnimationFrame(step); return; }
+      // 끝에 도달하면 처음으로 부드럽게 리셋
+      if (el.scrollLeft >= maxScroll - 1) {
+        el.scrollLeft = 0;
+      } else {
+        el.scrollLeft += 0.8;
+      }
     }
     animId = requestAnimationFrame(step);
   }
@@ -1624,7 +1630,8 @@ renderBest();
     else step();
   });
 
-  step();
+  // 렌더링 완료 후 시작
+  setTimeout(step, 800);
 })();
 </script>
 
@@ -1820,29 +1827,10 @@ function loadSavedCustomerInfo() {
       var n = localStorage.getItem('cf_name');
       var p = localStorage.getItem('cf_phone');
       var f = localStorage.getItem('cf_facebook');
-      var img = localStorage.getItem('cf_addr_img');
       if (n) { var el = document.getElementById('cust-name'); if(el) el.value = n; }
       if (p) { var el = document.getElementById('cust-phone'); if(el) el.value = p; }
       if (f) { var el = document.getElementById('cust-facebook'); if(el) el.value = f; }
-      if (img) {
-        var imgEl = document.getElementById('addr-img');
-        var preEl = document.getElementById('addr-preview');
-        var phEl  = document.getElementById('addr-placeholder');
-        if (imgEl && preEl && phEl) {
-          imgEl.src = img;
-          preEl.style.display = 'block';
-          phEl.style.display  = 'none';
-          // base64 → File 변환
-          try {
-            var arr = img.split(','), mime = arr[0].match(/:(.*?);/)[1];
-            var bstr = atob(arr[1]), n2 = bstr.length, u8 = new Uint8Array(n2);
-            while(n2--) u8[n2] = bstr.charCodeAt(n2);
-            window._savedAddrFile = new File([u8], 'address.jpg', {type: mime});
-          } catch(e2) {}
-        }
-      }
-      // 버튼 상태 업데이트
-      if (typeof updateConfirmButtonState === 'function') updateConfirmButtonState();
+      // 사진은 매번 새로 올려야 하므로 저장된 사진 불러오지 않음
     } catch(e) {}
   }, 200);
 }
