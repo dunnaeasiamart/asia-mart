@@ -1,0 +1,22 @@
+{
+  "name": "둔내아시아마트",
+  "short_name": "AsiaMart",
+  "description": "Dunnaeasiamart Online Order",
+  "start_url": "/asia-mart/",
+  "display": "standalone",
+  "background_color": "#faf9f6",
+  "theme_color": "#1a1814",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://dunnaeasiamart.github.io/asia-mart/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://dunnaeasiamart.github.io/asia-mart/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
