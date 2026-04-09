@@ -1458,15 +1458,14 @@ async function sendOrderByEmail(payload) {
 
 async function confirmOrder() {
   const t = i18n[currentLang];
-  const name  = document.getElementById('cust-name')?.value.trim();
-  const phone = document.getElementById('cust-phone')?.value.trim();
+  const name     = document.getElementById('cust-name')?.value.trim();
+  const phone    = document.getElementById('cust-phone')?.value.trim();
   const facebook = document.getElementById('cust-facebook')?.value.trim();
-  const note = document.getElementById('cust-note')?.value.trim();
-  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || null;
+  const note     = document.getElementById('cust-note')?.value.trim();
+  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile || null;
 
   if (!name) { alert(t.alert_fill); return; }
   if (!phone && !facebook) { alert(t.alert_contact); return; }
-  if (!photoFile) { alert('Please upload address photo first.'); return; }
 
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
@@ -1478,28 +1477,51 @@ async function confirmOrder() {
     return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
-  const msg = `🛒 New Order\n\n👤 Name: ${name}${phone ? '\n📞 Phone: ' + phone : ''}${facebook ? '\n📘 Facebook: ' + facebook : ''}${note ? '\n📝 Note: ' + note : ''}\n\n${lines}\n\n💰 Total: ${fmt(grand)}\n📸 Address photo attached`;
+  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n💵 현장결제${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
+
+  const TG_TOKEN = '8407483229:AAFapLvbJybVGqtLyo55EVsLIRZCCbieKk0';
+  const TG_CHAT  = '8626199213';
+  const apiBase  = `https://api.telegram.org/bot${TG_TOKEN}`;
 
   try {
-    await sendOrderByEmail({ name, text: msg, photoFile });
-  } catch (e) {
-    console.error('Email order error:', e);
-    alert('Email order is not connected yet. Please contact the store.');
-    return;
+    if (photoFile) {
+      const form = new FormData();
+      form.append('chat_id', TG_CHAT);
+      form.append('photo', photoFile);
+      form.append('caption', msg);
+      await fetch(`${apiBase}/sendPhoto`, { method: 'POST', body: form });
+    } else {
+      await fetch(`${apiBase}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT, text: msg })
+      });
+    }
+  } catch(e) {
+    console.error('Telegram error:', e);
   }
+
+  // 페이스북 메신저 연결
+  const fbMsg = encodeURIComponent(`Hi! I just placed an order on Asia Mart. Name: ${name}`);
+  const fbUrl = `https://m.me/korea.happy.store?text=${fbMsg}`;
 
   const body = document.getElementById('modal-body');
   body.innerHTML = `
     <div style="text-align:center;padding:32px 16px;">
       <div style="font-size:48px;margin-bottom:16px;">✅</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Order Sent</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">Your order has been sent successfully.</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${t.order_done_title}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">${t.order_done_desc}</div>
       <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:13px;color:#1a1814;">We will check the email and contact you soon.</div>
+        <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t.order_done_fb}</div>
+        <a href="${fbUrl}" target="_blank" style="display:inline-block;background:#0084ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">📘 Facebook Messenger</a>
       </div>
       <button onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">닫기 / Close</button>
     </div>
   `;
+
+  // 수량 초기화
+  Object.keys(quantities).forEach(id => quantities[id] = 0);
+  updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['a1','b25','c15','c19','d16']; // 기본값
@@ -1775,6 +1797,66 @@ document.addEventListener('click', function(e) {
     loadSavedCustomerInfo();
   }
 });
+
+// ===== PWA =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/asia-mart/sw.js').catch(function() {});
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (localStorage.getItem('pwa_installed')) return;
+  setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt || document.getElementById('pwa-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1814;color:#fff;padding:12px 16px;border-radius:14px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:340px;width:90%;';
+  banner.innerHTML = `
+    <div style="font-size:26px;">🛒</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;margin-bottom:2px;">홈 화면에 추가</div>
+      <div style="font-size:11px;opacity:0.65;">ສ້າງທາງລັດ / สร้างทางลัด / Add shortcut</div>
+    </div>
+    <button onclick="installPWA()" style="background:#c84b2f;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
+    <button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:#fff;opacity:0.4;font-size:20px;cursor:pointer;padding:0;">×</button>
+  `;
+  document.body.appendChild(banner);
+  setTimeout(function() { if (banner.parentNode) banner.remove(); }, 10000);
+}
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(result) {
+    if (result.outcome === 'accepted') localStorage.setItem('pwa_installed', '1');
+    deferredPrompt = null;
+    var b = document.getElementById('pwa-banner');
+    if (b) b.remove();
+  });
+}
+
+// iOS Safari 안내
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone && !localStorage.getItem('pwa_installed')) {
+  setTimeout(function() {
+    var banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1814;color:#fff;padding:14px 18px;border-radius:14px;font-size:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:340px;width:90%;';
+    banner.innerHTML = `
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;">📱 홈 화면에 Asia Mart 추가</div>
+      <div style="opacity:0.75;margin-bottom:4px;line-height:1.6;">ສ້າງທາງລັດໃສ່ໜ້າຈໍ / สร้างทางลัด / Add to Home Screen</div>
+      <div style="opacity:0.6;font-size:11px;">Safari 하단 공유버튼(□↑) → 홈 화면에 추가</div>
+      <button onclick="this.closest('div').remove();localStorage.setItem('pwa_installed','1')" style="margin-top:10px;background:#c84b2f;border:none;color:#fff;padding:6px 20px;border-radius:8px;font-size:12px;cursor:pointer;">확인</button>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(function() { if (banner.parentNode) banner.remove(); }, 10000);
+  }, 3000);
+}
 </script>
 </body>
 </html>
