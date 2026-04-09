@@ -498,21 +498,8 @@
     transition: opacity 0.15s;
   }
   .confirm-btn:hover { opacity: 0.9; }
-  .confirm-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  .confirm-help {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-  }
-  .confirm-help.ready {
-    color: var(--success);
-    font-weight: 600;
-  }
+  .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .confirm-btn:disabled:hover { opacity: 0.45; }
   .empty-cart { text-align: center; color: var(--muted); padding: 32px 0; font-size: 14px; }
 
   /* Customer info */
@@ -625,7 +612,6 @@ const i18n = {
     confirm_btn: 'Place Order', grand_total: 'Total',
     alert_fill: 'Please enter your name.',
     alert_contact: 'Please enter at least your phone number or Facebook name.',
-    alert_addr: 'Please upload an address photo.',
     order_done_title: 'Order Placed!',
     order_done_desc: 'We received your order. Please message us on Facebook to confirm.',
     order_done_fb: '📘 Tap below to send us a message on Facebook Messenger',
@@ -663,7 +649,6 @@ const i18n = {
     confirm_btn: 'ยืนยันคำสั่งซื้อ', grand_total: 'ยอดรวม',
     alert_fill: 'กรุณากรอกชื่อ',
     alert_contact: 'กรุณากรอกเบอร์โทรหรือชื่อ Facebook อย่างน้อยหนึ่งอย่าง',
-    alert_addr: 'กรุณาอัปโหลดรูปที่อยู่',
     order_done_title: 'สั่งซื้อสำเร็จ!',
     order_done_desc: 'เราได้รับคำสั่งซื้อของคุณแล้ว กรุณาส่งข้อความมาที่ Facebook เพื่อยืนยัน',
     order_done_fb: '📘 แตะด้านล่างเพื่อส่งข้อความหาเราทาง Facebook Messenger',
@@ -701,7 +686,6 @@ const i18n = {
     confirm_btn: '주문 완료하기', grand_total: '합계',
     alert_fill: '이름을 입력해 주세요.',
     alert_contact: '전화번호 또는 페이스북 중 하나는 입력해 주세요.',
-    alert_addr: '주소 이미지를 업로드해 주세요.',
     order_done_title: '주문 완료!',
     order_done_desc: '주문을 받았어요. 페이스북으로 메시지를 보내 확인해 주세요.',
     order_done_fb: '📘 아래를 눌러 페이스북 메신저로 연락해 주세요',
@@ -739,7 +723,6 @@ const i18n = {
     confirm_btn: 'ຢືນຢັນຄຳສັ່ງຊື້', grand_total: 'ລວມ',
     alert_fill: 'ກະລຸນາໃສ່ຊື່',
     alert_contact: 'ກະລຸນາໃສ່ເບີໂທ ຫຼື ຊື່ Facebook ຢ່າງໜ້ອຍໜຶ່ງຢ່າງ',
-    alert_addr: 'ກະລຸນາອັບໂຫລດຮູບທີ່ຢູ່',
     order_done_title: 'ສັ່ງຊື້ສຳເລັດ!',
     order_done_desc: 'ພວກເຮົາໄດ້ຮັບຄຳສັ່ງຊື້ຂອງທ່ານແລ້ວ ກະລຸນາສົ່ງຂໍ້ຄວາມ Facebook ເພື່ອຢືນຢັນ',
     order_done_fb: '📘 ແຕະດ້ານລຸ່ມເພື່ອສົ່ງຂໍ້ຄວາມຫາພວກເຮົາທາງ Facebook Messenger',
@@ -782,7 +765,6 @@ function setLang(lang) {
   renderTab(currentTab);
   renderBest();
   updateSummary();
-  if (typeof updateConfirmButtonState === 'function') updateConfirmButtonState();
 }
 
 /* =====================================================
@@ -1382,15 +1364,17 @@ function openModal() {
         </div>
       </div>
       <button class="confirm-btn" id="confirm-order-btn" onclick="confirmOrder()" disabled>${t.confirm_btn}</button>
-      <div class="confirm-help" id="confirm-help">${t.confirm_wait_addr}</div>
+      <div id="confirm-help" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">Place Order will activate after you upload an address photo.</div>
     `;
   }
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  resetAddressInputs();
   if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
-  if (typeof updateConfirmButtonState === 'function') updateConfirmButtonState();
+  updateConfirmButtonState();
 }
+
 
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
@@ -1401,18 +1385,36 @@ function closeOnOverlay(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-const ORDER_API_URL = window.ORDER_API_URL || 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/api/order';
+const ORDER_EMAIL = 'dunnaeasiamart@proton.me';
+const ORDER_API_URL = `https://formsubmit.co/ajax/${ORDER_EMAIL}`;
 
 function updateConfirmButtonState() {
   const btn = document.getElementById('confirm-order-btn');
   const help = document.getElementById('confirm-help');
   const hasPhoto = !!(document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0]);
-  const t = i18n[currentLang] || i18n.en;
   if (btn) btn.disabled = !hasPhoto;
   if (help) {
-    help.textContent = hasPhoto ? t.confirm_ready : t.confirm_wait_addr;
-    help.classList.toggle('ready', hasPhoto);
+    help.textContent = hasPhoto ? 'Ready to place order.' : 'Please upload address photo first.';
+    help.style.color = hasPhoto ? 'var(--success)' : 'var(--muted)';
   }
+}
+
+function previewAddr(input) {
+  const file = input.files[0];
+  if (!file) {
+    updateConfirmButtonState();
+    return;
+  }
+  const otherId = input.id === 'addr-camera' ? 'addr-gallery' : 'addr-camera';
+  document.getElementById(otherId).value = '';
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('addr-img').src = e.target.result;
+    document.getElementById('addr-preview').style.display = 'block';
+    document.getElementById('addr-placeholder').style.display = 'none';
+    updateConfirmButtonState();
+  };
+  reader.readAsDataURL(file);
 }
 
 function resetAddressInputs() {
@@ -1429,22 +1431,26 @@ function resetAddressInputs() {
   updateConfirmButtonState();
 }
 
-async function sendOrderToServer(payload) {
-  if (!ORDER_API_URL || ORDER_API_URL.includes('YOUR-WORKER-NAME')) {
-    throw new Error('ORDER_API_URL is not configured');
-  }
-
+async function sendOrderByEmail(payload) {
   const form = new FormData();
-  form.append('text', payload.text);
-  if (payload.photoFile) form.append('photo', payload.photoFile);
+  form.append('name', payload.name || 'Asia Mart Customer');
+  form.append('email', ORDER_EMAIL);
+  form.append('_subject', 'Asia Mart New Order');
+  form.append('_captcha', 'false');
+  form.append('_template', 'table');
+  form.append('message', payload.text);
+  if (payload.photoFile) {
+    form.append('attachment', payload.photoFile, payload.photoFile.name || 'address-photo.jpg');
+  }
 
   const response = await fetch(ORDER_API_URL, {
     method: 'POST',
-    body: form
+    body: form,
+    headers: { 'Accept': 'application/json' }
   });
 
   if (!response.ok) {
-    throw new Error(`Order API failed: ${response.status}`);
+    throw new Error(`Email order failed: ${response.status}`);
   }
 
   return response.json().catch(() => ({}));
@@ -1453,16 +1459,15 @@ async function sendOrderToServer(payload) {
 async function confirmOrder() {
   const t = i18n[currentLang];
   const name  = document.getElementById('cust-name')?.value.trim();
-  const phone    = document.getElementById('cust-phone')?.value.trim();
+  const phone = document.getElementById('cust-phone')?.value.trim();
   const facebook = document.getElementById('cust-facebook')?.value.trim();
-  const note     = document.getElementById('cust-note')?.value.trim();
+  const note = document.getElementById('cust-note')?.value.trim();
   const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || null;
 
   if (!name) { alert(t.alert_fill); return; }
   if (!phone && !facebook) { alert(t.alert_contact); return; }
-  if (!photoFile) { alert(t.alert_addr); return; }
+  if (!photoFile) { alert('Please upload address photo first.'); return; }
 
-  // 주문 내역 텍스트 작성
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
   let grand = 0;
@@ -1473,35 +1478,29 @@ async function confirmOrder() {
     return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
-  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n💵 현장결제${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
+  const msg = `🛒 New Order\n\n👤 Name: ${name}${phone ? '\n📞 Phone: ' + phone : ''}${facebook ? '\n📘 Facebook: ' + facebook : ''}${note ? '\n📝 Note: ' + note : ''}\n\n${lines}\n\n💰 Total: ${fmt(grand)}\n📸 Address photo attached`;
 
   try {
-    await sendOrderToServer({ text: msg, photoFile });
+    await sendOrderByEmail({ name, text: msg, photoFile });
   } catch (e) {
-    console.error('Order API error:', e);
-    alert('Order server is not connected yet. Please contact the store.');
+    console.error('Email order error:', e);
+    alert('Email order is not connected yet. Please contact the store.');
     return;
   }
 
-  // 주문 완료 화면 표시
-  const t2 = i18n[currentLang];
   const body = document.getElementById('modal-body');
   body.innerHTML = `
     <div style="text-align:center;padding:32px 16px;">
       <div style="font-size:48px;margin-bottom:16px;">✅</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${t2.order_done_title}</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">${t2.order_done_desc}</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Order Sent</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">Your order has been sent successfully.</div>
       <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t2.order_done_fb}</div>
-        <a href="https://m.me/KoSeungHee?text=Hi!%20I%20just%20placed%20an%20order%20on%20Asia%20Mart.%0AName%3A%20${encodeURIComponent(name)}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#1877f2;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-weight:700;font-size:14px;">
-          📘 Message Ko Seung Hee
-        </a>
+        <div style="font-size:13px;color:#1a1814;">We will check the email and contact you soon.</div>
       </div>
       <button onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">닫기 / Close</button>
     </div>
   `;
 }
-
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['a1','b25','c15','c19','d16']; // 기본값
 
@@ -1750,7 +1749,6 @@ if (isIOS() && !isInStandaloneMode()) {
 }
 
 // ===== 주문 폼 자동저장 =====
-// 입력 시 자동저장 (event delegation)
 document.addEventListener('input', function(e) {
   try {
     if (e.target.id === 'cust-name') localStorage.setItem('cf_name', e.target.value);
@@ -1759,18 +1757,6 @@ document.addEventListener('input', function(e) {
   } catch(ex) {}
 });
 
-// 주소 이미지는 매 주문마다 새로 입력
-var _origPreviewAddr = previewAddr;
-function previewAddr(input) {
-  _origPreviewAddr(input);
-  try { localStorage.removeItem('cf_addr_img'); } catch(ex) {}
-  window._savedAddrFile = null;
-  setTimeout(function() {
-    updateConfirmButtonState();
-  }, 0);
-}
-
-// 저장된 값 불러오기 - openModal 이후 호출
 function loadSavedCustomerInfo() {
   setTimeout(function() {
     try {
@@ -1780,26 +1766,10 @@ function loadSavedCustomerInfo() {
       if (n) { var el = document.getElementById('cust-name'); if(el) el.value = n; }
       if (p) { var el = document.getElementById('cust-phone'); if(el) el.value = p; }
       if (f) { var el = document.getElementById('cust-facebook'); if(el) el.value = f; }
-
-      // 주소 이미지는 항상 새로 받기
-      window._savedAddrFile = null;
-      try { localStorage.removeItem('cf_addr_img'); } catch(ex) {}
-      resetAddressInputs();
     } catch(e) {}
   }, 150);
 }
 
-
-// 주소 사진 선택 시 Place Order 버튼 상태 즉시 갱신
-window.addEventListener('change', function(e) {
-  if (e.target && (e.target.id === 'addr-camera' || e.target.id === 'addr-gallery')) {
-    setTimeout(function() {
-      updateConfirmButtonState();
-    }, 0);
-  }
-});
-
-// 주문버튼 클릭 후 자동으로 저장된 정보 불러오기
 document.addEventListener('click', function(e) {
   if (e.target.classList.contains('order-btn') || e.target.classList.contains('header-cart') || e.target.closest('.header-cart')) {
     loadSavedCustomerInfo();
