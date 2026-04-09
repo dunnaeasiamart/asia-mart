@@ -2963,7 +2963,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             <th>기타</th>
             <th>등록일</th>
             <th>문자</th>
-            <th>삭제</th>
+            <th>관리</th>
           </tr></thead>
           <tbody id="customer-tbody"></tbody>
         </table>
@@ -3033,27 +3033,38 @@ function sendSMS(phone, name) {
 function sendBulkSMS() {
   const msg = document.getElementById('bulk-sms-msg').value.trim();
   if (!msg) { alert('문자 내용을 입력해주세요.'); return; }
+
   const checked = document.querySelectorAll('.cust-check:checked');
-  if (checked.length === 0) {
-    // 전체 고객에게
-    const all = document.querySelectorAll('.cust-check');
-    if (all.length === 0) { alert('등록된 고객이 없습니다.'); return; }
-    if (!confirm(`전체 ${all.length}명에게 문자를 보낼까요?`)) return;
-    all.forEach((cb, i) => {
+  const targets = checked.length > 0
+    ? Array.from(checked)
+    : Array.from(document.querySelectorAll('.cust-check'));
+
+  if (targets.length === 0) { alert('등록된 고객이 없습니다.'); return; }
+  if (!confirm(`${targets.length}명에게 순서대로 문자를 보낼게요.\n한 명씩 문자앱이 열립니다.`)) return;
+
+  let i = 0;
+  function sendNext() {
+    if (i >= targets.length) {
+      showToast(`✅ ${targets.length}명 완료!`);
+      return;
+    }
+    const cb = targets[i];
+    const phone = cb.dataset.phone;
+    const name = cb.dataset.name;
+    const body = encodeURIComponent(msg);
+    window.location.href = `sms:${phone}?body=${body}`;
+    i++;
+    if (i < targets.length) {
       setTimeout(() => {
-        const body = encodeURIComponent(msg);
-        window.open(`sms:${cb.dataset.phone}?body=${body}`);
-      }, i * 1000);
-    });
-  } else {
-    if (!confirm(`선택된 ${checked.length}명에게 문자를 보낼까요?`)) return;
-    checked.forEach((cb, i) => {
-      setTimeout(() => {
-        const body = encodeURIComponent(msg);
-        window.open(`sms:${cb.dataset.phone}?body=${body}`);
-      }, i * 1000);
-    });
+        if (confirm(`(${i}/${targets.length}) 다음: ${targets[i].dataset.name}에게 문자 보내기`)) {
+          sendNext();
+        }
+      }, 1500);
+    } else {
+      setTimeout(() => showToast(`✅ ${targets.length}명 완료!`), 1500);
+    }
   }
+  sendNext();
 }
 
 function toggleSelectAll(cb) {
@@ -3126,16 +3137,45 @@ async function loadCustomers() {
   tbody.innerHTML = '';
   Object.entries(data).sort((a,b) => b[1].date - a[1].date).forEach(([key, c]) => {
     const date = new Date(c.date).toLocaleDateString('ko-KR');
-    tbody.innerHTML += `<tr>
+    tbody.innerHTML += `<tr id="row-${key}">
       <td style="padding:10px 12px;"><input type="checkbox" class="cust-check" data-phone="${c.phone}" data-name="${c.name}"></td>
-      <td>${c.name}</td>
-      <td>${c.phone || '-'}</td>
-      <td>${c.note || ''}</td>
+      <td id="name-${key}">${c.name}</td>
+      <td id="phone-${key}">${c.phone || '-'}</td>
+      <td id="note-${key}">${c.note || ''}</td>
       <td style="color:#aaa;font-size:12px;">${date}</td>
       <td><button class="btn-del" style="color:#1877f2;border-color:#1877f2;" onclick="sendSMS('${c.phone}','${c.name}')">📱 문자</button></td>
-      <td><button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button></td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn-del" style="color:#f59e0b;border-color:#f59e0b;" onclick="editCustomer('${key}','${c.name}','${c.phone}','${c.note||''}')">✏️ 수정</button>
+        <button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button>
+      </td>
     </tr>`;
   });
+}
+
+function editCustomer(key, name, phone, note) {
+  const row = document.getElementById('row-' + key);
+  row.innerHTML = `
+    <td style="padding:6px 8px;"><input type="checkbox" class="cust-check"></td>
+    <td><input type="text" value="${name}" id="edit-name-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td><input type="tel" value="${phone}" id="edit-phone-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td><input type="text" value="${note}" id="edit-note-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td></td>
+    <td></td>
+    <td style="display:flex;gap:4px;">
+      <button class="btn-del" style="color:#2d7a4f;border-color:#2d7a4f;" onclick="saveCustomer('${key}')">💾 저장</button>
+      <button class="btn-del" onclick="loadCustomers()">취소</button>
+    </td>
+  `;
+}
+
+async function saveCustomer(key) {
+  const name = document.getElementById('edit-name-' + key).value.trim();
+  const phone = document.getElementById('edit-phone-' + key).value.trim();
+  const note = document.getElementById('edit-note-' + key).value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); return; }
+  await db.ref('customers/' + key).update({ name, phone, note });
+  loadCustomers();
+  showToast('✅ 수정 완료!');
 }
 
 async function saveAll() {
