@@ -766,7 +766,9 @@ function setLang(lang) {
 
   // Re-render current tab to update product names
   renderTab(currentTab);
-  renderBest();
+  renderTab(currentTab);
+updateSummary();
+renderBest();
   updateSummary();
 }
 
@@ -1595,11 +1597,9 @@ function updateBestCard(id) {
   if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
 }
 
-renderTab(currentTab);
-updateSummary();
 renderBest();
 
-// 베스트 상품 자동 슬라이드 (좌우 왕복)
+// 베스트 상품 자동 슬라이드
 (function startBestAutoScroll() {
   const el = document.getElementById('best-scroll');
   if (!el) return;
@@ -1610,8 +1610,10 @@ renderBest();
 
   function step() {
     if (!document.body.contains(el)) return;
+
     if (!isPaused) {
-      const maxScroll = el.scrollWidth - el.clientWidth;
+      const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+
       if (maxScroll > 0) {
         el.scrollLeft += speed * direction;
 
@@ -1624,6 +1626,7 @@ renderBest();
         }
       }
     }
+
     animId = requestAnimationFrame(step);
   }
 
