@@ -108,7 +108,111 @@
   .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 44px); line-height: 1.2; margin-bottom: 12px; }
   .hero p { font-size: 14px; color: #aaa; max-width: 400px; margin: 0 auto; }
 
-  /* CATEGORY TABS */
+  /* BEST PRODUCTS */
+  .best-section {
+    background: var(--surface);
+    padding: 16px 0 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .best-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+  .best-title {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .best-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 16px;
+    scrollbar-width: none;
+  }
+  .best-scroll::-webkit-scrollbar { display: none; }
+  .best-card {
+    flex-shrink: 0;
+    width: 110px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .best-card:active { transform: scale(0.97); }
+  .best-card.has-qty {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .best-card-img {
+    width: 100%;
+    height: 90px;
+    object-fit: contain;
+    background: #fff;
+    padding: 4px;
+  }
+  .best-card-img-emoji {
+    width: 100%;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    background: #fff;
+  }
+  .best-card-body {
+    padding: 8px;
+  }
+  .best-card-name {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .best-card-price {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .best-card-qty {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .best-qty-btn {
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .best-qty-val {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+  }
   .tabs-wrap {
     position: sticky;
     top: 60px;
@@ -435,6 +539,13 @@
   </div>
 </div>
 
+<div class="best-section" id="best-section">
+  <div class="best-header">
+    <div class="best-title">🔥 <span data-t="best_title">Best Products</span></div>
+  </div>
+  <div class="best-scroll" id="best-scroll"></div>
+</div>
+
 <div class="tabs-wrap">
   <div class="tabs">
     <button class="tab active" onclick="switchTab(this,'frozen')" data-t="cat_frozen">🧊 A Frozen Food</button>
@@ -442,6 +553,7 @@
     <button class="tab" onclick="switchTab(this,'sauce')" data-t="cat_sauce">🥫 C Sauces</button>
     <button class="tab" onclick="switchTab(this,'other')" data-t="cat_other">🧃 D Drinks & More</button>
     <button class="tab" onclick="switchTab(this,'essentials')" data-t="cat_essentials">🧴 E Daily Essentials</button>
+    <button class="tab" onclick="switchTab(this,'veggie')" data-t="cat_veggie" style="display:none;">🥬 F 농산물</button>
   </div>
 </div>
 
@@ -476,9 +588,11 @@ const i18n = {
   en: {
     cart: 'Cart', hero_title: 'Authentic Asian<br>Online Order',
     hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
+    best_title: 'Best Products',
     cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
     cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks & More',
     cat_essentials: '🧴 E Daily Essentials',
+    cat_veggie: '🥬 F Vegetables & Produce',
     total_label: 'Total', select_items: 'Please select items',
     order_btn: 'Order Now →', order_confirm: 'Order Summary',
     items_selected: (n) => `${n} item(s) selected`,
@@ -511,9 +625,11 @@ const i18n = {
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
     hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
+    best_title: 'สินค้าขายดี',
     cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
     cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม & อื่นๆ',
     cat_essentials: '🧴 E สินค้าอุปโภค',
+    cat_veggie: '🥬 F ผักและผลไม้',
     total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
     order_btn: 'สั่งซื้อเลย →', order_confirm: 'สรุปคำสั่งซื้อ',
     items_selected: (n) => `เลือก ${n} รายการ`,
@@ -546,9 +662,11 @@ const i18n = {
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
     hero_desc: '수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!',
+    best_title: '베스트 상품',
     cat_frozen: '🧊 A 냉동음식', cat_noodle: '🍜 B 면 종류',
     cat_sauce: '🥫 C 각종 소스', cat_other: '🧃 D 음료 및 기타',
     cat_essentials: '🧴 E 생활용품',
+    cat_veggie: '🥬 F 농산물/채소',
     total_label: '합계 금액', select_items: '상품을 선택해 주세요',
     order_btn: '주문하기 →', order_confirm: '주문 확인',
     items_selected: (n) => `${n}종류 선택됨`,
@@ -620,7 +738,7 @@ const catalog = {
   frozen: {
     label: { en: 'A Frozen Food', th: 'A อาหารแช่แข็ง', ko: 'A 냉동음식' },
     emoji: '🧊',
-    items: [      { id:'a1', name_en:'A1. Shrimp Ball 500g', name_ko:'A1. 새우볼 500g', name_th:'A1. ลูกชิ้นกุ้ง 500g',         emoji:'🧊', image:'https://asia-mart.co.kr/web/product/big/202008/98a1988761568a55ad1a27dad976aaa0.jpg', price1:5900, price2:11300, price3:16000 },
+    items: [      { id:'a1', name_en:'A1. Shrimp Ball 500g', name_ko:'A1. 새우볼 500g', name_th:'A1. ลูกชิ้นกุ้ง 500g',         emoji:'🦐', image:'https://asia-mart.co.kr/web/product/big/202008/98a1988761568a55ad1a27dad976aaa0.jpg', price1:5900, price2:11300, price3:16000 },
       { id:'a2', name_en:'A2. Beef Meatball 320g', name_ko:'A2. 소고기미트볼 320g', name_th:'A2. ลูกชิ้นเนื้อวัว 320g',            emoji:'🧊', image:'https://asia-mart.co.kr/web/product/big/asiamart_1622.jpg', price1:5500, price2:10500,  price3:14900 },
       { id:'a3', name_en:'A3. Pork Meatball 320g', name_ko:'A3. 돼지고기미트볼 320g', name_th:'A3. ลูกชิ้นหมู 320g',            emoji:'🧊', image:'https://asia-mart.co.kr/web/product/big/asiamart_2009.jpg', price1:5500, price2:10500,  price3:14900 },
       { id:'a4', name_en:'A4. Pig Tail 700g', name_ko:'A4. 돼지꼬리 700g', name_th:'A4. หางหมู 700g',              emoji:'🧊', image:'https://shop-phinf.pstatic.net/20250318_12/1742281338075T8Fca_JPEG/30174834161806932_1330891970.jpg?type=m1000_pd', price1:4900, price2:9400,  price3:13300 },
@@ -696,11 +814,11 @@ const catalog = {
       { id:'c12', name_en:'C12. Magi Dipping Sauce 200ml', name_ko:'C12. 마기 딥핑소스 200ml', name_th:'C12. ซอสจิ้มมากี 200ml',            emoji:'🥫', image:'https://storage.tally.so/5af67a78-3f08-429d-8245-6b954c546ef9/hoejeon-magidipingsoseu.png', price1:3400, price2:6500,  price3:9200 },
       { id:'c13', name_en:'C13. KHONKAEN Fish Sauce 400ml', name_ko:'C13. KHONKAEN 피시소스 400ml', name_th:'C13. น้ำปลา KHONKAEN 400ml',           emoji:'🥫', image:'https://storage.tally.so/111ab886-140f-47fa-b9f8-08b15073205d/hoejeon-KHONKAEN.png', price1:3500, price2:6700,  price3:9500 },
       { id:'c14', name_en:'C14. ZAB MIKE Fish Sauce 330ml', name_ko:'C14. ZAB MIKE 피시소스 330ml', name_th:'C14. น้ำปลา ZAB MIKE 330ml',           emoji:'🥫', image:'https://storage.tally.so/88c6eaa0-8106-4398-832c-c497662872e0/hoejeon-jabmaikeu.png', price1:3900, price2:7500,  price3:10600 },
-      { id:'c15', name_en:'C15. Megachef Fish Sauce 700ml', name_ko:'C15. 메가쉐프 피시소스 700ml', name_th:'C15. น้ำปลา Megachef 700ml',      emoji:'🥫', image:'https://storage.tally.so/a4064b85-26df-480b-85e0-8d290c1885d4/hoejeon-megaswepeu-piswisoseu.png', price1:5900, price2:11300, price3:16000 },
+      { id:'c15', name_en:'C15. Megachef Fish Sauce 700ml', name_ko:'C15. 메가쉐프 피시소스 700ml', name_th:'C15. น้ำปลา Megachef 700ml',      emoji:'🐟', image:'https://storage.tally.so/a4064b85-26df-480b-85e0-8d290c1885d4/hoejeon-megaswepeu-piswisoseu.png', price1:5900, price2:11300, price3:16000 },
       { id:'c16', name_en:'C16. Tamarind Paste Sauce 300g', name_ko:'C16. 타마린드 페이스트 300g', name_th:'C16. น้ำมะขามเปียก 300g',      emoji:'🥫', image:'https://storage.tally.so/002249bf-e837-471d-8872-8db8fa91e786/hoejeon-tamarinpeiseuteu.png', price1:2900, price2:5600,  price3:7900 },
       { id:'c17', name_en:'C17. Hot Spice SUKI Sauce 342g', name_ko:'C17. 핫스파이스 수키소스 342g', name_th:'C17. ซอสสุกี้ฮอตสไปซ์ 342g',     emoji:'🥫', image:'https://storage.tally.so/70bf641c-368a-416d-a594-4eb362ba77ba/hoejeon-hasseupaiseu-suggisoseu.png', price1:5400, price2:10300, price3:14600 },
       { id:'c18', name_en:'C18. Pantai Sweet Chili Sauce 342g', name_ko:'C18. 판타이 스위트칠리소스 342g', name_th:'C18. ซอสพริกหวาน Pantai 342g',  emoji:'🥫', image:'https://storage.tally.so/cfd0e3ec-5f67-46d4-b778-fb6eb9ebd9f9/hoejeon-seuwiteucilripocikin.png', price1:3900, price2:7500,  price3:10600 },
-      { id:'c19', name_en:'C19. Nam Prik Pao 513g', name_ko:'C19. 남프릭파우 513g', name_th:'C19. น้ำพริกเผา 513g',              emoji:'🥫', image:'https://storage.tally.so/65c089f5-1535-4f6c-9052-4fa74bd50def/hoejeon-mepeuranom-nampigpau.png', price1:8900, price2:17000, price3:24100 },
+      { id:'c19', name_en:'C19. Nam Prik Pao 513g', name_ko:'C19. 남프릭파우 513g', name_th:'C19. น้ำพริกเผา 513g',              emoji:'🌶️', image:'https://storage.tally.so/65c089f5-1535-4f6c-9052-4fa74bd50def/hoejeon-mepeuranom-nampigpau.png', price1:8900, price2:17000, price3:24100 },
       { id:'c20', name_en:'C20. Sour Curry Paste 100g', name_ko:'C20. 사워커리 페이스트 100g', name_th:'C20. เครื่องแกงส้ม 100g',          emoji:'🥫', image:'https://storage.tally.so/f0113ad6-477f-4c0b-a609-98deadda0fc8/hoejeon-keori-saueo.png', price1:1800, price3:4900,  price5:8000 },
       { id:'c21', name_en:'C21. Nam Ya Curry Paste 100g', name_ko:'C21. 남야커리 페이스트 100g', name_th:'C21. เครื่องแกงนัมยา 100g',        emoji:'🥫', image:'https://storage.tally.so/cbcd7c69-12fc-4a86-a0c0-70391ae9ba03/hoejeon-keori-namya.png', price1:1800, price3:4900,  price5:8000 },
       { id:'c22', name_en:'C22. Country Style Red Curry Paste 100g', name_ko:'C22. 컨트리 레드커리 페이스트 100g', name_th:'C22. เครื่องแกงเผ็ดแดงชนบท 100g', emoji:'🥫', image:'https://storage.tally.so/d78464ac-00f1-4dc7-8779-08420fc9f8b4/hoejeon-keori-keoncyuri.png', price1:1800, price3:4900, price5:8000 },
@@ -725,6 +843,66 @@ const catalog = {
       { id:'c39', name_en:'C39. Chicken Cube 20g', name_ko:'C39. 치킨큐브 20g', name_th:'C39. ก้อนซุปไก่ 20g', emoji:'🍗', image:'https://www.yejoo153.co.kr/data/file/b0301/thumb-2949830214_gnvwPKu7_070038836aa95bdc545c743b427f8ce7d5e54cd8_498x498.jpg', price1:800, price2:1600, price3:2200 },
       { id:'c40', name_en:'C40. Pork Cube 20g', name_ko:'C40. 포크큐브 20g', name_th:'C40. ก้อนซุปหมู 20g', emoji:'🥩', image:'https://www.yejoo153.co.kr/data/file/b0301/thumb-2949830214_dtgNiSLm_16856412137ae189b541aa8c5d0ad7ce39b9dbaa_498x498.jpg', price1:800, price2:1600, price3:2200 },
       { id:'c41', name_en:'C41. Tom Yum Kung Cube 20g', name_ko:'C41. 톰얌꿍큐브 20g', name_th:'C41. ก้อนซุปต้มยำกุ้ง 20g', emoji:'🍲', image:'https://cdn.imweb.me/thumbnail/20210926/fdf3c95f06524.jpg', price1:800, price2:1600, price3:2200 },
+    ]
+  },
+  veggie: {
+    label: { en: 'F Vegetables & Produce', th: 'F ผักและผลไม้', ko: 'F 농산물/채소' },
+    emoji: '🥬',
+    items: [
+      { id:'f01', name_en:'F01. Pak Bung (Morning Glory)', name_ko:'F01. 팍붕 (공심채)', name_th:'F01. ผักบุ้ง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f02', name_en:'F02. Kana (Chinese Broccoli)', name_ko:'F02. 카나', name_th:'F02. ผักคะน้า', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f03', name_en:'F03. Silaou (Water Mimosa)', name_ko:'F03. 시라우', name_th:'F03. ผักชีลาว', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f04', name_en:'F04. Horapha (Thai Basil)', name_ko:'F04. 호라파 (타이바질)', name_th:'F04. ผักโหระพา', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f05', name_en:'F05. Kapao (Holy Basil)', name_ko:'F05. 가파오 (홀리바질)', name_th:'F05. ผักกะเพรา', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f06', name_en:'F06. Baitai (Pandan Leaf)', name_ko:'F06. 바이따이 (판단잎)', name_th:'F06. ใบเตย', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f07', name_en:'F07. Hom Daeng (Red Onion)', name_ko:'F07. 홈댕 (적양파)', name_th:'F07. หอมแดง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f08', name_en:'F08. Krachai (Fingerroot)', name_ko:'F08. 까차이 (핑거루트)', name_th:'F08. กระชาย', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f09', name_en:'F09. Dried Kaffir Lime Leaf 40g', name_ko:'F09. 건조 라임잎 40g', name_th:'F09. ใบมะกรูดอบแห้ง 40g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f10', name_en:'F10. Saranae (Mint)', name_ko:'F10. 사라내 (민트)', name_th:'F10. สาระแหน่', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f11', name_en:'F11. Lemongrass 3pcs Set', name_ko:'F11. 다카이 3종 세트 (포장)', name_th:'F11. ตะไคร้ ใบมะกรูด', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f12', name_en:'F12. Lemongrass 1kg', name_ko:'F12. 다카이 1kg', name_th:'F12. ตะไคร้ 1kg', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f13', name_en:'F13. Galangal 500g', name_ko:'F13. 후아카 500g (갈랑갈)', name_th:'F13. ข่า 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f14', name_en:'F14. Banana Flower 1kg', name_ko:'F14. 후이백 (바나나꽃) 1kg', name_th:'F14. หัวปลี 1kg', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f15', name_en:'F15. Banana Leaf 500g', name_ko:'F15. 바이팽 (바나나잎) 500g', name_th:'F15. ใบตอง 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f16', name_en:'F16. Chinese Garlic 500g', name_ko:'F16. 까티얌 (마늘) 500g', name_th:'F16. กระเทียมจีน 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f17', name_en:'F17. Spring Onion (Hom Pe)', name_ko:'F17. 험패 (파)', name_th:'F17. หอมเป', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f18', name_en:'F18. Long Bean (Tua Fak Yao)', name_ko:'F18. 투위팍야우 (줄콩)', name_th:'F18. ถั่วฝักยาว', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f19', name_en:'F19. Coriander (Pak Chi)', name_ko:'F19. 팍침 (고수)', name_th:'F19. ผักชี', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f20', name_en:'F20. Fresh Chili (Prik Jinda)', name_ko:'F20. 픽슨 (생고추)', name_th:'F20. พริกจินดา', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f21', name_en:'F21. Chapu Leaf', name_ko:'F21. 차푸', name_th:'F21. ใบชะพลู', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f22', name_en:'F22. Pak Kaen', name_ko:'F22. 팍캔', name_th:'F22. ผักแขยง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f23', name_en:'F23. Lemon 3pcs', name_ko:'F23. 레몬 3개', name_th:'F23. มะนาวเหลือง 3ลูก', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f24', name_en:'F24. Lime 3pcs', name_ko:'F24. 라임 3개', name_th:'F24. มะนาวเขียว 3ลูก', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f25', name_en:'F25. Mango', name_ko:'F25. 망고', name_th:'F25. มะม่วง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f26', name_en:'F26. Coconut', name_ko:'F26. 코코넛', name_th:'F26. มะพร้าวน้ำหอม', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f27', name_en:'F27. Frozen Taro 500g', name_ko:'F27. 냉동마 500g', name_th:'F27. มัน 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f28', name_en:'F28. Frozen Taro Peeled 500g', name_ko:'F28. 냉동타로 껍질 500g', name_th:'F28. เผือกปอก 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f29', name_en:'F29. Frozen Straw Mushroom', name_ko:'F29. 냉동 초고버섯', name_th:'F29. เห็ดฟาง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f30', name_en:'F30. Krachai (Fingerroot)', name_ko:'F30. 까차이', name_th:'F30. กระชาย', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f31', name_en:'F31. Pak Bung (Morning Glory)', name_ko:'F31. 팍붕', name_th:'F31. ผักบุ้ง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f32', name_en:'F32. Kapao (Holy Basil)', name_ko:'F32. 까파오', name_th:'F32. กะเพรา', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f33', name_en:'F33. Horapha (Thai Basil)', name_ko:'F33. 호라파', name_th:'F33. โหระพา', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f34', name_en:'F34. Pak Maeng Lak', name_ko:'F34. 맹락', name_th:'F34. แมงลัก', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f35', name_en:'F35. Yod Mara (Bitter Gourd Shoot)', name_ko:'F35. 염마라 (여주순)', name_th:'F35. ยอดมะระ', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f36', name_en:'F36. Kwang Tung (Chinese Cabbage)', name_ko:'F36. 팡풍 (광둥)', name_th:'F36. กวางตุ้ง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f37', name_en:'F37. Kana (Chinese Broccoli)', name_ko:'F37. 카나', name_th:'F37. คะน้า', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f38', name_en:'F38. Pak Taew (Lemon Basil)', name_ko:'F38. 픽태우 (리오탐)', name_th:'F38. ผักแพรว', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f39', name_en:'F39. Chinese Celery (Khuen Chai)', name_ko:'F39. 샐러리 (핑요)', name_th:'F39. ขึ้นฉ่าย', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f40', name_en:'F40. Pickled Garlic 550g', name_ko:'F40. 마늘절임 550g', name_th:'F40. กระเทียมดอง 550g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f41', name_en:'F41. Bamboo Shoot 900g', name_ko:'F41. 밤부숏 900g', name_th:'F41. หน่อไม้รวก 900g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f42', name_en:'F42. Baby Corn 500g', name_ko:'F42. 죽순 (고형물 350g) 500g', name_th:'F42. หน่อไม้ดองแห้ง 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f43', name_en:'F43. Sour Bamboo Shoot 500g', name_ko:'F43. 사워 밤부숏 500g', name_th:'F43. หน่อไม้ดองเปรี้ยว 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f44', name_en:'F44. Bamboo Shoot Mix 454g', name_ko:'F44. 밤부숏 인아냥 믹스트랙트 454g', name_th:'F44. หน่อไม้ในบ้านยางเส้น 454g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f45', name_en:'F45. Sour Bamboo Shoot Orange 500g', name_ko:'F45. 사워 밤부숏 (오렌지) 500g', name_th:'F45. หน่อไม้ดองส้ม 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f46', name_en:'F46. Sour Bamboo Shoot Flat 500g', name_ko:'F46. 사워 밤부숏 (평판) 500g', name_th:'F46. หน่อไม้ดองแผ่น 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f47', name_en:'F47. Sour Green Mustard 600g', name_ko:'F47. 사워 그린 마스타드 600g', name_th:'F47. ผักกาดดอง 600g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f48', name_en:'F48. Frozen Banana (Golden Saba) 800g', name_ko:'F48. 골든사바 (냉동바나나) 800g', name_th:'F48. โกลเด้นซาบา กล้วยน้ำว้า 800g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f49', name_en:'F49. Vietnam Frozen Red Chili 1kg', name_ko:'F49. 베트남 냉동홍고추 1kg', name_th:'F49. พริกแดงแช่แข็ง 1kg', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f50', name_en:'F50. Vietnam Frozen Red Chili 500g', name_ko:'F50. 베트남 냉동홍고추 500g', name_th:'F50. พริกแดงแช่แข็ง 500g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f51', name_en:'F51. Pickled Garlic 550g', name_ko:'F51. 마늘절임 550g', name_th:'F51. กระเทียมดอง 550g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+      { id:'f52', name_en:'F52. Dried Kaffir Lime Leaf 200g', name_ko:'F52. 바이막구탱 (건조라임잎) 200g', name_th:'F52. ใบมะกรูดแห้ง 200g', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
+    
+    
     ]
   },
   essentials: {
@@ -923,7 +1101,7 @@ function renderTab(tab) {
     card.innerHTML = `
       <div class="product-thumb">
         ${item.image
-          ? `<img src="${item.image}" alt="${displayName}" style="width:100%;height:100%;object-fit:contain;border-radius:8px;padding:4px;" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+          ? `<img src="${item.image}" alt="${displayName}" loading="lazy" style="width:100%;height:100%;object-fit:contain;border-radius:8px;padding:4px;" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
           : ''}
         <span style="display:${item.image ? 'none' : 'flex'};align-items:center;justify-content:center;width:100%;height:100%;font-size:28px;">${item.emoji}</span>
       </div>
@@ -1237,7 +1415,74 @@ function confirmOrder() {
   `;
 }
 
-renderTab('frozen');
+// 베스트 상품 ID 목록 (탑5)
+const bestIds = ['a1','b25','c15','c19','d16'];
+
+function renderBest() {
+  const container = document.getElementById('best-scroll');
+  if (!container) return;
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+
+  bestIds.forEach(id => {
+    const item = allItems.find(p => p.id === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'best-card-' + id;
+
+    const imgHtml = item.image
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+
+    card.innerHTML = `
+      ${imgHtml}${emojiHtml}
+      <div class="best-card-body">
+        <div class="best-card-name">${getItemName(item)}</div>
+        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="best-qty-${id}">
+          <button class="best-qty-btn" onclick="changeBestQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changeBestQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+
+    // 클릭하면 해당 카테고리 탭으로 이동
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      const cat = Object.entries(catalog).find(([k,v]) => v.items.some(p => p.id === id));
+      if (cat) {
+        const tabBtn = document.querySelector(`[onclick*="'${cat[0]}'"]`);
+        if (tabBtn) { switchTab(tabBtn, cat[0]); tabBtn.scrollIntoView({behavior:'smooth'}); }
+        setTimeout(() => {
+          const mainCard = document.getElementById('card-' + id);
+          if (mainCard) mainCard.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 200);
+      }
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function changeBestQty(id, delta, e) {
+  e && e.stopPropagation();
+  changeQty(id, delta, e);
+  updateBestCard(id);
+}
+
+function updateBestCard(id) {
+  const qty = quantities[id] || 0;
+  const card = document.getElementById('best-card-' + id);
+  if (!card) return;
+  card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+  const qtyDiv = document.getElementById('best-qty-' + id);
+  if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
+}
+
+renderBest();
 </script>
 
 <script type="module">
