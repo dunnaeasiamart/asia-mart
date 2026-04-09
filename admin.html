@@ -110,6 +110,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('discount')">🏷️ 할인율</button>
     <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
     <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
+    <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
   </div>
 
   <!-- 재고 관리 -->
@@ -2970,6 +2971,19 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
     </div>
   </div>
+
+  <!-- 베스트 상품 -->
+  <div id="tab-best" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 5개)</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
+
+      <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;">
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -3092,6 +3106,7 @@ async function loadAll() {
   await loadDiscount();
   await loadProducts();
   await loadCustomers();
+  await loadBest();
 }
 
 async function loadStock() {
@@ -3267,6 +3282,173 @@ async function deleteCustomer(key) {
   loadCustomers();
   showToast('🗑️ 삭제 완료');
 }
+
+// 베스트 상품 관련
+const ALL_OPTIONS = `<optgroup label="A 냉동음식">
+  <option value="a1">A1. A1. 새우볼 500g</option>
+  <option value="a2">A2. A2. 소고기미트볼 320g</option>
+  <option value="a3">A3. A3. 돼지고기미트볼 320g</option>
+  <option value="a4">A4. A4. 돼지꼬리 700g</option>
+  <option value="a5">A5. A5. 돼지귀 2개 500g</option>
+  <option value="a6">A6. A6. 닭근위 500g</option>
+  <option value="a7">A7. A7. 닭간 400g</option>
+  <option value="a8">A8. A8. 닭알집 500g</option>
+  <option value="a9">A9. A9. 닭무릎연골 500g</option>
+  <option value="a10">A10. A10. 냉동 등목어 3마리 500g</option>
+  <option value="a11">A11. A11. 냉동 줄무늬가물치 450g</option>
+  <option value="a12">A12. A12. 냉동 레드틸라피아 2마리 900g</option>
+  <option value="a13">A13. A13. 냉동 틸라피아 2마리 900g</option>
+  <option value="a14">A14. A14. 냉동 구라미 450g</option>
+  <option value="a15">A15. A15. 냉동 절단한 메기 450g</option>
+  <option value="a16">A16. A16. 냉동 메기 700g</option>
+  <option value="a17">A17. A17. 빠뚜캠 180g</option>
+  <option value="a18">A18. A18. 냉동 고등어 250g</option>
+  <option value="a19">A19. A19. 양념 반건조 메기 450g</option>
+  <option value="a20">A20. A20. 냉동 개구리 450g</option>
+  <option value="a21">A21. A21. 냉동 갑오징어 400g</option>
+  <option value="a22">A22. A22. 냉동 쭈꾸미 450g</option>
+  <option value="a23">A23. A23. 냉동 소 부속물 고기 파파이딴 700g</option>
+</optgroup>
+<optgroup label="B 면 종류">
+  <option value="b01">B01. B01. 마마 똠얌 컵 70g</option>
+  <option value="b02">B02. B02. 마마 크리미 똠얌 컵 70g</option>
+  <option value="b03">B03. B03. 마마 포크 컵 70g</option>
+  <option value="b04">B04. B04. MAMA 인스턴트 쌀국수 클리어수프 55g 1set(5pcs)</option>
+  <option value="b05">B05. B05. MAMA 인스턴트 누들 치킨그린커리 55g 1set(5pcs)</option>
+  <option value="b06">B06. B06. ACECOOK 쌀국수 71g 1set(5pcs)</option>
+  <option value="b07">B07. B07. 하오하오 오리지널 78g 1set(5pcs)</option>
+  <option value="b08">B08. B08. ACECOOK 포보 70g 1set(5pcs)</option>
+  <option value="b09">B09. B09. WAIWAI 오리엔탈 60g 1set(5pcs)</option>
+  <option value="b10">B10. B10. WAIWAI 똠얌 RED 60g 1set(5pcs)</option>
+  <option value="b11">B11. B11. WAIWAI 똠얌 BLUE 60g 1set(5pcs)</option>
+  <option value="b12">B12. B12. WAIWAI 크랩 55g 1set(5pcs)</option>
+  <option value="b13">B13. B13. MAMA 똠얌 55g 1set(5pcs)</option>
+  <option value="b14">B14. B14. MAMA 크리미 55g 1set(5pcs)</option>
+  <option value="b15">B15. B15. MAMA 포크 60g 1set(5pcs)</option>
+  <option value="b16">B16. B16. SAFOCO 쌀국수 300g</option>
+  <option value="b17">B17. B17. CHANTABURI 쌀국수 500g</option>
+  <option value="b18">B18. B18. BUNKO 당면 300g</option>
+  <option value="b19">B19. B19. BICH CHI 건면 500g</option>
+  <option value="b20">B20. B20. BICH CHI 넓은건면 500g</option>
+  <option value="b21">B21. B21. VIFON 건면 500g</option>
+  <option value="b22">B22. B22. VIFON 넓은건면 500g</option>
+  <option value="b23">B23. B23. WAIWAI 면 200g</option>
+  <option value="b24">B24. B24. WOONSEN LEK 1팩(10개) 400g</option>
+  <option value="b25">B25. B25. 신라면 5개입</option>
+  <option value="b26">B26. B26. 진라면 순한맛 5개입</option>
+  <option value="b27">B27. B27. 진라면 매운맛 5개입</option>
+  <option value="b28">B28. B28. 진라면 컵라면 순한맛 6개입</option>
+  <option value="b29">B29. B29. 진라면 컵라면 매운맛 6개입</option>
+</optgroup>
+<optgroup label="C 각종 소스">
+  <option value="c01">C01. C1. TIPAROS 피시소스 700ml</option>
+  <option value="c02">C02. C2. TIPAROS 식초 600ml</option>
+  <option value="c03">C03. C3. YWY 블랙스위트 간장 410g</option>
+  <option value="c04">C04. C4. YWY 굴소스 370g</option>
+  <option value="c05">C05. C5. YWY 시즈닝소스 300g</option>
+  <option value="c06">C06. C6. YWY 시즈닝페이스트 350g</option>
+  <option value="c07">C07. C7. YWY 블랙소스 410g</option>
+  <option value="c08">C08. C8. 오징어 피시소스 700ml</option>
+  <option value="c09">C09. C9. 메콩 레드소스 400ml</option>
+  <option value="c10">C10. C10. 메콩 옐로우소스 400ml</option>
+  <option value="c11">C11. C11. 메콩 화이트소스 400ml</option>
+  <option value="c12">C12. C12. 마기 딥핑소스 200ml</option>
+  <option value="c13">C13. C13. KHONKAEN 피시소스 400ml</option>
+  <option value="c14">C14. C14. ZAB MIKE 피시소스 330ml</option>
+  <option value="c15">C15. C15. 메가쉐프 피시소스 700ml</option>
+  <option value="c16">C16. C16. 타마린드 페이스트 300g</option>
+  <option value="c17">C17. C17. 핫스파이스 수키소스 342g</option>
+  <option value="c18">C18. C18. 판타이 스위트칠리소스 342g</option>
+  <option value="c19">C19. C19. 남프릭파우 513g</option>
+  <option value="c20">C20. C20. 사워커리 페이스트 100g</option>
+  <option value="c21">C21. C21. 남야커리 페이스트 100g</option>
+  <option value="c22">C22. C22. 컨트리 레드커리 페이스트 100g</option>
+  <option value="c23">C23. C23. 그린커리 페이스트 100g</option>
+  <option value="c24">C24. C24. 파낭커리 페이스트 100g</option>
+  <option value="c25">C25. C25. 레드커리 페이스트 100g</option>
+  <option value="c26">C26. C26. 쏠티드 쉬림페이스트 400g</option>
+  <option value="c26b">C26B. C26-1. 쏠티드 쉬림페이스트 200g</option>
+  <option value="c26c">C26C. C26-2. 피클드 구라미피시 454g</option>
+  <option value="c27">C27. C27. 매운고추 100g</option>
+  <option value="c28">C28. C28. 타마린드 씨없봉 170g</option>
+  <option value="c29">C29. C29. 미원 250g</option>
+  <option value="c30">C30. C30. 타피오카펄 그린 400g</option>
+  <option value="c31">C31. C31. ROSDEE 포크플레이버 800g</option>
+  <option value="c32">C32. C32. ROSDEE 치킨플레이버 70g</option>
+  <option value="c33">C33. C33. ROSDEE LAAB 믹스 30g</option>
+  <option value="c34">C34. C34. ROSDEE 똠얌꿍 믹스 60g</option>
+  <option value="c35">C35. C35. ROSDEE 얌운센 믹스 40g</option>
+  <option value="c36">C36. C36. ROSDEE 팔로 믹스 60g</option>
+  <option value="c37">C37. C37. ROSDEE 카프라오 믹스 50g</option>
+  <option value="c38">C38. C38. 라임 시즈닝 파우더 67g</option>
+  <option value="c39">C39. C39. 치킨큐브 20g</option>
+  <option value="c40">C40. C40. 포크큐브 20g</option>
+  <option value="c41">C41. C41. 톰얌꿍큐브 20g</option>
+</optgroup>
+<optgroup label="D 음료 및 기타">
+  <option value="d01">D01. D1. 람부탄 시럽 565g</option>
+  <option value="d02">D02. D2. 용안 시럽 565g</option>
+  <option value="d03">D03. D3. 카네이션 연유 405g</option>
+  <option value="d04">D04. D4. 말리 연유 355g</option>
+  <option value="d05">D05. D5. 코코낫밀크 400ml</option>
+  <option value="d06">D06. D6. 암파와 코코낫밀크 1000ml</option>
+  <option value="d07">D07. D7. SAHA 죽순채 350g</option>
+  <option value="d08">D08. D8. SAHA 죽순 슬라이스 350g</option>
+  <option value="d09">D09. D9. 뱀부 허브 400g</option>
+  <option value="d10">D10. D10. 피시스낵 바베큐맛 80g</option>
+  <option value="d11">D11. D11. 피시스낵 핫칠리맛 80g</option>
+  <option value="d12">D12. D12. 피시스낵 치킨바베큐맛 80g</option>
+  <option value="d13">D13. D13. 피시스낵 게살맛 80g</option>
+  <option value="d14">D14. D14. 이태리 레몬주스 200ml</option>
+  <option value="d14b">D14B. D14-1. 이태리 라임주스 200ml</option>
+  <option value="d15">D15. D15. 해바라기씨 빨간색 260g</option>
+  <option value="d16">D16. D16. 커피믹스 160개입</option>
+  <option value="d17">D17. D17. 종이컵 1000개</option>
+</optgroup>
+<optgroup label="E 생활용품">
+  <option value="e01">E01. E01. 콜게이트 아이시 쿨민트 치약 200g</option>
+  <option value="e02">E02. E02. 콜게이트 그레이트 레귤러 치약 200g</option>
+  <option value="e03">E03. E03. 트웰브플러스 엑스트라쿨파우더 쿨링블루 270g</option>
+  <option value="e04">E04. E04. 트웰브플러스 엑스트라쿨파우더 쿨링핑크 270g</option>
+</optgroup>
+`;
+
+function renderBestSlots(selectedIds) {
+  const container = document.getElementById('best-slots');
+  container.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const val = selectedIds[i] || '';
+    container.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
+        <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <option value="">-- 상품 선택 --</option>
+          ${ALL_OPTIONS}
+        </select>
+      </div>`;
+    setTimeout(() => {
+      const sel = document.getElementById('best-slot-' + i);
+      if (sel && val) sel.value = val;
+    }, 50);
+  }
+}
+
+async function loadBest() {
+  const snap = await db.ref('best').get();
+  const data = snap.val() || [];
+  renderBestSlots(data);
+}
+
+async function saveBest() {
+  const ids = [];
+  for (let i = 0; i < 5; i++) {
+    const sel = document.getElementById('best-slot-' + i);
+    if (sel && sel.value) ids.push(sel.value);
+  }
+  await db.ref('best').set(ids);
+  showToast('🔥 베스트 상품 저장 완료!');
+}
+
 </script>
 </body>
 </html>

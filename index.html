@@ -717,6 +717,7 @@ function setLang(lang) {
 
   // Re-render current tab to update product names
   renderTab(currentTab);
+  renderBest();
   updateSummary();
 }
 
@@ -1415,8 +1416,8 @@ function confirmOrder() {
   `;
 }
 
-// 베스트 상품 ID 목록 (탑5)
-const bestIds = ['a1','b25','c15','c19','d16'];
+// 베스트 상품 ID 목록 - Firebase에서 불러옴
+let bestIds = ['a1','b25','c15','c19','d16']; // 기본값
 
 function renderBest() {
   const container = document.getElementById('best-scroll');
@@ -1584,7 +1585,22 @@ window.renderTab = function(tab) {
   if (window._stock) applyStock();
 };
 
+// Firebase에서 베스트 상품 불러오기
+async function loadBestFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'best'));
+    const data = snapshot.val();
+    if (data && data.length > 0) {
+      bestIds = data;
+      renderBest();
+    }
+  } catch(e) {
+    console.log('베스트 상품 로드 실패:', e);
+  }
+}
+
 loadStock();
+loadBestFromFirebase();
 </script>
 </body>
 </html>
