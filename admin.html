@@ -2940,14 +2940,30 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <button class="btn btn-primary" onclick="addCustomer()">등록</button>
         </div>
       </div>
+
+      <!-- 단체 문자 -->
+      <div class="customer-form" style="margin-top:0;">
+        <h3>📨 단체 문자 보내기</h3>
+        <div style="margin-top:12px;">
+          <textarea id="bulk-sms-msg" placeholder="문자 내용을 입력하세요&#10;예: 안녕하세요! 이번 주 신상품이 입고되었습니다 😊" 
+            style="width:100%;height:80px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none;"></textarea>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="sendBulkSMS()">📱 전체 고객에게 문자</button>
+          <span style="font-size:12px;color:#888;">※ 문자앱이 순서대로 열립니다. 각각 전송 버튼을 누르세요.</span>
+        </div>
+      </div>
+
       <div class="customer-list">
         <table>
           <thead><tr>
+            <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> 전체</th>
             <th>이름</th>
             <th>전화번호</th>
             <th>기타</th>
             <th>등록일</th>
-            <th></th>
+            <th>문자</th>
+            <th>삭제</th>
           </tr></thead>
           <tbody id="customer-tbody"></tbody>
         </table>
@@ -3006,6 +3022,42 @@ function showToast(msg) {
   t.textContent = msg;
   t.style.display = 'block';
   setTimeout(() => t.style.display = 'none', 2500);
+}
+
+function sendSMS(phone, name) {
+  const msg = document.getElementById('bulk-sms-msg')?.value || '';
+  const body = encodeURIComponent(msg || `안녕하세요 ${name}님! Asia Mart입니다 😊`);
+  window.open(`sms:${phone}?body=${body}`);
+}
+
+function sendBulkSMS() {
+  const msg = document.getElementById('bulk-sms-msg').value.trim();
+  if (!msg) { alert('문자 내용을 입력해주세요.'); return; }
+  const checked = document.querySelectorAll('.cust-check:checked');
+  if (checked.length === 0) {
+    // 전체 고객에게
+    const all = document.querySelectorAll('.cust-check');
+    if (all.length === 0) { alert('등록된 고객이 없습니다.'); return; }
+    if (!confirm(`전체 ${all.length}명에게 문자를 보낼까요?`)) return;
+    all.forEach((cb, i) => {
+      setTimeout(() => {
+        const body = encodeURIComponent(msg);
+        window.open(`sms:${cb.dataset.phone}?body=${body}`);
+      }, i * 1000);
+    });
+  } else {
+    if (!confirm(`선택된 ${checked.length}명에게 문자를 보낼까요?`)) return;
+    checked.forEach((cb, i) => {
+      setTimeout(() => {
+        const body = encodeURIComponent(msg);
+        window.open(`sms:${cb.dataset.phone}?body=${body}`);
+      }, i * 1000);
+    });
+  }
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.cust-check').forEach(c => c.checked = cb.checked);
 }
 </script>
 
@@ -3087,10 +3139,12 @@ async function loadCustomers() {
   Object.entries(data).sort((a,b) => b[1].date - a[1].date).forEach(([key, c]) => {
     const date = new Date(c.date).toLocaleDateString('ko-KR');
     tbody.innerHTML += `<tr>
+      <td style="padding:10px 12px;"><input type="checkbox" class="cust-check" data-phone="${c.phone}" data-name="${c.name}"></td>
       <td>${c.name}</td>
-      <td>${c.phone}</td>
+      <td>${c.phone || '-'}</td>
       <td>${c.note || ''}</td>
       <td style="color:#aaa;font-size:12px;">${date}</td>
+      <td><button class="btn-del" style="color:#1877f2;border-color:#1877f2;" onclick="sendSMS('${c.phone}','${c.name}')">📱 문자</button></td>
       <td><button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button></td>
     </tr>`;
   });
