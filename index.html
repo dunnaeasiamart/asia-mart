@@ -590,7 +590,7 @@ const i18n = {
     hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
     best_title: 'Best Products',
     cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
-    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks & More',
+    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks and More',
     cat_essentials: '🧴 E Daily Essentials',
     cat_veggie: '🥬 F Vegetables & Produce',
     total_label: 'Total', select_items: 'Please select items',
@@ -627,7 +627,7 @@ const i18n = {
     hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
     best_title: 'สินค้าขายดี',
     cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
-    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม & อื่นๆ',
+    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม และ อื่นๆ',
     cat_essentials: '🧴 E สินค้าอุปโภค',
     cat_veggie: '🥬 F ผักและผลไม้',
     total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
@@ -1083,6 +1083,10 @@ function getItemName(item) {
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
 
+function saveCustField(key, value) {
+  try { localStorage.setItem(key, value); } catch(e) {}
+}
+
 function renderTab(tab) {
   const container = document.getElementById('main-content');
   container.innerHTML = '';
@@ -1271,15 +1275,15 @@ function openModal() {
       <div class="customer-form">
         <div class="form-group">
           <label class="form-label">${t.field_name}</label>
-          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" oninput="localStorage.setItem('cust_name', this.value)" />
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" oninput="saveCustField('cust_name', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" oninput="localStorage.setItem('cust_phone', this.value)" />
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" oninput="saveCustField('cust_phone', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" oninput="localStorage.setItem('cust_facebook', this.value)" />
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" oninput="saveCustField('cust_facebook', this.value)" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
