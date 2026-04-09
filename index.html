@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asia Mart — Online Order</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Sans+Lao:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,7 +22,7 @@
   }
 
   body {
-    font-family: 'Noto Sans KR', 'Noto Sans Thai', sans-serif;
+    font-family: 'Noto Sans KR', 'Noto Sans Thai', 'Noto Sans Lao', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -520,6 +520,7 @@
     <div class="lang-switcher">
       <button class="lang-btn active" onclick="setLang('en')">EN</button>
       <button class="lang-btn" onclick="setLang('th')">TH</button>
+      <button class="lang-btn" onclick="setLang('lo')">LO</button>
       <button class="lang-btn" onclick="setLang('ko')">KO</button>
     </div>
     <button class="header-cart" onclick="openModal()">
@@ -695,6 +696,43 @@ const i18n = {
     total_discount: (n) => `총 할인: -${n}`,
     min_order: (n) => `⚠️ ${n} 더 담으면 주문 가능 (최소 ₩50,000)`,
     min_order_ok: '✅ 무료배송 포함!',
+  },
+  lo: {
+    cart: 'ກະຕ່າ', hero_title: 'ອາຫານເອເຊຍແທ້<br>ສັ່ງຊື້ອອນໄລນ໌',
+    hero_desc: 'ເລືອກຈຳນວນເພື່ອຄຳນວນລາຄາທັນທີ ສ່ວນຫຼຸດອັດຕະໂນມັດເມື່ອຊື້ 3 ຊິ້ນຂຶ້ນໄປ!',
+    best_title: 'ສິນຄ້າຂາຍດີ',
+    cat_frozen: '🧊 A ອາຫານແຊ່ແຂງ', cat_noodle: '🍜 B ເສັ້ນກ໋ວຍເຕັ້ຍວ',
+    cat_sauce: '🥫 C ຊອດຕ່າງໆ', cat_other: '🧃 D ເຄື່ອງດື່ມ ແລະ ອື່ນໆ',
+    cat_essentials: '🧴 E ສິນຄ້າໃຊ້ສອຍ',
+    cat_veggie: '🥬 F ຜັກ ແລະ ຜົນໄມ້',
+    total_label: 'ລວມ', select_items: 'ກະລຸນາເລືອກສິນຄ້າ',
+    order_btn: 'ສັ່ງຊື້ເລີຍ →', order_confirm: 'ສະຫຼຸບຄຳສັ່ງຊື້',
+    items_selected: (n) => `ເລືອກ ${n} ລາຍການ`,
+    empty_cart: 'ກະຕ່າຫວ່າງເປົ່າ<br>ກະລຸນາເລືອກສິນຄ້າ',
+    field_name: 'ຊື່', field_phone: 'ເບີໂທ', field_note: 'ໝາຍເຫດ (ຖ້າມີ)',
+    field_facebook: 'ຊື່ Facebook', ph_facebook: 'ຊື່ທີ່ສະແດງໃນ Facebook ຂອງທ່ານ', optional: 'ບໍ່ບັງຄັບ',
+    ph_name: 'ຊື່ຂອງທ່ານ', ph_phone: '010-0000-0000', ph_note: 'ຄຳຂໍການສົ່ງ ໆລໆ',
+    confirm_btn: 'ຢືນຢັນຄຳສັ່ງຊື້', grand_total: 'ລວມ',
+    alert_fill: 'ກະລຸນາໃສ່ຊື່',
+    alert_contact: 'ກະລຸນາໃສ່ເບີໂທ ຫຼື ຊື່ Facebook ຢ່າງໜ້ອຍໜຶ່ງຢ່າງ',
+    order_done_title: 'ສັ່ງຊື້ສຳເລັດ!',
+    order_done_desc: 'ພວກເຮົາໄດ້ຮັບຄຳສັ່ງຊື້ຂອງທ່ານແລ້ວ ກະລຸນາສົ່ງຂໍ້ຄວາມ Facebook ເພື່ອຢືນຢັນ',
+    order_done_fb: '📘 ແຕະດ້ານລຸ່ມເພື່ອສົ່ງຂໍ້ຄວາມຫາພວກເຮົາທາງ Facebook Messenger',
+    alert_done: (name, phone) => `✅ ສັ່ງຊື້ສຳເລັດ!\n\nຊື່: ${name}\nເບີໂທ: ${phone}\n\nພວກເຮົາຈະຕິດຕໍ່ກັບໄວໆ ນີ້ ຂອບໃຈ!`,
+    pay_title: 'ຊຳລະເງິນເມື່ອຮັບສິນຄ້າເທົ່ານັ້ນ',
+    pay_desc: 'ຮັບເງິນສົດ ແລະ ບັດ · ບໍ່ມີການຊຳລະອອນໄລນ໌',
+    pay_modal: '💵 ຊຳລະເງິນເມື່ອຮັບສິນຄ້າ (ເງິນສົດ ຫຼື ບັດ)',
+    field_addr: 'ຮູບທີ່ຢູ່ (ປ້າຍຖະໜົນ)',
+    ph_addr: 'ກະລຸນາອັບໂຫລດຮູບປ້າຍຖະໜົນຂອງທ່ານ',
+    btn_camera: 'ຖ່າຍຮູບ',
+    btn_gallery: 'ເລືອກຈາກແກລເລີຣີ',
+    addr_uploaded: 'ອັບໂຫລດຮູບແລ້ວ',
+    addr_example: 'ຕົວຢ່າງ',
+    max_qty: '⚠️ ສູງສຸດ 10 ຊິ້ນຕໍ່ສິນຄ້າ',
+    discount: 'ຫຼຸດ!',
+    total_discount: (n) => `ປະຫຍັດລວມ: -${n}`,
+    min_order: (n) => `⚠️ ຕ້ອງການອີກ ₩${n} (ຂັ້ນຕ່ຳ ₩50,000)`,
+    min_order_ok: '✅ ສົ່ງຟຣີ!',
   }
 };
 
@@ -737,7 +775,7 @@ function setLang(lang) {
    ===================================================== */
 const catalog = {
   frozen: {
-    label: { en: 'A Frozen Food', th: 'A อาหารแช่แข็ง', ko: 'A 냉동음식' },
+    label: { en: 'A Frozen Food', th: 'A อาหารแช่แข็ง', ko: 'A 냉동음식', lo: 'A ອາຫານແຊ່ແຂງ' },
     emoji: '🧊',
     items: [      { id:'a1', name_en:'A1. Shrimp Ball 500g', name_ko:'A1. 새우볼 500g', name_th:'A1. ลูกชิ้นกุ้ง 500g',         emoji:'🦐', image:'https://asia-mart.co.kr/web/product/big/202008/98a1988761568a55ad1a27dad976aaa0.jpg', price1:5900, price2:11300, price3:16000 },
       { id:'a2', name_en:'A2. Beef Meatball 320g', name_ko:'A2. 소고기미트볼 320g', name_th:'A2. ลูกชิ้นเนื้อวัว 320g',            emoji:'🧊', image:'https://asia-mart.co.kr/web/product/big/asiamart_1622.jpg', price1:5500, price2:10500,  price3:14900 },
@@ -765,7 +803,7 @@ const catalog = {
     ]
   },
   noodle: {
-    label: { en: 'B Noodles', th: 'B เส้นก๋วยเตี๋ยว', ko: 'B 면 종류' },
+    label: { en: 'B Noodles', th: 'B เส้นก๋วยเตี๋ยว', ko: 'B 면 종류', lo: 'B ເສັ້ນກ໋ວຍເຕັ້ຍວ' },
     emoji: '🍜',
     items: [      { id:'b01', name_en:'B01. MAMA TOMYUM CUP 70g', name_ko:'B01. 마마 똠얌 컵 70g', name_th:'B01. มาม่าต้มยำถ้วย 70g',         emoji:'🍜', image:'https://storage.tally.so/8b497784-dd8c-4dce-8d77-f7f5c8495e1b/hoejeon-tomnyamkeob.png', price1:1400, price3:3800,  price5:6200 },
       { id:'b02', name_en:'B02. MAMA CREAMY TOMYUM CUP 70g', name_ko:'B02. 마마 크리미 똠얌 컵 70g', name_th:'B02. มาม่าต้มยำครีมถ้วย 70g',    emoji:'🍜', image:'https://storage.tally.so/dd64a983-100c-4b35-9e85-2f612a9c0898/hoejeon-tomnyamkeurimi.png', price1:1400, price3:3800,  price5:6200 },
@@ -799,7 +837,7 @@ const catalog = {
     ]
   },
   sauce: {
-    label: { en: 'C Sauces', th: 'C ซอสต่างๆ', ko: 'C 각종 소스' },
+    label: { en: 'C Sauces', th: 'C ซอสต่างๆ', ko: 'C 각종 소스', lo: 'C ຊອດຕ່າງໆ' },
     emoji: '🥫',
     items: [      { id:'c01', name_en:'C1. TIPAROS Fish Sauce 700ml', name_ko:'C1. TIPAROS 피시소스 700ml', name_th:'C1. น้ำปลา TIPAROS 700ml',              emoji:'🥫', image:'https://www.yejoo153.co.kr/data/file/b0301/thumb-2949830214_0muw4CTL_a77d2553fe8d75d90eae3a3a37e0d6be0d3f6db4_258x258.jpg', price1:2500, price2:4800,  price3:6800 },
       { id:'c02', name_en:'C2. TIPAROS Vinegar 600ml', name_ko:'C2. TIPAROS 식초 600ml', name_th:'C2. น้ำส้มสายชู TIPAROS 600ml',                  emoji:'🥫', image:'https://storage.tally.so/0c72be55-cacb-4c07-af6e-2555adb19a9d/hoejeon-tiparoseusigco.png', price1:2900, price2:5600,  price3:7900 },
@@ -847,7 +885,7 @@ const catalog = {
     ]
   },
   veggie: {
-    label: { en: 'F Vegetables & Produce', th: 'F ผักและผลไม้', ko: 'F 농산물/채소' },
+    label: { en: 'F Vegetables & Produce', th: 'F ผักและผลไม้', ko: 'F 농산물/채소', lo: 'F ຜັກ ແລະ ຜົນໄມ້' },
     emoji: '🥬',
     items: [
       { id:'f01', name_en:'F01. Pak Bung (Morning Glory)', name_ko:'F01. 팍붕 (공심채)', name_th:'F01. ผักบุ้ง', emoji:'🥬', image:'', price1:0, price2:0, price3:0 },
@@ -907,7 +945,7 @@ const catalog = {
     ]
   },
   essentials: {
-    label: { en: 'E Daily Essentials', th: 'E สินค้าอุปโภค', ko: 'E 생활용품' },
+    label: { en: 'E Daily Essentials', th: 'E สินค้าอุปโภค', ko: 'E 생활용품', lo: 'E ສິນຄ້າໃຊ້ສອຍ' },
     emoji: '🧴',
     items: [
       { id:'e01', name_en:'E01. Colgate Icy Cool Mint Toothpaste 200g', name_ko:'E01. 콜게이트 아이시 쿨민트 치약 200g', name_th:'E01. ยาสีฟัน Colgate Icy Cool Mint 200g', emoji:'🪥', image:'https://newthankqmarket.s3.ap-northeast-2.amazonaws.com/prod/goods/2025/12/13/cbf4045e-c7d7-4fb2-83e4-617d690b0eeb_500.jpg', price1:5400, price2:10300, price3:14600 },
@@ -917,7 +955,7 @@ const catalog = {
     ]
   },
   other: {
-    label: { en: 'D Drinks & More', th: 'D เครื่องดื่ม & อื่นๆ', ko: 'D 음료 및 기타' },
+    label: { en: 'D Drinks & More', th: 'D เครื่องดื่ม & อื่นๆ', ko: 'D 음료 및 기타', lo: 'D ເຄື່ອງດື່ມ ແລະ ອື່ນໆ' },
     emoji: '🧃',
     items: [      { id:'d01', name_en:'D1. Rambutan in Syrup 565g', name_ko:'D1. 람부탄 시럽 565g', name_th:'D1. เงาะในน้ำเชื่อม 565g',             emoji:'🍈', image:'https://storage.tally.so/2206a51b-e7b7-46b2-bdaa-eaa2d07ceaf7/hoejeon-rambutan.png', price1:5500, price3:14900, price5:24200 },
       { id:'d02', name_en:'D2. Longan in Syrup 565g', name_ko:'D2. 용안 시럽 565g', name_th:'D2. ลำไยในน้ำเชื่อม 565g',               emoji:'🍈', image:'https://storage.tally.so/758daaec-62eb-4f71-84c9-186077c43868/hoejeon-ronggan.png', price1:5500, price3:14900, price5:24200 },
@@ -969,12 +1007,13 @@ function getPrice(item, qty) {
 function getUnit(n) {
   if (currentLang === 'ko') return `${n}개`;
   if (currentLang === 'th') return `${n}ชิ้น`;
+  if (currentLang === 'lo') return `${n}ຊິ້ນ`;
   return n === 1 ? `${n}pc` : `${n}pcs`;
 }
 
 function getPriceTags(item) {
   const makeTag = (n, price, style) => {
-    return `<span class="price-tag" style="cursor:pointer;transition:all 0.15s;${style}">${getUnit(n)} ${fmt(price)}</span>`;
+    return `<span class="price-tag" onclick="setQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${style}">${getUnit(n)} ${fmt(price)}</span>`;
   };
   const tags = [makeTag(1, item.price1, 'background:#f0f0f0;border-color:#ccc;color:#666;')];
   if (item.price2)  tags.push(makeTag(2, item.price2, 'background:#e8f0fe;border-color:#90b4f5;color:#1a56db;font-weight:500;'));
@@ -1078,6 +1117,7 @@ function resetQty(id) {
 function getItemName(item) {
   if (currentLang === 'ko') return item.name_ko || item.name_en || '';
   if (currentLang === 'th') return item.name_th || item.name_en || '';
+  if (currentLang === 'lo') return item.name_lo || item.name_th || item.name_en || '';
   return item.name_en || item.name_ko || '';
 }
 
@@ -1321,6 +1361,7 @@ function openModal() {
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
 }
 
 function closeModal() {
@@ -1603,10 +1644,30 @@ loadStock();
 loadBestFromFirebase();
 
 // ===== 주문 폼 자동저장 =====
-// 모달이 열릴 때 저장된 값 불러오기
-const _origOpenModal = window.openModal || openModal;
-function openModal() {
-  _origOpenModal();
+// 입력 시 자동저장 (event delegation)
+document.addEventListener('input', function(e) {
+  try {
+    if (e.target.id === 'cust-name') localStorage.setItem('cf_name', e.target.value);
+    if (e.target.id === 'cust-phone') localStorage.setItem('cf_phone', e.target.value);
+    if (e.target.id === 'cust-facebook') localStorage.setItem('cf_facebook', e.target.value);
+  } catch(ex) {}
+});
+
+// 주소 이미지 저장
+var _origPreviewAddr = previewAddr;
+function previewAddr(input) {
+  _origPreviewAddr(input);
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try { localStorage.setItem('cf_addr_img', e.target.result); } catch(ex) {}
+  };
+  reader.readAsDataURL(file);
+}
+
+// 저장된 값 불러오기 - openModal 이후 호출
+function loadSavedCustomerInfo() {
   setTimeout(function() {
     try {
       var n = localStorage.getItem('cf_name');
@@ -1630,47 +1691,15 @@ function openModal() {
         }
       }
     } catch(e) {}
-  }, 100);
+  }, 150);
 }
 
-// 입력 시 자동저장 (event delegation)
-document.addEventListener('input', function(e) {
-  try {
-    if (e.target.id === 'cust-name') localStorage.setItem('cf_name', e.target.value);
-    if (e.target.id === 'cust-phone') localStorage.setItem('cf_phone', e.target.value);
-    if (e.target.id === 'cust-facebook') localStorage.setItem('cf_facebook', e.target.value);
-  } catch(ex) {}
-});
-
-// 주소 이미지 저장
-var _origPreviewAddr = previewAddr;
-function previewAddr(input) {
-  _origPreviewAddr(input);
-  var file = input.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    try { localStorage.setItem('cf_addr_img', e.target.result); } catch(ex) {}
-  };
-  reader.readAsDataURL(file);
-}
-
-// 주문 시 저장된 이미지 사용
-var _origConfirmOrder = confirmOrder;
-function confirmOrder() {
-  if (!window._savedAddrFile) {
-    var img = localStorage.getItem('cf_addr_img');
-    if (img) {
-      try {
-        var arr = img.split(','), mime = arr[0].match(/:(.*?);/)[1];
-        var bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--){ u8arr[n] = bstr.charCodeAt(n); }
-        window._savedAddrFile = new File([u8arr], 'address.jpg', {type: mime});
-      } catch(e) {}
-    }
+// 주문버튼 클릭 후 자동으로 저장된 정보 불러오기
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('order-btn') || e.target.classList.contains('header-cart') || e.target.closest('.header-cart')) {
+    loadSavedCustomerInfo();
   }
-  _origConfirmOrder();
-}
+});
 </script>
 </body>
 </html>
