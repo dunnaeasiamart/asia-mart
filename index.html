@@ -1365,15 +1365,15 @@ function openModal() {
         </div>
       </div>
       <button class="confirm-btn" id="confirm-order-btn" onclick="confirmOrder()" disabled>${t.confirm_btn}</button>
-      <div id="confirm-help" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">Place Order will activate after you upload an address photo.</div>
+      <div id="confirm-help" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">📸 ${t.ph_addr}</div>
     `;
   }
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
   resetAddressInputs();
-  if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
   updateConfirmButtonState();
+  if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
 }
 
 
