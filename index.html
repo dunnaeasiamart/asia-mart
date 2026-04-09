@@ -590,7 +590,7 @@ const i18n = {
     hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
     best_title: 'Best Products',
     cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
-    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks and More',
+    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks & More',
     cat_essentials: '🧴 E Daily Essentials',
     cat_veggie: '🥬 F Vegetables & Produce',
     total_label: 'Total', select_items: 'Please select items',
@@ -627,7 +627,7 @@ const i18n = {
     hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
     best_title: 'สินค้าขายดี',
     cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
-    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม และ อื่นๆ',
+    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม & อื่นๆ',
     cat_essentials: '🧴 E สินค้าอุปโภค',
     cat_veggie: '🥬 F ผักและผลไม้',
     total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
@@ -1321,7 +1321,7 @@ function openModal() {
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
-
+}
 
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
@@ -1338,20 +1338,17 @@ const TG_CHAT  = '8626199213';
 function previewAddr(input) {
   const file = input.files[0];
   if (!file) return;
+  // 다른 input 초기화
   const otherId = input.id === 'addr-camera' ? 'addr-gallery' : 'addr-camera';
   document.getElementById(otherId).value = '';
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    document.getElementById('addr-img').src = dataUrl;
+    document.getElementById('addr-img').src = e.target.result;
     document.getElementById('addr-preview').style.display = 'block';
     document.getElementById('addr-placeholder').style.display = 'none';
-
   };
   reader.readAsDataURL(file);
 }
-
-
 
 async function sendToTelegram(text, photoFile) {
   const apiBase = `https://api.telegram.org/bot${TG_TOKEN}`;
@@ -1380,7 +1377,7 @@ function confirmOrder() {
   const phone    = document.getElementById('cust-phone')?.value.trim();
   const facebook = document.getElementById('cust-facebook')?.value.trim();
   const note     = document.getElementById('cust-note')?.value.trim();
-  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0];
+  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile || null;
 
   if (!name) { alert(t.alert_fill); return; }
   if (!phone && !facebook) { alert(t.alert_contact); return; }
@@ -1604,6 +1601,76 @@ async function loadBestFromFirebase() {
 
 loadStock();
 loadBestFromFirebase();
+
+// ===== 주문 폼 자동저장 =====
+// 모달이 열릴 때 저장된 값 불러오기
+const _origOpenModal = window.openModal || openModal;
+function openModal() {
+  _origOpenModal();
+  setTimeout(function() {
+    try {
+      var n = localStorage.getItem('cf_name');
+      var p = localStorage.getItem('cf_phone');
+      var f = localStorage.getItem('cf_facebook');
+      var img = localStorage.getItem('cf_addr_img');
+      if (n) { var el = document.getElementById('cust-name'); if(el) el.value = n; }
+      if (p) { var el = document.getElementById('cust-phone'); if(el) el.value = p; }
+      if (f) { var el = document.getElementById('cust-facebook'); if(el) el.value = f; }
+      if (img) {
+        var imgEl = document.getElementById('addr-img');
+        var preEl = document.getElementById('addr-preview');
+        var phEl = document.getElementById('addr-placeholder');
+        if (imgEl && preEl && phEl) {
+          imgEl.src = img;
+          preEl.style.display = 'block';
+          phEl.style.display = 'none';
+          fetch(img).then(function(r){ return r.blob(); }).then(function(blob){
+            window._savedAddrFile = new File([blob], 'address.jpg', {type: blob.type});
+          }).catch(function(){});
+        }
+      }
+    } catch(e) {}
+  }, 100);
+}
+
+// 입력 시 자동저장 (event delegation)
+document.addEventListener('input', function(e) {
+  try {
+    if (e.target.id === 'cust-name') localStorage.setItem('cf_name', e.target.value);
+    if (e.target.id === 'cust-phone') localStorage.setItem('cf_phone', e.target.value);
+    if (e.target.id === 'cust-facebook') localStorage.setItem('cf_facebook', e.target.value);
+  } catch(ex) {}
+});
+
+// 주소 이미지 저장
+var _origPreviewAddr = previewAddr;
+function previewAddr(input) {
+  _origPreviewAddr(input);
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try { localStorage.setItem('cf_addr_img', e.target.result); } catch(ex) {}
+  };
+  reader.readAsDataURL(file);
+}
+
+// 주문 시 저장된 이미지 사용
+var _origConfirmOrder = confirmOrder;
+function confirmOrder() {
+  if (!window._savedAddrFile) {
+    var img = localStorage.getItem('cf_addr_img');
+    if (img) {
+      try {
+        var arr = img.split(','), mime = arr[0].match(/:(.*?);/)[1];
+        var bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+        window._savedAddrFile = new File([u8arr], 'address.jpg', {type: mime});
+      } catch(e) {}
+    }
+  }
+  _origConfirmOrder();
+}
 </script>
 </body>
 </html>
