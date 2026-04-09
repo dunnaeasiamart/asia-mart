@@ -1087,6 +1087,12 @@ function saveCustField(key, value) {
   try { localStorage.setItem(key, value); } catch(e) {}
 }
 
+// 주문 폼 입력 자동저장 - event delegation
+document.addEventListener('input', function(e) {
+  const key = e.target.getAttribute('data-savekey');
+  if (key) { try { localStorage.setItem(key, e.target.value); } catch(ex) {} }
+});
+
 function renderTab(tab) {
   const container = document.getElementById('main-content');
   container.innerHTML = '';
@@ -1275,15 +1281,15 @@ function openModal() {
       <div class="customer-form">
         <div class="form-group">
           <label class="form-label">${t.field_name}</label>
-          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" oninput="saveCustField('cust_name', this.value)" />
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" data-savekey="cust_name" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" oninput="saveCustField('cust_phone', this.value)" />
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" data-savekey="cust_phone" />
         </div>
         <div class="form-group">
           <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" oninput="saveCustField('cust_facebook', this.value)" />
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" data-savekey="cust_facebook" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
