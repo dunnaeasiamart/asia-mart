@@ -1083,16 +1083,6 @@ function getItemName(item) {
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
 
-function saveCustField(key, value) {
-  try { localStorage.setItem(key, value); } catch(e) {}
-}
-
-// 주문 폼 입력 자동저장 - event delegation
-document.addEventListener('input', function(e) {
-  const key = e.target.getAttribute('data-savekey');
-  if (key) { try { localStorage.setItem(key, e.target.value); } catch(ex) {} }
-});
-
 function renderTab(tab) {
   const container = document.getElementById('main-content');
   container.innerHTML = '';
@@ -1281,15 +1271,15 @@ function openModal() {
       <div class="customer-form">
         <div class="form-group">
           <label class="form-label">${t.field_name}</label>
-          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" data-savekey="cust_name" />
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" data-savekey="cust_phone" />
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" />
         </div>
         <div class="form-group">
           <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
-          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" data-savekey="cust_facebook" />
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" />
         </div>
         <div class="form-group">
           <label class="form-label">${t.field_addr}</label>
@@ -1331,16 +1321,7 @@ function openModal() {
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
-  // 저장된 고객 정보 불러오기
-  setTimeout(() => {
-    const nameEl = document.getElementById('cust-name');
-    const phoneEl = document.getElementById('cust-phone');
-    const fbEl = document.getElementById('cust-facebook');
-    if (nameEl) nameEl.value = localStorage.getItem('cust_name') || '';
-    if (phoneEl) phoneEl.value = localStorage.getItem('cust_phone') || '';
-    if (fbEl) fbEl.value = localStorage.getItem('cust_facebook') || '';
-    loadSavedAddrImg();
-  }, 50);
+
 
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
@@ -1365,32 +1346,12 @@ function previewAddr(input) {
     document.getElementById('addr-img').src = dataUrl;
     document.getElementById('addr-preview').style.display = 'block';
     document.getElementById('addr-placeholder').style.display = 'none';
-    // 이미지 localStorage에 저장
-    try { localStorage.setItem('cust_addr_img', dataUrl); } catch(e) {}
+
   };
   reader.readAsDataURL(file);
 }
 
-// 저장된 주소 이미지 불러오기
-function loadSavedAddrImg() {
-  try {
-    const saved = localStorage.getItem('cust_addr_img');
-    if (saved) {
-      const imgEl = document.getElementById('addr-img');
-      const previewEl = document.getElementById('addr-preview');
-      const placeholderEl = document.getElementById('addr-placeholder');
-      if (imgEl && previewEl && placeholderEl) {
-        imgEl.src = saved;
-        previewEl.style.display = 'block';
-        placeholderEl.style.display = 'none';
-        // 저장된 이미지를 photoFile로도 세팅
-        fetch(saved).then(r => r.blob()).then(blob => {
-          window._savedAddrFile = new File([blob], 'address.jpg', { type: blob.type });
-        }).catch(() => {});
-      }
-    }
-  } catch(e) {}
-}
+
 
 async function sendToTelegram(text, photoFile) {
   const apiBase = `https://api.telegram.org/bot${TG_TOKEN}`;
@@ -1419,7 +1380,7 @@ function confirmOrder() {
   const phone    = document.getElementById('cust-phone')?.value.trim();
   const facebook = document.getElementById('cust-facebook')?.value.trim();
   const note     = document.getElementById('cust-note')?.value.trim();
-  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile || null;
+  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0];
 
   if (!name) { alert(t.alert_fill); return; }
   if (!phone && !facebook) { alert(t.alert_contact); return; }
