@@ -2965,7 +2965,6 @@ function doLogin() {
   if (pw === ADMIN_PW) {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
-    // Firebase 로드 후 데이터 불러오기
     setTimeout(() => { if (window.loadAll) window.loadAll(); }, 500);
   } else {
     alert('비밀번호가 틀렸습니다.');
@@ -2974,6 +2973,40 @@ function doLogin() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
 });
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function markChanged(id, type) {
+  const badge = document.getElementById(`badge_${type == 'stock' ? 'stock' : type == 'disc' ? 'disc' : 'prod'}_${id}`);
+  if (badge) badge.style.display = 'inline';
+}
+
+function applyBulkDiscount() {
+  const cat = document.getElementById('bulk-cat').value;
+  const d2 = document.getElementById('bulk-disc2').value;
+  const d3 = document.getElementById('bulk-disc3').value;
+  document.querySelectorAll('input[id^="disc2_"]').forEach(inp => {
+    const id = inp.id.replace('disc2_', '');
+    if (cat === 'all' || id.startsWith(cat)) inp.value = d2;
+  });
+  document.querySelectorAll('input[id^="disc3_"]').forEach(inp => {
+    const id = inp.id.replace('disc3_', '');
+    if (cat === 'all' || id.startsWith(cat)) inp.value = d3;
+  });
+  showToast('✅ 할인율 적용됨 (저장 버튼 눌러주세요)');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
 </script>
 
 <script type="module">
@@ -2994,22 +3027,12 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const ADMIN_PW = "asia1234";
 
-// 탭 전환
-window.switchTab = function(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  event.target.classList.add('active');
-};
+// 탭 전환 - 일반 스크립트에서 처리
 
-// 변경 표시
-window.markChanged = function(id, type) {
-  const badge = document.getElementById(`badge_${type == 'stock' ? 'stock' : type == 'disc' ? 'disc' : 'prod'}_${id}`);
-  if (badge) badge.style.display = 'inline';
-};
+// 변경 표시 - 일반 스크립트에서 처리
 
 // 전체 로드
-window.loadAll = async function() {
+async function loadAll() {
   await loadStock();
   await loadDiscount();
   await loadProducts();
@@ -3074,7 +3097,7 @@ async function loadCustomers() {
 }
 
 // 전체 저장
-window.saveAll = async function() {
+async function saveAll() {
   const updates = {};
 
   // 재고
@@ -3114,24 +3137,10 @@ window.saveAll = async function() {
   showToast('💾 저장 완료!');
 };
 
-// 일괄 할인율 적용
-window.applyBulkDiscount = function() {
-  const cat = document.getElementById('bulk-cat').value;
-  const d2 = document.getElementById('bulk-disc2').value;
-  const d3 = document.getElementById('bulk-disc3').value;
-  document.querySelectorAll('input[id^="disc2_"]').forEach(inp => {
-    const id = inp.id.replace('disc2_', '');
-    if (cat === 'all' || id.startsWith(cat)) inp.value = d2;
-  });
-  document.querySelectorAll('input[id^="disc3_"]').forEach(inp => {
-    const id = inp.id.replace('disc3_', '');
-    if (cat === 'all' || id.startsWith(cat)) inp.value = d3;
-  });
-  showToast('✅ 할인율 적용됨 (저장 버튼 눌러주세요)');
-};
+// 일괄 할인율 - 일반 스크립트에서 처리
 
 // 자동 번역 (Claude API)
-window.translateName = async function() {
+async function translateName() {
   const ko = document.getElementById('new-ko').value.trim();
   if (!ko) { alert('한국어 상품명을 먼저 입력해주세요.'); return; }
 
@@ -3186,7 +3195,7 @@ window.translateName = async function() {
 };
 
 // 고객 등록
-window.addCustomer = function() {
+function addCustomer() {
   const name = document.getElementById('cust-name').value.trim();
   const phone = document.getElementById('cust-phone').value.trim();
   const note = document.getElementById('cust-note').value.trim();
@@ -3198,21 +3207,20 @@ window.addCustomer = function() {
 };
 
 // 고객 삭제
-window.deleteCustomer = async function(key) {
+async function deleteCustomer(key) {
   if (!confirm('삭제하시겠습니까?')) return;
   await remove(ref(db, 'customers/' + key));
   loadCustomers();
   showToast('🗑️ 삭제 완료');
 };
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2500);
-}
-
-// 초기 로드
+// window에 Firebase 함수 노출
+window.loadAll = loadAll;
+window.saveAll = saveAll;
+window.translateName = translateName;
+window.addProduct = addProduct;
+window.addCustomer = addCustomer;
+window.deleteCustomer = deleteCustomer;
 </script>
 </body>
 </html>
