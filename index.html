@@ -585,7 +585,7 @@
     <div id="total-discount" style="font-size:12px;color:var(--success);font-weight:600;margin-top:2px;display:none;"></div>
     <div id="min-order-notice" style="font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;"></div>
   </div>
-  <button disabled class="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
+  <button class="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
@@ -772,11 +772,7 @@ function setLang(lang) {
 
   // Re-render current tab to update product names
   renderTab(currentTab);
-  renderTab(currentTab);
-updateSummary();
-renderTab(currentTab);
-updateSummary();
-renderBest();
+  renderBest();
   updateSummary();
 }
 
@@ -1248,18 +1244,15 @@ function updateSummary() {
   const orderBtn = document.querySelector('.order-btn');
   const MIN_ORDER = 50000;
   if (count > 0 && grand >= MIN_ORDER) {
-    minOrderEl.textContent = t.min_order_ok;
-    minOrderEl.style.color = 'var(--success)';
-    if (orderBtn) { orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; orderBtn.disabled = false; }
+    if (minOrderEl) { minOrderEl.textContent = t.min_order_ok; minOrderEl.style.color = 'var(--success)'; }
+    if (orderBtn) { orderBtn.disabled = false; orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; }
   } else if (count > 0 && grand < MIN_ORDER) {
     const need = (MIN_ORDER - grand).toLocaleString();
-    minOrderEl.textContent = t.min_order(need);
-    minOrderEl.style.color = 'var(--accent)';
-    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; orderBtn.disabled = true; }
+    if (minOrderEl) { minOrderEl.textContent = t.min_order(need); minOrderEl.style.color = 'var(--accent)'; }
+    if (orderBtn) { orderBtn.disabled = true; orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
   } else {
-    minOrderEl.textContent = t.min_order('50,000');
-    minOrderEl.style.color = 'var(--muted)';
-    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; orderBtn.disabled = true; }
+    if (minOrderEl) { minOrderEl.textContent = t.min_order('50,000'); minOrderEl.style.color = 'var(--muted)'; }
+    if (orderBtn) { orderBtn.disabled = true; orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
   }
 }
 
@@ -1779,6 +1772,11 @@ async function loadBestFromFirebase() {
 
 loadStock();
 loadBestFromFirebase();
+
+// 초기 렌더링
+renderTab(currentTab);
+renderBest();
+updateSummary();
 
 // ===== PWA =====
 // 서비스워커 등록
