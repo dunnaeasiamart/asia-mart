@@ -1809,10 +1809,18 @@ async function loadBestFromFirebase() {
 loadStock();
 loadBestFromFirebase();
 
-// 초기 렌더링
-renderTab(currentTab);
+// 초기 렌더링 - A카테고리 활성화, Order Now 비활성화
+renderTab('frozen');
 renderBest();
 updateSummary();
+// Order Now 버튼 초기 비활성화
+(function() {
+  const btn = document.querySelector('.order-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+  // A탭 active 확인
+  const firstTab = document.querySelector('.tab');
+  if (firstTab) firstTab.classList.add('active');
+})();
 
 // ===== PWA =====
 // 서비스워커 등록
