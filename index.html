@@ -1261,8 +1261,6 @@ function updateSummary() {
     minOrderEl.style.color = 'var(--muted)';
     if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
   }
-  const orderBtn = document.getElementById('order-btn');
-  if (orderBtn) orderBtn.disabled = totalItems === 0;
 }
 
 function changeQty(id, delta, e) {
