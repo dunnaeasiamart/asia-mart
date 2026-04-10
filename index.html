@@ -1250,16 +1250,16 @@ function updateSummary() {
   if (count > 0 && grand >= MIN_ORDER) {
     minOrderEl.textContent = t.min_order_ok;
     minOrderEl.style.color = 'var(--success)';
-    if (orderBtn) { orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; }
+    if (orderBtn) { orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; orderBtn.disabled = false; }
   } else if (count > 0 && grand < MIN_ORDER) {
     const need = (MIN_ORDER - grand).toLocaleString();
     minOrderEl.textContent = t.min_order(need);
     minOrderEl.style.color = 'var(--accent)';
-    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
+    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; orderBtn.disabled = true; }
   } else {
     minOrderEl.textContent = t.min_order('50,000');
     minOrderEl.style.color = 'var(--muted)';
-    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
+    if (orderBtn) { orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; orderBtn.disabled = true; }
   }
 }
 
