@@ -2032,41 +2032,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 홈화면 추가 안내 (Android Chrome)
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  // 3초 후 안내 배너 표시
-  setTimeout(showInstallBanner, 3000);
-});
-
-function showInstallBanner() {
-  if (!deferredPrompt) return;
-  const banner = document.createElement('div');
-  banner.id = 'pwa-banner';
-  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1814;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:320px;width:90%;';
-  banner.innerHTML = `
-    <div style="flex:1;">
-      <div style="font-weight:700;margin-bottom:2px;">📱 홈 화면에 추가</div>
-      <div style="font-size:11px;opacity:0.7;">ສ້າງທາງລັດ / สร้างทางลัด / Add shortcut</div>
-    </div>
-    <button onclick="installPWA()" style="background:#c84b2f;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
-    <button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:#fff;opacity:0.5;font-size:18px;cursor:pointer;padding:0 4px;">×</button>
-  `;
-  document.body.appendChild(banner);
-}
-
-function installPWA() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function() {
-    deferredPrompt = null;
-    const banner = document.getElementById('pwa-banner');
-    if (banner) banner.remove();
-  });
-}
-
 // iOS 안내 (Safari)
 function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isInStandaloneMode() { return window.matchMedia('(display-mode: standalone)').matches; }
