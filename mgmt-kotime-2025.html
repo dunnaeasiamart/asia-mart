@@ -373,7 +373,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
 <!-- 카테고리 수정/추가 모달 -->
 <div class="modal-overlay" id="cat-modal">
-  <div class="modal-box" style="max-width:400px;">
+  <div class="modal-box" style="max-width:440px;">
     <h3 id="cat-modal-title">📂 카테고리 수정</h3>
     <div class="modal-grid">
       <div class="full">
@@ -388,9 +388,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <label>이름 (label)</label>
         <input type="text" id="cat-label" placeholder="예: A 냉동음식">
       </div>
-      <div>
-        <label>이모지</label>
-        <input type="text" id="cat-emoji" placeholder="🧊">
+      <div class="full">
+        <label>이모지 선택</label>
+        <div id="emoji-picker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+        <input type="text" id="cat-emoji" placeholder="직접 입력 또는 위에서 선택" style="margin-top:4px;">
       </div>
     </div>
     <div class="modal-btns">
@@ -834,15 +835,19 @@ async function openEditModal(catKey, itemId, idx) {
 
   _editMeta = { catKey, oldId: itemId, idx };
 
-  // 카테고리 select 옵션 동적 생성
+  // 카테고리 select 옵션 동적 생성 (A→B→C 순서)
   const catSnap = await db.ref('catalog').get();
   const catData = catSnap.val() || {};
   const sel = document.getElementById('edit-cat');
   sel.innerHTML = '';
-  Object.entries(catData).forEach(([k, c]) => {
+  const orderedKeys = [
+    ...CAT_ORDER.filter(k => catData[k]),
+    ...Object.keys(catData).filter(k => !CAT_ORDER.includes(k)).sort()
+  ];
+  orderedKeys.forEach(k => {
     const opt = document.createElement('option');
     opt.value = k;
-    opt.textContent = getLabel(c, k);
+    opt.textContent = getLabel(catData[k], k);
     if (k === catKey) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -941,14 +946,39 @@ async function submitEditProduct() {
 let _catEditKey = null; // null이면 추가 모드
 
 const FALLBACK_LABELS = { frozen:'A 냉동음식', noodle:'B 면 종류', sauce:'C 각종 소스', other:'D 음료 및 기타', essentials:'E 생활용품', veggie:'F 농산물' };
+const CAT_ORDER = ['frozen','noodle','sauce','other','essentials','veggie'];
 
-// label이 객체({ko,en,...})이거나 문자열이거나 모두 안전하게 처리
-function getLabel(cat, key) {
-  const raw = cat?.label;
-  if (!raw) return FALLBACK_LABELS[key] || key;
-  if (typeof raw === 'string') return raw;
-  if (typeof raw === 'object') return raw.ko || raw.en || Object.values(raw)[0] || FALLBACK_LABELS[key] || key;
-  return FALLBACK_LABELS[key] || key;
+// 이모지 후보 목록
+const EMOJI_CANDIDATES = [
+  '🧊','🥶','❄️','🍖','🥩','🥓','🍗','🦐','🦑','🐟','🐷','🐄',
+  '🍜','🍝','🍣','🍱','🥟','🍛','🍲','🫕','🥘','🍚',
+  '🥫','🧄','🧅','🌶️','🫙','🍯','🧂','🥚','🧆',
+  '🧃','🥤','🍺','🧊','🥛','☕','🫖','🍵','🧋','💧',
+  '🧴','🧼','🪥','🧹','🧺','🛒','🏠','💊','🪴','🌿',
+  '🥬','🥦','🍅','🥕','🧅','🌽','🥑','🍆','🫑','🍄'
+];
+
+function buildEmojiPicker(currentEmoji) {
+  const picker = document.getElementById('emoji-picker');
+  picker.innerHTML = '';
+  EMOJI_CANDIDATES.forEach(em => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = em;
+    btn.title = em;
+    const isSelected = em === currentEmoji;
+    btn.style.cssText = `font-size:22px;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid ${isSelected ? '#c84b2f' : 'transparent'};background:${isSelected ? '#fde8e8' : '#f5f5f5'};transition:all 0.1s;`;
+    btn.onclick = () => {
+      document.getElementById('cat-emoji').value = em;
+      picker.querySelectorAll('button').forEach(b => {
+        b.style.borderColor = 'transparent';
+        b.style.background = '#f5f5f5';
+      });
+      btn.style.borderColor = '#c84b2f';
+      btn.style.background = '#fde8e8';
+    };
+    picker.appendChild(btn);
+  });
 }
 
 async function loadCategories() {
@@ -957,7 +987,15 @@ async function loadCategories() {
   const tbody = document.getElementById('category-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  Object.entries(data).forEach(([key, cat]) => {
+
+  // A→B→C→D→E→F 순서 정렬
+  const ordered = [
+    ...CAT_ORDER.filter(k => data[k]),
+    ...Object.keys(data).filter(k => !CAT_ORDER.includes(k)).sort()
+  ];
+
+  ordered.forEach(key => {
+    const cat = data[key];
     const count = (cat.items || []).length;
     const label = getLabel(cat, key);
     const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
@@ -977,11 +1015,13 @@ async function openEditCatModal(key) {
   _catEditKey = key;
   const snap = await db.ref('catalog/' + key).get();
   const cat = snap.val() || {};
+  const currentEmoji = typeof cat.emoji === 'string' ? cat.emoji : '';
   document.getElementById('cat-modal-title').textContent = '📂 카테고리 수정';
   document.getElementById('cat-key').value = key;
   document.getElementById('cat-key-edit-wrap').style.display = 'none';
   document.getElementById('cat-label').value = getLabel(cat, key);
-  document.getElementById('cat-emoji').value = typeof cat.emoji === 'string' ? cat.emoji : '';
+  document.getElementById('cat-emoji').value = currentEmoji;
+  buildEmojiPicker(currentEmoji);
   document.getElementById('cat-modal').classList.add('open');
 }
 
@@ -993,6 +1033,7 @@ function openAddCatModal() {
   document.getElementById('cat-key-edit-wrap').style.display = 'none';
   document.getElementById('cat-label').value = '';
   document.getElementById('cat-emoji').value = '';
+  buildEmojiPicker('');
   document.getElementById('cat-modal').classList.add('open');
 }
 
