@@ -2051,7 +2051,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <div class="form-grid">
         <div>
           <label>카테고리</label>
-          <select id="new-cat">
+          <select id="new-cat" onchange="autoFillId()">
             <option value="a">A 냉동음식</option>
             <option value="b">B 면 종류</option>
             <option value="c">C 각종 소스</option>
@@ -3008,7 +3008,7 @@ function doLogin() {
   if (pw === ADMIN_PW) {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
-    setTimeout(() => { if (window.loadAll) window.loadAll(); }, 500);
+    setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 1000); }, 500);
   } else {
     alert('비밀번호가 틀렸습니다.');
   }
@@ -3271,6 +3271,30 @@ async function translateName() {
   }
 }
 
+function autoFillId() {
+  const cat = document.getElementById('new-cat').value;
+  // 현재 카탈로그에서 해당 카테고리 마지막 번호 찾기
+  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
+  const catKey = catMap[cat];
+  if (!catKey || !window.catalog || !window.catalog[catKey]) {
+    document.getElementById('new-id').value = cat + '1';
+    return;
+  }
+  const items = window.catalog[catKey].items || [];
+  // 해당 카테고리 ID 중 숫자 최대값 찾기
+  let maxNum = 0;
+  items.forEach(item => {
+    const match = item.id.match(/^[a-z]+(\d+)/);
+    if (match) maxNum = Math.max(maxNum, parseInt(match[1]));
+  });
+  const nextNum = maxNum + 1;
+  // 카테고리별 포맷 (b,c,d,e는 2자리)
+  const formatted = cat === 'a'
+    ? cat + nextNum
+    : cat + String(nextNum).padStart(2, '0');
+  document.getElementById('new-id').value = formatted;
+}
+
 function addProduct() {
   const id = document.getElementById('new-id').value.trim().toLowerCase();
   const en = document.getElementById('new-en').value.trim();
@@ -3279,10 +3303,15 @@ function addProduct() {
   const lo = document.getElementById('new-lo').value.trim();
   const price = parseInt(document.getElementById('new-price').value);
   const img = document.getElementById('new-img').value.trim();
-  if (!id || !en || !price) { alert('ID, 영문명, 가격은 필수입니다.'); return; }
-  db.ref('products/' + id).set({ en, ko, th, lo, price, img });
-  showToast('✅ 상품 추가됨!');
+  if (!id) { alert('상품 ID를 입력해주세요.'); return; }
+  if (!ko) { alert('한국어 상품명을 입력해주세요.'); return; }
+  if (!price) { alert('가격을 입력해주세요.'); return; }
+  // 영문명이 없으면 한국어명으로 대체
+  const finalEn = en || ko;
+  db.ref('products/' + id).set({ en: finalEn, ko, th, lo, price, img });
+  showToast('✅ 상품 추가됨! (index.html에도 수동 추가 필요)');
   ['new-id','new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => document.getElementById(f).value = '');
+  autoFillId();
 }
 
 function addCustomer() {
