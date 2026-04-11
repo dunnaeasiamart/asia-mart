@@ -79,6 +79,18 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 .form-grid input:focus, .form-grid select:focus { border-color: #c84b2f; }
 .form-full { grid-column: 1 / -1; }
 
+/* 모달 */
+.modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff;border-radius:16px;padding:28px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18); }
+.modal-box h3 { font-size:16px;font-weight:700;margin-bottom:20px; }
+.modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px; }
+.modal-grid .full { grid-column:1/-1; }
+.modal-grid label { font-size:12px;color:#888;display:block;margin-bottom:4px; }
+.modal-grid input, .modal-grid select { width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none; }
+.modal-grid input:focus, .modal-grid select:focus { border-color:#c84b2f; }
+.modal-btns { display:flex;gap:8px;justify-content:flex-end;margin-top:20px; }
+
 /* 토스트 */
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; z-index: 999; display: none; white-space: nowrap; }
 </style>
@@ -109,6 +121,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn active" onclick="switchTab('stock')">📦 재고 관리</button>
     <button class="tab-btn" onclick="switchTab('discount')">🏷️ 할인율</button>
     <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
+    <button class="tab-btn" onclick="switchTab('category')">📂 카테고리</button>
     <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
     <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
     <button class="tab-btn" onclick="switchTab('new')">🆕 신상품</button>
@@ -213,18 +226,37 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <button class="btn btn-primary" style="margin-top:16px;" onclick="addProduct()">상품 추가</button>
     </div>
 
-    <!-- 상품 수정 -->
+    <!-- 상품 목록 테이블 -->
     <div class="table-wrap">
       <table>
         <thead><tr style="background:#f5f5f5;">
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">번호</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:55px;">번호</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">영문명</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">한국명</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">1개 가격</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;">이미지 URL</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">삭제</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:90px;">가격</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">수정/삭제</th>
         </tr></thead>
         <tbody id="product-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 카테고리 관리 탭 -->
+  <div id="tab-category" class="tab-content">
+    <div class="table-wrap" style="max-width:1000px;margin:24px auto;">
+      <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;font-size:14px;">카테고리 목록</span>
+        <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">키</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">이름 (label)</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">이모지</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">상품수</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">수정</th>
+        </tr></thead>
+        <tbody id="category-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -294,6 +326,80 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
 </div><!-- end main-page -->
 
+<!-- 상품 수정 모달 -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <h3>✏️ 상품 수정</h3>
+    <div class="modal-grid">
+      <div>
+        <label>카테고리</label>
+        <select id="edit-cat"></select>
+      </div>
+      <div>
+        <label>상품 ID</label>
+        <input type="text" id="edit-id" placeholder="A01">
+      </div>
+      <div class="full">
+        <label>한국어명</label>
+        <input type="text" id="edit-ko">
+      </div>
+      <div>
+        <label>영문명</label>
+        <input type="text" id="edit-en">
+      </div>
+      <div>
+        <label>태국어명</label>
+        <input type="text" id="edit-th">
+      </div>
+      <div>
+        <label>라오스어명</label>
+        <input type="text" id="edit-lo">
+      </div>
+      <div>
+        <label>1개 가격 (₩)</label>
+        <input type="number" id="edit-price">
+      </div>
+      <div class="full">
+        <label>이미지 URL</label>
+        <input type="text" id="edit-img">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="closeEditModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitEditProduct()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 카테고리 수정/추가 모달 -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <h3 id="cat-modal-title">📂 카테고리 수정</h3>
+    <div class="modal-grid">
+      <div class="full">
+        <label>키 (영문, 변경불가)</label>
+        <input type="text" id="cat-key" placeholder="예: frozen" style="background:#f5f5f5;" readonly>
+      </div>
+      <div class="full" id="cat-key-edit-wrap" style="display:none;">
+        <label>새 키 (영문 소문자, 공백없이)</label>
+        <input type="text" id="cat-key-new" placeholder="예: seafood">
+      </div>
+      <div class="full">
+        <label>이름 (label)</label>
+        <input type="text" id="cat-label" placeholder="예: A 냉동음식">
+      </div>
+      <div>
+        <label>이모지</label>
+        <input type="text" id="cat-emoji" placeholder="🧊">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="closeCatModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitCatEdit()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -317,6 +423,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   event.target.classList.add('active');
+  if (tab === 'category') loadCategories();
 }
 
 function markChanged(id, type) {
@@ -457,17 +564,19 @@ async function loadCatalogForAdmin() {
   Object.entries(catMap).forEach(([catKey, catInfo]) => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
-    tbody.innerHTML += `<tr><td colspan="5" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${catInfo.label}</td></tr>`;
+    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${catInfo.label}</td></tr>`;
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       tbody.innerHTML += `<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
-        <td><input id="en_${item.id}" value="${cleanEn}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
-        <td><input id="ko_${item.id}" value="${cleanKo}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
-        <td><input id="price_${item.id}" value="${item.price1||''}" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="가격"></td>
-        <td><input id="img_${item.id}" value="${item.image||''}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="이미지 URL"></td>
-        <td style="text-align:center;"><button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️</button></td>
+        <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
+        <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
+        <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
+        <td style="padding:8px 6px;display:flex;gap:4px;">
+          <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✏️ 수정</button>
+          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️</button>
+        </td>
       </tr>`;
     });
   });
@@ -713,6 +822,193 @@ async function autoFillId() {
   const nextNum = maxNum + 1;
   const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
   document.getElementById('new-id').value = formatted;
+}
+
+// ── 상품 수정 모달 ──
+let _editMeta = {}; // { catKey, oldId, idx }
+
+async function openEditModal(catKey, itemId, idx) {
+  const snap = await db.ref('catalog/' + catKey + '/items/' + idx).get();
+  const item = snap.val();
+  if (!item) { showToast('상품 정보를 불러올 수 없습니다.'); return; }
+
+  _editMeta = { catKey, oldId: itemId, idx };
+
+  // 카테고리 select 옵션 동적 생성
+  const catSnap = await db.ref('catalog').get();
+  const catData = catSnap.val() || {};
+  const sel = document.getElementById('edit-cat');
+  sel.innerHTML = '';
+  Object.entries(catData).forEach(([k, c]) => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = c.label || k;
+    if (k === catKey) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  const clean = v => (v || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  document.getElementById('edit-id').value    = item.id || itemId;
+  document.getElementById('edit-ko').value    = clean(item.name_ko);
+  document.getElementById('edit-en').value    = clean(item.name_en);
+  document.getElementById('edit-th').value    = clean(item.name_th);
+  document.getElementById('edit-lo').value    = clean(item.name_lo);
+  document.getElementById('edit-price').value = item.price1 || '';
+  document.getElementById('edit-img').value   = item.image || '';
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function submitEditProduct() {
+  const newCatKey = document.getElementById('edit-cat').value;
+  let newId       = document.getElementById('edit-id').value.trim().toUpperCase();
+  const ko        = document.getElementById('edit-ko').value.trim();
+  const en        = document.getElementById('edit-en').value.trim();
+  const th        = document.getElementById('edit-th').value.trim();
+  const lo        = document.getElementById('edit-lo').value.trim();
+  const price     = parseInt(document.getElementById('edit-price').value);
+  const img       = document.getElementById('edit-img').value.trim();
+
+  if (!ko)    { alert('한국어 상품명을 입력해주세요.'); return; }
+  if (!price) { alert('가격을 입력해주세요.'); return; }
+
+  const { catKey: oldCatKey, oldId, idx } = _editMeta;
+  const catChanged = newCatKey !== oldCatKey;
+
+  // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
+  if (catChanged) {
+    const newCatSnap = await db.ref('catalog/' + newCatKey).get();
+    const newCatData = newCatSnap.val() || {};
+    const newCatItems = newCatData.items || [];
+    let maxNum = 0;
+    newCatItems.forEach(item => {
+      const match = String(item.id).match(/\d+/);
+      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    });
+    const prefix = (newCatData.label || newCatKey).charAt(0).toUpperCase();
+    newId = prefix + String(maxNum + 1).padStart(2, '0');
+  }
+
+  const idChanged = newId !== oldId;
+
+  const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿' };
+  const updatedItem = {
+    id: newId, emoji: '',
+    name_en: en || ko, name_ko: ko, name_th: th, name_lo: lo,
+    price1: price, price2: 0, price3: 0, image: img
+  };
+
+  if (catChanged || idChanged) {
+    // 기존 카테고리에서 제거
+    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
+    const oldItems = (oldSnap.val() || []).filter((_, i) => i !== idx);
+    await db.ref('catalog/' + oldCatKey + '/items').set(oldItems);
+
+    // 새 카테고리에 추가
+    const newSnap = await db.ref('catalog/' + newCatKey + '/items').get();
+    const newItems = newSnap.val() || [];
+    updatedItem.emoji = catEmojis[newCatKey] || '🛒';
+    newItems.push(updatedItem);
+    await db.ref('catalog/' + newCatKey + '/items').set(newItems);
+
+    // discount 키도 이동
+    const discSnap = await db.ref('discount/' + oldId).get();
+    if (discSnap.val()) {
+      await db.ref('discount/' + newId).set(discSnap.val());
+      await db.ref('discount/' + oldId).remove();
+    }
+  } else {
+    // 같은 카테고리, 같은 ID → 필드만 업데이트
+    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items/' + idx).get();
+    const existing = oldSnap.val() || {};
+    updatedItem.emoji  = existing.emoji || '';
+    updatedItem.price2 = existing.price2 || 0;
+    updatedItem.price3 = existing.price3 || 0;
+    await db.ref('catalog/' + oldCatKey + '/items/' + idx).set(updatedItem);
+  }
+
+  closeEditModal();
+  showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
+  await loadCatalogForAdmin();
+  autoFillId();
+}
+
+// ── 카테고리 관리 ──
+let _catEditKey = null; // null이면 추가 모드
+
+async function loadCategories() {
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  Object.entries(data).forEach(([key, cat]) => {
+    const count = (cat.items || []).length;
+    tbody.innerHTML += `<tr>
+      <td style="padding:10px 12px;font-size:12px;color:#888;">${key}</td>
+      <td style="padding:10px 12px;font-size:13px;">${cat.label || ''}</td>
+      <td style="padding:10px 12px;font-size:18px;">${cat.emoji || ''}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#888;">${count}개</td>
+      <td style="padding:10px 6px;">
+        <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✏️ 수정</button>
+      </td>
+    </tr>`;
+  });
+}
+
+async function openEditCatModal(key) {
+  _catEditKey = key;
+  const snap = await db.ref('catalog/' + key).get();
+  const cat = snap.val() || {};
+  document.getElementById('cat-modal-title').textContent = '📂 카테고리 수정';
+  document.getElementById('cat-key').value = key;
+  document.getElementById('cat-key-edit-wrap').style.display = 'none';
+  document.getElementById('cat-label').value = cat.label || '';
+  document.getElementById('cat-emoji').value = cat.emoji || '';
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function openAddCatModal() {
+  _catEditKey = null;
+  document.getElementById('cat-modal-title').textContent = '📂 카테고리 추가';
+  document.getElementById('cat-key').value = '';
+  document.getElementById('cat-key').removeAttribute('readonly');
+  document.getElementById('cat-key-edit-wrap').style.display = 'none';
+  document.getElementById('cat-label').value = '';
+  document.getElementById('cat-emoji').value = '';
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function closeCatModal() {
+  document.getElementById('cat-modal').classList.remove('open');
+  document.getElementById('cat-key').setAttribute('readonly', true);
+}
+
+async function submitCatEdit() {
+  const label = document.getElementById('cat-label').value.trim();
+  const emoji = document.getElementById('cat-emoji').value.trim();
+
+  if (!label) { alert('카테고리 이름을 입력해주세요.'); return; }
+
+  if (_catEditKey) {
+    // 수정
+    await db.ref('catalog/' + _catEditKey).update({ label, emoji });
+    showToast('✅ 카테고리 수정 완료!');
+  } else {
+    // 추가
+    const key = document.getElementById('cat-key').value.trim().toLowerCase().replace(/\s/g,'');
+    if (!key) { alert('키를 입력해주세요.'); return; }
+    const exists = await db.ref('catalog/' + key).get();
+    if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
+    await db.ref('catalog/' + key).set({ label, emoji, items: [] });
+    showToast('✅ 카테고리 추가 완료!');
+  }
+  closeCatModal();
+  loadCategories();
 }
 
 async function deleteProduct(catKey, itemId) {
