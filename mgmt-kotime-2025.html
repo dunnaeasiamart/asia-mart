@@ -678,9 +678,10 @@ async function translateName() {
 }
 
 function autoFillId() {
-  const cat = document.getElementById('new-cat').value;
-  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
+  const cat = document.getElementById('new-cat').value.toLowerCase();
+  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials', f: 'veggie' };
   const catKey = catMap[cat];
+  if (!catKey) return;
 
   // Firebase에서 카탈로그 로드
   db.ref('catalog/' + catKey + '/items').once('value', snap => {
