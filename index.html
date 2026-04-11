@@ -1536,7 +1536,7 @@ async function confirmOrder() {
   updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
-let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d01','e01']; // 기본값 10개
+let bestIds = ['A01','B25','C15','C19','D16','A06','C14','B01','D01','E01']; // 기본값 10개
 window.bestIds = bestIds;
 let newIds = []; // 신상품 목록 - Firebase에서 불러옴
 window.newIds = newIds;
@@ -1748,13 +1748,16 @@ window.startNewAutoScroll = startNewAutoScroll;
 
 // ===== 초기화 =====
 setLang(currentLang);
-renderTab('frozen');
-renderBest();
 updateSummary();
 // Order Now 비활성화
 (function() {
   var btn = document.querySelector('.order-btn');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+})();
+// 카탈로그 로딩 중 표시
+(function() {
+  var main = document.getElementById('main-content');
+  if (main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#aaa;"><div style="font-size:32px;margin-bottom:12px;">⏳</div><div style="font-size:14px;">상품 불러오는 중...</div><div style="font-size:11px;margin-top:6px;font-family:\'Noto Sans Lao\',\'Noto Sans Thai\',sans-serif;">ກຳລັງໂຫລດ... / กำลังโหลด...</div></div>';
 })();
 </script>
 
@@ -1790,7 +1793,6 @@ async function loadCatalogFromFirebase() {
     const snapshot = await get(ref(db, 'catalog'));
     const data = snapshot.val();
     if (data) {
-      // Firebase 데이터를 catalog 형식으로 변환
       Object.entries(data).forEach(([catKey, cat]) => {
         catalog[catKey] = {
           label: cat.label,
@@ -1798,13 +1800,18 @@ async function loadCatalogFromFirebase() {
           items: cat.items || []
         };
       });
-      renderTab(currentTab);
+      // 카탈로그 로드 완료 후 렌더링
+      renderTab('frozen');
       renderBest();
       if (typeof window.renderNew === 'function') window.renderNew();
+      updateSummary();
       console.log('✅ 카탈로그 로드 완료:', Object.keys(catalog).length, '개 카테고리');
     }
   } catch(e) {
     console.log('카탈로그 로드 실패:', e);
+    // 실패 시 빈 화면 안내
+    var main = document.getElementById('main-content');
+    if (main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#c84b2f;"><div style="font-size:32px;margin-bottom:12px;">⚠️</div><div>상품을 불러오지 못했습니다. 새로고침 해주세요.</div></div>';
   }
 }
 
