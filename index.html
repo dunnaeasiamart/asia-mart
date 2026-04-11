@@ -142,6 +142,7 @@
     scrollbar-width: none;
     scroll-behavior: smooth;
     cursor: grab;
+    align-items: stretch;
   }
   .best-scroll::-webkit-scrollbar { display: none; }
   .best-scroll.dragging { cursor: grabbing; scroll-behavior: auto; }
@@ -154,6 +155,8 @@
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
   }
   .best-card:active { transform: scale(0.97); }
   .best-card.has-qty {
@@ -180,7 +183,7 @@
     padding: 8px;
     display: flex;
     flex-direction: column;
-    height: 80px;
+    flex: 1;
   }
   .best-card-name {
     font-size: 11px;
