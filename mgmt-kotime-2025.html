@@ -133,7 +133,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <div id="tab-discount" class="tab-content">
     <div class="bulk-box">
       <label>전체/카테고리 일괄 적용:</label>
-      <select id="bulk-cat">
+      <select id="bulk-cat" onchange="filterDiscountTable()">
         <option value="all">전체</option>
         <option value="A">A 냉동음식</option>
         <option value="B">B 면 종류</option>
@@ -337,6 +337,25 @@ function applyBulkDiscount() {
     if (cat === 'all' || id.toUpperCase().startsWith(cat.toUpperCase())) inp.value = d3;
   });
   showToast('✅ 할인율 적용됨 (저장 버튼 눌러주세요)');
+}
+
+function filterDiscountTable() {
+  const cat = document.getElementById('bulk-cat').value;
+  const tbody = document.getElementById('discount-tbody');
+  if (!tbody) return;
+  Array.from(tbody.rows).forEach(row => {
+    // cat-header 행 (colspan=5인 카테고리 구분선)
+    if (row.cells.length === 1) {
+      const text = row.cells[0].textContent.trim(); // 예: "A 냉동음식"
+      const rowCat = text.charAt(0).toUpperCase(); // "A"
+      row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
+    } else {
+      // 상품 행
+      const id = row.cells[0]?.textContent.trim(); // 예: "B01"
+      const rowCat = id.charAt(0).toUpperCase();
+      row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
+    }
+  });
 }
 
 function showToast(msg) {
