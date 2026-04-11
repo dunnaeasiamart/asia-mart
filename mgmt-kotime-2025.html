@@ -3308,8 +3308,25 @@ function addProduct() {
   if (!price) { alert('가격을 입력해주세요.'); return; }
   // 영문명이 없으면 한국어명으로 대체
   const finalEn = en || ko;
-  db.ref('products/' + id).set({ en: finalEn, ko, th, lo, price, img });
-  showToast('✅ 상품 추가됨! (index.html에도 수동 추가 필요)');
+  const cat = document.getElementById('new-cat').value;
+  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
+  const catKey = catMap[cat];
+  const emoji = { a:'🧊', b:'🍜', c:'🥫', d:'🧃', e:'🧴' }[cat] || '🛒';
+
+  // Firebase catalog에 바로 저장
+  const newItem = {
+    id, emoji,
+    name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
+    price1: price, price2: 0, price3: 0, image: img
+  };
+
+  db.ref('catalog/' + catKey + '/items').once('value', snap => {
+    const items = snap.val() || [];
+    items.push(newItem);
+    db.ref('catalog/' + catKey + '/items').set(items);
+    showToast('✅ 상품 추가 완료! 메인 페이지에 바로 반영됩니다.');
+  });
+
   ['new-id','new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => document.getElementById(f).value = '');
   autoFillId();
 }
