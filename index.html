@@ -570,6 +570,13 @@
   <div class="best-scroll" id="best-scroll"></div>
 </div>
 
+<div class="best-section" id="new-section" style="display:none;">
+  <div class="best-header">
+    <div class="best-title">🆕 <span data-t="new_arrivals">New Arrivals</span></div>
+  </div>
+  <div class="best-scroll" id="new-scroll"></div>
+</div>
+
 <div class="tabs-wrap">
   <div class="tabs">
     <button class="tab active" onclick="switchTab(this,'frozen')" data-t="cat_frozen">🧊 A Frozen Food</button>
@@ -645,6 +652,12 @@ const i18n = {
     total_discount: (n) => `Total saved: -${n}`,
     min_order: (n) => `⚠️ ₩${n} more for minimum order (₩50,000)`,
     min_order_ok: '✅ Free delivery included!',
+    new_arrivals: '🆕 New Arrivals',
+    delivery_type: 'Delivery Method',
+    delivery_home: '🛵 Home Delivery (Pay on delivery)',
+    delivery_parcel: '📦 Parcel (Prepayment required)',
+    parcel_notice: '⚠️ Parcel orders require prepayment. We will contact you via Messenger with payment details.',
+    frozen_warning: '🧊 Your order includes frozen items. Additional ice pack & box fee applies.',
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -682,6 +695,12 @@ const i18n = {
     total_discount: (n) => `ประหยัดรวม: -${n}`,
     min_order: (n) => `⚠️ ต้องการอีก ₩${n} (ขั้นต่ำ ₩50,000)`,
     min_order_ok: '✅ จัดส่งฟรี!',
+    new_arrivals: '🆕 สินค้าใหม่',
+    delivery_type: 'วิธีการจัดส่ง',
+    delivery_home: '🛵 จัดส่งถึงบ้าน (ชำระเมื่อได้รับ)',
+    delivery_parcel: '📦 ส่งพัสดุ (ชำระล่วงหน้า)',
+    parcel_notice: '⚠️ การสั่งพัสดุต้องชำระเงินล่วงหน้า เราจะติดต่อผ่าน Messenger พร้อมรายละเอียดการชำระ',
+    frozen_warning: '🧊 มีสินค้าแช่แข็งในคำสั่ง มีค่าใช้จ่ายเพิ่มเติมสำหรับกล่องน้ำแข็งและสารทำความเย็น',
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -719,6 +738,12 @@ const i18n = {
     total_discount: (n) => `총 할인: -${n}`,
     min_order: (n) => `⚠️ ${n} 더 담으면 주문 가능 (최소 ₩50,000)`,
     min_order_ok: '✅ 무료배송 포함!',
+    new_arrivals: '🆕 신상품',
+    delivery_type: '배달 방식',
+    delivery_home: '🛵 일반 배달 (현장결제)',
+    delivery_parcel: '📦 택배 (선입금 필요)',
+    parcel_notice: '⚠️ 택배 주문은 선입금이 필요합니다. 메신저로 입금 안내를 드릴게요.',
+    frozen_warning: '🧊 냉동 상품이 포함되어 있습니다. 아이스박스 및 보냉재 추가 비용이 발생합니다.',
   },
   lo: {
     cart: 'ກະຕ່າ', hero_title: 'ອາຫານເອເຊຍແທ້<br>ສັ່ງຊື້ອອນໄລນ໌',
@@ -756,10 +781,25 @@ const i18n = {
     total_discount: (n) => `ປະຫຍັດລວມ: -${n}`,
     min_order: (n) => `⚠️ ຕ້ອງການອີກ ₩${n} (ຂັ້ນຕ່ຳ ₩50,000)`,
     min_order_ok: '✅ ສົ່ງຟຣີ!',
+    new_arrivals: '🆕 ສິນຄ້າໃໝ່',
+    delivery_type: 'ວິທີການສົ່ງ',
+    delivery_home: '🛵 ສົ່ງເຖິງບ້ານ (ຊຳລະເມື່ອຮັບ)',
+    delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
+    parcel_notice: '⚠️ ການສັ່ງພັດສະດຸຕ້ອງຊຳລະລ່ວງໜ້າ. ພວກເຮົາຈະຕິດຕໍ່ທາງ Messenger ພ້ອມລາຍລະອຽດການຊຳລະ',
+    frozen_warning: '🧊 ມີສິນຄ້າແຊ່ແຂງໃນຄຳສັ່ງ. ມີຄ່າໃຊ້ຈ່າຍເພີ່ມສຳລັບກ່ອງນ້ຳກ້ອນ',
   }
 };
 
-let currentLang = 'en';
+// 브라우저 언어 자동 감지
+function detectLang() {
+  const nav = navigator.language || navigator.userLanguage || 'en';
+  const lang = nav.toLowerCase().split('-')[0];
+  if (lang === 'lo') return 'lo';
+  if (lang === 'th') return 'th';
+  if (lang === 'ko') return 'ko';
+  return 'en';
+}
+let currentLang = detectLang();
 
 function setLang(lang) {
   currentLang = lang;
@@ -1328,6 +1368,28 @@ function openModal() {
       <div style="margin:16px 0; background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:10px 14px; font-size:13px; color:#7a6000;">
         ${t.pay_modal}
       </div>
+
+      <!-- 배달 방식 선택 (택배 준비중) -->
+      <div class="form-group" style="margin-bottom:16px;display:none;" id="delivery-type-section">
+        <label class="form-label">🚚 ${t.delivery_type}</label>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" id="btn-delivery" onclick="selectDelivery('home')"
+            style="flex:1;padding:12px 8px;border:2px solid #c84b2f;border-radius:10px;background:#c84b2f;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+            🛵 ${t.delivery_home}
+          </button>
+          <button type="button" id="btn-parcel" onclick="selectDelivery('parcel')"
+            style="flex:1;padding:12px 8px;border:2px solid #ddd;border-radius:10px;background:#fff;color:#666;font-size:13px;font-weight:700;cursor:pointer;">
+            📦 ${t.delivery_parcel}
+          </button>
+        </div>
+        <div id="parcel-notice" style="display:none;margin-top:10px;background:#fff8f0;border:1px solid #c84b2f;border-radius:8px;padding:10px 12px;font-size:12px;color:#c84b2f;line-height:1.6;">
+          ${t.parcel_notice}
+        </div>
+        <div id="frozen-notice" style="display:none;margin-top:8px;background:#e8f4fd;border:1px solid #90caf9;border-radius:8px;padding:10px 12px;font-size:12px;color:#1565c0;line-height:1.6;">
+          ${t.frozen_warning}
+        </div>
+      </div>
+
       <div class="customer-form">
         <div class="form-group">
           <label class="form-label">${t.field_name}</label>
@@ -1403,6 +1465,31 @@ const ORDER_API_URL = `https://formsubmit.co/ajax/${ORDER_EMAIL}`;
 
 function saveCustField(key, value) {
   try { localStorage.setItem(key, value); } catch(e) {}
+}
+
+let currentDelivery = 'home'; // 'home' or 'parcel'
+
+function selectDelivery(type) {
+  currentDelivery = type;
+  const btnHome = document.getElementById('btn-delivery');
+  const btnParcel = document.getElementById('btn-parcel');
+  const parcelNotice = document.getElementById('parcel-notice');
+  const frozenNotice = document.getElementById('frozen-notice');
+
+  if (type === 'home') {
+    btnHome.style.background = '#c84b2f'; btnHome.style.color = '#fff'; btnHome.style.borderColor = '#c84b2f';
+    btnParcel.style.background = '#fff'; btnParcel.style.color = '#666'; btnParcel.style.borderColor = '#ddd';
+    parcelNotice.style.display = 'none';
+    frozenNotice.style.display = 'none';
+  } else {
+    btnParcel.style.background = '#c84b2f'; btnParcel.style.color = '#fff'; btnParcel.style.borderColor = '#c84b2f';
+    btnHome.style.background = '#fff'; btnHome.style.color = '#666'; btnHome.style.borderColor = '#ddd';
+    parcelNotice.style.display = 'block';
+    // 냉동 상품 포함 여부 확인
+    const hasFrozen = Object.values(catalog).find(c => c.items.some(item => item.id.startsWith('a') && (quantities[item.id] || 0) > 0));
+    if (hasFrozen) frozenNotice.style.display = 'block';
+    else frozenNotice.style.display = 'none';
+  }
 }
 
 function updateConfirmButtonState() {
@@ -1527,13 +1614,20 @@ async function confirmOrder() {
     return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
-  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n💵 현장결제${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
+  const isParcel = currentDelivery === 'parcel';
+  const hasFrozen = selected.some(item => item.id.startsWith('a'));
+  const deliveryLabel = isParcel ? '📦 택배 (선입금)' : '🛵 일반 배달 (현장결제)';
+  const frozenLabel = isParcel && hasFrozen ? '\n🧊 냉동 상품 포함 - 아이스박스/보냉재 추가비용 발생' : '';
+
+  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n${deliveryLabel}${frozenLabel}${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
 
   const TG_TOKEN = '8407483229:AAFapLvbJybVGqtLyo55EVsLIRZCCbieKk0';
   const TG_CHAT  = '8626199213';
   const apiBase  = `https://api.telegram.org/bot${TG_TOKEN}`;
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz2mcxE0yUjsNXD0KkBA1_CvRV8SC_QMiwvod0g2gwrFN7QbrTuMSHwlpSb80zePazC3A/exec';
 
   try {
+    // 1. 텔레그램 전송
     if (photoFile) {
       const form = new FormData();
       form.append('chat_id', TG_CHAT);
@@ -1547,20 +1641,46 @@ async function confirmOrder() {
         body: JSON.stringify({ chat_id: TG_CHAT, text: msg })
       });
     }
+
+    // 2. 구글 시트 기록
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        phone: phone || '',
+        facebook: facebook || '',
+        items: lines,
+        total: fmt(grand),
+        note: note || '',
+        deliveryType: isParcel ? '택배(선입금)' : '일반배달'
+      })
+    });
   } catch(e) {
-    console.error('Telegram error:', e);
+    console.error('전송 오류:', e);
   }
 
   // 페이스북 메신저 연결
-  const fbMsg = encodeURIComponent(`Hi! I just placed an order on Asia Mart. Name: ${name}`);
+  const fbMsg = isParcel
+    ? encodeURIComponent(`안녕하세요! 택배 주문했습니다. 이름: ${name} / 합계: ${fmt(grand)} / 입금 계좌 알려주세요.`)
+    : encodeURIComponent(`Hi! I just placed an order on Asia Mart. Name: ${name}`);
   const fbUrl = `https://m.me/korea.happy.store?text=${fbMsg}`;
 
   const body = document.getElementById('modal-body');
   body.innerHTML = `
     <div style="text-align:center;padding:32px 16px;">
-      <div style="font-size:48px;margin-bottom:16px;">✅</div>
+      <div style="font-size:48px;margin-bottom:16px;">${isParcel ? '📦' : '✅'}</div>
       <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${t.order_done_title}</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:24px;">${t.order_done_desc}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px;">${t.order_done_desc}</div>
+      ${isParcel ? `
+      <div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:#c84b2f;line-height:1.8;text-align:left;">
+        <div style="font-weight:700;margin-bottom:6px;">📦 택배 주문 안내</div>
+        <div>1. 아래 메신저로 연락해주세요</div>
+        <div>2. 배송지 주소 + 택배비 안내</div>
+        <div>3. 입금 확인 후 발송</div>
+        ${hasFrozen ? '<div style="margin-top:6px;color:#1565c0;">🧊 냉동 상품 포함 - 아이스박스/보냉재 비용 별도 안내</div>' : ''}
+      </div>` : ''}
       <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
         <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t.order_done_fb}</div>
         <a href="${fbUrl}" target="_blank" style="display:inline-block;background:#0084ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">📘 Facebook Messenger</a>
@@ -1575,6 +1695,62 @@ async function confirmOrder() {
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d01','e01']; // 기본값 10개
+let newIds = []; // 신상품 목록 - Firebase에서 불러옴
+
+function renderNew() {
+  const container = document.getElementById('new-scroll');
+  const section = document.getElementById('new-section');
+  if (!container || !section) return;
+  if (!newIds || newIds.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  newIds.forEach(id => {
+    const item = allItems.find(p => p.id === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'new-card-' + id;
+    const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+    card.innerHTML = `
+      ${imgHtml}${emojiHtml}
+      <div class="best-card-body">
+        <div class="best-card-name">${getItemName(item)}</div>
+        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="new-qty-${id}">
+          <button class="best-qty-btn" onclick="changeNewQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changeNewQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      const cat = Object.entries(catalog).find(([k,v]) => v.items.some(i => i.id === id));
+      if (cat) {
+        closeModal();
+        const tabBtn = document.querySelector(`.tab[onclick*="${cat[0]}"]`);
+        if (tabBtn) { switchTab(tabBtn, cat[0]); }
+        setTimeout(() => {
+          const mainCard = document.getElementById('card-' + id);
+          if (mainCard) mainCard.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 200);
+      }
+    });
+    container.appendChild(card);
+  });
+}
+
+function changeNewQty(id, delta, e) {
+  e && e.stopPropagation();
+  changeQty(id, delta, e);
+  const qtyDiv = document.getElementById('new-qty-' + id);
+  const qty = quantities[id] || 0;
+  if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
+  const card = document.getElementById('new-card-' + id);
+  if (card) card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+}
 
 function renderBest() {
   const container = document.getElementById('best-scroll');
@@ -1812,18 +1988,36 @@ async function loadBestFromFirebase() {
   }
 }
 
+async function loadNewFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'newItems'));
+    const data = snapshot.val();
+    if (data && data.length > 0) {
+      newIds = data;
+      renderNew();
+    }
+  } catch(e) {
+    console.log('신상품 로드 실패:', e);
+  }
+}
+
 loadStock();
 loadBestFromFirebase();
+loadNewFromFirebase();
 
 // 초기 렌더링 - A카테고리 활성화, Order Now 비활성화
 renderTab('frozen');
 renderBest();
+renderNew();
 updateSummary();
+
+// 언어 버튼 초기 활성화 + 언어 적용
+setLang(currentLang);
+
 // Order Now 버튼 초기 비활성화
 (function() {
   const btn = document.querySelector('.order-btn');
   if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
-  // A탭 active 확인
   const firstTab = document.querySelector('.tab');
   if (firstTab) firstTab.classList.add('active');
 })();

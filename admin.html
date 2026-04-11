@@ -111,6 +111,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
     <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
     <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
+    <button class="tab-btn" onclick="switchTab('new')">🆕 신상품</button>
   </div>
 
   <!-- 재고 관리 -->
@@ -2977,14 +2978,22 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 5개)</h3>
       <p style="font-size:13px;color:#888;margin-bottom:20px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
-
-      <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;">
-      </div>
-
+      <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
     </div>
   </div>
-</div>
+
+  <!-- 신상품 -->
+  <div id="tab-new" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🆕 신상품 선택 (최대 10개)</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">새로 들어온 상품을 선택하면 메인 페이지 상단에 표시됩니다.</p>
+      <div id="new-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveNew()">💾 신상품 저장</button>
+    </div>
+  </div>
+
+</div><!-- end main-page -->
 
 <div class="toast" id="toast"></div>
 
@@ -3107,6 +3116,7 @@ async function loadAll() {
   await loadProducts();
   await loadCustomers();
   await loadBest();
+  await loadNew();
 }
 
 async function loadStock() {
@@ -3447,6 +3457,44 @@ async function saveBest() {
   }
   await db.ref('best').set(ids);
   showToast('🔥 베스트 상품 저장 완료!');
+}
+
+// 신상품 관련
+function renderNewSlots(selectedIds = []) {
+  const container = document.getElementById('new-slots');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const val = selectedIds[i] || '';
+    container.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
+        <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <option value="">-- 상품 선택 --</option>
+          ${ALL_OPTIONS}
+        </select>
+      </div>`;
+    setTimeout(() => {
+      const sel = document.getElementById('new-slot-' + i);
+      if (sel && val) sel.value = val;
+    }, 50);
+  }
+}
+
+async function loadNew() {
+  const snap = await db.ref('newItems').get();
+  const data = snap.val() || [];
+  renderNewSlots(data);
+}
+
+async function saveNew() {
+  const ids = [];
+  for (let i = 0; i < 10; i++) {
+    const sel = document.getElementById('new-slot-' + i);
+    if (sel && sel.value) ids.push(sel.value);
+  }
+  await db.ref('newItems').set(ids);
+  showToast('🆕 신상품 저장 완료!');
 }
 
 </script>
