@@ -152,9 +152,9 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:60px;">번호</th>
           <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">영문명</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">2개 할인율</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">3개 할인율</th>
-          <th style="padding:10px 12px;width:40px;"></th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">한글명</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:130px;">2개 할인율</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:130px;">3개 할인율</th>
         </tr></thead>
         <tbody id="discount-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
@@ -529,8 +529,8 @@ async function loadDiscount() {
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${(item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '')}</td>
-        <td class="td-stock"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
-        <td class="td-stock"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
+        <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
+        <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
       </tr>`;
     });
   });
