@@ -1696,16 +1696,18 @@ async function confirmOrder() {
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d01','e01']; // 기본값 10개
 let newIds = []; // 신상품 목록 - Firebase에서 불러옴
+window.newIds = newIds;
 
 function renderNew() {
   const container = document.getElementById('new-scroll');
   const section = document.getElementById('new-section');
   if (!container || !section) return;
-  if (!newIds || newIds.length === 0) { section.style.display = 'none'; return; }
+  const ids = window.newIds || newIds;
+  if (!ids || ids.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   container.innerHTML = '';
   const allItems = Object.values(catalog).flatMap(c => c.items);
-  newIds.forEach(id => {
+  ids.forEach(id => {
     const item = allItems.find(p => p.id === id);
     if (!item) return;
     const qty = quantities[id] || 0;
@@ -1751,6 +1753,7 @@ function changeNewQty(id, delta, e) {
   const card = document.getElementById('new-card-' + id);
   if (card) card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
 }
+window.renderNew = renderNew;
 
 function renderBest() {
   const container = document.getElementById('best-scroll');
@@ -1992,9 +1995,10 @@ async function loadNewFromFirebase() {
   try {
     const snapshot = await get(ref(db, 'newItems'));
     const data = snapshot.val();
+    console.log('신상품 데이터:', data);
     if (data && data.length > 0) {
-      newIds = data;
-      renderNew();
+      window.newIds = data;
+      if (typeof window.renderNew === 'function') window.renderNew();
     }
   } catch(e) {
     console.log('신상품 로드 실패:', e);

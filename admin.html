@@ -3457,6 +3457,7 @@ async function saveBest() {
   }
   await db.ref('best').set(ids);
   showToast('🔥 베스트 상품 저장 완료!');
+  setTimeout(() => switchTab('stock'), 1000);
 }
 
 // 신상품 관련
@@ -3495,6 +3496,7 @@ async function saveNew() {
   }
   await db.ref('newItems').set(ids);
   showToast('🆕 신상품 저장 완료!');
+  setTimeout(() => switchTab('stock'), 1000);
 }
 
 </script>
