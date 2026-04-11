@@ -3008,7 +3008,7 @@ function doLogin() {
   if (pw === ADMIN_PW) {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
-    setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 1000); }, 500);
+    setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
   } else {
     alert('비밀번호가 틀렸습니다.');
   }
@@ -3273,28 +3273,25 @@ async function translateName() {
 
 function autoFillId() {
   const cat = document.getElementById('new-cat').value;
-  // 현재 카탈로그에서 해당 카테고리 마지막 번호 찾기
   const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
   const catKey = catMap[cat];
-  if (!catKey || !window.catalog || !window.catalog[catKey]) {
-    document.getElementById('new-id').value = cat + '1';
-    return;
-  }
-  const items = window.catalog[catKey].items || [];
-  // 해당 카테고리 ID 중 숫자 최대값 찾기
-  let maxNum = 0;
-  items.forEach(item => {
-    const match = item.id.match(/^[a-z]+(\d+)/);
-    if (match) maxNum = Math.max(maxNum, parseInt(match[1]));
+
+  // Firebase에서 카탈로그 로드
+  db.ref('catalog/' + catKey + '/items').once('value', snap => {
+    const items = snap.val() || [];
+    let maxNum = 0;
+    items.forEach(item => {
+      const match = String(item.id).match(/\d+/);
+      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    });
+    const nextNum = maxNum + 1;
+    const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
+    document.getElementById('new-id').value = formatted;
   });
-  const nextNum = maxNum + 1;
-  // 모두 대문자 + 2자리 숫자
-  const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
-  document.getElementById('new-id').value = formatted;
 }
 
 function addProduct() {
-  const id = document.getElementById('new-id').value.trim().toLowerCase();
+  const id = document.getElementById('new-id').value.trim(); // 대소문자 그대로 유지
   const en = document.getElementById('new-en').value.trim();
   const ko = document.getElementById('new-ko').value.trim();
   const th = document.getElementById('new-th').value.trim();
