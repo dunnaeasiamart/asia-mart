@@ -754,7 +754,13 @@ function addProduct() {
   db.ref('catalog/' + catKey + '/items').once('value', snap => {
     const items = snap.val() || [];
     items.push(newItem);
+    // 기본 할인율 (할인율 탭의 현재 설정값 사용, 없으면 5%/10%)
+    const defaultD2 = parseFloat(document.getElementById('bulk-disc2')?.value) || 5;
+    const defaultD3 = parseFloat(document.getElementById('bulk-disc3')?.value) || 10;
     db.ref('catalog/' + catKey + '/items').set(items).then(() => {
+      // discount 노드에도 새 상품 기본 할인율 저장
+      return db.ref('discount/' + id).set({ d2: defaultD2, d3: defaultD3 });
+    }).then(() => {
       showToast('✅ 상품 추가 완료!');
       // 필드 초기화
       ['new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => {
