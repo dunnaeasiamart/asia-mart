@@ -336,6 +336,10 @@
     font-weight: 500;
   }
   .price-tag.deal:hover { background: #d4eee0; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
   @keyframes toastIn {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -1674,11 +1678,29 @@ async function confirmOrder() {
     console.error('전송 오류:', e);
   }
 
-  // 페이스북 메신저 연결
-  const fbMsg = isParcel
-    ? encodeURIComponent(`안녕하세요! 택배 주문했습니다. 이름: ${name} / 합계: ${fmt(grand)} / 입금 계좌 알려주세요.`)
-    : encodeURIComponent(`Hi! I just placed an order on Asia Mart. Name: ${name}`);
-  const fbUrl = `https://m.me/korea.happy.store?text=${fbMsg}`;
+  // 페이스북 메신저 연결 - 언어별 자동 메시지
+  const orderSummary = selected.slice(0,3).map(item => `${getItemName(item)} x${quantities[item.id]}`).join(', ') + (selected.length > 3 ? ` 외 ${selected.length-3}개` : '');
+
+  let fbMsgText;
+  if (currentLang === 'lo') {
+    fbMsgText = isParcel
+      ? `ສະບາຍດີ! ຂ້ອຍສັ່ງຊື້ແລ້ວ 😊\nຊື່: ${name}\nລາຍການ: ${orderSummary}\nລວມ: ${fmt(grand)}\nກະລຸນາແຈ້ງເລກບັນຊີໂອນເງິນດ້ວຍ\n📸 ຮູບທີ່ຢູ່ສົ່ງທາງ Telegram ແລ້ວ`
+      : `ສະບາຍດີ! ຂ້ອຍສັ່ງຊື້ແລ້ວ 😊\nຊື່: ${name}\nລາຍການ: ${orderSummary}\nລວມ: ${fmt(grand)}\nກະລຸນາຢືນຢັນຄຳສັ່ງຊື້ດ້ວຍ\n📸 ຮູບທີ່ຢູ່ສົ່ງທາງ Telegram ແລ້ວ`;
+  } else if (currentLang === 'th') {
+    fbMsgText = isParcel
+      ? `สวัสดีครับ/ค่ะ! สั่งซื้อแล้วนะครับ/ค่ะ 😊\nชื่อ: ${name}\nรายการ: ${orderSummary}\nรวม: ${fmt(grand)}\nกรุณาแจ้งเลขบัญชีสำหรับโอนเงินด้วยครับ/ค่ะ\n📸 ส่งรูปที่อยู่ทาง Telegram แล้ว`
+      : `สวัสดีครับ/ค่ะ! สั่งซื้อแล้วนะครับ/ค่ะ 😊\nชื่อ: ${name}\nรายการ: ${orderSummary}\nรวม: ${fmt(grand)}\nกรุณายืนยันคำสั่งซื้อด้วยครับ/ค่ะ\n📸 ส่งรูปที่อยู่ทาง Telegram แล้ว`;
+  } else if (currentLang === 'ko') {
+    fbMsgText = isParcel
+      ? `안녕하세요! 주문했어요 😊\n이름: ${name}\n주문: ${orderSummary}\n합계: ${fmt(grand)}\n입금 계좌 알려주세요!\n📸 주소 사진은 Telegram으로 전송됐어요`
+      : `안녕하세요! 주문했어요 😊\n이름: ${name}\n주문: ${orderSummary}\n합계: ${fmt(grand)}\n주문 확인 부탁드려요!\n📸 주소 사진은 Telegram으로 전송됐어요`;
+  } else {
+    fbMsgText = isParcel
+      ? `Hello! I placed an order 😊\nName: ${name}\nItems: ${orderSummary}\nTotal: ${fmt(grand)}\nPlease send me the payment account details.\n📸 Address photo sent via Telegram`
+      : `Hello! I placed an order 😊\nName: ${name}\nItems: ${orderSummary}\nTotal: ${fmt(grand)}\nPlease confirm my order!\n📸 Address photo sent via Telegram`;
+  }
+
+  const fbUrl = `https://m.me/korea.happy.store?text=${encodeURIComponent(fbMsgText)}`;
 
   const body = document.getElementById('modal-body');
   body.innerHTML = `
@@ -1696,7 +1718,18 @@ async function confirmOrder() {
       </div>` : ''}
       <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
         <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t.order_done_fb}</div>
-        <a href="${fbUrl}" target="_blank" style="display:inline-block;background:#0084ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">📘 Facebook Messenger</a>
+        <a href="${fbUrl}" target="_blank" onclick="
+          var notice = document.getElementById('fb-loading-notice');
+          if (notice) {
+            notice.style.display = 'block';
+            setTimeout(function(){ notice.style.display = 'none'; }, 4000);
+          }
+        " style="display:inline-block;background:#0084ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">📘 Facebook Messenger</a>
+        <div id="fb-loading-notice" style="display:none;margin-top:10px;font-size:12px;color:#0084ff;animation:pulse 1s ease-in-out infinite;">
+          📲 메신저 앱이 열립니다! 잠시만 기다려주세요 😊<br>
+          <span style="font-family:'Noto Sans Lao',sans-serif;font-size:11px;color:#888;">ກຳລັງເປີດ Messenger...</span><br>
+          <span style="font-family:'Noto Sans Thai',sans-serif;font-size:11px;color:#888;">กำลังเปิด Messenger...</span>
+        </div>
       </div>
       <button onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">닫기 / Close</button>
     </div>
@@ -1914,7 +1947,7 @@ function startNewAutoScroll() {
 }
 
 // 초기 시도 (이미 데이터 있는 경우)
-setTimeout(startNewAutoScroll, 1500);
+setTimeout(startNewAutoScroll, 3000);
 window.startNewAutoScroll = startNewAutoScroll;
 
 // ===== 초기화 =====
@@ -2051,7 +2084,7 @@ async function loadNewFromFirebase() {
       if (typeof window.renderNew === 'function') {
         window.renderNew();
         // 섹션이 보인 후 슬라이드 시작
-        setTimeout(startNewAutoScroll, 300);
+        setTimeout(startNewAutoScroll, 500);
       }
     }
   } catch(e) {
