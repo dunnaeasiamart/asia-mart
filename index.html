@@ -1877,14 +1877,17 @@ renderBest();
 })();
 
 // 신상품 자동 슬라이드 (베스트보다 느리게)
-(function startNewAutoScroll() {
+function startNewAutoScroll() {
   const el = document.getElementById('new-scroll');
   if (!el) return;
+  // 이미 실행 중이면 중복 실행 방지
+  if (el._scrollStarted) return;
+  el._scrollStarted = true;
 
   let isPaused = false;
   let rafId = null;
   let direction = 1;
-  const speed = 0.4; // 베스트(0.8)보다 느리게
+  const speed = 0.4;
 
   function tick() {
     const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
@@ -1907,13 +1910,12 @@ renderBest();
   el.addEventListener('pointerdown', pause);
   el.addEventListener('pointerup', resumeLater);
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
-    else if (!rafId) { rafId = requestAnimationFrame(tick); }
-  });
+  rafId = requestAnimationFrame(tick);
+}
 
-  setTimeout(() => { if (!rafId) rafId = requestAnimationFrame(tick); }, 1200);
-})();
+// 초기 시도 (이미 데이터 있는 경우)
+setTimeout(startNewAutoScroll, 1500);
+window.startNewAutoScroll = startNewAutoScroll;
 
 // ===== 초기화 =====
 setLang(currentLang);
@@ -2046,7 +2048,11 @@ async function loadNewFromFirebase() {
     const data = snapshot.val();
     if (data && data.length > 0) {
       window.newIds = data;
-      if (typeof window.renderNew === 'function') window.renderNew();
+      if (typeof window.renderNew === 'function') {
+        window.renderNew();
+        // 섹션이 보인 후 슬라이드 시작
+        setTimeout(startNewAutoScroll, 300);
+      }
     }
   } catch(e) {
     console.log('신상품 로드 실패:', e);
