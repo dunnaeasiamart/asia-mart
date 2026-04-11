@@ -1996,7 +1996,6 @@ async function loadNewFromFirebase() {
   try {
     const snapshot = await get(ref(db, 'newItems'));
     const data = snapshot.val();
-    console.log('신상품 데이터:', data);
     if (data && data.length > 0) {
       window.newIds = data;
       if (typeof window.renderNew === 'function') window.renderNew();
@@ -2006,31 +2005,29 @@ async function loadNewFromFirebase() {
   }
 }
 
+// Firebase 데이터 로드
 loadStock();
 loadBestFromFirebase();
 loadNewFromFirebase();
 
-// 초기화 - 언어감지 → 렌더링 → Order Now 비활성화
-(function init() {
-  // 1. 언어 자동감지 + 버튼 활성화 + 전체 UI 언어 적용
+// 초기화 - DOM 준비 후 실행
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. 언어 자동감지 + 전체 UI 적용
   setLang(currentLang);
 
-  // 2. A카테고리 자동 선택 및 렌더링
-  const firstTab = document.querySelector('.tab');
-  if (firstTab) firstTab.classList.add('active');
+  // 2. A카테고리 렌더링 (탭 active는 HTML에 이미 있음)
   renderTab('frozen');
   renderBest();
-  renderNew();
   updateSummary();
 
-  // 3. Order Now 버튼 초기 비활성화
+  // 3. Order Now 버튼 강제 비활성화
   const btn = document.querySelector('.order-btn');
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.4';
     btn.style.pointerEvents = 'none';
   }
-})();
+});
 
 // ===== PWA =====
 // 서비스워커 등록
