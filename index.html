@@ -1696,6 +1696,7 @@ async function confirmOrder() {
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['a1','b25','c15','c19','d16','a6','c14','b01','d01','e01']; // 기본값 10개
+window.bestIds = bestIds;
 let newIds = []; // 신상품 목록 - Firebase에서 불러옴
 window.newIds = newIds;
 
@@ -1761,8 +1762,9 @@ function renderBest() {
   if (!container) return;
   container.innerHTML = '';
   const allItems = Object.values(catalog).flatMap(c => c.items);
+  const ids = window.bestIds || bestIds;
 
-  bestIds.forEach(id => {
+  ids.forEach(id => {
     const item = allItems.find(p => p.id === id);
     if (!item) return;
     const qty = quantities[id] || 0;
@@ -1804,6 +1806,7 @@ function renderBest() {
     container.appendChild(card);
   });
 }
+window.renderBest = renderBest;
 
 function changeBestQty(id, delta, e) {
   e && e.stopPropagation();
@@ -1995,8 +1998,8 @@ async function loadBestFromFirebase() {
     const snapshot = await get(ref(db, 'best'));
     const data = snapshot.val();
     if (data && data.length > 0) {
-      bestIds = data;
-      renderBest();
+      window.bestIds = data;
+      if (typeof window.renderBest === 'function') window.renderBest();
     }
   } catch(e) {
     console.log('베스트 상품 로드 실패:', e);
