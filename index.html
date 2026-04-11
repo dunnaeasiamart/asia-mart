@@ -1790,14 +1790,27 @@ async function loadStock() {
 
 async function loadCatalogFromFirebase() {
   try {
-    const snapshot = await get(ref(db, 'catalog'));
-    const data = snapshot.val();
+    const [catalogSnap, discSnap] = await Promise.all([
+      get(ref(db, 'catalog')),
+      get(ref(db, 'discount'))
+    ]);
+    const data = catalogSnap.val();
+    const disc = discSnap.val() || {};
     if (data) {
       Object.entries(data).forEach(([catKey, cat]) => {
+        const items = (cat.items || []).map(item => {
+          const d = disc[item.id];
+          if (d) {
+            const p1 = item.price1 || 0;
+            if (d.d2) item.price2 = Math.round(p1 * (1 - d.d2 / 100)) * 2;
+            if (d.d3) item.price3 = Math.round(p1 * (1 - d.d3 / 100)) * 3;
+          }
+          return item;
+        });
         catalog[catKey] = {
           label: cat.label,
           emoji: cat.emoji,
-          items: cat.items || []
+          items
         };
       });
       // 카탈로그 로드 완료 후 렌더링
