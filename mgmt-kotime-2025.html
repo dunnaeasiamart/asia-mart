@@ -90,7 +90,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <div class="login-wrap">
     <h2>🛒 Asia Mart</h2>
     <p>관리자 전용 페이지</p>
-    <input type="password" id="pw-input" class="login-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+    <input type="password" id="pw-input" class="login-input" placeholder="비밀번호 입력" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
     <button class="btn-login" onclick="doLogin()">로그인</button>
   </div>
 </div>
@@ -2064,7 +2064,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="text" id="new-id" placeholder="a24">
         </div>
         <div class="form-full">
-          <label>한국어 상품명 (영어/태국어 자동 번역)</label>
+          <label>한국어 상품명 (영어/태국어/라오스어 자동 번역)</label>
           <div style="display:flex;gap:8px;align-items:center;">
             <input type="text" id="new-ko" placeholder="예: 새우볼 500g" style="flex:1;">
             <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="translateName()">🤖 번역</button>
@@ -2077,6 +2077,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div>
           <label>태국어명 (자동 입력)</label>
           <input type="text" id="new-th" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
+        </div>
+        <div>
+          <label>라오스어명 (자동 입력)</label>
+          <input type="text" id="new-lo" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
         </div>
         <div>
           <label>1개 가격 (₩)</label>
@@ -3250,10 +3254,15 @@ async function translateName() {
     const thData = await thRes.json();
     const th = thData.responseData.translatedText;
 
+    const loRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|lo`);
+    const loData = await loRes.json();
+    const lo = loData.responseData.translatedText;
+
     const id = document.getElementById('new-id').value.trim().toUpperCase();
     const prefix = id ? id + '. ' : '';
     document.getElementById('new-en').value = prefix + en;
     document.getElementById('new-th').value = prefix + th;
+    document.getElementById('new-lo').value = prefix + lo;
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
@@ -3267,12 +3276,13 @@ function addProduct() {
   const en = document.getElementById('new-en').value.trim();
   const ko = document.getElementById('new-ko').value.trim();
   const th = document.getElementById('new-th').value.trim();
+  const lo = document.getElementById('new-lo').value.trim();
   const price = parseInt(document.getElementById('new-price').value);
   const img = document.getElementById('new-img').value.trim();
   if (!id || !en || !price) { alert('ID, 영문명, 가격은 필수입니다.'); return; }
-  db.ref('products/' + id).set({ en, ko, th, price, img });
+  db.ref('products/' + id).set({ en, ko, th, lo, price, img });
   showToast('✅ 상품 추가됨!');
-  ['new-id','new-en','new-ko','new-th','new-price','new-img'].forEach(f => document.getElementById(f).value = '');
+  ['new-id','new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => document.getElementById(f).value = '');
 }
 
 function addCustomer() {
