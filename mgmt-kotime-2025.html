@@ -275,7 +275,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <!-- 베스트 상품 -->
   <div id="tab-best" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 5개)</h3>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 10개)</h3>
       <p style="font-size:13px;color:#888;margin-bottom:20px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
       <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
@@ -803,7 +803,7 @@ async function buildAllOptions() {
 function renderBestSlots(selectedIds) {
   const container = document.getElementById('best-slots');
   container.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
     container.innerHTML += `
       <div style="display:flex;align-items:center;gap:12px;">
@@ -828,7 +828,7 @@ async function loadBest() {
 
 async function saveBest() {
   const ids = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('best-slot-' + i);
     if (sel && sel.value) ids.push(sel.value);
   }
