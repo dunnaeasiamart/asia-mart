@@ -837,12 +837,13 @@ async function openEditModal(catKey, itemId, idx) {
   // 카테고리 select 옵션 동적 생성
   const catSnap = await db.ref('catalog').get();
   const catData = catSnap.val() || {};
+  const fallbackLabels = { frozen:'A 냉동음식', noodle:'B 면 종류', sauce:'C 각종 소스', other:'D 음료 및 기타', essentials:'E 생활용품', veggie:'F 농산물' };
   const sel = document.getElementById('edit-cat');
   sel.innerHTML = '';
   Object.entries(catData).forEach(([k, c]) => {
     const opt = document.createElement('option');
     opt.value = k;
-    opt.textContent = c.label || k;
+    opt.textContent = (typeof c === 'object' && c.label) ? c.label : (fallbackLabels[k] || k);
     if (k === catKey) opt.selected = true;
     sel.appendChild(opt);
   });
