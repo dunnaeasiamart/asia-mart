@@ -3288,10 +3288,8 @@ function autoFillId() {
     if (match) maxNum = Math.max(maxNum, parseInt(match[1]));
   });
   const nextNum = maxNum + 1;
-  // 카테고리별 포맷 (b,c,d,e는 2자리)
-  const formatted = cat === 'a'
-    ? cat + nextNum
-    : cat + String(nextNum).padStart(2, '0');
+  // 모두 대문자 + 2자리 숫자
+  const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
   document.getElementById('new-id').value = formatted;
 }
 
