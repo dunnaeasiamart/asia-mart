@@ -696,24 +696,23 @@ async function translateName() {
   }
 }
 
-function autoFillId() {
+async function autoFillId() {
   const cat = document.getElementById('new-cat').value.toLowerCase();
   const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials', f: 'veggie' };
   const catKey = catMap[cat];
   if (!catKey) return;
 
-  // Firebase에서 카탈로그 로드
-  db.ref('catalog/' + catKey + '/items').once('value', snap => {
-    const items = snap.val() || [];
-    let maxNum = 0;
-    items.forEach(item => {
-      const match = String(item.id).match(/\d+/);
-      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
-    });
-    const nextNum = maxNum + 1;
-    const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
-    document.getElementById('new-id').value = formatted;
+  // Firebase에서 항상 최신 데이터 로드
+  const snap = await db.ref('catalog/' + catKey + '/items').get();
+  const items = snap.val() || [];
+  let maxNum = 0;
+  items.forEach(item => {
+    const match = String(item.id).match(/\d+/);
+    if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
   });
+  const nextNum = maxNum + 1;
+  const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
+  document.getElementById('new-id').value = formatted;
 }
 
 async function deleteProduct(catKey, itemId) {
@@ -763,10 +762,9 @@ function addProduct() {
         if (el) el.value = '';
       });
       document.getElementById('translate-status').style.display = 'none';
-      // 카탈로그 새로고침 + 다음 ID 자동 입력
+      // 카탈로그 새로고침 완료 후 다음 ID 자동 입력
       setTimeout(() => {
-        loadCatalogForAdmin();
-        autoFillId();
+        loadCatalogForAdmin().then(() => autoFillId());
       }, 500);
     });
   });
