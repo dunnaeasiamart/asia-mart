@@ -837,13 +837,12 @@ async function openEditModal(catKey, itemId, idx) {
   // 카테고리 select 옵션 동적 생성
   const catSnap = await db.ref('catalog').get();
   const catData = catSnap.val() || {};
-  const fallbackLabels = { frozen:'A 냉동음식', noodle:'B 면 종류', sauce:'C 각종 소스', other:'D 음료 및 기타', essentials:'E 생활용품', veggie:'F 농산물' };
   const sel = document.getElementById('edit-cat');
   sel.innerHTML = '';
   Object.entries(catData).forEach(([k, c]) => {
     const opt = document.createElement('option');
     opt.value = k;
-    opt.textContent = (typeof c === 'object' && c.label) ? c.label : (fallbackLabels[k] || k);
+    opt.textContent = getLabel(c, k);
     if (k === catKey) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -941,6 +940,17 @@ async function submitEditProduct() {
 // ── 카테고리 관리 ──
 let _catEditKey = null; // null이면 추가 모드
 
+const FALLBACK_LABELS = { frozen:'A 냉동음식', noodle:'B 면 종류', sauce:'C 각종 소스', other:'D 음료 및 기타', essentials:'E 생활용품', veggie:'F 농산물' };
+
+// label이 객체({ko,en,...})이거나 문자열이거나 모두 안전하게 처리
+function getLabel(cat, key) {
+  const raw = cat?.label;
+  if (!raw) return FALLBACK_LABELS[key] || key;
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') return raw.ko || raw.en || Object.values(raw)[0] || FALLBACK_LABELS[key] || key;
+  return FALLBACK_LABELS[key] || key;
+}
+
 async function loadCategories() {
   const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
@@ -949,13 +959,15 @@ async function loadCategories() {
   tbody.innerHTML = '';
   Object.entries(data).forEach(([key, cat]) => {
     const count = (cat.items || []).length;
+    const label = getLabel(cat, key);
+    const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
     tbody.innerHTML += `<tr>
       <td style="padding:10px 12px;font-size:12px;color:#888;">${key}</td>
-      <td style="padding:10px 12px;font-size:13px;">${cat.label || ''}</td>
-      <td style="padding:10px 12px;font-size:18px;">${cat.emoji || ''}</td>
+      <td style="padding:10px 12px;font-size:13px;">${label}</td>
+      <td style="padding:10px 12px;font-size:18px;">${emoji}</td>
       <td style="padding:10px 12px;font-size:13px;color:#888;">${count}개</td>
       <td style="padding:10px 6px;">
-        <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✏️ 수정</button>
+        <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
       </td>
     </tr>`;
   });
@@ -968,8 +980,8 @@ async function openEditCatModal(key) {
   document.getElementById('cat-modal-title').textContent = '📂 카테고리 수정';
   document.getElementById('cat-key').value = key;
   document.getElementById('cat-key-edit-wrap').style.display = 'none';
-  document.getElementById('cat-label').value = cat.label || '';
-  document.getElementById('cat-emoji').value = cat.emoji || '';
+  document.getElementById('cat-label').value = getLabel(cat, key);
+  document.getElementById('cat-emoji').value = typeof cat.emoji === 'string' ? cat.emoji : '';
   document.getElementById('cat-modal').classList.add('open');
 }
 
