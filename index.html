@@ -1877,6 +1877,17 @@ renderBest();
     if (!rafId) rafId = requestAnimationFrame(tick);
   }, 800);
 })();
+
+// ===== 초기화 =====
+setLang(currentLang);
+renderTab('frozen');
+renderBest();
+updateSummary();
+// Order Now 비활성화
+(function() {
+  var btn = document.querySelector('.order-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+})();
 </script>
 
 <script type="module">
@@ -2009,25 +2020,6 @@ async function loadNewFromFirebase() {
 loadStock();
 loadBestFromFirebase();
 loadNewFromFirebase();
-
-// 초기화 - DOM 준비 후 실행
-document.addEventListener('DOMContentLoaded', function() {
-  // 1. 언어 자동감지 + 전체 UI 적용
-  setLang(currentLang);
-
-  // 2. A카테고리 렌더링 (탭 active는 HTML에 이미 있음)
-  renderTab('frozen');
-  renderBest();
-  updateSummary();
-
-  // 3. Order Now 버튼 강제 비활성화
-  const btn = document.querySelector('.order-btn');
-  if (btn) {
-    btn.disabled = true;
-    btn.style.opacity = '0.4';
-    btn.style.pointerEvents = 'none';
-  }
-});
 
 // ===== PWA =====
 // 서비스워커 등록
