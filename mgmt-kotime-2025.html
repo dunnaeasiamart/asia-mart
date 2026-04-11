@@ -1,0 +1,3504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asia Mart — 관리자</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+/* 로그인 */
+.login-wrap { max-width: 380px; margin: 120px auto; background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); text-align: center; }
+.login-wrap h2 { font-size: 22px; margin-bottom: 8px; }
+.login-wrap p { color: #888; font-size: 13px; margin-bottom: 24px; }
+.login-input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; margin-bottom: 12px; outline: none; }
+.login-input:focus { border-color: #c84b2f; }
+.btn-login { width: 100%; padding: 13px; background: #c84b2f; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* 헤더 */
+.header { background: #1a1814; color: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; }
+.header-title { font-size: 16px; font-weight: 700; }
+.header-btns { display: flex; gap: 8px; }
+.btn { padding: 7px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: #c84b2f; color: #fff; }
+.btn-secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+
+/* 탭 */
+.tabs { background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; padding: 0 24px; gap: 0; }
+.tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; color: #999; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab-btn.active { color: #c84b2f; border-bottom-color: #c84b2f; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* 테이블 */
+.table-wrap { max-width: 1000px; margin: 24px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+table { width: 100%; border-collapse: collapse; }
+.cat-header { background: #1a1814; color: #fff; font-weight: 700; padding: 10px 16px; font-size: 13px; }
+tr:hover td { background: #fafafa; }
+td { border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+.td-id { padding: 10px 12px; font-size: 12px; color: #aaa; width: 60px; }
+.td-name { padding: 10px 12px; font-size: 13px; }
+.td-ko { padding: 10px 12px; font-size: 12px; color: #888; }
+.td-stock { padding: 10px 12px; width: 120px; }
+td input[type="number"] { width: 80px; padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; text-align: center; outline: none; }
+td input[type="number"]:focus { border-color: #c84b2f; }
+.text-input { width: 100%; padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; outline: none; }
+.text-input:focus { border-color: #c84b2f; }
+.price-input { width: 90px; padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+.img-input { width: 100%; padding: 5px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; outline: none; }
+.changed-badge { color: #c84b2f; font-size: 10px; display: none; margin-left: 4px; }
+
+/* 할인율 전체 조정 */
+.bulk-box { max-width: 1000px; margin: 24px auto 0; background: #fff; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bulk-box label { font-size: 13px; font-weight: 600; }
+.bulk-box input { width: 70px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; text-align: center; }
+.bulk-box select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
+
+/* 고객 등록 */
+.customer-wrap { max-width: 1000px; margin: 24px auto; }
+.customer-form { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+.customer-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-row input, .form-row textarea { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
+.form-row input:focus, .form-row textarea:focus { border-color: #c84b2f; }
+.customer-list { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.customer-list table { width: 100%; border-collapse: collapse; }
+.customer-list th { background: #f5f5f5; padding: 10px 16px; text-align: left; font-size: 12px; color: #888; font-weight: 600; }
+.customer-list td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.btn-del { background: none; border: 1px solid #ddd; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #888; }
+.btn-del:hover { border-color: #c84b2f; color: #c84b2f; }
+
+/* 상품 추가 폼 */
+.add-product-form { max-width: 1000px; margin: 24px auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.add-product-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid label { font-size: 12px; color: #888; margin-bottom: 4px; display: block; }
+.form-grid input, .form-grid select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.form-grid input:focus, .form-grid select:focus { border-color: #c84b2f; }
+.form-full { grid-column: 1 / -1; }
+
+/* 토스트 */
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; z-index: 999; display: none; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login-page">
+  <div class="login-wrap">
+    <h2>🛒 Asia Mart</h2>
+    <p>관리자 전용 페이지</p>
+    <input type="password" id="pw-input" class="login-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn-login" onclick="doLogin()">로그인</button>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div id="main-page" style="display:none;">
+  <div class="header">
+    <div class="header-title">🛒 Asia Mart 관리자</div>
+    <div class="header-btns">
+      <button class="btn btn-secondary" onclick="loadAll()">🔄 새로고침</button>
+      <button class="btn btn-primary" onclick="saveAll()">💾 저장</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('stock')">📦 재고 관리</button>
+    <button class="tab-btn" onclick="switchTab('discount')">🏷️ 할인율</button>
+    <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
+    <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
+    <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
+    <button class="tab-btn" onclick="switchTab('new')">🆕 신상품</button>
+  </div>
+
+  <!-- 재고 관리 -->
+  <div id="tab-stock" class="tab-content active">
+    <div class="table-wrap">
+      <table>
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:60px;">번호</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">영문명</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">한국명</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:130px;">재고 (-1=무제한)</th>
+        </tr></thead>
+        <tbody><tr><td colspan="4" class="cat-header">A 냉동음식</td></tr>
+<tr>
+  <td class="td-id">A1</td>
+  <td class="td-name">A1. Shrimp Ball 500g</td>
+  <td class="td-ko">A1. 새우볼 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a1" onchange="markChanged('a1','stock')">
+    <span class="changed-badge" id="badge_stock_a1">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A2</td>
+  <td class="td-name">A2. Beef Meatball 320g</td>
+  <td class="td-ko">A2. 소고기미트볼 320g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a2" onchange="markChanged('a2','stock')">
+    <span class="changed-badge" id="badge_stock_a2">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A3</td>
+  <td class="td-name">A3. Pork Meatball 320g</td>
+  <td class="td-ko">A3. 돼지고기미트볼 320g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a3" onchange="markChanged('a3','stock')">
+    <span class="changed-badge" id="badge_stock_a3">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A4</td>
+  <td class="td-name">A4. Pig Tail 700g</td>
+  <td class="td-ko">A4. 돼지꼬리 700g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a4" onchange="markChanged('a4','stock')">
+    <span class="changed-badge" id="badge_stock_a4">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A5</td>
+  <td class="td-name">A5. Pig Ear x2 500g</td>
+  <td class="td-ko">A5. 돼지귀 2개 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a5" onchange="markChanged('a5','stock')">
+    <span class="changed-badge" id="badge_stock_a5">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A6</td>
+  <td class="td-name">A6. Chicken Gizzard 500g</td>
+  <td class="td-ko">A6. 닭근위 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a6" onchange="markChanged('a6','stock')">
+    <span class="changed-badge" id="badge_stock_a6">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A7</td>
+  <td class="td-name">A7. Chicken Liver 400g</td>
+  <td class="td-ko">A7. 닭간 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a7" onchange="markChanged('a7','stock')">
+    <span class="changed-badge" id="badge_stock_a7">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A8</td>
+  <td class="td-name">A8. Chicken Heart 500g</td>
+  <td class="td-ko">A8. 닭알집 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a8" onchange="markChanged('a8','stock')">
+    <span class="changed-badge" id="badge_stock_a8">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A9</td>
+  <td class="td-name">A9. Chicken Knee Cartilage 500g</td>
+  <td class="td-ko">A9. 닭무릎연골 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a9" onchange="markChanged('a9','stock')">
+    <span class="changed-badge" id="badge_stock_a9">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A10</td>
+  <td class="td-name">A10. Frozen Striped Snakehead 3pcs 500g</td>
+  <td class="td-ko">A10. 냉동 등목어 3마리 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a10" onchange="markChanged('a10','stock')">
+    <span class="changed-badge" id="badge_stock_a10">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A11</td>
+  <td class="td-name">A11. Frozen Striped Snakehead 450g</td>
+  <td class="td-ko">A11. 냉동 줄무늬가물치 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a11" onchange="markChanged('a11','stock')">
+    <span class="changed-badge" id="badge_stock_a11">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A12</td>
+  <td class="td-name">A12. Frozen Red Tilapia 2pcs 900g</td>
+  <td class="td-ko">A12. 냉동 레드틸라피아 2마리 900g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a12" onchange="markChanged('a12','stock')">
+    <span class="changed-badge" id="badge_stock_a12">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A13</td>
+  <td class="td-name">A13. Frozen Tilapia 2pcs 900g</td>
+  <td class="td-ko">A13. 냉동 틸라피아 2마리 900g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a13" onchange="markChanged('a13','stock')">
+    <span class="changed-badge" id="badge_stock_a13">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A14</td>
+  <td class="td-name">A14. Frozen Gourami 450g</td>
+  <td class="td-ko">A14. 냉동 구라미 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a14" onchange="markChanged('a14','stock')">
+    <span class="changed-badge" id="badge_stock_a14">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A15</td>
+  <td class="td-name">A15. Frozen Cut Catfish 450g</td>
+  <td class="td-ko">A15. 냉동 절단한 메기 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a15" onchange="markChanged('a15','stock')">
+    <span class="changed-badge" id="badge_stock_a15">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A16</td>
+  <td class="td-name">A16. Frozen Catfish 700g</td>
+  <td class="td-ko">A16. 냉동 메기 700g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a16" onchange="markChanged('a16','stock')">
+    <span class="changed-badge" id="badge_stock_a16">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A17</td>
+  <td class="td-name">A17. Pla Tu Khem 180g</td>
+  <td class="td-ko">A17. 빠뚜캠 180g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a17" onchange="markChanged('a17','stock')">
+    <span class="changed-badge" id="badge_stock_a17">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A18</td>
+  <td class="td-name">A18. Frozen Mackerel 250g</td>
+  <td class="td-ko">A18. 냉동 고등어 250g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a18" onchange="markChanged('a18','stock')">
+    <span class="changed-badge" id="badge_stock_a18">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A19</td>
+  <td class="td-name">A19. Seasoned Semi-Dried Catfish 450g</td>
+  <td class="td-ko">A19. 양념 반건조 메기 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a19" onchange="markChanged('a19','stock')">
+    <span class="changed-badge" id="badge_stock_a19">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A20</td>
+  <td class="td-name">A20. Frozen Frog 450g</td>
+  <td class="td-ko">A20. 냉동 개구리 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a20" onchange="markChanged('a20','stock')">
+    <span class="changed-badge" id="badge_stock_a20">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A21</td>
+  <td class="td-name">A21. Frozen Cuttlefish 400g</td>
+  <td class="td-ko">A21. 냉동 갑오징어 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a21" onchange="markChanged('a21','stock')">
+    <span class="changed-badge" id="badge_stock_a21">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A22</td>
+  <td class="td-name">A22. Frozen Baby Octopus 450g</td>
+  <td class="td-ko">A22. 냉동 쭈꾸미 450g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a22" onchange="markChanged('a22','stock')">
+    <span class="changed-badge" id="badge_stock_a22">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">A23</td>
+  <td class="td-name">A23. Frozen Beef Offal Papayatan 700g</td>
+  <td class="td-ko">A23. 냉동 소 부속물 고기 파파이딴 700g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_a23" onchange="markChanged('a23','stock')">
+    <span class="changed-badge" id="badge_stock_a23">●</span>
+  </td>
+</tr>
+<tr><td colspan="4" class="cat-header">B 면 종류</td></tr>
+<tr>
+  <td class="td-id">B01</td>
+  <td class="td-name">B01. MAMA TOMYUM CUP 70g</td>
+  <td class="td-ko">B01. 마마 똠얌 컵 70g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b01" onchange="markChanged('b01','stock')">
+    <span class="changed-badge" id="badge_stock_b01">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B02</td>
+  <td class="td-name">B02. MAMA CREAMY TOMYUM CUP 70g</td>
+  <td class="td-ko">B02. 마마 크리미 똠얌 컵 70g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b02" onchange="markChanged('b02','stock')">
+    <span class="changed-badge" id="badge_stock_b02">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B03</td>
+  <td class="td-name">B03. MAMA PORK CUP 70g</td>
+  <td class="td-ko">B03. 마마 포크 컵 70g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b03" onchange="markChanged('b03','stock')">
+    <span class="changed-badge" id="badge_stock_b03">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B04</td>
+  <td class="td-name">B04. MAMA Instant Rice Vermicelli Clear Soup 55g 1set(5pcs)</td>
+  <td class="td-ko">B04. MAMA 인스턴트 쌀국수 클리어수프 55g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b04" onchange="markChanged('b04','stock')">
+    <span class="changed-badge" id="badge_stock_b04">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B05</td>
+  <td class="td-name">B05. MAMA Instant Noodle Chicken Green Curry 55g 1set(5pcs)</td>
+  <td class="td-ko">B05. MAMA 인스턴트 누들 치킨그린커리 55g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b05" onchange="markChanged('b05','stock')">
+    <span class="changed-badge" id="badge_stock_b05">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B06</td>
+  <td class="td-name">B06. ACECOOK Rice Noodle 71g 1set(5pcs)</td>
+  <td class="td-ko">B06. ACECOOK 쌀국수 71g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b06" onchange="markChanged('b06','stock')">
+    <span class="changed-badge" id="badge_stock_b06">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B07</td>
+  <td class="td-name">B07. HAOHAO ORIGINAL 78g 1set(5pcs)</td>
+  <td class="td-ko">B07. 하오하오 오리지널 78g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b07" onchange="markChanged('b07','stock')">
+    <span class="changed-badge" id="badge_stock_b07">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B08</td>
+  <td class="td-name">B08. ACECOOK Pho Bo 70g 1set(5pcs)</td>
+  <td class="td-ko">B08. ACECOOK 포보 70g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b08" onchange="markChanged('b08','stock')">
+    <span class="changed-badge" id="badge_stock_b08">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B09</td>
+  <td class="td-name">B09. WAIWAI Oriental 60g 1set(5pcs)</td>
+  <td class="td-ko">B09. WAIWAI 오리엔탈 60g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b09" onchange="markChanged('b09','stock')">
+    <span class="changed-badge" id="badge_stock_b09">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B10</td>
+  <td class="td-name">B10. WAIWAI Tom Yum Red 60g 1set(5pcs)</td>
+  <td class="td-ko">B10. WAIWAI 똠얌 RED 60g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b10" onchange="markChanged('b10','stock')">
+    <span class="changed-badge" id="badge_stock_b10">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B11</td>
+  <td class="td-name">B11. WAIWAI Tom Yum Blue 60g 1set(5pcs)</td>
+  <td class="td-ko">B11. WAIWAI 똠얌 BLUE 60g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b11" onchange="markChanged('b11','stock')">
+    <span class="changed-badge" id="badge_stock_b11">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B12</td>
+  <td class="td-name">B12. WAIWAI Crab 55g 1set(5pcs)</td>
+  <td class="td-ko">B12. WAIWAI 크랩 55g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b12" onchange="markChanged('b12','stock')">
+    <span class="changed-badge" id="badge_stock_b12">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B13</td>
+  <td class="td-name">B13. MAMA Tom Yum 55g 1set(5pcs)</td>
+  <td class="td-ko">B13. MAMA 똠얌 55g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b13" onchange="markChanged('b13','stock')">
+    <span class="changed-badge" id="badge_stock_b13">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B14</td>
+  <td class="td-name">B14. MAMA Creamy 55g 1set(5pcs)</td>
+  <td class="td-ko">B14. MAMA 크리미 55g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b14" onchange="markChanged('b14','stock')">
+    <span class="changed-badge" id="badge_stock_b14">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B15</td>
+  <td class="td-name">B15. MAMA Pork 60g 1set(5pcs)</td>
+  <td class="td-ko">B15. MAMA 포크 60g 1set(5pcs)</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b15" onchange="markChanged('b15','stock')">
+    <span class="changed-badge" id="badge_stock_b15">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B16</td>
+  <td class="td-name">B16. SAFOCO Rice Vermicelli 300g</td>
+  <td class="td-ko">B16. SAFOCO 쌀국수 300g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b16" onchange="markChanged('b16','stock')">
+    <span class="changed-badge" id="badge_stock_b16">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B17</td>
+  <td class="td-name">B17. CHANTABURI Rice Noodle 500g</td>
+  <td class="td-ko">B17. CHANTABURI 쌀국수 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b17" onchange="markChanged('b17','stock')">
+    <span class="changed-badge" id="badge_stock_b17">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B18</td>
+  <td class="td-name">B18. BUNKO Vermicelli 300g</td>
+  <td class="td-ko">B18. BUNKO 당면 300g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b18" onchange="markChanged('b18','stock')">
+    <span class="changed-badge" id="badge_stock_b18">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B19</td>
+  <td class="td-name">B19. BICH CHI Hu Tieu Kho 500g</td>
+  <td class="td-ko">B19. BICH CHI 건면 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b19" onchange="markChanged('b19','stock')">
+    <span class="changed-badge" id="badge_stock_b19">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B20</td>
+  <td class="td-name">B20. BICH CHI Banh Pho Kho 500g</td>
+  <td class="td-ko">B20. BICH CHI 넓은건면 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b20" onchange="markChanged('b20','stock')">
+    <span class="changed-badge" id="badge_stock_b20">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B21</td>
+  <td class="td-name">B21. VIFON Hu Tieu Kho 500g</td>
+  <td class="td-ko">B21. VIFON 건면 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b21" onchange="markChanged('b21','stock')">
+    <span class="changed-badge" id="badge_stock_b21">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B22</td>
+  <td class="td-name">B22. VIFON Banh Pho Kho 500g</td>
+  <td class="td-ko">B22. VIFON 넓은건면 500g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b22" onchange="markChanged('b22','stock')">
+    <span class="changed-badge" id="badge_stock_b22">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B23</td>
+  <td class="td-name">B23. WAIWAI Noodle 200g</td>
+  <td class="td-ko">B23. WAIWAI 면 200g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b23" onchange="markChanged('b23','stock')">
+    <span class="changed-badge" id="badge_stock_b23">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B24</td>
+  <td class="td-name">B24. WOONSEN LEK 1pack(10pcs) 400g</td>
+  <td class="td-ko">B24. WOONSEN LEK 1팩(10개) 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b24" onchange="markChanged('b24','stock')">
+    <span class="changed-badge" id="badge_stock_b24">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B25</td>
+  <td class="td-name">B25. Shin Ramyun 5pcs</td>
+  <td class="td-ko">B25. 신라면 5개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b25" onchange="markChanged('b25','stock')">
+    <span class="changed-badge" id="badge_stock_b25">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B26</td>
+  <td class="td-name">B26. Jin Ramyun Mild 5pcs</td>
+  <td class="td-ko">B26. 진라면 순한맛 5개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b26" onchange="markChanged('b26','stock')">
+    <span class="changed-badge" id="badge_stock_b26">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B27</td>
+  <td class="td-name">B27. Jin Ramyun Spicy 5pcs</td>
+  <td class="td-ko">B27. 진라면 매운맛 5개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b27" onchange="markChanged('b27','stock')">
+    <span class="changed-badge" id="badge_stock_b27">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B28</td>
+  <td class="td-name">B28. Jin Ramyun Cup Mild 6pcs</td>
+  <td class="td-ko">B28. 진라면 컵라면 순한맛 6개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b28" onchange="markChanged('b28','stock')">
+    <span class="changed-badge" id="badge_stock_b28">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">B29</td>
+  <td class="td-name">B29. Jin Ramyun Cup Spicy 6pcs</td>
+  <td class="td-ko">B29. 진라면 컵라면 매운맛 6개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_b29" onchange="markChanged('b29','stock')">
+    <span class="changed-badge" id="badge_stock_b29">●</span>
+  </td>
+</tr>
+<tr><td colspan="4" class="cat-header">C 각종 소스</td></tr>
+<tr>
+  <td class="td-id">C01</td>
+  <td class="td-name">C1. TIPAROS Fish Sauce 700ml</td>
+  <td class="td-ko">C1. TIPAROS 피시소스 700ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c01" onchange="markChanged('c01','stock')">
+    <span class="changed-badge" id="badge_stock_c01">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C02</td>
+  <td class="td-name">C2. TIPAROS Vinegar 600ml</td>
+  <td class="td-ko">C2. TIPAROS 식초 600ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c02" onchange="markChanged('c02','stock')">
+    <span class="changed-badge" id="badge_stock_c02">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C03</td>
+  <td class="td-name">C3. YWY Black Sweet Soy Sauce 410g</td>
+  <td class="td-ko">C3. YWY 블랙스위트 간장 410g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c03" onchange="markChanged('c03','stock')">
+    <span class="changed-badge" id="badge_stock_c03">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C04</td>
+  <td class="td-name">C4. YWY Oyster Sauce 370g</td>
+  <td class="td-ko">C4. YWY 굴소스 370g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c04" onchange="markChanged('c04','stock')">
+    <span class="changed-badge" id="badge_stock_c04">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C05</td>
+  <td class="td-name">C5. YWY Seasoning Sauce 300g</td>
+  <td class="td-ko">C5. YWY 시즈닝소스 300g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c05" onchange="markChanged('c05','stock')">
+    <span class="changed-badge" id="badge_stock_c05">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C06</td>
+  <td class="td-name">C6. YWY Seasoning Paste 350g</td>
+  <td class="td-ko">C6. YWY 시즈닝페이스트 350g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c06" onchange="markChanged('c06','stock')">
+    <span class="changed-badge" id="badge_stock_c06">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C07</td>
+  <td class="td-name">C7. YWY Black Sauce 410g</td>
+  <td class="td-ko">C7. YWY 블랙소스 410g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c07" onchange="markChanged('c07','stock')">
+    <span class="changed-badge" id="badge_stock_c07">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C08</td>
+  <td class="td-name">C8. Squid Fish Sauce 700ml</td>
+  <td class="td-ko">C8. 오징어 피시소스 700ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c08" onchange="markChanged('c08','stock')">
+    <span class="changed-badge" id="badge_stock_c08">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C09</td>
+  <td class="td-name">C9. Maekong Red Sauce 400ml</td>
+  <td class="td-ko">C9. 메콩 레드소스 400ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c09" onchange="markChanged('c09','stock')">
+    <span class="changed-badge" id="badge_stock_c09">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C10</td>
+  <td class="td-name">C10. Maekong Yellow Sauce 400ml</td>
+  <td class="td-ko">C10. 메콩 옐로우소스 400ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c10" onchange="markChanged('c10','stock')">
+    <span class="changed-badge" id="badge_stock_c10">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C11</td>
+  <td class="td-name">C11. Maekong White Sauce 400ml</td>
+  <td class="td-ko">C11. 메콩 화이트소스 400ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c11" onchange="markChanged('c11','stock')">
+    <span class="changed-badge" id="badge_stock_c11">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C12</td>
+  <td class="td-name">C12. Magi Dipping Sauce 200ml</td>
+  <td class="td-ko">C12. 마기 딥핑소스 200ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c12" onchange="markChanged('c12','stock')">
+    <span class="changed-badge" id="badge_stock_c12">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C13</td>
+  <td class="td-name">C13. KHONKAEN Fish Sauce 400ml</td>
+  <td class="td-ko">C13. KHONKAEN 피시소스 400ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c13" onchange="markChanged('c13','stock')">
+    <span class="changed-badge" id="badge_stock_c13">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C14</td>
+  <td class="td-name">C14. ZAB MIKE Fish Sauce 330ml</td>
+  <td class="td-ko">C14. ZAB MIKE 피시소스 330ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c14" onchange="markChanged('c14','stock')">
+    <span class="changed-badge" id="badge_stock_c14">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C15</td>
+  <td class="td-name">C15. Megachef Fish Sauce 700ml</td>
+  <td class="td-ko">C15. 메가쉐프 피시소스 700ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c15" onchange="markChanged('c15','stock')">
+    <span class="changed-badge" id="badge_stock_c15">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C16</td>
+  <td class="td-name">C16. Tamarind Paste Sauce 300g</td>
+  <td class="td-ko">C16. 타마린드 페이스트 300g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c16" onchange="markChanged('c16','stock')">
+    <span class="changed-badge" id="badge_stock_c16">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C17</td>
+  <td class="td-name">C17. Hot Spice SUKI Sauce 342g</td>
+  <td class="td-ko">C17. 핫스파이스 수키소스 342g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c17" onchange="markChanged('c17','stock')">
+    <span class="changed-badge" id="badge_stock_c17">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C18</td>
+  <td class="td-name">C18. Pantai Sweet Chili Sauce 342g</td>
+  <td class="td-ko">C18. 판타이 스위트칠리소스 342g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c18" onchange="markChanged('c18','stock')">
+    <span class="changed-badge" id="badge_stock_c18">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C19</td>
+  <td class="td-name">C19. Nam Prik Pao 513g</td>
+  <td class="td-ko">C19. 남프릭파우 513g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c19" onchange="markChanged('c19','stock')">
+    <span class="changed-badge" id="badge_stock_c19">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C20</td>
+  <td class="td-name">C20. Sour Curry Paste 100g</td>
+  <td class="td-ko">C20. 사워커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c20" onchange="markChanged('c20','stock')">
+    <span class="changed-badge" id="badge_stock_c20">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C21</td>
+  <td class="td-name">C21. Nam Ya Curry Paste 100g</td>
+  <td class="td-ko">C21. 남야커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c21" onchange="markChanged('c21','stock')">
+    <span class="changed-badge" id="badge_stock_c21">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C22</td>
+  <td class="td-name">C22. Country Style Red Curry Paste 100g</td>
+  <td class="td-ko">C22. 컨트리 레드커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c22" onchange="markChanged('c22','stock')">
+    <span class="changed-badge" id="badge_stock_c22">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C23</td>
+  <td class="td-name">C23. Green Curry Paste 100g</td>
+  <td class="td-ko">C23. 그린커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c23" onchange="markChanged('c23','stock')">
+    <span class="changed-badge" id="badge_stock_c23">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C24</td>
+  <td class="td-name">C24. Panang Curry Paste 100g</td>
+  <td class="td-ko">C24. 파낭커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c24" onchange="markChanged('c24','stock')">
+    <span class="changed-badge" id="badge_stock_c24">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C25</td>
+  <td class="td-name">C25. Red Curry Paste 100g</td>
+  <td class="td-ko">C25. 레드커리 페이스트 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c25" onchange="markChanged('c25','stock')">
+    <span class="changed-badge" id="badge_stock_c25">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C26</td>
+  <td class="td-name">C26. Salted Shrimp Paste 400g</td>
+  <td class="td-ko">C26. 쏠티드 쉬림페이스트 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c26" onchange="markChanged('c26','stock')">
+    <span class="changed-badge" id="badge_stock_c26">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C26B</td>
+  <td class="td-name">C26-1. Salted Shrimp Paste 200g</td>
+  <td class="td-ko">C26-1. 쏠티드 쉬림페이스트 200g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c26b" onchange="markChanged('c26b','stock')">
+    <span class="changed-badge" id="badge_stock_c26b">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C26C</td>
+  <td class="td-name">C26-2. Pickled Gouramy Fish 454g</td>
+  <td class="td-ko">C26-2. 피클드 구라미피시 454g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c26c" onchange="markChanged('c26c','stock')">
+    <span class="changed-badge" id="badge_stock_c26c">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C27</td>
+  <td class="td-name">C27. Dried Chili 100g</td>
+  <td class="td-ko">C27. 매운고추 100g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c27" onchange="markChanged('c27','stock')">
+    <span class="changed-badge" id="badge_stock_c27">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C28</td>
+  <td class="td-name">C28. Tamarind Seedless 170g</td>
+  <td class="td-ko">C28. 타마린드 씨없봉 170g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c28" onchange="markChanged('c28','stock')">
+    <span class="changed-badge" id="badge_stock_c28">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C29</td>
+  <td class="td-name">C29. MSG 250g</td>
+  <td class="td-ko">C29. 미원 250g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c29" onchange="markChanged('c29','stock')">
+    <span class="changed-badge" id="badge_stock_c29">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C30</td>
+  <td class="td-name">C30. Tapioca Pearl Green 400g</td>
+  <td class="td-ko">C30. 타피오카펄 그린 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c30" onchange="markChanged('c30','stock')">
+    <span class="changed-badge" id="badge_stock_c30">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C31</td>
+  <td class="td-name">C31. ROSDEE Pork Flavor 800g</td>
+  <td class="td-ko">C31. ROSDEE 포크플레이버 800g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c31" onchange="markChanged('c31','stock')">
+    <span class="changed-badge" id="badge_stock_c31">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C32</td>
+  <td class="td-name">C32. ROSDEE Chicken Flavor 70g</td>
+  <td class="td-ko">C32. ROSDEE 치킨플레이버 70g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c32" onchange="markChanged('c32','stock')">
+    <span class="changed-badge" id="badge_stock_c32">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C33</td>
+  <td class="td-name">C33. ROSDEE LAAB Mix 30g</td>
+  <td class="td-ko">C33. ROSDEE LAAB 믹스 30g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c33" onchange="markChanged('c33','stock')">
+    <span class="changed-badge" id="badge_stock_c33">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C34</td>
+  <td class="td-name">C34. ROSDEE TOM YUM KUNG Mix 60g</td>
+  <td class="td-ko">C34. ROSDEE 똠얌꿍 믹스 60g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c34" onchange="markChanged('c34','stock')">
+    <span class="changed-badge" id="badge_stock_c34">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C35</td>
+  <td class="td-name">C35. ROSDEE YUM WOON SEN Mix 40g</td>
+  <td class="td-ko">C35. ROSDEE 얌운센 믹스 40g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c35" onchange="markChanged('c35','stock')">
+    <span class="changed-badge" id="badge_stock_c35">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C36</td>
+  <td class="td-name">C36. ROSDEE PALO Mix 60g</td>
+  <td class="td-ko">C36. ROSDEE 팔로 믹스 60g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c36" onchange="markChanged('c36','stock')">
+    <span class="changed-badge" id="badge_stock_c36">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C37</td>
+  <td class="td-name">C37. ROSDEE KA PRAO Mix 50g</td>
+  <td class="td-ko">C37. ROSDEE 카프라오 믹스 50g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c37" onchange="markChanged('c37','stock')">
+    <span class="changed-badge" id="badge_stock_c37">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C38</td>
+  <td class="td-name">C38. Lime Seasoning Powder 67g</td>
+  <td class="td-ko">C38. 라임 시즈닝 파우더 67g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c38" onchange="markChanged('c38','stock')">
+    <span class="changed-badge" id="badge_stock_c38">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C39</td>
+  <td class="td-name">C39. Chicken Cube 20g</td>
+  <td class="td-ko">C39. 치킨큐브 20g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c39" onchange="markChanged('c39','stock')">
+    <span class="changed-badge" id="badge_stock_c39">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C40</td>
+  <td class="td-name">C40. Pork Cube 20g</td>
+  <td class="td-ko">C40. 포크큐브 20g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c40" onchange="markChanged('c40','stock')">
+    <span class="changed-badge" id="badge_stock_c40">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">C41</td>
+  <td class="td-name">C41. Tom Yum Kung Cube 20g</td>
+  <td class="td-ko">C41. 톰얌꿍큐브 20g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_c41" onchange="markChanged('c41','stock')">
+    <span class="changed-badge" id="badge_stock_c41">●</span>
+  </td>
+</tr>
+<tr><td colspan="4" class="cat-header">D 음료 및 기타</td></tr>
+<tr>
+  <td class="td-id">D01</td>
+  <td class="td-name">D1. Rambutan in Syrup 565g</td>
+  <td class="td-ko">D1. 람부탄 시럽 565g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d01" onchange="markChanged('d01','stock')">
+    <span class="changed-badge" id="badge_stock_d01">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D02</td>
+  <td class="td-name">D2. Longan in Syrup 565g</td>
+  <td class="td-ko">D2. 용안 시럽 565g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d02" onchange="markChanged('d02','stock')">
+    <span class="changed-badge" id="badge_stock_d02">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D03</td>
+  <td class="td-name">D3. Carnation Condensed Milk 405g</td>
+  <td class="td-ko">D3. 카네이션 연유 405g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d03" onchange="markChanged('d03','stock')">
+    <span class="changed-badge" id="badge_stock_d03">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D04</td>
+  <td class="td-name">D4. Mali Condensed Milk 355g</td>
+  <td class="td-ko">D4. 말리 연유 355g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d04" onchange="markChanged('d04','stock')">
+    <span class="changed-badge" id="badge_stock_d04">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D05</td>
+  <td class="td-name">D5. Coconut Milk 400ml</td>
+  <td class="td-ko">D5. 코코낫밀크 400ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d05" onchange="markChanged('d05','stock')">
+    <span class="changed-badge" id="badge_stock_d05">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D06</td>
+  <td class="td-name">D6. Ampawa Coconut Milk 1000ml</td>
+  <td class="td-ko">D6. 암파와 코코낫밀크 1000ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d06" onchange="markChanged('d06','stock')">
+    <span class="changed-badge" id="badge_stock_d06">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D07</td>
+  <td class="td-name">D7. SAHA Bamboo Shoot 350g</td>
+  <td class="td-ko">D7. SAHA 죽순채 350g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d07" onchange="markChanged('d07','stock')">
+    <span class="changed-badge" id="badge_stock_d07">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D08</td>
+  <td class="td-name">D8. SAHA Bamboo Shoot Sliced 350g</td>
+  <td class="td-ko">D8. SAHA 죽순 슬라이스 350g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d08" onchange="markChanged('d08','stock')">
+    <span class="changed-badge" id="badge_stock_d08">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D09</td>
+  <td class="td-name">D9. Bamboo Shoot with Herb 400g</td>
+  <td class="td-ko">D9. 뱀부 허브 400g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d09" onchange="markChanged('d09','stock')">
+    <span class="changed-badge" id="badge_stock_d09">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D10</td>
+  <td class="td-name">D10. Fish Snack BBQ 80g</td>
+  <td class="td-ko">D10. 피시스낵 바베큐맛 80g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d10" onchange="markChanged('d10','stock')">
+    <span class="changed-badge" id="badge_stock_d10">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D11</td>
+  <td class="td-name">D11. Fish Snack Hot Chili 80g</td>
+  <td class="td-ko">D11. 피시스낵 핫칠리맛 80g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d11" onchange="markChanged('d11','stock')">
+    <span class="changed-badge" id="badge_stock_d11">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D12</td>
+  <td class="td-name">D12. Fish Snack Chicken BBQ 80g</td>
+  <td class="td-ko">D12. 피시스낵 치킨바베큐맛 80g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d12" onchange="markChanged('d12','stock')">
+    <span class="changed-badge" id="badge_stock_d12">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D13</td>
+  <td class="td-name">D13. Fish Snack Crab 80g</td>
+  <td class="td-ko">D13. 피시스낵 게살맛 80g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d13" onchange="markChanged('d13','stock')">
+    <span class="changed-badge" id="badge_stock_d13">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D14</td>
+  <td class="td-name">D14. Italian Lemon Juice 200ml</td>
+  <td class="td-ko">D14. 이태리 레몬주스 200ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d14" onchange="markChanged('d14','stock')">
+    <span class="changed-badge" id="badge_stock_d14">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D14B</td>
+  <td class="td-name">D14-1. Italian Lime Juice 200ml</td>
+  <td class="td-ko">D14-1. 이태리 라임주스 200ml</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d14b" onchange="markChanged('d14b','stock')">
+    <span class="changed-badge" id="badge_stock_d14b">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D15</td>
+  <td class="td-name">D15. Red Sunflower Seeds 260g</td>
+  <td class="td-ko">D15. 해바라기씨 빨간색 260g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d15" onchange="markChanged('d15','stock')">
+    <span class="changed-badge" id="badge_stock_d15">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D16</td>
+  <td class="td-name">D16. Coffee Mix 160pcs</td>
+  <td class="td-ko">D16. 커피믹스 160개입</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d16" onchange="markChanged('d16','stock')">
+    <span class="changed-badge" id="badge_stock_d16">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">D17</td>
+  <td class="td-name">D17. Paper Cup 1000pcs</td>
+  <td class="td-ko">D17. 종이컵 1000개</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_d17" onchange="markChanged('d17','stock')">
+    <span class="changed-badge" id="badge_stock_d17">●</span>
+  </td>
+</tr>
+<tr><td colspan="4" class="cat-header">E 생활용품</td></tr>
+<tr>
+  <td class="td-id">E01</td>
+  <td class="td-name">E01. Colgate Icy Cool Mint Toothpaste 200g</td>
+  <td class="td-ko">E01. 콜게이트 아이시 쿨민트 치약 200g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_e01" onchange="markChanged('e01','stock')">
+    <span class="changed-badge" id="badge_stock_e01">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">E02</td>
+  <td class="td-name">E02. Colgate Great Regular Flavor Toothpaste 200g</td>
+  <td class="td-ko">E02. 콜게이트 그레이트 레귤러 치약 200g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_e02" onchange="markChanged('e02','stock')">
+    <span class="changed-badge" id="badge_stock_e02">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">E03</td>
+  <td class="td-name">E03. Twelve Plus Extra Cool Powder Cooling Blue 270g</td>
+  <td class="td-ko">E03. 트웰브플러스 엑스트라쿨파우더 쿨링블루 270g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_e03" onchange="markChanged('e03','stock')">
+    <span class="changed-badge" id="badge_stock_e03">●</span>
+  </td>
+</tr>
+<tr>
+  <td class="td-id">E04</td>
+  <td class="td-name">E04. Twelve Plus Extra Cool Powder Cooling Pink 270g</td>
+  <td class="td-ko">E04. 트웰브플러스 엑스트라쿨파우더 쿨링핑크 270g</td>
+  <td class="td-stock">
+    <input type="number" min="-1" value="-1" id="stock_e04" onchange="markChanged('e04','stock')">
+    <span class="changed-badge" id="badge_stock_e04">●</span>
+  </td>
+</tr>
+</tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 할인율 -->
+  <div id="tab-discount" class="tab-content">
+    <div class="bulk-box">
+      <label>전체/카테고리 일괄 적용:</label>
+      <select id="bulk-cat">
+        <option value="all">전체</option>
+        <option value="a">A 냉동음식</option>
+        <option value="b">B 면 종류</option>
+        <option value="c">C 각종 소스</option>
+        <option value="d">D 음료 및 기타</option>
+        <option value="e">E 생활용품</option>
+      </select>
+      <label>2개 할인:</label>
+      <input type="number" id="bulk-disc2" value="5" min="0" max="50"> %
+      <label>3개 할인:</label>
+      <input type="number" id="bulk-disc3" value="10" min="0" max="50"> %
+      <button class="btn btn-primary" onclick="applyBulkDiscount()">적용</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:60px;">번호</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">영문명</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">2개 할인율</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">3개 할인율</th>
+          <th style="padding:10px 12px;width:40px;"></th>
+        </tr></thead>
+        <tbody><tr><td colspan="5" class="cat-header">A 냉동음식</td></tr>
+<tr>
+  <td class="td-id">A1</td>
+  <td class="td-name">A1. Shrimp Ball 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a1" onchange="markChanged('a1','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a1" onchange="markChanged('a1','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a1">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A2</td>
+  <td class="td-name">A2. Beef Meatball 320g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a2" onchange="markChanged('a2','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a2" onchange="markChanged('a2','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a2">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A3</td>
+  <td class="td-name">A3. Pork Meatball 320g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a3" onchange="markChanged('a3','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a3" onchange="markChanged('a3','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a3">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A4</td>
+  <td class="td-name">A4. Pig Tail 700g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a4" onchange="markChanged('a4','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a4" onchange="markChanged('a4','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a4">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A5</td>
+  <td class="td-name">A5. Pig Ear x2 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a5" onchange="markChanged('a5','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a5" onchange="markChanged('a5','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a5">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A6</td>
+  <td class="td-name">A6. Chicken Gizzard 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a6" onchange="markChanged('a6','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a6" onchange="markChanged('a6','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a6">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A7</td>
+  <td class="td-name">A7. Chicken Liver 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a7" onchange="markChanged('a7','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a7" onchange="markChanged('a7','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a7">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A8</td>
+  <td class="td-name">A8. Chicken Heart 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a8" onchange="markChanged('a8','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a8" onchange="markChanged('a8','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a8">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A9</td>
+  <td class="td-name">A9. Chicken Knee Cartilage 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a9" onchange="markChanged('a9','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a9" onchange="markChanged('a9','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a9">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A10</td>
+  <td class="td-name">A10. Frozen Striped Snakehead 3pcs 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a10" onchange="markChanged('a10','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a10" onchange="markChanged('a10','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a10">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A11</td>
+  <td class="td-name">A11. Frozen Striped Snakehead 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a11" onchange="markChanged('a11','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a11" onchange="markChanged('a11','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a11">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A12</td>
+  <td class="td-name">A12. Frozen Red Tilapia 2pcs 900g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a12" onchange="markChanged('a12','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a12" onchange="markChanged('a12','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a12">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A13</td>
+  <td class="td-name">A13. Frozen Tilapia 2pcs 900g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a13" onchange="markChanged('a13','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a13" onchange="markChanged('a13','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a13">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A14</td>
+  <td class="td-name">A14. Frozen Gourami 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a14" onchange="markChanged('a14','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a14" onchange="markChanged('a14','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a14">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A15</td>
+  <td class="td-name">A15. Frozen Cut Catfish 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a15" onchange="markChanged('a15','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a15" onchange="markChanged('a15','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a15">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A16</td>
+  <td class="td-name">A16. Frozen Catfish 700g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a16" onchange="markChanged('a16','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a16" onchange="markChanged('a16','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a16">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A17</td>
+  <td class="td-name">A17. Pla Tu Khem 180g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a17" onchange="markChanged('a17','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a17" onchange="markChanged('a17','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a17">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A18</td>
+  <td class="td-name">A18. Frozen Mackerel 250g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a18" onchange="markChanged('a18','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a18" onchange="markChanged('a18','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a18">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A19</td>
+  <td class="td-name">A19. Seasoned Semi-Dried Catfish 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a19" onchange="markChanged('a19','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a19" onchange="markChanged('a19','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a19">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A20</td>
+  <td class="td-name">A20. Frozen Frog 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a20" onchange="markChanged('a20','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a20" onchange="markChanged('a20','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a20">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A21</td>
+  <td class="td-name">A21. Frozen Cuttlefish 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a21" onchange="markChanged('a21','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a21" onchange="markChanged('a21','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a21">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A22</td>
+  <td class="td-name">A22. Frozen Baby Octopus 450g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a22" onchange="markChanged('a22','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a22" onchange="markChanged('a22','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a22">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">A23</td>
+  <td class="td-name">A23. Frozen Beef Offal Papayatan 700g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_a23" onchange="markChanged('a23','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_a23" onchange="markChanged('a23','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_a23">●</span></td>
+</tr>
+<tr><td colspan="5" class="cat-header">B 면 종류</td></tr>
+<tr>
+  <td class="td-id">B01</td>
+  <td class="td-name">B01. MAMA TOMYUM CUP 70g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b01" onchange="markChanged('b01','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b01" onchange="markChanged('b01','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b01">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B02</td>
+  <td class="td-name">B02. MAMA CREAMY TOMYUM CUP 70g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b02" onchange="markChanged('b02','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b02" onchange="markChanged('b02','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b02">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B03</td>
+  <td class="td-name">B03. MAMA PORK CUP 70g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b03" onchange="markChanged('b03','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b03" onchange="markChanged('b03','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b03">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B04</td>
+  <td class="td-name">B04. MAMA Instant Rice Vermicelli Clear Soup 55g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b04" onchange="markChanged('b04','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b04" onchange="markChanged('b04','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b04">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B05</td>
+  <td class="td-name">B05. MAMA Instant Noodle Chicken Green Curry 55g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b05" onchange="markChanged('b05','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b05" onchange="markChanged('b05','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b05">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B06</td>
+  <td class="td-name">B06. ACECOOK Rice Noodle 71g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b06" onchange="markChanged('b06','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b06" onchange="markChanged('b06','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b06">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B07</td>
+  <td class="td-name">B07. HAOHAO ORIGINAL 78g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b07" onchange="markChanged('b07','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b07" onchange="markChanged('b07','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b07">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B08</td>
+  <td class="td-name">B08. ACECOOK Pho Bo 70g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b08" onchange="markChanged('b08','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b08" onchange="markChanged('b08','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b08">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B09</td>
+  <td class="td-name">B09. WAIWAI Oriental 60g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b09" onchange="markChanged('b09','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b09" onchange="markChanged('b09','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b09">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B10</td>
+  <td class="td-name">B10. WAIWAI Tom Yum Red 60g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b10" onchange="markChanged('b10','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b10" onchange="markChanged('b10','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b10">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B11</td>
+  <td class="td-name">B11. WAIWAI Tom Yum Blue 60g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b11" onchange="markChanged('b11','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b11" onchange="markChanged('b11','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b11">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B12</td>
+  <td class="td-name">B12. WAIWAI Crab 55g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b12" onchange="markChanged('b12','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b12" onchange="markChanged('b12','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b12">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B13</td>
+  <td class="td-name">B13. MAMA Tom Yum 55g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b13" onchange="markChanged('b13','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b13" onchange="markChanged('b13','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b13">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B14</td>
+  <td class="td-name">B14. MAMA Creamy 55g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b14" onchange="markChanged('b14','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b14" onchange="markChanged('b14','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b14">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B15</td>
+  <td class="td-name">B15. MAMA Pork 60g 1set(5pcs)</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b15" onchange="markChanged('b15','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b15" onchange="markChanged('b15','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b15">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B16</td>
+  <td class="td-name">B16. SAFOCO Rice Vermicelli 300g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b16" onchange="markChanged('b16','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b16" onchange="markChanged('b16','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b16">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B17</td>
+  <td class="td-name">B17. CHANTABURI Rice Noodle 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b17" onchange="markChanged('b17','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b17" onchange="markChanged('b17','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b17">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B18</td>
+  <td class="td-name">B18. BUNKO Vermicelli 300g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b18" onchange="markChanged('b18','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b18" onchange="markChanged('b18','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b18">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B19</td>
+  <td class="td-name">B19. BICH CHI Hu Tieu Kho 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b19" onchange="markChanged('b19','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b19" onchange="markChanged('b19','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b19">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B20</td>
+  <td class="td-name">B20. BICH CHI Banh Pho Kho 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b20" onchange="markChanged('b20','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b20" onchange="markChanged('b20','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b20">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B21</td>
+  <td class="td-name">B21. VIFON Hu Tieu Kho 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b21" onchange="markChanged('b21','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b21" onchange="markChanged('b21','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b21">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B22</td>
+  <td class="td-name">B22. VIFON Banh Pho Kho 500g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b22" onchange="markChanged('b22','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b22" onchange="markChanged('b22','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b22">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B23</td>
+  <td class="td-name">B23. WAIWAI Noodle 200g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b23" onchange="markChanged('b23','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b23" onchange="markChanged('b23','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b23">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B24</td>
+  <td class="td-name">B24. WOONSEN LEK 1pack(10pcs) 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b24" onchange="markChanged('b24','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b24" onchange="markChanged('b24','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b24">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B25</td>
+  <td class="td-name">B25. Shin Ramyun 5pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b25" onchange="markChanged('b25','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b25" onchange="markChanged('b25','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b25">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B26</td>
+  <td class="td-name">B26. Jin Ramyun Mild 5pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b26" onchange="markChanged('b26','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b26" onchange="markChanged('b26','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b26">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B27</td>
+  <td class="td-name">B27. Jin Ramyun Spicy 5pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b27" onchange="markChanged('b27','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b27" onchange="markChanged('b27','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b27">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B28</td>
+  <td class="td-name">B28. Jin Ramyun Cup Mild 6pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b28" onchange="markChanged('b28','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b28" onchange="markChanged('b28','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b28">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">B29</td>
+  <td class="td-name">B29. Jin Ramyun Cup Spicy 6pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_b29" onchange="markChanged('b29','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_b29" onchange="markChanged('b29','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_b29">●</span></td>
+</tr>
+<tr><td colspan="5" class="cat-header">C 각종 소스</td></tr>
+<tr>
+  <td class="td-id">C01</td>
+  <td class="td-name">C1. TIPAROS Fish Sauce 700ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c01" onchange="markChanged('c01','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c01" onchange="markChanged('c01','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c01">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C02</td>
+  <td class="td-name">C2. TIPAROS Vinegar 600ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c02" onchange="markChanged('c02','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c02" onchange="markChanged('c02','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c02">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C03</td>
+  <td class="td-name">C3. YWY Black Sweet Soy Sauce 410g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c03" onchange="markChanged('c03','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c03" onchange="markChanged('c03','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c03">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C04</td>
+  <td class="td-name">C4. YWY Oyster Sauce 370g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c04" onchange="markChanged('c04','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c04" onchange="markChanged('c04','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c04">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C05</td>
+  <td class="td-name">C5. YWY Seasoning Sauce 300g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c05" onchange="markChanged('c05','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c05" onchange="markChanged('c05','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c05">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C06</td>
+  <td class="td-name">C6. YWY Seasoning Paste 350g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c06" onchange="markChanged('c06','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c06" onchange="markChanged('c06','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c06">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C07</td>
+  <td class="td-name">C7. YWY Black Sauce 410g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c07" onchange="markChanged('c07','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c07" onchange="markChanged('c07','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c07">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C08</td>
+  <td class="td-name">C8. Squid Fish Sauce 700ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c08" onchange="markChanged('c08','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c08" onchange="markChanged('c08','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c08">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C09</td>
+  <td class="td-name">C9. Maekong Red Sauce 400ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c09" onchange="markChanged('c09','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c09" onchange="markChanged('c09','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c09">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C10</td>
+  <td class="td-name">C10. Maekong Yellow Sauce 400ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c10" onchange="markChanged('c10','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c10" onchange="markChanged('c10','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c10">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C11</td>
+  <td class="td-name">C11. Maekong White Sauce 400ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c11" onchange="markChanged('c11','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c11" onchange="markChanged('c11','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c11">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C12</td>
+  <td class="td-name">C12. Magi Dipping Sauce 200ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c12" onchange="markChanged('c12','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c12" onchange="markChanged('c12','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c12">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C13</td>
+  <td class="td-name">C13. KHONKAEN Fish Sauce 400ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c13" onchange="markChanged('c13','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c13" onchange="markChanged('c13','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c13">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C14</td>
+  <td class="td-name">C14. ZAB MIKE Fish Sauce 330ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c14" onchange="markChanged('c14','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c14" onchange="markChanged('c14','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c14">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C15</td>
+  <td class="td-name">C15. Megachef Fish Sauce 700ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c15" onchange="markChanged('c15','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c15" onchange="markChanged('c15','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c15">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C16</td>
+  <td class="td-name">C16. Tamarind Paste Sauce 300g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c16" onchange="markChanged('c16','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c16" onchange="markChanged('c16','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c16">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C17</td>
+  <td class="td-name">C17. Hot Spice SUKI Sauce 342g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c17" onchange="markChanged('c17','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c17" onchange="markChanged('c17','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c17">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C18</td>
+  <td class="td-name">C18. Pantai Sweet Chili Sauce 342g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c18" onchange="markChanged('c18','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c18" onchange="markChanged('c18','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c18">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C19</td>
+  <td class="td-name">C19. Nam Prik Pao 513g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c19" onchange="markChanged('c19','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c19" onchange="markChanged('c19','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c19">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C20</td>
+  <td class="td-name">C20. Sour Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c20" onchange="markChanged('c20','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c20" onchange="markChanged('c20','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c20">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C21</td>
+  <td class="td-name">C21. Nam Ya Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c21" onchange="markChanged('c21','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c21" onchange="markChanged('c21','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c21">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C22</td>
+  <td class="td-name">C22. Country Style Red Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c22" onchange="markChanged('c22','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c22" onchange="markChanged('c22','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c22">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C23</td>
+  <td class="td-name">C23. Green Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c23" onchange="markChanged('c23','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c23" onchange="markChanged('c23','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c23">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C24</td>
+  <td class="td-name">C24. Panang Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c24" onchange="markChanged('c24','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c24" onchange="markChanged('c24','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c24">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C25</td>
+  <td class="td-name">C25. Red Curry Paste 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c25" onchange="markChanged('c25','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c25" onchange="markChanged('c25','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c25">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C26</td>
+  <td class="td-name">C26. Salted Shrimp Paste 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c26" onchange="markChanged('c26','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c26" onchange="markChanged('c26','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c26">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C26B</td>
+  <td class="td-name">C26-1. Salted Shrimp Paste 200g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c26b" onchange="markChanged('c26b','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c26b" onchange="markChanged('c26b','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c26b">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C26C</td>
+  <td class="td-name">C26-2. Pickled Gouramy Fish 454g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c26c" onchange="markChanged('c26c','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c26c" onchange="markChanged('c26c','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c26c">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C27</td>
+  <td class="td-name">C27. Dried Chili 100g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c27" onchange="markChanged('c27','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c27" onchange="markChanged('c27','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c27">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C28</td>
+  <td class="td-name">C28. Tamarind Seedless 170g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c28" onchange="markChanged('c28','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c28" onchange="markChanged('c28','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c28">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C29</td>
+  <td class="td-name">C29. MSG 250g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c29" onchange="markChanged('c29','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c29" onchange="markChanged('c29','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c29">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C30</td>
+  <td class="td-name">C30. Tapioca Pearl Green 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c30" onchange="markChanged('c30','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c30" onchange="markChanged('c30','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c30">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C31</td>
+  <td class="td-name">C31. ROSDEE Pork Flavor 800g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c31" onchange="markChanged('c31','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c31" onchange="markChanged('c31','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c31">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C32</td>
+  <td class="td-name">C32. ROSDEE Chicken Flavor 70g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c32" onchange="markChanged('c32','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c32" onchange="markChanged('c32','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c32">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C33</td>
+  <td class="td-name">C33. ROSDEE LAAB Mix 30g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c33" onchange="markChanged('c33','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c33" onchange="markChanged('c33','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c33">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C34</td>
+  <td class="td-name">C34. ROSDEE TOM YUM KUNG Mix 60g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c34" onchange="markChanged('c34','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c34" onchange="markChanged('c34','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c34">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C35</td>
+  <td class="td-name">C35. ROSDEE YUM WOON SEN Mix 40g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c35" onchange="markChanged('c35','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c35" onchange="markChanged('c35','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c35">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C36</td>
+  <td class="td-name">C36. ROSDEE PALO Mix 60g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c36" onchange="markChanged('c36','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c36" onchange="markChanged('c36','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c36">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C37</td>
+  <td class="td-name">C37. ROSDEE KA PRAO Mix 50g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c37" onchange="markChanged('c37','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c37" onchange="markChanged('c37','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c37">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C38</td>
+  <td class="td-name">C38. Lime Seasoning Powder 67g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c38" onchange="markChanged('c38','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c38" onchange="markChanged('c38','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c38">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C39</td>
+  <td class="td-name">C39. Chicken Cube 20g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c39" onchange="markChanged('c39','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c39" onchange="markChanged('c39','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c39">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C40</td>
+  <td class="td-name">C40. Pork Cube 20g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c40" onchange="markChanged('c40','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c40" onchange="markChanged('c40','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c40">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">C41</td>
+  <td class="td-name">C41. Tom Yum Kung Cube 20g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_c41" onchange="markChanged('c41','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_c41" onchange="markChanged('c41','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_c41">●</span></td>
+</tr>
+<tr><td colspan="5" class="cat-header">D 음료 및 기타</td></tr>
+<tr>
+  <td class="td-id">D01</td>
+  <td class="td-name">D1. Rambutan in Syrup 565g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d01" onchange="markChanged('d01','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d01" onchange="markChanged('d01','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d01">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D02</td>
+  <td class="td-name">D2. Longan in Syrup 565g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d02" onchange="markChanged('d02','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d02" onchange="markChanged('d02','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d02">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D03</td>
+  <td class="td-name">D3. Carnation Condensed Milk 405g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d03" onchange="markChanged('d03','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d03" onchange="markChanged('d03','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d03">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D04</td>
+  <td class="td-name">D4. Mali Condensed Milk 355g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d04" onchange="markChanged('d04','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d04" onchange="markChanged('d04','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d04">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D05</td>
+  <td class="td-name">D5. Coconut Milk 400ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d05" onchange="markChanged('d05','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d05" onchange="markChanged('d05','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d05">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D06</td>
+  <td class="td-name">D6. Ampawa Coconut Milk 1000ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d06" onchange="markChanged('d06','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d06" onchange="markChanged('d06','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d06">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D07</td>
+  <td class="td-name">D7. SAHA Bamboo Shoot 350g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d07" onchange="markChanged('d07','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d07" onchange="markChanged('d07','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d07">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D08</td>
+  <td class="td-name">D8. SAHA Bamboo Shoot Sliced 350g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d08" onchange="markChanged('d08','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d08" onchange="markChanged('d08','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d08">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D09</td>
+  <td class="td-name">D9. Bamboo Shoot with Herb 400g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d09" onchange="markChanged('d09','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d09" onchange="markChanged('d09','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d09">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D10</td>
+  <td class="td-name">D10. Fish Snack BBQ 80g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d10" onchange="markChanged('d10','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d10" onchange="markChanged('d10','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d10">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D11</td>
+  <td class="td-name">D11. Fish Snack Hot Chili 80g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d11" onchange="markChanged('d11','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d11" onchange="markChanged('d11','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d11">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D12</td>
+  <td class="td-name">D12. Fish Snack Chicken BBQ 80g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d12" onchange="markChanged('d12','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d12" onchange="markChanged('d12','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d12">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D13</td>
+  <td class="td-name">D13. Fish Snack Crab 80g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d13" onchange="markChanged('d13','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d13" onchange="markChanged('d13','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d13">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D14</td>
+  <td class="td-name">D14. Italian Lemon Juice 200ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d14" onchange="markChanged('d14','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d14" onchange="markChanged('d14','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d14">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D14B</td>
+  <td class="td-name">D14-1. Italian Lime Juice 200ml</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d14b" onchange="markChanged('d14b','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d14b" onchange="markChanged('d14b','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d14b">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D15</td>
+  <td class="td-name">D15. Red Sunflower Seeds 260g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d15" onchange="markChanged('d15','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d15" onchange="markChanged('d15','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d15">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D16</td>
+  <td class="td-name">D16. Coffee Mix 160pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d16" onchange="markChanged('d16','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d16" onchange="markChanged('d16','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d16">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">D17</td>
+  <td class="td-name">D17. Paper Cup 1000pcs</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_d17" onchange="markChanged('d17','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_d17" onchange="markChanged('d17','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_d17">●</span></td>
+</tr>
+<tr><td colspan="5" class="cat-header">E 생활용품</td></tr>
+<tr>
+  <td class="td-id">E01</td>
+  <td class="td-name">E01. Colgate Icy Cool Mint Toothpaste 200g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_e01" onchange="markChanged('e01','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_e01" onchange="markChanged('e01','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_e01">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">E02</td>
+  <td class="td-name">E02. Colgate Great Regular Flavor Toothpaste 200g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_e02" onchange="markChanged('e02','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_e02" onchange="markChanged('e02','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_e02">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">E03</td>
+  <td class="td-name">E03. Twelve Plus Extra Cool Powder Cooling Blue 270g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_e03" onchange="markChanged('e03','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_e03" onchange="markChanged('e03','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_e03">●</span></td>
+</tr>
+<tr>
+  <td class="td-id">E04</td>
+  <td class="td-name">E04. Twelve Plus Extra Cool Powder Cooling Pink 270g</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="5" id="disc2_e04" onchange="markChanged('e04','disc')"> %</td>
+  <td class="td-stock"><input type="number" min="0" max="50" value="10" id="disc3_e04" onchange="markChanged('e04','disc')"> %</td>
+  <td class="td-stock"><span class="changed-badge" id="badge_disc_e04">●</span></td>
+</tr>
+</tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 상품 관리 -->
+  <div id="tab-product" class="tab-content">
+    <!-- 상품 추가 -->
+    <div class="add-product-form">
+      <h3>➕ 새 상품 추가</h3>
+      <div class="form-grid">
+        <div>
+          <label>카테고리</label>
+          <select id="new-cat">
+            <option value="a">A 냉동음식</option>
+            <option value="b">B 면 종류</option>
+            <option value="c">C 각종 소스</option>
+            <option value="d">D 음료 및 기타</option>
+            <option value="e">E 생활용품</option>
+          </select>
+        </div>
+        <div>
+          <label>상품 ID (예: a24, b30)</label>
+          <input type="text" id="new-id" placeholder="a24">
+        </div>
+        <div class="form-full">
+          <label>한국어 상품명 (영어/태국어 자동 번역)</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="new-ko" placeholder="예: 새우볼 500g" style="flex:1;">
+            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="translateName()">🤖 번역</button>
+          </div>
+        </div>
+        <div>
+          <label>영문명 (자동 입력)</label>
+          <input type="text" id="new-en" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
+        </div>
+        <div>
+          <label>태국어명 (자동 입력)</label>
+          <input type="text" id="new-th" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
+        </div>
+        <div>
+          <label>1개 가격 (₩)</label>
+          <input type="number" id="new-price" placeholder="5000">
+        </div>
+        <div class="form-full">
+          <label>이미지 URL</label>
+          <input type="text" id="new-img" placeholder="https://...">
+        </div>
+      </div>
+      <div id="translate-status" style="margin-top:8px;font-size:12px;color:#888;display:none;">🤖 번역 중...</div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="addProduct()">상품 추가</button>
+    </div>
+
+    <!-- 상품 수정 -->
+    <div class="table-wrap">
+      <table>
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">번호</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">영문명</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">한국명</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">1개 가격</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">이미지 URL</th>
+        </tr></thead>
+        <tbody><tr><td colspan="5" class="cat-header">A 냉동음식</td></tr>
+<tr>
+  <td class="td-id">A1</td>
+  <td><input type="text" value="A1. Shrimp Ball 500g" id="en_a1" class="text-input" onchange="markChanged('a1','prod')"></td>
+  <td><input type="text" value="A1. 새우볼 500g" id="ko_a1" class="text-input" onchange="markChanged('a1','prod')"></td>
+  <td><input type="number" id="price_a1" class="price-input" placeholder="가격" onchange="markChanged('a1','prod')"></td>
+  <td><input type="text" id="img_a1" class="img-input" placeholder="이미지 URL" onchange="markChanged('a1','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A2</td>
+  <td><input type="text" value="A2. Beef Meatball 320g" id="en_a2" class="text-input" onchange="markChanged('a2','prod')"></td>
+  <td><input type="text" value="A2. 소고기미트볼 320g" id="ko_a2" class="text-input" onchange="markChanged('a2','prod')"></td>
+  <td><input type="number" id="price_a2" class="price-input" placeholder="가격" onchange="markChanged('a2','prod')"></td>
+  <td><input type="text" id="img_a2" class="img-input" placeholder="이미지 URL" onchange="markChanged('a2','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A3</td>
+  <td><input type="text" value="A3. Pork Meatball 320g" id="en_a3" class="text-input" onchange="markChanged('a3','prod')"></td>
+  <td><input type="text" value="A3. 돼지고기미트볼 320g" id="ko_a3" class="text-input" onchange="markChanged('a3','prod')"></td>
+  <td><input type="number" id="price_a3" class="price-input" placeholder="가격" onchange="markChanged('a3','prod')"></td>
+  <td><input type="text" id="img_a3" class="img-input" placeholder="이미지 URL" onchange="markChanged('a3','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A4</td>
+  <td><input type="text" value="A4. Pig Tail 700g" id="en_a4" class="text-input" onchange="markChanged('a4','prod')"></td>
+  <td><input type="text" value="A4. 돼지꼬리 700g" id="ko_a4" class="text-input" onchange="markChanged('a4','prod')"></td>
+  <td><input type="number" id="price_a4" class="price-input" placeholder="가격" onchange="markChanged('a4','prod')"></td>
+  <td><input type="text" id="img_a4" class="img-input" placeholder="이미지 URL" onchange="markChanged('a4','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A5</td>
+  <td><input type="text" value="A5. Pig Ear x2 500g" id="en_a5" class="text-input" onchange="markChanged('a5','prod')"></td>
+  <td><input type="text" value="A5. 돼지귀 2개 500g" id="ko_a5" class="text-input" onchange="markChanged('a5','prod')"></td>
+  <td><input type="number" id="price_a5" class="price-input" placeholder="가격" onchange="markChanged('a5','prod')"></td>
+  <td><input type="text" id="img_a5" class="img-input" placeholder="이미지 URL" onchange="markChanged('a5','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A6</td>
+  <td><input type="text" value="A6. Chicken Gizzard 500g" id="en_a6" class="text-input" onchange="markChanged('a6','prod')"></td>
+  <td><input type="text" value="A6. 닭근위 500g" id="ko_a6" class="text-input" onchange="markChanged('a6','prod')"></td>
+  <td><input type="number" id="price_a6" class="price-input" placeholder="가격" onchange="markChanged('a6','prod')"></td>
+  <td><input type="text" id="img_a6" class="img-input" placeholder="이미지 URL" onchange="markChanged('a6','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A7</td>
+  <td><input type="text" value="A7. Chicken Liver 400g" id="en_a7" class="text-input" onchange="markChanged('a7','prod')"></td>
+  <td><input type="text" value="A7. 닭간 400g" id="ko_a7" class="text-input" onchange="markChanged('a7','prod')"></td>
+  <td><input type="number" id="price_a7" class="price-input" placeholder="가격" onchange="markChanged('a7','prod')"></td>
+  <td><input type="text" id="img_a7" class="img-input" placeholder="이미지 URL" onchange="markChanged('a7','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A8</td>
+  <td><input type="text" value="A8. Chicken Heart 500g" id="en_a8" class="text-input" onchange="markChanged('a8','prod')"></td>
+  <td><input type="text" value="A8. 닭알집 500g" id="ko_a8" class="text-input" onchange="markChanged('a8','prod')"></td>
+  <td><input type="number" id="price_a8" class="price-input" placeholder="가격" onchange="markChanged('a8','prod')"></td>
+  <td><input type="text" id="img_a8" class="img-input" placeholder="이미지 URL" onchange="markChanged('a8','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A9</td>
+  <td><input type="text" value="A9. Chicken Knee Cartilage 500g" id="en_a9" class="text-input" onchange="markChanged('a9','prod')"></td>
+  <td><input type="text" value="A9. 닭무릎연골 500g" id="ko_a9" class="text-input" onchange="markChanged('a9','prod')"></td>
+  <td><input type="number" id="price_a9" class="price-input" placeholder="가격" onchange="markChanged('a9','prod')"></td>
+  <td><input type="text" id="img_a9" class="img-input" placeholder="이미지 URL" onchange="markChanged('a9','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A10</td>
+  <td><input type="text" value="A10. Frozen Striped Snakehead 3pcs 500g" id="en_a10" class="text-input" onchange="markChanged('a10','prod')"></td>
+  <td><input type="text" value="A10. 냉동 등목어 3마리 500g" id="ko_a10" class="text-input" onchange="markChanged('a10','prod')"></td>
+  <td><input type="number" id="price_a10" class="price-input" placeholder="가격" onchange="markChanged('a10','prod')"></td>
+  <td><input type="text" id="img_a10" class="img-input" placeholder="이미지 URL" onchange="markChanged('a10','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A11</td>
+  <td><input type="text" value="A11. Frozen Striped Snakehead 450g" id="en_a11" class="text-input" onchange="markChanged('a11','prod')"></td>
+  <td><input type="text" value="A11. 냉동 줄무늬가물치 450g" id="ko_a11" class="text-input" onchange="markChanged('a11','prod')"></td>
+  <td><input type="number" id="price_a11" class="price-input" placeholder="가격" onchange="markChanged('a11','prod')"></td>
+  <td><input type="text" id="img_a11" class="img-input" placeholder="이미지 URL" onchange="markChanged('a11','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A12</td>
+  <td><input type="text" value="A12. Frozen Red Tilapia 2pcs 900g" id="en_a12" class="text-input" onchange="markChanged('a12','prod')"></td>
+  <td><input type="text" value="A12. 냉동 레드틸라피아 2마리 900g" id="ko_a12" class="text-input" onchange="markChanged('a12','prod')"></td>
+  <td><input type="number" id="price_a12" class="price-input" placeholder="가격" onchange="markChanged('a12','prod')"></td>
+  <td><input type="text" id="img_a12" class="img-input" placeholder="이미지 URL" onchange="markChanged('a12','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A13</td>
+  <td><input type="text" value="A13. Frozen Tilapia 2pcs 900g" id="en_a13" class="text-input" onchange="markChanged('a13','prod')"></td>
+  <td><input type="text" value="A13. 냉동 틸라피아 2마리 900g" id="ko_a13" class="text-input" onchange="markChanged('a13','prod')"></td>
+  <td><input type="number" id="price_a13" class="price-input" placeholder="가격" onchange="markChanged('a13','prod')"></td>
+  <td><input type="text" id="img_a13" class="img-input" placeholder="이미지 URL" onchange="markChanged('a13','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A14</td>
+  <td><input type="text" value="A14. Frozen Gourami 450g" id="en_a14" class="text-input" onchange="markChanged('a14','prod')"></td>
+  <td><input type="text" value="A14. 냉동 구라미 450g" id="ko_a14" class="text-input" onchange="markChanged('a14','prod')"></td>
+  <td><input type="number" id="price_a14" class="price-input" placeholder="가격" onchange="markChanged('a14','prod')"></td>
+  <td><input type="text" id="img_a14" class="img-input" placeholder="이미지 URL" onchange="markChanged('a14','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A15</td>
+  <td><input type="text" value="A15. Frozen Cut Catfish 450g" id="en_a15" class="text-input" onchange="markChanged('a15','prod')"></td>
+  <td><input type="text" value="A15. 냉동 절단한 메기 450g" id="ko_a15" class="text-input" onchange="markChanged('a15','prod')"></td>
+  <td><input type="number" id="price_a15" class="price-input" placeholder="가격" onchange="markChanged('a15','prod')"></td>
+  <td><input type="text" id="img_a15" class="img-input" placeholder="이미지 URL" onchange="markChanged('a15','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A16</td>
+  <td><input type="text" value="A16. Frozen Catfish 700g" id="en_a16" class="text-input" onchange="markChanged('a16','prod')"></td>
+  <td><input type="text" value="A16. 냉동 메기 700g" id="ko_a16" class="text-input" onchange="markChanged('a16','prod')"></td>
+  <td><input type="number" id="price_a16" class="price-input" placeholder="가격" onchange="markChanged('a16','prod')"></td>
+  <td><input type="text" id="img_a16" class="img-input" placeholder="이미지 URL" onchange="markChanged('a16','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A17</td>
+  <td><input type="text" value="A17. Pla Tu Khem 180g" id="en_a17" class="text-input" onchange="markChanged('a17','prod')"></td>
+  <td><input type="text" value="A17. 빠뚜캠 180g" id="ko_a17" class="text-input" onchange="markChanged('a17','prod')"></td>
+  <td><input type="number" id="price_a17" class="price-input" placeholder="가격" onchange="markChanged('a17','prod')"></td>
+  <td><input type="text" id="img_a17" class="img-input" placeholder="이미지 URL" onchange="markChanged('a17','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A18</td>
+  <td><input type="text" value="A18. Frozen Mackerel 250g" id="en_a18" class="text-input" onchange="markChanged('a18','prod')"></td>
+  <td><input type="text" value="A18. 냉동 고등어 250g" id="ko_a18" class="text-input" onchange="markChanged('a18','prod')"></td>
+  <td><input type="number" id="price_a18" class="price-input" placeholder="가격" onchange="markChanged('a18','prod')"></td>
+  <td><input type="text" id="img_a18" class="img-input" placeholder="이미지 URL" onchange="markChanged('a18','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A19</td>
+  <td><input type="text" value="A19. Seasoned Semi-Dried Catfish 450g" id="en_a19" class="text-input" onchange="markChanged('a19','prod')"></td>
+  <td><input type="text" value="A19. 양념 반건조 메기 450g" id="ko_a19" class="text-input" onchange="markChanged('a19','prod')"></td>
+  <td><input type="number" id="price_a19" class="price-input" placeholder="가격" onchange="markChanged('a19','prod')"></td>
+  <td><input type="text" id="img_a19" class="img-input" placeholder="이미지 URL" onchange="markChanged('a19','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A20</td>
+  <td><input type="text" value="A20. Frozen Frog 450g" id="en_a20" class="text-input" onchange="markChanged('a20','prod')"></td>
+  <td><input type="text" value="A20. 냉동 개구리 450g" id="ko_a20" class="text-input" onchange="markChanged('a20','prod')"></td>
+  <td><input type="number" id="price_a20" class="price-input" placeholder="가격" onchange="markChanged('a20','prod')"></td>
+  <td><input type="text" id="img_a20" class="img-input" placeholder="이미지 URL" onchange="markChanged('a20','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A21</td>
+  <td><input type="text" value="A21. Frozen Cuttlefish 400g" id="en_a21" class="text-input" onchange="markChanged('a21','prod')"></td>
+  <td><input type="text" value="A21. 냉동 갑오징어 400g" id="ko_a21" class="text-input" onchange="markChanged('a21','prod')"></td>
+  <td><input type="number" id="price_a21" class="price-input" placeholder="가격" onchange="markChanged('a21','prod')"></td>
+  <td><input type="text" id="img_a21" class="img-input" placeholder="이미지 URL" onchange="markChanged('a21','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A22</td>
+  <td><input type="text" value="A22. Frozen Baby Octopus 450g" id="en_a22" class="text-input" onchange="markChanged('a22','prod')"></td>
+  <td><input type="text" value="A22. 냉동 쭈꾸미 450g" id="ko_a22" class="text-input" onchange="markChanged('a22','prod')"></td>
+  <td><input type="number" id="price_a22" class="price-input" placeholder="가격" onchange="markChanged('a22','prod')"></td>
+  <td><input type="text" id="img_a22" class="img-input" placeholder="이미지 URL" onchange="markChanged('a22','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">A23</td>
+  <td><input type="text" value="A23. Frozen Beef Offal Papayatan 700g" id="en_a23" class="text-input" onchange="markChanged('a23','prod')"></td>
+  <td><input type="text" value="A23. 냉동 소 부속물 고기 파파이딴 700g" id="ko_a23" class="text-input" onchange="markChanged('a23','prod')"></td>
+  <td><input type="number" id="price_a23" class="price-input" placeholder="가격" onchange="markChanged('a23','prod')"></td>
+  <td><input type="text" id="img_a23" class="img-input" placeholder="이미지 URL" onchange="markChanged('a23','prod')"></td>
+</tr>
+<tr><td colspan="5" class="cat-header">B 면 종류</td></tr>
+<tr>
+  <td class="td-id">B01</td>
+  <td><input type="text" value="B01. MAMA TOMYUM CUP 70g" id="en_b01" class="text-input" onchange="markChanged('b01','prod')"></td>
+  <td><input type="text" value="B01. 마마 똠얌 컵 70g" id="ko_b01" class="text-input" onchange="markChanged('b01','prod')"></td>
+  <td><input type="number" id="price_b01" class="price-input" placeholder="가격" onchange="markChanged('b01','prod')"></td>
+  <td><input type="text" id="img_b01" class="img-input" placeholder="이미지 URL" onchange="markChanged('b01','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B02</td>
+  <td><input type="text" value="B02. MAMA CREAMY TOMYUM CUP 70g" id="en_b02" class="text-input" onchange="markChanged('b02','prod')"></td>
+  <td><input type="text" value="B02. 마마 크리미 똠얌 컵 70g" id="ko_b02" class="text-input" onchange="markChanged('b02','prod')"></td>
+  <td><input type="number" id="price_b02" class="price-input" placeholder="가격" onchange="markChanged('b02','prod')"></td>
+  <td><input type="text" id="img_b02" class="img-input" placeholder="이미지 URL" onchange="markChanged('b02','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B03</td>
+  <td><input type="text" value="B03. MAMA PORK CUP 70g" id="en_b03" class="text-input" onchange="markChanged('b03','prod')"></td>
+  <td><input type="text" value="B03. 마마 포크 컵 70g" id="ko_b03" class="text-input" onchange="markChanged('b03','prod')"></td>
+  <td><input type="number" id="price_b03" class="price-input" placeholder="가격" onchange="markChanged('b03','prod')"></td>
+  <td><input type="text" id="img_b03" class="img-input" placeholder="이미지 URL" onchange="markChanged('b03','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B04</td>
+  <td><input type="text" value="B04. MAMA Instant Rice Vermicelli Clear Soup 55g 1set(5pcs)" id="en_b04" class="text-input" onchange="markChanged('b04','prod')"></td>
+  <td><input type="text" value="B04. MAMA 인스턴트 쌀국수 클리어수프 55g 1set(5pcs)" id="ko_b04" class="text-input" onchange="markChanged('b04','prod')"></td>
+  <td><input type="number" id="price_b04" class="price-input" placeholder="가격" onchange="markChanged('b04','prod')"></td>
+  <td><input type="text" id="img_b04" class="img-input" placeholder="이미지 URL" onchange="markChanged('b04','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B05</td>
+  <td><input type="text" value="B05. MAMA Instant Noodle Chicken Green Curry 55g 1set(5pcs)" id="en_b05" class="text-input" onchange="markChanged('b05','prod')"></td>
+  <td><input type="text" value="B05. MAMA 인스턴트 누들 치킨그린커리 55g 1set(5pcs)" id="ko_b05" class="text-input" onchange="markChanged('b05','prod')"></td>
+  <td><input type="number" id="price_b05" class="price-input" placeholder="가격" onchange="markChanged('b05','prod')"></td>
+  <td><input type="text" id="img_b05" class="img-input" placeholder="이미지 URL" onchange="markChanged('b05','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B06</td>
+  <td><input type="text" value="B06. ACECOOK Rice Noodle 71g 1set(5pcs)" id="en_b06" class="text-input" onchange="markChanged('b06','prod')"></td>
+  <td><input type="text" value="B06. ACECOOK 쌀국수 71g 1set(5pcs)" id="ko_b06" class="text-input" onchange="markChanged('b06','prod')"></td>
+  <td><input type="number" id="price_b06" class="price-input" placeholder="가격" onchange="markChanged('b06','prod')"></td>
+  <td><input type="text" id="img_b06" class="img-input" placeholder="이미지 URL" onchange="markChanged('b06','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B07</td>
+  <td><input type="text" value="B07. HAOHAO ORIGINAL 78g 1set(5pcs)" id="en_b07" class="text-input" onchange="markChanged('b07','prod')"></td>
+  <td><input type="text" value="B07. 하오하오 오리지널 78g 1set(5pcs)" id="ko_b07" class="text-input" onchange="markChanged('b07','prod')"></td>
+  <td><input type="number" id="price_b07" class="price-input" placeholder="가격" onchange="markChanged('b07','prod')"></td>
+  <td><input type="text" id="img_b07" class="img-input" placeholder="이미지 URL" onchange="markChanged('b07','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B08</td>
+  <td><input type="text" value="B08. ACECOOK Pho Bo 70g 1set(5pcs)" id="en_b08" class="text-input" onchange="markChanged('b08','prod')"></td>
+  <td><input type="text" value="B08. ACECOOK 포보 70g 1set(5pcs)" id="ko_b08" class="text-input" onchange="markChanged('b08','prod')"></td>
+  <td><input type="number" id="price_b08" class="price-input" placeholder="가격" onchange="markChanged('b08','prod')"></td>
+  <td><input type="text" id="img_b08" class="img-input" placeholder="이미지 URL" onchange="markChanged('b08','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B09</td>
+  <td><input type="text" value="B09. WAIWAI Oriental 60g 1set(5pcs)" id="en_b09" class="text-input" onchange="markChanged('b09','prod')"></td>
+  <td><input type="text" value="B09. WAIWAI 오리엔탈 60g 1set(5pcs)" id="ko_b09" class="text-input" onchange="markChanged('b09','prod')"></td>
+  <td><input type="number" id="price_b09" class="price-input" placeholder="가격" onchange="markChanged('b09','prod')"></td>
+  <td><input type="text" id="img_b09" class="img-input" placeholder="이미지 URL" onchange="markChanged('b09','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B10</td>
+  <td><input type="text" value="B10. WAIWAI Tom Yum Red 60g 1set(5pcs)" id="en_b10" class="text-input" onchange="markChanged('b10','prod')"></td>
+  <td><input type="text" value="B10. WAIWAI 똠얌 RED 60g 1set(5pcs)" id="ko_b10" class="text-input" onchange="markChanged('b10','prod')"></td>
+  <td><input type="number" id="price_b10" class="price-input" placeholder="가격" onchange="markChanged('b10','prod')"></td>
+  <td><input type="text" id="img_b10" class="img-input" placeholder="이미지 URL" onchange="markChanged('b10','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B11</td>
+  <td><input type="text" value="B11. WAIWAI Tom Yum Blue 60g 1set(5pcs)" id="en_b11" class="text-input" onchange="markChanged('b11','prod')"></td>
+  <td><input type="text" value="B11. WAIWAI 똠얌 BLUE 60g 1set(5pcs)" id="ko_b11" class="text-input" onchange="markChanged('b11','prod')"></td>
+  <td><input type="number" id="price_b11" class="price-input" placeholder="가격" onchange="markChanged('b11','prod')"></td>
+  <td><input type="text" id="img_b11" class="img-input" placeholder="이미지 URL" onchange="markChanged('b11','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B12</td>
+  <td><input type="text" value="B12. WAIWAI Crab 55g 1set(5pcs)" id="en_b12" class="text-input" onchange="markChanged('b12','prod')"></td>
+  <td><input type="text" value="B12. WAIWAI 크랩 55g 1set(5pcs)" id="ko_b12" class="text-input" onchange="markChanged('b12','prod')"></td>
+  <td><input type="number" id="price_b12" class="price-input" placeholder="가격" onchange="markChanged('b12','prod')"></td>
+  <td><input type="text" id="img_b12" class="img-input" placeholder="이미지 URL" onchange="markChanged('b12','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B13</td>
+  <td><input type="text" value="B13. MAMA Tom Yum 55g 1set(5pcs)" id="en_b13" class="text-input" onchange="markChanged('b13','prod')"></td>
+  <td><input type="text" value="B13. MAMA 똠얌 55g 1set(5pcs)" id="ko_b13" class="text-input" onchange="markChanged('b13','prod')"></td>
+  <td><input type="number" id="price_b13" class="price-input" placeholder="가격" onchange="markChanged('b13','prod')"></td>
+  <td><input type="text" id="img_b13" class="img-input" placeholder="이미지 URL" onchange="markChanged('b13','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B14</td>
+  <td><input type="text" value="B14. MAMA Creamy 55g 1set(5pcs)" id="en_b14" class="text-input" onchange="markChanged('b14','prod')"></td>
+  <td><input type="text" value="B14. MAMA 크리미 55g 1set(5pcs)" id="ko_b14" class="text-input" onchange="markChanged('b14','prod')"></td>
+  <td><input type="number" id="price_b14" class="price-input" placeholder="가격" onchange="markChanged('b14','prod')"></td>
+  <td><input type="text" id="img_b14" class="img-input" placeholder="이미지 URL" onchange="markChanged('b14','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B15</td>
+  <td><input type="text" value="B15. MAMA Pork 60g 1set(5pcs)" id="en_b15" class="text-input" onchange="markChanged('b15','prod')"></td>
+  <td><input type="text" value="B15. MAMA 포크 60g 1set(5pcs)" id="ko_b15" class="text-input" onchange="markChanged('b15','prod')"></td>
+  <td><input type="number" id="price_b15" class="price-input" placeholder="가격" onchange="markChanged('b15','prod')"></td>
+  <td><input type="text" id="img_b15" class="img-input" placeholder="이미지 URL" onchange="markChanged('b15','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B16</td>
+  <td><input type="text" value="B16. SAFOCO Rice Vermicelli 300g" id="en_b16" class="text-input" onchange="markChanged('b16','prod')"></td>
+  <td><input type="text" value="B16. SAFOCO 쌀국수 300g" id="ko_b16" class="text-input" onchange="markChanged('b16','prod')"></td>
+  <td><input type="number" id="price_b16" class="price-input" placeholder="가격" onchange="markChanged('b16','prod')"></td>
+  <td><input type="text" id="img_b16" class="img-input" placeholder="이미지 URL" onchange="markChanged('b16','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B17</td>
+  <td><input type="text" value="B17. CHANTABURI Rice Noodle 500g" id="en_b17" class="text-input" onchange="markChanged('b17','prod')"></td>
+  <td><input type="text" value="B17. CHANTABURI 쌀국수 500g" id="ko_b17" class="text-input" onchange="markChanged('b17','prod')"></td>
+  <td><input type="number" id="price_b17" class="price-input" placeholder="가격" onchange="markChanged('b17','prod')"></td>
+  <td><input type="text" id="img_b17" class="img-input" placeholder="이미지 URL" onchange="markChanged('b17','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B18</td>
+  <td><input type="text" value="B18. BUNKO Vermicelli 300g" id="en_b18" class="text-input" onchange="markChanged('b18','prod')"></td>
+  <td><input type="text" value="B18. BUNKO 당면 300g" id="ko_b18" class="text-input" onchange="markChanged('b18','prod')"></td>
+  <td><input type="number" id="price_b18" class="price-input" placeholder="가격" onchange="markChanged('b18','prod')"></td>
+  <td><input type="text" id="img_b18" class="img-input" placeholder="이미지 URL" onchange="markChanged('b18','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B19</td>
+  <td><input type="text" value="B19. BICH CHI Hu Tieu Kho 500g" id="en_b19" class="text-input" onchange="markChanged('b19','prod')"></td>
+  <td><input type="text" value="B19. BICH CHI 건면 500g" id="ko_b19" class="text-input" onchange="markChanged('b19','prod')"></td>
+  <td><input type="number" id="price_b19" class="price-input" placeholder="가격" onchange="markChanged('b19','prod')"></td>
+  <td><input type="text" id="img_b19" class="img-input" placeholder="이미지 URL" onchange="markChanged('b19','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B20</td>
+  <td><input type="text" value="B20. BICH CHI Banh Pho Kho 500g" id="en_b20" class="text-input" onchange="markChanged('b20','prod')"></td>
+  <td><input type="text" value="B20. BICH CHI 넓은건면 500g" id="ko_b20" class="text-input" onchange="markChanged('b20','prod')"></td>
+  <td><input type="number" id="price_b20" class="price-input" placeholder="가격" onchange="markChanged('b20','prod')"></td>
+  <td><input type="text" id="img_b20" class="img-input" placeholder="이미지 URL" onchange="markChanged('b20','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B21</td>
+  <td><input type="text" value="B21. VIFON Hu Tieu Kho 500g" id="en_b21" class="text-input" onchange="markChanged('b21','prod')"></td>
+  <td><input type="text" value="B21. VIFON 건면 500g" id="ko_b21" class="text-input" onchange="markChanged('b21','prod')"></td>
+  <td><input type="number" id="price_b21" class="price-input" placeholder="가격" onchange="markChanged('b21','prod')"></td>
+  <td><input type="text" id="img_b21" class="img-input" placeholder="이미지 URL" onchange="markChanged('b21','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B22</td>
+  <td><input type="text" value="B22. VIFON Banh Pho Kho 500g" id="en_b22" class="text-input" onchange="markChanged('b22','prod')"></td>
+  <td><input type="text" value="B22. VIFON 넓은건면 500g" id="ko_b22" class="text-input" onchange="markChanged('b22','prod')"></td>
+  <td><input type="number" id="price_b22" class="price-input" placeholder="가격" onchange="markChanged('b22','prod')"></td>
+  <td><input type="text" id="img_b22" class="img-input" placeholder="이미지 URL" onchange="markChanged('b22','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B23</td>
+  <td><input type="text" value="B23. WAIWAI Noodle 200g" id="en_b23" class="text-input" onchange="markChanged('b23','prod')"></td>
+  <td><input type="text" value="B23. WAIWAI 면 200g" id="ko_b23" class="text-input" onchange="markChanged('b23','prod')"></td>
+  <td><input type="number" id="price_b23" class="price-input" placeholder="가격" onchange="markChanged('b23','prod')"></td>
+  <td><input type="text" id="img_b23" class="img-input" placeholder="이미지 URL" onchange="markChanged('b23','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B24</td>
+  <td><input type="text" value="B24. WOONSEN LEK 1pack(10pcs) 400g" id="en_b24" class="text-input" onchange="markChanged('b24','prod')"></td>
+  <td><input type="text" value="B24. WOONSEN LEK 1팩(10개) 400g" id="ko_b24" class="text-input" onchange="markChanged('b24','prod')"></td>
+  <td><input type="number" id="price_b24" class="price-input" placeholder="가격" onchange="markChanged('b24','prod')"></td>
+  <td><input type="text" id="img_b24" class="img-input" placeholder="이미지 URL" onchange="markChanged('b24','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B25</td>
+  <td><input type="text" value="B25. Shin Ramyun 5pcs" id="en_b25" class="text-input" onchange="markChanged('b25','prod')"></td>
+  <td><input type="text" value="B25. 신라면 5개입" id="ko_b25" class="text-input" onchange="markChanged('b25','prod')"></td>
+  <td><input type="number" id="price_b25" class="price-input" placeholder="가격" onchange="markChanged('b25','prod')"></td>
+  <td><input type="text" id="img_b25" class="img-input" placeholder="이미지 URL" onchange="markChanged('b25','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B26</td>
+  <td><input type="text" value="B26. Jin Ramyun Mild 5pcs" id="en_b26" class="text-input" onchange="markChanged('b26','prod')"></td>
+  <td><input type="text" value="B26. 진라면 순한맛 5개입" id="ko_b26" class="text-input" onchange="markChanged('b26','prod')"></td>
+  <td><input type="number" id="price_b26" class="price-input" placeholder="가격" onchange="markChanged('b26','prod')"></td>
+  <td><input type="text" id="img_b26" class="img-input" placeholder="이미지 URL" onchange="markChanged('b26','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B27</td>
+  <td><input type="text" value="B27. Jin Ramyun Spicy 5pcs" id="en_b27" class="text-input" onchange="markChanged('b27','prod')"></td>
+  <td><input type="text" value="B27. 진라면 매운맛 5개입" id="ko_b27" class="text-input" onchange="markChanged('b27','prod')"></td>
+  <td><input type="number" id="price_b27" class="price-input" placeholder="가격" onchange="markChanged('b27','prod')"></td>
+  <td><input type="text" id="img_b27" class="img-input" placeholder="이미지 URL" onchange="markChanged('b27','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B28</td>
+  <td><input type="text" value="B28. Jin Ramyun Cup Mild 6pcs" id="en_b28" class="text-input" onchange="markChanged('b28','prod')"></td>
+  <td><input type="text" value="B28. 진라면 컵라면 순한맛 6개입" id="ko_b28" class="text-input" onchange="markChanged('b28','prod')"></td>
+  <td><input type="number" id="price_b28" class="price-input" placeholder="가격" onchange="markChanged('b28','prod')"></td>
+  <td><input type="text" id="img_b28" class="img-input" placeholder="이미지 URL" onchange="markChanged('b28','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">B29</td>
+  <td><input type="text" value="B29. Jin Ramyun Cup Spicy 6pcs" id="en_b29" class="text-input" onchange="markChanged('b29','prod')"></td>
+  <td><input type="text" value="B29. 진라면 컵라면 매운맛 6개입" id="ko_b29" class="text-input" onchange="markChanged('b29','prod')"></td>
+  <td><input type="number" id="price_b29" class="price-input" placeholder="가격" onchange="markChanged('b29','prod')"></td>
+  <td><input type="text" id="img_b29" class="img-input" placeholder="이미지 URL" onchange="markChanged('b29','prod')"></td>
+</tr>
+<tr><td colspan="5" class="cat-header">C 각종 소스</td></tr>
+<tr>
+  <td class="td-id">C01</td>
+  <td><input type="text" value="C1. TIPAROS Fish Sauce 700ml" id="en_c01" class="text-input" onchange="markChanged('c01','prod')"></td>
+  <td><input type="text" value="C1. TIPAROS 피시소스 700ml" id="ko_c01" class="text-input" onchange="markChanged('c01','prod')"></td>
+  <td><input type="number" id="price_c01" class="price-input" placeholder="가격" onchange="markChanged('c01','prod')"></td>
+  <td><input type="text" id="img_c01" class="img-input" placeholder="이미지 URL" onchange="markChanged('c01','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C02</td>
+  <td><input type="text" value="C2. TIPAROS Vinegar 600ml" id="en_c02" class="text-input" onchange="markChanged('c02','prod')"></td>
+  <td><input type="text" value="C2. TIPAROS 식초 600ml" id="ko_c02" class="text-input" onchange="markChanged('c02','prod')"></td>
+  <td><input type="number" id="price_c02" class="price-input" placeholder="가격" onchange="markChanged('c02','prod')"></td>
+  <td><input type="text" id="img_c02" class="img-input" placeholder="이미지 URL" onchange="markChanged('c02','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C03</td>
+  <td><input type="text" value="C3. YWY Black Sweet Soy Sauce 410g" id="en_c03" class="text-input" onchange="markChanged('c03','prod')"></td>
+  <td><input type="text" value="C3. YWY 블랙스위트 간장 410g" id="ko_c03" class="text-input" onchange="markChanged('c03','prod')"></td>
+  <td><input type="number" id="price_c03" class="price-input" placeholder="가격" onchange="markChanged('c03','prod')"></td>
+  <td><input type="text" id="img_c03" class="img-input" placeholder="이미지 URL" onchange="markChanged('c03','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C04</td>
+  <td><input type="text" value="C4. YWY Oyster Sauce 370g" id="en_c04" class="text-input" onchange="markChanged('c04','prod')"></td>
+  <td><input type="text" value="C4. YWY 굴소스 370g" id="ko_c04" class="text-input" onchange="markChanged('c04','prod')"></td>
+  <td><input type="number" id="price_c04" class="price-input" placeholder="가격" onchange="markChanged('c04','prod')"></td>
+  <td><input type="text" id="img_c04" class="img-input" placeholder="이미지 URL" onchange="markChanged('c04','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C05</td>
+  <td><input type="text" value="C5. YWY Seasoning Sauce 300g" id="en_c05" class="text-input" onchange="markChanged('c05','prod')"></td>
+  <td><input type="text" value="C5. YWY 시즈닝소스 300g" id="ko_c05" class="text-input" onchange="markChanged('c05','prod')"></td>
+  <td><input type="number" id="price_c05" class="price-input" placeholder="가격" onchange="markChanged('c05','prod')"></td>
+  <td><input type="text" id="img_c05" class="img-input" placeholder="이미지 URL" onchange="markChanged('c05','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C06</td>
+  <td><input type="text" value="C6. YWY Seasoning Paste 350g" id="en_c06" class="text-input" onchange="markChanged('c06','prod')"></td>
+  <td><input type="text" value="C6. YWY 시즈닝페이스트 350g" id="ko_c06" class="text-input" onchange="markChanged('c06','prod')"></td>
+  <td><input type="number" id="price_c06" class="price-input" placeholder="가격" onchange="markChanged('c06','prod')"></td>
+  <td><input type="text" id="img_c06" class="img-input" placeholder="이미지 URL" onchange="markChanged('c06','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C07</td>
+  <td><input type="text" value="C7. YWY Black Sauce 410g" id="en_c07" class="text-input" onchange="markChanged('c07','prod')"></td>
+  <td><input type="text" value="C7. YWY 블랙소스 410g" id="ko_c07" class="text-input" onchange="markChanged('c07','prod')"></td>
+  <td><input type="number" id="price_c07" class="price-input" placeholder="가격" onchange="markChanged('c07','prod')"></td>
+  <td><input type="text" id="img_c07" class="img-input" placeholder="이미지 URL" onchange="markChanged('c07','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C08</td>
+  <td><input type="text" value="C8. Squid Fish Sauce 700ml" id="en_c08" class="text-input" onchange="markChanged('c08','prod')"></td>
+  <td><input type="text" value="C8. 오징어 피시소스 700ml" id="ko_c08" class="text-input" onchange="markChanged('c08','prod')"></td>
+  <td><input type="number" id="price_c08" class="price-input" placeholder="가격" onchange="markChanged('c08','prod')"></td>
+  <td><input type="text" id="img_c08" class="img-input" placeholder="이미지 URL" onchange="markChanged('c08','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C09</td>
+  <td><input type="text" value="C9. Maekong Red Sauce 400ml" id="en_c09" class="text-input" onchange="markChanged('c09','prod')"></td>
+  <td><input type="text" value="C9. 메콩 레드소스 400ml" id="ko_c09" class="text-input" onchange="markChanged('c09','prod')"></td>
+  <td><input type="number" id="price_c09" class="price-input" placeholder="가격" onchange="markChanged('c09','prod')"></td>
+  <td><input type="text" id="img_c09" class="img-input" placeholder="이미지 URL" onchange="markChanged('c09','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C10</td>
+  <td><input type="text" value="C10. Maekong Yellow Sauce 400ml" id="en_c10" class="text-input" onchange="markChanged('c10','prod')"></td>
+  <td><input type="text" value="C10. 메콩 옐로우소스 400ml" id="ko_c10" class="text-input" onchange="markChanged('c10','prod')"></td>
+  <td><input type="number" id="price_c10" class="price-input" placeholder="가격" onchange="markChanged('c10','prod')"></td>
+  <td><input type="text" id="img_c10" class="img-input" placeholder="이미지 URL" onchange="markChanged('c10','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C11</td>
+  <td><input type="text" value="C11. Maekong White Sauce 400ml" id="en_c11" class="text-input" onchange="markChanged('c11','prod')"></td>
+  <td><input type="text" value="C11. 메콩 화이트소스 400ml" id="ko_c11" class="text-input" onchange="markChanged('c11','prod')"></td>
+  <td><input type="number" id="price_c11" class="price-input" placeholder="가격" onchange="markChanged('c11','prod')"></td>
+  <td><input type="text" id="img_c11" class="img-input" placeholder="이미지 URL" onchange="markChanged('c11','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C12</td>
+  <td><input type="text" value="C12. Magi Dipping Sauce 200ml" id="en_c12" class="text-input" onchange="markChanged('c12','prod')"></td>
+  <td><input type="text" value="C12. 마기 딥핑소스 200ml" id="ko_c12" class="text-input" onchange="markChanged('c12','prod')"></td>
+  <td><input type="number" id="price_c12" class="price-input" placeholder="가격" onchange="markChanged('c12','prod')"></td>
+  <td><input type="text" id="img_c12" class="img-input" placeholder="이미지 URL" onchange="markChanged('c12','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C13</td>
+  <td><input type="text" value="C13. KHONKAEN Fish Sauce 400ml" id="en_c13" class="text-input" onchange="markChanged('c13','prod')"></td>
+  <td><input type="text" value="C13. KHONKAEN 피시소스 400ml" id="ko_c13" class="text-input" onchange="markChanged('c13','prod')"></td>
+  <td><input type="number" id="price_c13" class="price-input" placeholder="가격" onchange="markChanged('c13','prod')"></td>
+  <td><input type="text" id="img_c13" class="img-input" placeholder="이미지 URL" onchange="markChanged('c13','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C14</td>
+  <td><input type="text" value="C14. ZAB MIKE Fish Sauce 330ml" id="en_c14" class="text-input" onchange="markChanged('c14','prod')"></td>
+  <td><input type="text" value="C14. ZAB MIKE 피시소스 330ml" id="ko_c14" class="text-input" onchange="markChanged('c14','prod')"></td>
+  <td><input type="number" id="price_c14" class="price-input" placeholder="가격" onchange="markChanged('c14','prod')"></td>
+  <td><input type="text" id="img_c14" class="img-input" placeholder="이미지 URL" onchange="markChanged('c14','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C15</td>
+  <td><input type="text" value="C15. Megachef Fish Sauce 700ml" id="en_c15" class="text-input" onchange="markChanged('c15','prod')"></td>
+  <td><input type="text" value="C15. 메가쉐프 피시소스 700ml" id="ko_c15" class="text-input" onchange="markChanged('c15','prod')"></td>
+  <td><input type="number" id="price_c15" class="price-input" placeholder="가격" onchange="markChanged('c15','prod')"></td>
+  <td><input type="text" id="img_c15" class="img-input" placeholder="이미지 URL" onchange="markChanged('c15','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C16</td>
+  <td><input type="text" value="C16. Tamarind Paste Sauce 300g" id="en_c16" class="text-input" onchange="markChanged('c16','prod')"></td>
+  <td><input type="text" value="C16. 타마린드 페이스트 300g" id="ko_c16" class="text-input" onchange="markChanged('c16','prod')"></td>
+  <td><input type="number" id="price_c16" class="price-input" placeholder="가격" onchange="markChanged('c16','prod')"></td>
+  <td><input type="text" id="img_c16" class="img-input" placeholder="이미지 URL" onchange="markChanged('c16','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C17</td>
+  <td><input type="text" value="C17. Hot Spice SUKI Sauce 342g" id="en_c17" class="text-input" onchange="markChanged('c17','prod')"></td>
+  <td><input type="text" value="C17. 핫스파이스 수키소스 342g" id="ko_c17" class="text-input" onchange="markChanged('c17','prod')"></td>
+  <td><input type="number" id="price_c17" class="price-input" placeholder="가격" onchange="markChanged('c17','prod')"></td>
+  <td><input type="text" id="img_c17" class="img-input" placeholder="이미지 URL" onchange="markChanged('c17','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C18</td>
+  <td><input type="text" value="C18. Pantai Sweet Chili Sauce 342g" id="en_c18" class="text-input" onchange="markChanged('c18','prod')"></td>
+  <td><input type="text" value="C18. 판타이 스위트칠리소스 342g" id="ko_c18" class="text-input" onchange="markChanged('c18','prod')"></td>
+  <td><input type="number" id="price_c18" class="price-input" placeholder="가격" onchange="markChanged('c18','prod')"></td>
+  <td><input type="text" id="img_c18" class="img-input" placeholder="이미지 URL" onchange="markChanged('c18','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C19</td>
+  <td><input type="text" value="C19. Nam Prik Pao 513g" id="en_c19" class="text-input" onchange="markChanged('c19','prod')"></td>
+  <td><input type="text" value="C19. 남프릭파우 513g" id="ko_c19" class="text-input" onchange="markChanged('c19','prod')"></td>
+  <td><input type="number" id="price_c19" class="price-input" placeholder="가격" onchange="markChanged('c19','prod')"></td>
+  <td><input type="text" id="img_c19" class="img-input" placeholder="이미지 URL" onchange="markChanged('c19','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C20</td>
+  <td><input type="text" value="C20. Sour Curry Paste 100g" id="en_c20" class="text-input" onchange="markChanged('c20','prod')"></td>
+  <td><input type="text" value="C20. 사워커리 페이스트 100g" id="ko_c20" class="text-input" onchange="markChanged('c20','prod')"></td>
+  <td><input type="number" id="price_c20" class="price-input" placeholder="가격" onchange="markChanged('c20','prod')"></td>
+  <td><input type="text" id="img_c20" class="img-input" placeholder="이미지 URL" onchange="markChanged('c20','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C21</td>
+  <td><input type="text" value="C21. Nam Ya Curry Paste 100g" id="en_c21" class="text-input" onchange="markChanged('c21','prod')"></td>
+  <td><input type="text" value="C21. 남야커리 페이스트 100g" id="ko_c21" class="text-input" onchange="markChanged('c21','prod')"></td>
+  <td><input type="number" id="price_c21" class="price-input" placeholder="가격" onchange="markChanged('c21','prod')"></td>
+  <td><input type="text" id="img_c21" class="img-input" placeholder="이미지 URL" onchange="markChanged('c21','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C22</td>
+  <td><input type="text" value="C22. Country Style Red Curry Paste 100g" id="en_c22" class="text-input" onchange="markChanged('c22','prod')"></td>
+  <td><input type="text" value="C22. 컨트리 레드커리 페이스트 100g" id="ko_c22" class="text-input" onchange="markChanged('c22','prod')"></td>
+  <td><input type="number" id="price_c22" class="price-input" placeholder="가격" onchange="markChanged('c22','prod')"></td>
+  <td><input type="text" id="img_c22" class="img-input" placeholder="이미지 URL" onchange="markChanged('c22','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C23</td>
+  <td><input type="text" value="C23. Green Curry Paste 100g" id="en_c23" class="text-input" onchange="markChanged('c23','prod')"></td>
+  <td><input type="text" value="C23. 그린커리 페이스트 100g" id="ko_c23" class="text-input" onchange="markChanged('c23','prod')"></td>
+  <td><input type="number" id="price_c23" class="price-input" placeholder="가격" onchange="markChanged('c23','prod')"></td>
+  <td><input type="text" id="img_c23" class="img-input" placeholder="이미지 URL" onchange="markChanged('c23','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C24</td>
+  <td><input type="text" value="C24. Panang Curry Paste 100g" id="en_c24" class="text-input" onchange="markChanged('c24','prod')"></td>
+  <td><input type="text" value="C24. 파낭커리 페이스트 100g" id="ko_c24" class="text-input" onchange="markChanged('c24','prod')"></td>
+  <td><input type="number" id="price_c24" class="price-input" placeholder="가격" onchange="markChanged('c24','prod')"></td>
+  <td><input type="text" id="img_c24" class="img-input" placeholder="이미지 URL" onchange="markChanged('c24','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C25</td>
+  <td><input type="text" value="C25. Red Curry Paste 100g" id="en_c25" class="text-input" onchange="markChanged('c25','prod')"></td>
+  <td><input type="text" value="C25. 레드커리 페이스트 100g" id="ko_c25" class="text-input" onchange="markChanged('c25','prod')"></td>
+  <td><input type="number" id="price_c25" class="price-input" placeholder="가격" onchange="markChanged('c25','prod')"></td>
+  <td><input type="text" id="img_c25" class="img-input" placeholder="이미지 URL" onchange="markChanged('c25','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C26</td>
+  <td><input type="text" value="C26. Salted Shrimp Paste 400g" id="en_c26" class="text-input" onchange="markChanged('c26','prod')"></td>
+  <td><input type="text" value="C26. 쏠티드 쉬림페이스트 400g" id="ko_c26" class="text-input" onchange="markChanged('c26','prod')"></td>
+  <td><input type="number" id="price_c26" class="price-input" placeholder="가격" onchange="markChanged('c26','prod')"></td>
+  <td><input type="text" id="img_c26" class="img-input" placeholder="이미지 URL" onchange="markChanged('c26','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C26B</td>
+  <td><input type="text" value="C26-1. Salted Shrimp Paste 200g" id="en_c26b" class="text-input" onchange="markChanged('c26b','prod')"></td>
+  <td><input type="text" value="C26-1. 쏠티드 쉬림페이스트 200g" id="ko_c26b" class="text-input" onchange="markChanged('c26b','prod')"></td>
+  <td><input type="number" id="price_c26b" class="price-input" placeholder="가격" onchange="markChanged('c26b','prod')"></td>
+  <td><input type="text" id="img_c26b" class="img-input" placeholder="이미지 URL" onchange="markChanged('c26b','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C26C</td>
+  <td><input type="text" value="C26-2. Pickled Gouramy Fish 454g" id="en_c26c" class="text-input" onchange="markChanged('c26c','prod')"></td>
+  <td><input type="text" value="C26-2. 피클드 구라미피시 454g" id="ko_c26c" class="text-input" onchange="markChanged('c26c','prod')"></td>
+  <td><input type="number" id="price_c26c" class="price-input" placeholder="가격" onchange="markChanged('c26c','prod')"></td>
+  <td><input type="text" id="img_c26c" class="img-input" placeholder="이미지 URL" onchange="markChanged('c26c','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C27</td>
+  <td><input type="text" value="C27. Dried Chili 100g" id="en_c27" class="text-input" onchange="markChanged('c27','prod')"></td>
+  <td><input type="text" value="C27. 매운고추 100g" id="ko_c27" class="text-input" onchange="markChanged('c27','prod')"></td>
+  <td><input type="number" id="price_c27" class="price-input" placeholder="가격" onchange="markChanged('c27','prod')"></td>
+  <td><input type="text" id="img_c27" class="img-input" placeholder="이미지 URL" onchange="markChanged('c27','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C28</td>
+  <td><input type="text" value="C28. Tamarind Seedless 170g" id="en_c28" class="text-input" onchange="markChanged('c28','prod')"></td>
+  <td><input type="text" value="C28. 타마린드 씨없봉 170g" id="ko_c28" class="text-input" onchange="markChanged('c28','prod')"></td>
+  <td><input type="number" id="price_c28" class="price-input" placeholder="가격" onchange="markChanged('c28','prod')"></td>
+  <td><input type="text" id="img_c28" class="img-input" placeholder="이미지 URL" onchange="markChanged('c28','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C29</td>
+  <td><input type="text" value="C29. MSG 250g" id="en_c29" class="text-input" onchange="markChanged('c29','prod')"></td>
+  <td><input type="text" value="C29. 미원 250g" id="ko_c29" class="text-input" onchange="markChanged('c29','prod')"></td>
+  <td><input type="number" id="price_c29" class="price-input" placeholder="가격" onchange="markChanged('c29','prod')"></td>
+  <td><input type="text" id="img_c29" class="img-input" placeholder="이미지 URL" onchange="markChanged('c29','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C30</td>
+  <td><input type="text" value="C30. Tapioca Pearl Green 400g" id="en_c30" class="text-input" onchange="markChanged('c30','prod')"></td>
+  <td><input type="text" value="C30. 타피오카펄 그린 400g" id="ko_c30" class="text-input" onchange="markChanged('c30','prod')"></td>
+  <td><input type="number" id="price_c30" class="price-input" placeholder="가격" onchange="markChanged('c30','prod')"></td>
+  <td><input type="text" id="img_c30" class="img-input" placeholder="이미지 URL" onchange="markChanged('c30','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C31</td>
+  <td><input type="text" value="C31. ROSDEE Pork Flavor 800g" id="en_c31" class="text-input" onchange="markChanged('c31','prod')"></td>
+  <td><input type="text" value="C31. ROSDEE 포크플레이버 800g" id="ko_c31" class="text-input" onchange="markChanged('c31','prod')"></td>
+  <td><input type="number" id="price_c31" class="price-input" placeholder="가격" onchange="markChanged('c31','prod')"></td>
+  <td><input type="text" id="img_c31" class="img-input" placeholder="이미지 URL" onchange="markChanged('c31','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C32</td>
+  <td><input type="text" value="C32. ROSDEE Chicken Flavor 70g" id="en_c32" class="text-input" onchange="markChanged('c32','prod')"></td>
+  <td><input type="text" value="C32. ROSDEE 치킨플레이버 70g" id="ko_c32" class="text-input" onchange="markChanged('c32','prod')"></td>
+  <td><input type="number" id="price_c32" class="price-input" placeholder="가격" onchange="markChanged('c32','prod')"></td>
+  <td><input type="text" id="img_c32" class="img-input" placeholder="이미지 URL" onchange="markChanged('c32','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C33</td>
+  <td><input type="text" value="C33. ROSDEE LAAB Mix 30g" id="en_c33" class="text-input" onchange="markChanged('c33','prod')"></td>
+  <td><input type="text" value="C33. ROSDEE LAAB 믹스 30g" id="ko_c33" class="text-input" onchange="markChanged('c33','prod')"></td>
+  <td><input type="number" id="price_c33" class="price-input" placeholder="가격" onchange="markChanged('c33','prod')"></td>
+  <td><input type="text" id="img_c33" class="img-input" placeholder="이미지 URL" onchange="markChanged('c33','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C34</td>
+  <td><input type="text" value="C34. ROSDEE TOM YUM KUNG Mix 60g" id="en_c34" class="text-input" onchange="markChanged('c34','prod')"></td>
+  <td><input type="text" value="C34. ROSDEE 똠얌꿍 믹스 60g" id="ko_c34" class="text-input" onchange="markChanged('c34','prod')"></td>
+  <td><input type="number" id="price_c34" class="price-input" placeholder="가격" onchange="markChanged('c34','prod')"></td>
+  <td><input type="text" id="img_c34" class="img-input" placeholder="이미지 URL" onchange="markChanged('c34','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C35</td>
+  <td><input type="text" value="C35. ROSDEE YUM WOON SEN Mix 40g" id="en_c35" class="text-input" onchange="markChanged('c35','prod')"></td>
+  <td><input type="text" value="C35. ROSDEE 얌운센 믹스 40g" id="ko_c35" class="text-input" onchange="markChanged('c35','prod')"></td>
+  <td><input type="number" id="price_c35" class="price-input" placeholder="가격" onchange="markChanged('c35','prod')"></td>
+  <td><input type="text" id="img_c35" class="img-input" placeholder="이미지 URL" onchange="markChanged('c35','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C36</td>
+  <td><input type="text" value="C36. ROSDEE PALO Mix 60g" id="en_c36" class="text-input" onchange="markChanged('c36','prod')"></td>
+  <td><input type="text" value="C36. ROSDEE 팔로 믹스 60g" id="ko_c36" class="text-input" onchange="markChanged('c36','prod')"></td>
+  <td><input type="number" id="price_c36" class="price-input" placeholder="가격" onchange="markChanged('c36','prod')"></td>
+  <td><input type="text" id="img_c36" class="img-input" placeholder="이미지 URL" onchange="markChanged('c36','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C37</td>
+  <td><input type="text" value="C37. ROSDEE KA PRAO Mix 50g" id="en_c37" class="text-input" onchange="markChanged('c37','prod')"></td>
+  <td><input type="text" value="C37. ROSDEE 카프라오 믹스 50g" id="ko_c37" class="text-input" onchange="markChanged('c37','prod')"></td>
+  <td><input type="number" id="price_c37" class="price-input" placeholder="가격" onchange="markChanged('c37','prod')"></td>
+  <td><input type="text" id="img_c37" class="img-input" placeholder="이미지 URL" onchange="markChanged('c37','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C38</td>
+  <td><input type="text" value="C38. Lime Seasoning Powder 67g" id="en_c38" class="text-input" onchange="markChanged('c38','prod')"></td>
+  <td><input type="text" value="C38. 라임 시즈닝 파우더 67g" id="ko_c38" class="text-input" onchange="markChanged('c38','prod')"></td>
+  <td><input type="number" id="price_c38" class="price-input" placeholder="가격" onchange="markChanged('c38','prod')"></td>
+  <td><input type="text" id="img_c38" class="img-input" placeholder="이미지 URL" onchange="markChanged('c38','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C39</td>
+  <td><input type="text" value="C39. Chicken Cube 20g" id="en_c39" class="text-input" onchange="markChanged('c39','prod')"></td>
+  <td><input type="text" value="C39. 치킨큐브 20g" id="ko_c39" class="text-input" onchange="markChanged('c39','prod')"></td>
+  <td><input type="number" id="price_c39" class="price-input" placeholder="가격" onchange="markChanged('c39','prod')"></td>
+  <td><input type="text" id="img_c39" class="img-input" placeholder="이미지 URL" onchange="markChanged('c39','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C40</td>
+  <td><input type="text" value="C40. Pork Cube 20g" id="en_c40" class="text-input" onchange="markChanged('c40','prod')"></td>
+  <td><input type="text" value="C40. 포크큐브 20g" id="ko_c40" class="text-input" onchange="markChanged('c40','prod')"></td>
+  <td><input type="number" id="price_c40" class="price-input" placeholder="가격" onchange="markChanged('c40','prod')"></td>
+  <td><input type="text" id="img_c40" class="img-input" placeholder="이미지 URL" onchange="markChanged('c40','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">C41</td>
+  <td><input type="text" value="C41. Tom Yum Kung Cube 20g" id="en_c41" class="text-input" onchange="markChanged('c41','prod')"></td>
+  <td><input type="text" value="C41. 톰얌꿍큐브 20g" id="ko_c41" class="text-input" onchange="markChanged('c41','prod')"></td>
+  <td><input type="number" id="price_c41" class="price-input" placeholder="가격" onchange="markChanged('c41','prod')"></td>
+  <td><input type="text" id="img_c41" class="img-input" placeholder="이미지 URL" onchange="markChanged('c41','prod')"></td>
+</tr>
+<tr><td colspan="5" class="cat-header">D 음료 및 기타</td></tr>
+<tr>
+  <td class="td-id">D01</td>
+  <td><input type="text" value="D1. Rambutan in Syrup 565g" id="en_d01" class="text-input" onchange="markChanged('d01','prod')"></td>
+  <td><input type="text" value="D1. 람부탄 시럽 565g" id="ko_d01" class="text-input" onchange="markChanged('d01','prod')"></td>
+  <td><input type="number" id="price_d01" class="price-input" placeholder="가격" onchange="markChanged('d01','prod')"></td>
+  <td><input type="text" id="img_d01" class="img-input" placeholder="이미지 URL" onchange="markChanged('d01','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D02</td>
+  <td><input type="text" value="D2. Longan in Syrup 565g" id="en_d02" class="text-input" onchange="markChanged('d02','prod')"></td>
+  <td><input type="text" value="D2. 용안 시럽 565g" id="ko_d02" class="text-input" onchange="markChanged('d02','prod')"></td>
+  <td><input type="number" id="price_d02" class="price-input" placeholder="가격" onchange="markChanged('d02','prod')"></td>
+  <td><input type="text" id="img_d02" class="img-input" placeholder="이미지 URL" onchange="markChanged('d02','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D03</td>
+  <td><input type="text" value="D3. Carnation Condensed Milk 405g" id="en_d03" class="text-input" onchange="markChanged('d03','prod')"></td>
+  <td><input type="text" value="D3. 카네이션 연유 405g" id="ko_d03" class="text-input" onchange="markChanged('d03','prod')"></td>
+  <td><input type="number" id="price_d03" class="price-input" placeholder="가격" onchange="markChanged('d03','prod')"></td>
+  <td><input type="text" id="img_d03" class="img-input" placeholder="이미지 URL" onchange="markChanged('d03','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D04</td>
+  <td><input type="text" value="D4. Mali Condensed Milk 355g" id="en_d04" class="text-input" onchange="markChanged('d04','prod')"></td>
+  <td><input type="text" value="D4. 말리 연유 355g" id="ko_d04" class="text-input" onchange="markChanged('d04','prod')"></td>
+  <td><input type="number" id="price_d04" class="price-input" placeholder="가격" onchange="markChanged('d04','prod')"></td>
+  <td><input type="text" id="img_d04" class="img-input" placeholder="이미지 URL" onchange="markChanged('d04','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D05</td>
+  <td><input type="text" value="D5. Coconut Milk 400ml" id="en_d05" class="text-input" onchange="markChanged('d05','prod')"></td>
+  <td><input type="text" value="D5. 코코낫밀크 400ml" id="ko_d05" class="text-input" onchange="markChanged('d05','prod')"></td>
+  <td><input type="number" id="price_d05" class="price-input" placeholder="가격" onchange="markChanged('d05','prod')"></td>
+  <td><input type="text" id="img_d05" class="img-input" placeholder="이미지 URL" onchange="markChanged('d05','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D06</td>
+  <td><input type="text" value="D6. Ampawa Coconut Milk 1000ml" id="en_d06" class="text-input" onchange="markChanged('d06','prod')"></td>
+  <td><input type="text" value="D6. 암파와 코코낫밀크 1000ml" id="ko_d06" class="text-input" onchange="markChanged('d06','prod')"></td>
+  <td><input type="number" id="price_d06" class="price-input" placeholder="가격" onchange="markChanged('d06','prod')"></td>
+  <td><input type="text" id="img_d06" class="img-input" placeholder="이미지 URL" onchange="markChanged('d06','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D07</td>
+  <td><input type="text" value="D7. SAHA Bamboo Shoot 350g" id="en_d07" class="text-input" onchange="markChanged('d07','prod')"></td>
+  <td><input type="text" value="D7. SAHA 죽순채 350g" id="ko_d07" class="text-input" onchange="markChanged('d07','prod')"></td>
+  <td><input type="number" id="price_d07" class="price-input" placeholder="가격" onchange="markChanged('d07','prod')"></td>
+  <td><input type="text" id="img_d07" class="img-input" placeholder="이미지 URL" onchange="markChanged('d07','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D08</td>
+  <td><input type="text" value="D8. SAHA Bamboo Shoot Sliced 350g" id="en_d08" class="text-input" onchange="markChanged('d08','prod')"></td>
+  <td><input type="text" value="D8. SAHA 죽순 슬라이스 350g" id="ko_d08" class="text-input" onchange="markChanged('d08','prod')"></td>
+  <td><input type="number" id="price_d08" class="price-input" placeholder="가격" onchange="markChanged('d08','prod')"></td>
+  <td><input type="text" id="img_d08" class="img-input" placeholder="이미지 URL" onchange="markChanged('d08','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D09</td>
+  <td><input type="text" value="D9. Bamboo Shoot with Herb 400g" id="en_d09" class="text-input" onchange="markChanged('d09','prod')"></td>
+  <td><input type="text" value="D9. 뱀부 허브 400g" id="ko_d09" class="text-input" onchange="markChanged('d09','prod')"></td>
+  <td><input type="number" id="price_d09" class="price-input" placeholder="가격" onchange="markChanged('d09','prod')"></td>
+  <td><input type="text" id="img_d09" class="img-input" placeholder="이미지 URL" onchange="markChanged('d09','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D10</td>
+  <td><input type="text" value="D10. Fish Snack BBQ 80g" id="en_d10" class="text-input" onchange="markChanged('d10','prod')"></td>
+  <td><input type="text" value="D10. 피시스낵 바베큐맛 80g" id="ko_d10" class="text-input" onchange="markChanged('d10','prod')"></td>
+  <td><input type="number" id="price_d10" class="price-input" placeholder="가격" onchange="markChanged('d10','prod')"></td>
+  <td><input type="text" id="img_d10" class="img-input" placeholder="이미지 URL" onchange="markChanged('d10','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D11</td>
+  <td><input type="text" value="D11. Fish Snack Hot Chili 80g" id="en_d11" class="text-input" onchange="markChanged('d11','prod')"></td>
+  <td><input type="text" value="D11. 피시스낵 핫칠리맛 80g" id="ko_d11" class="text-input" onchange="markChanged('d11','prod')"></td>
+  <td><input type="number" id="price_d11" class="price-input" placeholder="가격" onchange="markChanged('d11','prod')"></td>
+  <td><input type="text" id="img_d11" class="img-input" placeholder="이미지 URL" onchange="markChanged('d11','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D12</td>
+  <td><input type="text" value="D12. Fish Snack Chicken BBQ 80g" id="en_d12" class="text-input" onchange="markChanged('d12','prod')"></td>
+  <td><input type="text" value="D12. 피시스낵 치킨바베큐맛 80g" id="ko_d12" class="text-input" onchange="markChanged('d12','prod')"></td>
+  <td><input type="number" id="price_d12" class="price-input" placeholder="가격" onchange="markChanged('d12','prod')"></td>
+  <td><input type="text" id="img_d12" class="img-input" placeholder="이미지 URL" onchange="markChanged('d12','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D13</td>
+  <td><input type="text" value="D13. Fish Snack Crab 80g" id="en_d13" class="text-input" onchange="markChanged('d13','prod')"></td>
+  <td><input type="text" value="D13. 피시스낵 게살맛 80g" id="ko_d13" class="text-input" onchange="markChanged('d13','prod')"></td>
+  <td><input type="number" id="price_d13" class="price-input" placeholder="가격" onchange="markChanged('d13','prod')"></td>
+  <td><input type="text" id="img_d13" class="img-input" placeholder="이미지 URL" onchange="markChanged('d13','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D14</td>
+  <td><input type="text" value="D14. Italian Lemon Juice 200ml" id="en_d14" class="text-input" onchange="markChanged('d14','prod')"></td>
+  <td><input type="text" value="D14. 이태리 레몬주스 200ml" id="ko_d14" class="text-input" onchange="markChanged('d14','prod')"></td>
+  <td><input type="number" id="price_d14" class="price-input" placeholder="가격" onchange="markChanged('d14','prod')"></td>
+  <td><input type="text" id="img_d14" class="img-input" placeholder="이미지 URL" onchange="markChanged('d14','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D14B</td>
+  <td><input type="text" value="D14-1. Italian Lime Juice 200ml" id="en_d14b" class="text-input" onchange="markChanged('d14b','prod')"></td>
+  <td><input type="text" value="D14-1. 이태리 라임주스 200ml" id="ko_d14b" class="text-input" onchange="markChanged('d14b','prod')"></td>
+  <td><input type="number" id="price_d14b" class="price-input" placeholder="가격" onchange="markChanged('d14b','prod')"></td>
+  <td><input type="text" id="img_d14b" class="img-input" placeholder="이미지 URL" onchange="markChanged('d14b','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D15</td>
+  <td><input type="text" value="D15. Red Sunflower Seeds 260g" id="en_d15" class="text-input" onchange="markChanged('d15','prod')"></td>
+  <td><input type="text" value="D15. 해바라기씨 빨간색 260g" id="ko_d15" class="text-input" onchange="markChanged('d15','prod')"></td>
+  <td><input type="number" id="price_d15" class="price-input" placeholder="가격" onchange="markChanged('d15','prod')"></td>
+  <td><input type="text" id="img_d15" class="img-input" placeholder="이미지 URL" onchange="markChanged('d15','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D16</td>
+  <td><input type="text" value="D16. Coffee Mix 160pcs" id="en_d16" class="text-input" onchange="markChanged('d16','prod')"></td>
+  <td><input type="text" value="D16. 커피믹스 160개입" id="ko_d16" class="text-input" onchange="markChanged('d16','prod')"></td>
+  <td><input type="number" id="price_d16" class="price-input" placeholder="가격" onchange="markChanged('d16','prod')"></td>
+  <td><input type="text" id="img_d16" class="img-input" placeholder="이미지 URL" onchange="markChanged('d16','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">D17</td>
+  <td><input type="text" value="D17. Paper Cup 1000pcs" id="en_d17" class="text-input" onchange="markChanged('d17','prod')"></td>
+  <td><input type="text" value="D17. 종이컵 1000개" id="ko_d17" class="text-input" onchange="markChanged('d17','prod')"></td>
+  <td><input type="number" id="price_d17" class="price-input" placeholder="가격" onchange="markChanged('d17','prod')"></td>
+  <td><input type="text" id="img_d17" class="img-input" placeholder="이미지 URL" onchange="markChanged('d17','prod')"></td>
+</tr>
+<tr><td colspan="5" class="cat-header">E 생활용품</td></tr>
+<tr>
+  <td class="td-id">E01</td>
+  <td><input type="text" value="E01. Colgate Icy Cool Mint Toothpaste 200g" id="en_e01" class="text-input" onchange="markChanged('e01','prod')"></td>
+  <td><input type="text" value="E01. 콜게이트 아이시 쿨민트 치약 200g" id="ko_e01" class="text-input" onchange="markChanged('e01','prod')"></td>
+  <td><input type="number" id="price_e01" class="price-input" placeholder="가격" onchange="markChanged('e01','prod')"></td>
+  <td><input type="text" id="img_e01" class="img-input" placeholder="이미지 URL" onchange="markChanged('e01','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">E02</td>
+  <td><input type="text" value="E02. Colgate Great Regular Flavor Toothpaste 200g" id="en_e02" class="text-input" onchange="markChanged('e02','prod')"></td>
+  <td><input type="text" value="E02. 콜게이트 그레이트 레귤러 치약 200g" id="ko_e02" class="text-input" onchange="markChanged('e02','prod')"></td>
+  <td><input type="number" id="price_e02" class="price-input" placeholder="가격" onchange="markChanged('e02','prod')"></td>
+  <td><input type="text" id="img_e02" class="img-input" placeholder="이미지 URL" onchange="markChanged('e02','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">E03</td>
+  <td><input type="text" value="E03. Twelve Plus Extra Cool Powder Cooling Blue 270g" id="en_e03" class="text-input" onchange="markChanged('e03','prod')"></td>
+  <td><input type="text" value="E03. 트웰브플러스 엑스트라쿨파우더 쿨링블루 270g" id="ko_e03" class="text-input" onchange="markChanged('e03','prod')"></td>
+  <td><input type="number" id="price_e03" class="price-input" placeholder="가격" onchange="markChanged('e03','prod')"></td>
+  <td><input type="text" id="img_e03" class="img-input" placeholder="이미지 URL" onchange="markChanged('e03','prod')"></td>
+</tr>
+<tr>
+  <td class="td-id">E04</td>
+  <td><input type="text" value="E04. Twelve Plus Extra Cool Powder Cooling Pink 270g" id="en_e04" class="text-input" onchange="markChanged('e04','prod')"></td>
+  <td><input type="text" value="E04. 트웰브플러스 엑스트라쿨파우더 쿨링핑크 270g" id="ko_e04" class="text-input" onchange="markChanged('e04','prod')"></td>
+  <td><input type="number" id="price_e04" class="price-input" placeholder="가격" onchange="markChanged('e04','prod')"></td>
+  <td><input type="text" id="img_e04" class="img-input" placeholder="이미지 URL" onchange="markChanged('e04','prod')"></td>
+</tr>
+</tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 고객 관리 -->
+  <div id="tab-customer" class="tab-content">
+    <div class="customer-wrap">
+      <div class="customer-form">
+        <h3>➕ 고객 등록</h3>
+        <div class="form-row">
+          <input type="text" id="cust-name" placeholder="이름">
+          <input type="tel" id="cust-phone" placeholder="전화번호">
+          <input type="text" id="cust-note" placeholder="기타">
+          <button class="btn btn-primary" onclick="addCustomer()">등록</button>
+        </div>
+      </div>
+
+      <!-- 단체 문자 -->
+      <div class="customer-form" style="margin-top:0;">
+        <h3>📨 단체 문자 보내기</h3>
+        <div style="margin-top:12px;">
+          <textarea id="bulk-sms-msg" placeholder="문자 내용을 입력하세요&#10;예: 안녕하세요! 이번 주 신상품이 입고되었습니다 😊" 
+            style="width:100%;height:80px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none;"></textarea>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="sendBulkSMS()">📱 전체 고객에게 문자</button>
+          <span style="font-size:12px;color:#888;">※ 문자앱이 순서대로 열립니다. 각각 전송 버튼을 누르세요.</span>
+        </div>
+      </div>
+
+      <div class="customer-list">
+        <table>
+          <thead><tr>
+            <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> 전체</th>
+            <th>이름</th>
+            <th>전화번호</th>
+            <th>기타</th>
+            <th>등록일</th>
+            <th>문자</th>
+            <th>관리</th>
+          </tr></thead>
+          <tbody id="customer-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 베스트 상품 -->
+  <div id="tab-best" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 5개)</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
+      <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
+    </div>
+  </div>
+
+  <!-- 신상품 -->
+  <div id="tab-new" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🆕 신상품 선택 (최대 10개)</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">새로 들어온 상품을 선택하면 메인 페이지 상단에 표시됩니다.</p>
+      <div id="new-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveNew()">💾 신상품 저장</button>
+    </div>
+  </div>
+
+</div><!-- end main-page -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PW = "asia1234";
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('main-page').style.display = 'block';
+    setTimeout(() => { if (window.loadAll) window.loadAll(); }, 500);
+  } else {
+    alert('비밀번호가 틀렸습니다.');
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function markChanged(id, type) {
+  const badge = document.getElementById(`badge_${type == 'stock' ? 'stock' : type == 'disc' ? 'disc' : 'prod'}_${id}`);
+  if (badge) badge.style.display = 'inline';
+}
+
+function applyBulkDiscount() {
+  const cat = document.getElementById('bulk-cat').value;
+  const d2 = document.getElementById('bulk-disc2').value;
+  const d3 = document.getElementById('bulk-disc3').value;
+  document.querySelectorAll('input[id^="disc2_"]').forEach(inp => {
+    const id = inp.id.replace('disc2_', '');
+    if (cat === 'all' || id.startsWith(cat)) inp.value = d2;
+  });
+  document.querySelectorAll('input[id^="disc3_"]').forEach(inp => {
+    const id = inp.id.replace('disc3_', '');
+    if (cat === 'all' || id.startsWith(cat)) inp.value = d3;
+  });
+  showToast('✅ 할인율 적용됨 (저장 버튼 눌러주세요)');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
+
+function sendSMS(phone, name) {
+  const msg = document.getElementById('bulk-sms-msg')?.value || '';
+  const body = encodeURIComponent(msg || `안녕하세요 ${name}님! Asia Mart입니다 😊`);
+  window.open(`sms:${phone}?body=${body}`);
+}
+
+function sendBulkSMS() {
+  const msg = document.getElementById('bulk-sms-msg').value.trim();
+  if (!msg) { alert('문자 내용을 입력해주세요.'); return; }
+
+  const checked = document.querySelectorAll('.cust-check:checked');
+  const targets = checked.length > 0
+    ? Array.from(checked)
+    : Array.from(document.querySelectorAll('.cust-check'));
+
+  if (targets.length === 0) { alert('등록된 고객이 없습니다.'); return; }
+  if (!confirm(`${targets.length}명에게 순서대로 문자를 보낼게요.\n한 명씩 문자앱이 열립니다.`)) return;
+
+  let i = 0;
+  function sendNext() {
+    if (i >= targets.length) {
+      showToast(`✅ ${targets.length}명 완료!`);
+      return;
+    }
+    const cb = targets[i];
+    const phone = cb.dataset.phone;
+    const name = cb.dataset.name;
+    const body = encodeURIComponent(msg);
+    window.location.href = `sms:${phone}?body=${body}`;
+    i++;
+    if (i < targets.length) {
+      setTimeout(() => {
+        if (confirm(`(${i}/${targets.length}) 다음: ${targets[i].dataset.name}에게 문자 보내기`)) {
+          sendNext();
+        }
+      }, 1500);
+    } else {
+      setTimeout(() => showToast(`✅ ${targets.length}명 완료!`), 1500);
+    }
+  }
+  sendNext();
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.cust-check').forEach(c => c.checked = cb.checked);
+}
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
+  authDomain: "asia-mart-a0292.firebaseapp.com",
+  databaseURL: "https://asia-mart-a0292-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "asia-mart-a0292",
+  storageBucket: "asia-mart-a0292.firebasestorage.app",
+  messagingSenderId: "6786874274",
+  appId: "1:6786874274:web:50f7bec4fb3668cb4c10fb"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+async function loadAll() {
+  await loadStock();
+  await loadDiscount();
+  await loadProducts();
+  await loadCustomers();
+  await loadBest();
+  await loadNew();
+}
+
+async function loadStock() {
+  const snap = await db.ref('stock').get();
+  const data = snap.val() || {};
+  document.querySelectorAll('input[id^="stock_"]').forEach(inp => {
+    const id = inp.id.replace('stock_', '');
+    inp.value = data[id] !== undefined ? data[id] : -1;
+    const b = document.getElementById('badge_stock_' + id);
+    if (b) b.style.display = 'none';
+  });
+}
+
+async function loadDiscount() {
+  const snap = await db.ref('discount').get();
+  const data = snap.val() || {};
+  document.querySelectorAll('input[id^="disc2_"]').forEach(inp => {
+    const id = inp.id.replace('disc2_', '');
+    inp.value = data[id]?.d2 !== undefined ? data[id].d2 : 5;
+  });
+  document.querySelectorAll('input[id^="disc3_"]').forEach(inp => {
+    const id = inp.id.replace('disc3_', '');
+    inp.value = data[id]?.d3 !== undefined ? data[id].d3 : 10;
+  });
+}
+
+async function loadProducts() {
+  const snap = await db.ref('products').get();
+  const data = snap.val() || {};
+  Object.keys(data).forEach(id => {
+    const p = data[id];
+    if (document.getElementById('en_' + id)) document.getElementById('en_' + id).value = p.en || '';
+    if (document.getElementById('ko_' + id)) document.getElementById('ko_' + id).value = p.ko || '';
+    if (document.getElementById('price_' + id)) document.getElementById('price_' + id).value = p.price || '';
+    if (document.getElementById('img_' + id)) document.getElementById('img_' + id).value = p.img || '';
+  });
+}
+
+async function loadCustomers() {
+  const snap = await db.ref('customers').get();
+  const data = snap.val() || {};
+  const tbody = document.getElementById('customer-tbody');
+  tbody.innerHTML = '';
+  Object.entries(data).sort((a,b) => b[1].date - a[1].date).forEach(([key, c]) => {
+    const date = new Date(c.date).toLocaleDateString('ko-KR');
+    tbody.innerHTML += `<tr id="row-${key}">
+      <td style="padding:10px 12px;"><input type="checkbox" class="cust-check" data-phone="${c.phone}" data-name="${c.name}"></td>
+      <td id="name-${key}">${c.name}</td>
+      <td id="phone-${key}">${c.phone || '-'}</td>
+      <td id="note-${key}">${c.note || ''}</td>
+      <td style="color:#aaa;font-size:12px;">${date}</td>
+      <td><button class="btn-del" style="color:#1877f2;border-color:#1877f2;" onclick="sendSMS('${c.phone}','${c.name}')">📱 문자</button></td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn-del" style="color:#f59e0b;border-color:#f59e0b;" onclick="editCustomer('${key}','${c.name}','${c.phone}','${c.note||''}')">✏️ 수정</button>
+        <button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button>
+      </td>
+    </tr>`;
+  });
+}
+
+function editCustomer(key, name, phone, note) {
+  const row = document.getElementById('row-' + key);
+  row.innerHTML = `
+    <td style="padding:6px 8px;"><input type="checkbox" class="cust-check"></td>
+    <td><input type="text" value="${name}" id="edit-name-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td><input type="tel" value="${phone}" id="edit-phone-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td><input type="text" value="${note}" id="edit-note-${key}" style="width:100%;padding:4px 8px;border:1px solid #f59e0b;border-radius:6px;font-size:13px;"></td>
+    <td></td>
+    <td></td>
+    <td style="display:flex;gap:4px;">
+      <button class="btn-del" style="color:#2d7a4f;border-color:#2d7a4f;" onclick="saveCustomer('${key}')">💾 저장</button>
+      <button class="btn-del" onclick="loadCustomers()">취소</button>
+    </td>
+  `;
+}
+
+async function saveCustomer(key) {
+  const name = document.getElementById('edit-name-' + key).value.trim();
+  const phone = document.getElementById('edit-phone-' + key).value.trim();
+  const note = document.getElementById('edit-note-' + key).value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); return; }
+  await db.ref('customers/' + key).update({ name, phone, note });
+  loadCustomers();
+  showToast('✅ 수정 완료!');
+}
+
+async function saveAll() {
+  const updates = {};
+  document.querySelectorAll('input[id^="stock_"]').forEach(inp => {
+    updates['stock/' + inp.id.replace('stock_', '')] = parseInt(inp.value);
+  });
+  const discData = {};
+  document.querySelectorAll('input[id^="disc2_"]').forEach(inp => {
+    const id = inp.id.replace('disc2_', '');
+    if (!discData[id]) discData[id] = {};
+    discData[id].d2 = parseFloat(inp.value);
+  });
+  document.querySelectorAll('input[id^="disc3_"]').forEach(inp => {
+    const id = inp.id.replace('disc3_', '');
+    if (!discData[id]) discData[id] = {};
+    discData[id].d3 = parseFloat(inp.value);
+  });
+  Object.entries(discData).forEach(([id, val]) => { updates['discount/' + id] = val; });
+  document.querySelectorAll('input[id^="en_"]').forEach(inp => {
+    const id = inp.id.replace('en_', '');
+    updates['products/' + id] = {
+      en: document.getElementById('en_' + id)?.value || '',
+      ko: document.getElementById('ko_' + id)?.value || '',
+      price: parseInt(document.getElementById('price_' + id)?.value) || 0,
+      img: document.getElementById('img_' + id)?.value || '',
+    };
+  });
+  await db.ref().update(updates);
+  document.querySelectorAll('.changed-badge').forEach(b => b.style.display = 'none');
+  showToast('💾 저장 완료!');
+}
+
+async function translateName() {
+  const ko = document.getElementById('new-ko').value.trim();
+  if (!ko) { alert('한국어 상품명을 먼저 입력해주세요.'); return; }
+  const status = document.getElementById('translate-status');
+  status.style.display = 'block';
+  status.style.color = '#888';
+  status.textContent = '🤖 번역 중...';
+  try {
+    const enRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|en`);
+    const enData = await enRes.json();
+    const en = enData.responseData.translatedText;
+
+    const thRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|th`);
+    const thData = await thRes.json();
+    const th = thData.responseData.translatedText;
+
+    const id = document.getElementById('new-id').value.trim().toUpperCase();
+    const prefix = id ? id + '. ' : '';
+    document.getElementById('new-en').value = prefix + en;
+    document.getElementById('new-th').value = prefix + th;
+    status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
+    status.style.color = '#2d7a4f';
+  } catch(e) {
+    status.textContent = '❌ 번역 실패. 직접 입력해주세요.';
+    status.style.color = '#c84b2f';
+  }
+}
+
+function addProduct() {
+  const id = document.getElementById('new-id').value.trim().toLowerCase();
+  const en = document.getElementById('new-en').value.trim();
+  const ko = document.getElementById('new-ko').value.trim();
+  const th = document.getElementById('new-th').value.trim();
+  const price = parseInt(document.getElementById('new-price').value);
+  const img = document.getElementById('new-img').value.trim();
+  if (!id || !en || !price) { alert('ID, 영문명, 가격은 필수입니다.'); return; }
+  db.ref('products/' + id).set({ en, ko, th, price, img });
+  showToast('✅ 상품 추가됨!');
+  ['new-id','new-en','new-ko','new-th','new-price','new-img'].forEach(f => document.getElementById(f).value = '');
+}
+
+function addCustomer() {
+  const name = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  const note = document.getElementById('cust-note').value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); return; }
+  db.ref('customers').push({ name, phone, note, date: Date.now() });
+  ['cust-name','cust-phone','cust-note'].forEach(f => document.getElementById(f).value = '');
+  setTimeout(loadCustomers, 500);
+  showToast('✅ 고객 등록 완료!');
+}
+
+async function deleteCustomer(key) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await db.ref('customers/' + key).remove();
+  loadCustomers();
+  showToast('🗑️ 삭제 완료');
+}
+
+// 베스트 상품 관련
+const ALL_OPTIONS = `<optgroup label="A 냉동음식">
+  <option value="a1">A1. A1. 새우볼 500g</option>
+  <option value="a2">A2. A2. 소고기미트볼 320g</option>
+  <option value="a3">A3. A3. 돼지고기미트볼 320g</option>
+  <option value="a4">A4. A4. 돼지꼬리 700g</option>
+  <option value="a5">A5. A5. 돼지귀 2개 500g</option>
+  <option value="a6">A6. A6. 닭근위 500g</option>
+  <option value="a7">A7. A7. 닭간 400g</option>
+  <option value="a8">A8. A8. 닭알집 500g</option>
+  <option value="a9">A9. A9. 닭무릎연골 500g</option>
+  <option value="a10">A10. A10. 냉동 등목어 3마리 500g</option>
+  <option value="a11">A11. A11. 냉동 줄무늬가물치 450g</option>
+  <option value="a12">A12. A12. 냉동 레드틸라피아 2마리 900g</option>
+  <option value="a13">A13. A13. 냉동 틸라피아 2마리 900g</option>
+  <option value="a14">A14. A14. 냉동 구라미 450g</option>
+  <option value="a15">A15. A15. 냉동 절단한 메기 450g</option>
+  <option value="a16">A16. A16. 냉동 메기 700g</option>
+  <option value="a17">A17. A17. 빠뚜캠 180g</option>
+  <option value="a18">A18. A18. 냉동 고등어 250g</option>
+  <option value="a19">A19. A19. 양념 반건조 메기 450g</option>
+  <option value="a20">A20. A20. 냉동 개구리 450g</option>
+  <option value="a21">A21. A21. 냉동 갑오징어 400g</option>
+  <option value="a22">A22. A22. 냉동 쭈꾸미 450g</option>
+  <option value="a23">A23. A23. 냉동 소 부속물 고기 파파이딴 700g</option>
+</optgroup>
+<optgroup label="B 면 종류">
+  <option value="b01">B01. B01. 마마 똠얌 컵 70g</option>
+  <option value="b02">B02. B02. 마마 크리미 똠얌 컵 70g</option>
+  <option value="b03">B03. B03. 마마 포크 컵 70g</option>
+  <option value="b04">B04. B04. MAMA 인스턴트 쌀국수 클리어수프 55g 1set(5pcs)</option>
+  <option value="b05">B05. B05. MAMA 인스턴트 누들 치킨그린커리 55g 1set(5pcs)</option>
+  <option value="b06">B06. B06. ACECOOK 쌀국수 71g 1set(5pcs)</option>
+  <option value="b07">B07. B07. 하오하오 오리지널 78g 1set(5pcs)</option>
+  <option value="b08">B08. B08. ACECOOK 포보 70g 1set(5pcs)</option>
+  <option value="b09">B09. B09. WAIWAI 오리엔탈 60g 1set(5pcs)</option>
+  <option value="b10">B10. B10. WAIWAI 똠얌 RED 60g 1set(5pcs)</option>
+  <option value="b11">B11. B11. WAIWAI 똠얌 BLUE 60g 1set(5pcs)</option>
+  <option value="b12">B12. B12. WAIWAI 크랩 55g 1set(5pcs)</option>
+  <option value="b13">B13. B13. MAMA 똠얌 55g 1set(5pcs)</option>
+  <option value="b14">B14. B14. MAMA 크리미 55g 1set(5pcs)</option>
+  <option value="b15">B15. B15. MAMA 포크 60g 1set(5pcs)</option>
+  <option value="b16">B16. B16. SAFOCO 쌀국수 300g</option>
+  <option value="b17">B17. B17. CHANTABURI 쌀국수 500g</option>
+  <option value="b18">B18. B18. BUNKO 당면 300g</option>
+  <option value="b19">B19. B19. BICH CHI 건면 500g</option>
+  <option value="b20">B20. B20. BICH CHI 넓은건면 500g</option>
+  <option value="b21">B21. B21. VIFON 건면 500g</option>
+  <option value="b22">B22. B22. VIFON 넓은건면 500g</option>
+  <option value="b23">B23. B23. WAIWAI 면 200g</option>
+  <option value="b24">B24. B24. WOONSEN LEK 1팩(10개) 400g</option>
+  <option value="b25">B25. B25. 신라면 5개입</option>
+  <option value="b26">B26. B26. 진라면 순한맛 5개입</option>
+  <option value="b27">B27. B27. 진라면 매운맛 5개입</option>
+  <option value="b28">B28. B28. 진라면 컵라면 순한맛 6개입</option>
+  <option value="b29">B29. B29. 진라면 컵라면 매운맛 6개입</option>
+</optgroup>
+<optgroup label="C 각종 소스">
+  <option value="c01">C01. C1. TIPAROS 피시소스 700ml</option>
+  <option value="c02">C02. C2. TIPAROS 식초 600ml</option>
+  <option value="c03">C03. C3. YWY 블랙스위트 간장 410g</option>
+  <option value="c04">C04. C4. YWY 굴소스 370g</option>
+  <option value="c05">C05. C5. YWY 시즈닝소스 300g</option>
+  <option value="c06">C06. C6. YWY 시즈닝페이스트 350g</option>
+  <option value="c07">C07. C7. YWY 블랙소스 410g</option>
+  <option value="c08">C08. C8. 오징어 피시소스 700ml</option>
+  <option value="c09">C09. C9. 메콩 레드소스 400ml</option>
+  <option value="c10">C10. C10. 메콩 옐로우소스 400ml</option>
+  <option value="c11">C11. C11. 메콩 화이트소스 400ml</option>
+  <option value="c12">C12. C12. 마기 딥핑소스 200ml</option>
+  <option value="c13">C13. C13. KHONKAEN 피시소스 400ml</option>
+  <option value="c14">C14. C14. ZAB MIKE 피시소스 330ml</option>
+  <option value="c15">C15. C15. 메가쉐프 피시소스 700ml</option>
+  <option value="c16">C16. C16. 타마린드 페이스트 300g</option>
+  <option value="c17">C17. C17. 핫스파이스 수키소스 342g</option>
+  <option value="c18">C18. C18. 판타이 스위트칠리소스 342g</option>
+  <option value="c19">C19. C19. 남프릭파우 513g</option>
+  <option value="c20">C20. C20. 사워커리 페이스트 100g</option>
+  <option value="c21">C21. C21. 남야커리 페이스트 100g</option>
+  <option value="c22">C22. C22. 컨트리 레드커리 페이스트 100g</option>
+  <option value="c23">C23. C23. 그린커리 페이스트 100g</option>
+  <option value="c24">C24. C24. 파낭커리 페이스트 100g</option>
+  <option value="c25">C25. C25. 레드커리 페이스트 100g</option>
+  <option value="c26">C26. C26. 쏠티드 쉬림페이스트 400g</option>
+  <option value="c26b">C26B. C26-1. 쏠티드 쉬림페이스트 200g</option>
+  <option value="c26c">C26C. C26-2. 피클드 구라미피시 454g</option>
+  <option value="c27">C27. C27. 매운고추 100g</option>
+  <option value="c28">C28. C28. 타마린드 씨없봉 170g</option>
+  <option value="c29">C29. C29. 미원 250g</option>
+  <option value="c30">C30. C30. 타피오카펄 그린 400g</option>
+  <option value="c31">C31. C31. ROSDEE 포크플레이버 800g</option>
+  <option value="c32">C32. C32. ROSDEE 치킨플레이버 70g</option>
+  <option value="c33">C33. C33. ROSDEE LAAB 믹스 30g</option>
+  <option value="c34">C34. C34. ROSDEE 똠얌꿍 믹스 60g</option>
+  <option value="c35">C35. C35. ROSDEE 얌운센 믹스 40g</option>
+  <option value="c36">C36. C36. ROSDEE 팔로 믹스 60g</option>
+  <option value="c37">C37. C37. ROSDEE 카프라오 믹스 50g</option>
+  <option value="c38">C38. C38. 라임 시즈닝 파우더 67g</option>
+  <option value="c39">C39. C39. 치킨큐브 20g</option>
+  <option value="c40">C40. C40. 포크큐브 20g</option>
+  <option value="c41">C41. C41. 톰얌꿍큐브 20g</option>
+</optgroup>
+<optgroup label="D 음료 및 기타">
+  <option value="d01">D01. D1. 람부탄 시럽 565g</option>
+  <option value="d02">D02. D2. 용안 시럽 565g</option>
+  <option value="d03">D03. D3. 카네이션 연유 405g</option>
+  <option value="d04">D04. D4. 말리 연유 355g</option>
+  <option value="d05">D05. D5. 코코낫밀크 400ml</option>
+  <option value="d06">D06. D6. 암파와 코코낫밀크 1000ml</option>
+  <option value="d07">D07. D7. SAHA 죽순채 350g</option>
+  <option value="d08">D08. D8. SAHA 죽순 슬라이스 350g</option>
+  <option value="d09">D09. D9. 뱀부 허브 400g</option>
+  <option value="d10">D10. D10. 피시스낵 바베큐맛 80g</option>
+  <option value="d11">D11. D11. 피시스낵 핫칠리맛 80g</option>
+  <option value="d12">D12. D12. 피시스낵 치킨바베큐맛 80g</option>
+  <option value="d13">D13. D13. 피시스낵 게살맛 80g</option>
+  <option value="d14">D14. D14. 이태리 레몬주스 200ml</option>
+  <option value="d14b">D14B. D14-1. 이태리 라임주스 200ml</option>
+  <option value="d15">D15. D15. 해바라기씨 빨간색 260g</option>
+  <option value="d16">D16. D16. 커피믹스 160개입</option>
+  <option value="d17">D17. D17. 종이컵 1000개</option>
+</optgroup>
+<optgroup label="E 생활용품">
+  <option value="e01">E01. E01. 콜게이트 아이시 쿨민트 치약 200g</option>
+  <option value="e02">E02. E02. 콜게이트 그레이트 레귤러 치약 200g</option>
+  <option value="e03">E03. E03. 트웰브플러스 엑스트라쿨파우더 쿨링블루 270g</option>
+  <option value="e04">E04. E04. 트웰브플러스 엑스트라쿨파우더 쿨링핑크 270g</option>
+</optgroup>
+`;
+
+function renderBestSlots(selectedIds) {
+  const container = document.getElementById('best-slots');
+  container.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const val = selectedIds[i] || '';
+    container.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
+        <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <option value="">-- 상품 선택 --</option>
+          ${ALL_OPTIONS}
+        </select>
+      </div>`;
+    setTimeout(() => {
+      const sel = document.getElementById('best-slot-' + i);
+      if (sel && val) sel.value = val;
+    }, 50);
+  }
+}
+
+async function loadBest() {
+  const snap = await db.ref('best').get();
+  const data = snap.val() || [];
+  renderBestSlots(data);
+}
+
+async function saveBest() {
+  const ids = [];
+  for (let i = 0; i < 5; i++) {
+    const sel = document.getElementById('best-slot-' + i);
+    if (sel && sel.value) ids.push(sel.value);
+  }
+  await db.ref('best').set(ids);
+  showToast('🔥 베스트 상품 저장 완료!');
+  setTimeout(() => switchTab('stock'), 1000);
+}
+
+// 신상품 관련
+function renderNewSlots(selectedIds = []) {
+  const container = document.getElementById('new-slots');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const val = selectedIds[i] || '';
+    container.innerHTML += `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
+        <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <option value="">-- 상품 선택 --</option>
+          ${ALL_OPTIONS}
+        </select>
+      </div>`;
+    setTimeout(() => {
+      const sel = document.getElementById('new-slot-' + i);
+      if (sel && val) sel.value = val;
+    }, 50);
+  }
+}
+
+async function loadNew() {
+  const snap = await db.ref('newItems').get();
+  const data = snap.val() || [];
+  renderNewSlots(data);
+}
+
+async function saveNew() {
+  const ids = [];
+  for (let i = 0; i < 10; i++) {
+    const sel = document.getElementById('new-slot-' + i);
+    if (sel && sel.value) ids.push(sel.value);
+  }
+  await db.ref('newItems').set(ids);
+  showToast('🆕 신상품 저장 완료!');
+  setTimeout(() => switchTab('stock'), 1000);
+}
+
+</script>
+</body>
+</html>
