@@ -118,13 +118,13 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('stock')">📦 재고 관리</button>
-    <button class="tab-btn" onclick="switchTab('discount')">🏷️ 할인율</button>
-    <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
-    <button class="tab-btn" onclick="switchTab('category')">📂 카테고리</button>
-    <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
-    <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
-    <button class="tab-btn" onclick="switchTab('new')">🆕 신상품</button>
+    <button class="tab-btn active" onclick="switchTab('stock',this)">📦 재고 관리</button>
+    <button class="tab-btn" onclick="switchTab('discount',this)">🏷️ 할인율</button>
+    <button class="tab-btn" onclick="switchTab('product',this)">📝 상품 관리</button>
+    <button class="tab-btn" onclick="switchTab('category',this)">📂 카테고리</button>
+    <button class="tab-btn" onclick="switchTab('customer',this)">👥 고객 관리</button>
+    <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
+    <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
   </div>
 
   <!-- 재고 관리 -->
@@ -419,11 +419,12 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
 });
 
-function switchTab(tab) {
+function switchTab(tab, triggerEl) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  event.target.classList.add('active');
+  const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
+  if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
 }
 
