@@ -222,6 +222,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <th style="padding:10px 12px;font-size:12px;color:#888;">한국명</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">1개 가격</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">이미지 URL</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">삭제</th>
         </tr></thead>
         <tbody id="product-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
@@ -447,6 +448,7 @@ async function loadCatalogForAdmin() {
         <td><input id="ko_${item.id}" value="${cleanKo}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
         <td><input id="price_${item.id}" value="${item.price1||''}" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="가격"></td>
         <td><input id="img_${item.id}" value="${item.image||''}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="이미지 URL"></td>
+        <td style="text-align:center;"><button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️</button></td>
       </tr>`;
     });
   });
@@ -692,6 +694,17 @@ function autoFillId() {
     const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
     document.getElementById('new-id').value = formatted;
   });
+}
+
+async function deleteProduct(catKey, itemId) {
+  if (!confirm(`${itemId} 상품을 삭제하시겠습니까?`)) return;
+  const snap = await db.ref('catalog/' + catKey + '/items').get();
+  const items = snap.val() || [];
+  const newItems = items.filter(item => item.id !== itemId);
+  await db.ref('catalog/' + catKey + '/items').set(newItems);
+  showToast('🗑️ 삭제 완료!');
+  loadCatalogForAdmin();
+  autoFillId();
 }
 
 function addProduct() {
