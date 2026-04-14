@@ -1092,6 +1092,8 @@ function resetQty(id) {
 }
 
 function getItemName(item) {
+  // 신발 카테고리는 언어 관계없이 항상 영문명
+  if (item._catKey === 'shoes') return item.name_en || '';
   if (currentLang === 'ko') return item.name_ko || item.name_en || '';
   if (currentLang === 'th') return item.name_th || item.name_en || '';
   if (currentLang === 'lo') return item.name_lo || item.name_th || item.name_en || '';
@@ -1924,6 +1926,7 @@ async function loadCatalogFromFirebase() {
             if (d.d2) item.price2 = Math.round(p1 * (1 - d.d2 / 100)) * 2;
             if (d.d3) item.price3 = Math.round(p1 * (1 - d.d3 / 100)) * 3;
           }
+          item._catKey = catKey; // 카테고리 판별용
           return item;
         });
         catalog[catKey] = {
