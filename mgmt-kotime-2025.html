@@ -174,6 +174,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('product',this)">📝 상품 관리</button>
     <button class="tab-btn" onclick="switchTab('category',this)">📂 카테고리</button>
     <button class="tab-btn" onclick="switchTab('customer',this)">👥 고객 관리</button>
+    <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
   </div>
@@ -361,6 +362,70 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+  <!-- 엑셀 -->
+  <div id="tab-excel" class="tab-content">
+    <div style="max-width:1000px;margin:24px auto;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 다운로드 섹션 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📥 엑셀 다운로드</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-primary" onclick="downloadExcel('products')">📦 전체 상품 목록</button>
+          <button class="btn btn-primary" onclick="downloadExcel('stock')">🗃️ 재고 현황</button>
+          <button class="btn btn-primary" onclick="downloadExcel('discount')">🏷️ 할인율</button>
+          <button class="btn btn-primary" onclick="downloadExcel('customers')">👥 고객 목록</button>
+        </div>
+      </div>
+
+      <!-- 업로드 섹션 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📤 엑셀 업로드</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">다운로드한 엑셀 파일을 수정 후 다시 올리면 Firebase에 자동 반영됩니다.</p>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">📦 상품 일괄 등록/수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 카테고리, 영문명, 한국명, 태국어명, 라오스어명, 가격, 이미지URL 포함</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-products" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('products')">업로드</button>
+            </div>
+            <div id="upload-products-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🗃️ 재고 일괄 수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 재고수량 포함 (-1=무제한)</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-stock" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('stock')">업로드</button>
+            </div>
+            <div id="upload-stock-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🏷️ 할인율 일괄 수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 2개할인율(%), 3개할인율(%) 포함</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-discount" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('discount')">업로드</button>
+            </div>
+            <div id="upload-discount-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 샘플 다운로드 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📋 샘플 양식 다운로드</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">신규 상품 등록 시 이 양식에 맞춰 입력해주세요.</p>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="downloadSample()">📋 상품 등록 양식 다운로드</button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 베스트 상품 -->
   <div id="tab-best" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
@@ -489,6 +554,7 @@ function switchTab(tab, triggerEl) {
   const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
+  if (tab === 'excel') {} // 엑셀 탭은 버튼 클릭으로 동작
 }
 
 function markChanged(id, type) {
@@ -528,6 +594,211 @@ function filterDiscountTable() {
       row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
     }
   });
+}
+
+// ── 엑셀 다운로드 ──
+async function downloadExcel(type) {
+  const wb = XLSX.utils.book_new();
+  let ws, fileName;
+
+  if (type === 'products') {
+    const snap = await db.ref('catalog').get();
+    const catalog = snap.val() || {};
+    const rows = [['상품ID','카테고리키','카테고리명','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL']];
+    const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+    const allKeys = [...catOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!catOrder.includes(k))];
+    allKeys.forEach(catKey => {
+      const cat = catalog[catKey];
+      if (!cat || !cat.items) return;
+      const label = typeof cat.label === 'string' ? cat.label : (cat.label?.ko || catKey);
+      cat.items.forEach(item => {
+        rows.push([
+          item.id, catKey, label,
+          (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          item.price1||0,
+          item.image||''
+        ]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,10,12,20,20,20,20,10,40].map(w=>({wch:w}));
+    fileName = 'asia-mart-상품목록.xlsx';
+
+  } else if (type === 'stock') {
+    const [catSnap, stockSnap] = await Promise.all([db.ref('catalog').get(), db.ref('stock').get()]);
+    const catalog = catSnap.val() || {};
+    const stock = stockSnap.val() || {};
+    const rows = [['상품ID','영문명','한국명','재고(-1=무제한)']];
+    Object.values(catalog).forEach(cat => {
+      (cat.items||[]).forEach(item => {
+        rows.push([item.id, (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''), (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''), stock[item.id]??-1]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,25,25,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-재고.xlsx';
+
+  } else if (type === 'discount') {
+    const [catSnap, discSnap] = await Promise.all([db.ref('catalog').get(), db.ref('discount').get()]);
+    const catalog = catSnap.val() || {};
+    const disc = discSnap.val() || {};
+    const rows = [['상품ID','영문명','한국명','2개할인율(%)','3개할인율(%)']];
+    Object.values(catalog).forEach(cat => {
+      (cat.items||[]).forEach(item => {
+        const d = disc[item.id] || {};
+        rows.push([item.id, (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''), (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''), d.d2??5, d.d3??10]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,25,25,12,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-할인율.xlsx';
+
+  } else if (type === 'customers') {
+    const snap = await db.ref('customers').get();
+    const data = snap.val() || {};
+    const rows = [['이름','전화번호','메모','등록일']];
+    Object.values(data).sort((a,b)=>b.date-a.date).forEach(c => {
+      rows.push([c.name, c.phone||'', c.note||'', new Date(c.date).toLocaleDateString('ko-KR')]);
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [15,15,25,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-고객목록.xlsx';
+  }
+
+  // 헤더 스타일
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = ws[XLSX.utils.encode_cell({r:0, c})];
+    if (cell) cell.s = { font:{bold:true}, fill:{fgColor:{rgb:'1A1814'}}, font:{bold:true,color:{rgb:'FFFFFF'}} };
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, fileName);
+  showToast(`✅ ${fileName} 다운로드 완료!`);
+}
+
+// ── 샘플 양식 다운로드 ──
+function downloadSample() {
+  const wb = XLSX.utils.book_new();
+  const rows = [
+    ['상품ID','카테고리키','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL'],
+    ['G01','shoes','Nike Air Force 1 250','나이키 에어포스 1 250','','',89000,''],
+    ['G02','shoes','Nike Air Force 1 260','나이키 에어포스 1 260','','',89000,''],
+    ['G03','shoes','Adidas Stan Smith 255','아디다스 스탄스미스 255','','',75000,''],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [8,10,25,25,20,20,10,40].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, '상품등록양식');
+  XLSX.writeFile(wb, 'asia-mart-상품등록양식.xlsx');
+  showToast('✅ 샘플 양식 다운로드 완료!');
+}
+
+// ── 엑셀 업로드 ──
+async function uploadExcel(type) {
+  const fileInput = document.getElementById('upload-' + type);
+  const statusEl = document.getElementById('upload-' + type + '-status');
+  const file = fileInput.files[0];
+  if (!file) { alert('파일을 선택해주세요.'); return; }
+
+  statusEl.textContent = '⏳ 처리 중...';
+  statusEl.style.color = '#888';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const headers = rows[0];
+      const data = rows.slice(1).filter(r => r.some(c => c !== undefined && c !== ''));
+
+      if (type === 'products') {
+        // 카탈로그에 상품 일괄 등록
+        const catSnap = await db.ref('catalog').get();
+        const catalog = catSnap.val() || {};
+        const updates = {};
+        let count = 0;
+
+        // 카테고리별로 그룹화
+        const byCat = {};
+        data.forEach(row => {
+          const id = String(row[0]||'').trim();
+          const catKey = String(row[1]||'').trim();
+          if (!id || !catKey) return;
+          if (!byCat[catKey]) byCat[catKey] = [];
+          byCat[catKey].push({
+            id, emoji: '🛒',
+            name_en: String(row[2]||'').trim(),
+            name_ko: String(row[3]||'').trim(),
+            name_th: String(row[4]||'').trim(),
+            name_lo: String(row[5]||'').trim(),
+            price1: parseInt(row[6])||0,
+            price2: 0, price3: 0,
+            image: String(row[7]||'').trim(),
+            images: row[7] ? [String(row[7]).trim()] : []
+          });
+          count++;
+        });
+
+        // 각 카테고리에 추가
+        for (const [catKey, items] of Object.entries(byCat)) {
+          const existing = catalog[catKey]?.items || [];
+          // 기존 상품 ID 목록
+          const existingIds = existing.map(i => i.id);
+          items.forEach(item => {
+            const idx = existingIds.indexOf(item.id);
+            if (idx >= 0) existing[idx] = { ...existing[idx], ...item }; // 수정
+            else existing.push(item); // 추가
+          });
+          updates[`catalog/${catKey}/items`] = existing;
+        }
+
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 상품 등록/수정 완료!`;
+        statusEl.style.color = '#2d7a4f';
+        loadCatalogForAdmin();
+
+      } else if (type === 'stock') {
+        const updates = {};
+        let count = 0;
+        data.forEach(row => {
+          const id = String(row[0]||'').trim();
+          const qty = parseInt(row[3]);
+          if (!id || isNaN(qty)) return;
+          updates['stock/' + id] = qty;
+          count++;
+        });
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 재고 수정 완료!`;
+        statusEl.style.color = '#2d7a4f';
+
+      } else if (type === 'discount') {
+        const updates = {};
+        let count = 0;
+        data.forEach(row => {
+          const id = String(row[0]||'').trim();
+          const d2 = parseFloat(row[3]);
+          const d3 = parseFloat(row[4]);
+          if (!id || isNaN(d2) || isNaN(d3)) return;
+          updates['discount/' + id] = { d2, d3 };
+          count++;
+        });
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 할인율 수정 완료!`;
+        statusEl.style.color = '#2d7a4f';
+      }
+
+      showToast('✅ 업로드 완료!');
+    } catch(e) {
+      statusEl.textContent = '❌ 오류: ' + e.message;
+      statusEl.style.color = '#c84b2f';
+      console.error(e);
+    }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function showToast(msg) {
@@ -588,6 +859,7 @@ function toggleSelectAll(cb) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
