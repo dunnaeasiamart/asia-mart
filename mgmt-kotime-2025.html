@@ -93,6 +93,57 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
 /* 토스트 */
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; z-index: 999; display: none; white-space: nowrap; }
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  /* 헤더 */
+  .header { padding: 0 12px; }
+  .header-title { font-size: 14px; }
+  .btn { padding: 6px 10px; font-size: 12px; }
+
+  /* 탭 */
+  .tabs { padding: 0; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tab-btn { padding: 12px 14px; font-size: 12px; }
+
+  /* 상품 추가 폼 - 1열로 변경 */
+  .add-product-form { margin: 12px; padding: 16px; border-radius: 10px; }
+  .add-product-form h3 { font-size: 14px; margin-bottom: 12px; }
+  .form-grid { grid-template-columns: 1fr; gap: 10px; }
+  .form-grid .form-full { grid-column: 1; }
+  .form-grid input, .form-grid select { padding: 12px 14px; font-size: 15px; }
+
+  /* 번역 버튼 */
+  .form-grid button { padding: 12px 16px; font-size: 14px; }
+
+  /* 상품 추가 버튼 */
+  .add-product-form > .btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 12px; }
+
+  /* 이미지 업로드 */
+  #new-img-file { font-size: 14px; padding: 10px; }
+  #new-img-preview img { width: 80px; height: 80px; }
+
+  /* 테이블 - 모바일에선 스크롤 */
+  .table-wrap { margin: 12px; border-radius: 10px; overflow-x: auto; }
+  table { min-width: 600px; }
+
+  /* bulk-box */
+  .bulk-box { margin: 12px; padding: 14px; gap: 10px; }
+
+  /* 고객 관리 */
+  .customer-wrap { margin: 12px; }
+  .customer-form { padding: 16px; }
+  .form-row { flex-direction: column; }
+
+  /* 카테고리 탭 */
+  #tab-category .table-wrap { margin: 12px; }
+
+  /* 모달 */
+  .modal-box { padding: 20px 16px; width: 95%; border-radius: 12px; }
+  .modal-grid { grid-template-columns: 1fr; }
+  .modal-grid .full { grid-column: 1; }
+  .modal-btns { flex-direction: column-reverse; }
+  .modal-btns .btn { width: 100%; padding: 13px; text-align: center; }
+}
 </style>
 </head>
 <body>
@@ -229,7 +280,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         </div>
       </div>
       <div id="translate-status" style="margin-top:8px;font-size:12px;color:#888;display:none;">🤖 번역 중...</div>
-      <button class="btn btn-primary" style="margin-top:16px;" onclick="addProduct()">상품 추가</button>
+      <button class="btn btn-primary" style="margin-top:16px;width:100%;" onclick="addProduct()">상품 추가</button>
     </div>
 
     <!-- 상품 목록 테이블 -->
