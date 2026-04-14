@@ -202,11 +202,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <label>전체/카테고리 일괄 적용:</label>
       <select id="bulk-cat" onchange="filterDiscountTable()">
         <option value="all">전체</option>
-        <option value="A">A 냉동음식</option>
-        <option value="B">B 면 종류</option>
-        <option value="C">C 각종 소스</option>
-        <option value="D">D 음료 및 기타</option>
-        <option value="E">E 생활용품</option>
       </select>
       <label>2개 할인:</label>
       <input type="number" id="bulk-disc2" value="5" min="0" max="50"> %
@@ -1016,22 +1011,19 @@ async function loadCatSelect() {
 async function loadCatalogForAdmin() {
   const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
-  // 카테고리별 상품 테이블 렌더링
-  const catMap = {
-    frozen: { label: 'A 냉동음식', prefix: 'A' },
-    noodle: { label: 'B 면 종류', prefix: 'B' },
-    sauce:  { label: 'C 각종 소스', prefix: 'C' },
-    other:  { label: 'D 음료 및 기타', prefix: 'D' },
-    essentials: { label: 'E 생활용품', prefix: 'E' },
-    veggie: { label: 'F 농산물', prefix: 'F' }
-  };
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  Object.entries(catMap).forEach(([catKey, catInfo]) => {
+
+  // A→B→C 순서 + 새로 추가된 카테고리도 포함
+  const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
+
+  ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
-    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${catInfo.label}</td></tr>`;
+    const label = getLabel(cat, catKey);
+    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
@@ -1057,22 +1049,17 @@ async function loadStock() {
   const catalog = catalogSnap.val() || {};
   const stock = stockSnap.val() || {};
 
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' }
-  ];
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  catOrder.forEach(({ key, label }) => {
+  ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
@@ -1099,22 +1086,33 @@ async function loadDiscount() {
   const catalog = catalogSnap.val() || {};
   const disc = discSnap.val() || {};
 
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' }
-  ];
+  const fixedOrder2 = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered2 = [...fixedOrder2.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder2.includes(k)).sort()];
+
+  // bulk-cat select 동적 채우기
+  const bulkCat = document.getElementById('bulk-cat');
+  if (bulkCat) {
+    bulkCat.innerHTML = '<option value="all">전체</option>';
+    ordered2.forEach(key => {
+      const cat = catalog[key];
+      if (!cat) return;
+      const label = getLabel(cat, key);
+      const prefix = label.charAt(0).toUpperCase();
+      const opt = document.createElement('option');
+      opt.value = prefix;
+      opt.textContent = label;
+      bulkCat.appendChild(opt);
+    });
+  }
 
   const tbody = document.getElementById('discount-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  catOrder.forEach(({ key, label }) => {
+  ordered2.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     tbody.innerHTML += `<tr><td colspan="5" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const d2 = disc[item.id]?.d2 !== undefined ? disc[item.id].d2 : 5;
@@ -1647,21 +1645,15 @@ let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 async function buildAllOptions() {
   const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' }
-  ];
+  const fixedOrder3 = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
   ALL_OPTIONS = '';
-  catOrder.forEach(({ key, label }) => {
+  ordered3.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     ALL_OPTIONS += `<optgroup label="${label}">`;
     cat.items.forEach(item => {
-      // name_ko에서 "A01. " 같은 ID 접두사 제거
       const rawName = (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${rawName}</option>`;
     });
