@@ -628,7 +628,7 @@
 </div>
 
 <div class="tabs-wrap">
-  <div class="tabs">
+  <div class="tabs" id="cat-tabs">
     <button class="tab active" onclick="switchTab(this,'frozen')" data-t="cat_frozen">🧊 A Frozen Food</button>
     <button class="tab" onclick="switchTab(this,'noodle')" data-t="cat_noodle">🍜 B Noodles</button>
     <button class="tab" onclick="switchTab(this,'sauce')" data-t="cat_sauce">🥫 C Sauces</button>
@@ -1938,8 +1938,30 @@ async function loadCatalogFromFirebase() {
           items
         };
       });
-      // 카탈로그 로드 완료 후 렌더링
-      renderTab('frozen');
+
+      // 카테고리 탭 동적 생성
+      const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+      const orderedKeys = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
+      const tabsEl = document.getElementById('cat-tabs');
+      if (tabsEl) {
+        tabsEl.innerHTML = '';
+        orderedKeys.forEach((key, i) => {
+          const cat = catalog[key];
+          if (!cat || !cat.items || cat.items.length === 0) return;
+          const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
+          const label = typeof cat.label === 'object' ? (cat.label[currentLang] || cat.label.en || key) : (cat.label || key);
+          const btn = document.createElement('button');
+          btn.className = 'tab' + (i === 0 ? ' active' : '');
+          btn.onclick = function() { switchTab(this, key); };
+          btn.textContent = emoji + ' ' + label;
+          tabsEl.appendChild(btn);
+        });
+      }
+
+      // 첫 번째 카테고리 렌더링
+      const firstKey = orderedKeys.find(k => catalog[k]?.items?.length > 0) || 'frozen';
+      currentTab = firstKey;
+      renderTab(firstKey);
       renderBest();
       if (typeof window.renderNew === 'function') window.renderNew();
       updateSummary();
