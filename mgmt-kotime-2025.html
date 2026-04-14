@@ -235,11 +235,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div>
           <label>카테고리</label>
           <select id="new-cat" onchange="autoFillId()">
-            <option value="a">A 냉동음식</option>
-            <option value="b">B 면 종류</option>
-            <option value="c">C 각종 소스</option>
-            <option value="d">D 음료 및 기타</option>
-            <option value="e">E 생활용품</option>
+            <option value="">로딩 중...</option>
           </select>
         </div>
         <div>
@@ -684,13 +680,16 @@ async function downloadExcel(type) {
 function downloadSample() {
   const wb = XLSX.utils.book_new();
   const rows = [
-    ['상품ID','카테고리키','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL'],
-    ['G01','shoes','Nike Air Force 1 250','나이키 에어포스 1 250','','',89000,''],
-    ['G02','shoes','Nike Air Force 1 260','나이키 에어포스 1 260','','',89000,''],
-    ['G03','shoes','Adidas Stan Smith 255','아디다스 스탄스미스 255','','',75000,''],
+    ['카테고리키','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL'],
+    ['shoes','Nike Air Force 1 250','나이키 에어포스 1 250','','',89000,''],
+    ['shoes','Nike Air Force 1 260','나이키 에어포스 1 260','','',89000,''],
+    ['shoes','Adidas Stan Smith 255','아디다스 스탄스미스 255','','',75000,''],
   ];
+  const note = wb.SheetNames;
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [8,10,25,25,20,20,10,40].map(w=>({wch:w}));
+  ws['!cols'] = [10,25,25,20,20,10,40].map(w=>({wch:w}));
+  // 안내 메모
+  ws['A1'].c = [{a:'Asia Mart', t:'상품ID는 자동 생성됩니다. 카테고리키만 입력하세요.\n예: shoes, frozen, noodle 등'}];
   XLSX.utils.book_append_sheet(wb, ws, '상품등록양식');
   XLSX.writeFile(wb, 'asia-mart-상품등록양식.xlsx');
   showToast('✅ 샘플 양식 다운로드 완료!');
@@ -716,50 +715,78 @@ async function uploadExcel(type) {
       const data = rows.slice(1).filter(r => r.some(c => c !== undefined && c !== ''));
 
       if (type === 'products') {
-        // 카탈로그에 상품 일괄 등록
+        // 카탈로그에 상품 일괄 등록 (ID 자동 생성)
         const catSnap = await db.ref('catalog').get();
         const catalog = catSnap.val() || {};
         const updates = {};
         let count = 0;
 
-        // 카테고리별로 그룹화
+        // 카테고리별로 그룹화 (컬럼: 카테고리키, 영문명, 한국명, 태국어명, 라오스어명, 가격, 이미지URL)
         const byCat = {};
         data.forEach(row => {
-          const id = String(row[0]||'').trim();
-          const catKey = String(row[1]||'').trim();
-          if (!id || !catKey) return;
+          const catKey = String(row[0]||'').trim();
+          if (!catKey) return;
           if (!byCat[catKey]) byCat[catKey] = [];
           byCat[catKey].push({
-            id, emoji: '🛒',
-            name_en: String(row[2]||'').trim(),
-            name_ko: String(row[3]||'').trim(),
-            name_th: String(row[4]||'').trim(),
-            name_lo: String(row[5]||'').trim(),
-            price1: parseInt(row[6])||0,
-            price2: 0, price3: 0,
-            image: String(row[7]||'').trim(),
-            images: row[7] ? [String(row[7]).trim()] : []
+            name_en: String(row[1]||'').trim(),
+            name_ko: String(row[2]||'').trim(),
+            name_th: String(row[3]||'').trim(),
+            name_lo: String(row[4]||'').trim(),
+            price1: parseInt(row[5])||0,
+            image: String(row[6]||'').trim(),
+            images: row[6] ? [String(row[6]).trim()] : []
           });
           count++;
         });
 
-        // 각 카테고리에 추가
-        for (const [catKey, items] of Object.entries(byCat)) {
+        // 각 카테고리에 자동 ID 부여 후 추가
+        for (const [catKey, newItems] of Object.entries(byCat)) {
           const existing = catalog[catKey]?.items || [];
-          // 기존 상품 ID 목록
-          const existingIds = existing.map(i => i.id);
-          items.forEach(item => {
-            const idx = existingIds.indexOf(item.id);
-            if (idx >= 0) existing[idx] = { ...existing[idx], ...item }; // 수정
-            else existing.push(item); // 추가
+          const catData = catalog[catKey] || {};
+
+          // 카테고리 prefix: label 첫 글자 또는 catKey 첫 글자 대문자
+          const label = typeof catData.label === 'string' ? catData.label : (catData.label?.ko || catKey);
+          const prefix = label.charAt(0).toUpperCase();
+
+          // 현재 최대 번호 계산
+          let maxNum = 0;
+          existing.forEach(item => {
+            const match = String(item.id).match(/\d+/);
+            if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
           });
+
+          // 카테고리 이모지
+          const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿', shoes:'👟' };
+          const emoji = catEmojis[catKey] || catData.emoji || '🛒';
+
+          // 새 상품에 ID 자동 부여
+          newItems.forEach(item => {
+            maxNum++;
+            const newId = prefix + String(maxNum).padStart(2, '0');
+            existing.push({
+              id: newId, emoji,
+              price2: 0, price3: 0,
+              ...item
+            });
+          });
+
           updates[`catalog/${catKey}/items`] = existing;
+
+          // 기본 할인율도 자동 등록
+          const discUpdates = {};
+          newItems.forEach((_, i) => {
+            const idx = existing.length - newItems.length + i;
+            const id = existing[idx]?.id;
+            if (id) discUpdates['discount/' + id] = { d2: 5, d3: 10 };
+          });
+          Object.assign(updates, discUpdates);
         }
 
         await db.ref().update(updates);
-        statusEl.textContent = `✅ ${count}개 상품 등록/수정 완료!`;
+        statusEl.textContent = `✅ ${count}개 상품 등록 완료! (ID 자동 생성)`;
         statusEl.style.color = '#2d7a4f';
         loadCatalogForAdmin();
+        autoFillId();
 
       } else if (type === 'stock') {
         const updates = {};
@@ -956,6 +983,7 @@ async function uploadEditImgs() {
 
 async function loadAll() {
   await buildAllOptions();
+  await loadCatSelect();
   await loadStock();
   await loadDiscount();
   await loadCatalogForAdmin();
@@ -963,6 +991,24 @@ async function loadAll() {
   await loadBest();
   await loadNew();
   await autoFillId();
+}
+
+async function loadCatSelect() {
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
+  const sel = document.getElementById('new-cat');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
+  ordered.forEach(key => {
+    const cat = data[key];
+    const label = getLabel(cat, key);
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
 }
 
 async function loadCatalogForAdmin() {
@@ -1225,21 +1271,23 @@ async function translateName() {
 }
 
 async function autoFillId() {
-  const cat = document.getElementById('new-cat').value.toLowerCase();
-  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials', f: 'veggie' };
-  const catKey = catMap[cat];
+  const catKey = document.getElementById('new-cat').value;
   if (!catKey) return;
 
   // Firebase에서 항상 최신 데이터 로드
-  const snap = await db.ref('catalog/' + catKey + '/items').get();
-  const items = snap.val() || [];
+  const snap = await db.ref('catalog/' + catKey).get();
+  const catData = snap.val() || {};
+  const items = catData.items || [];
+  const label = getLabel(catData, catKey);
+  const prefix = label.charAt(0).toUpperCase();
+
   let maxNum = 0;
   items.forEach(item => {
     const match = String(item.id).match(/\d+/);
     if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
   });
   const nextNum = maxNum + 1;
-  const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
+  const formatted = prefix + String(nextNum).padStart(2, '0');
   document.getElementById('new-id').value = formatted;
 }
 
@@ -1392,7 +1440,9 @@ const EMOJI_CANDIDATES = [
   '🥫','🧄','🧅','🌶️','🫙','🍯','🧂','🥚','🧆',
   '🧃','🥤','🍺','🧊','🥛','☕','🫖','🍵','🧋','💧',
   '🧴','🧼','🪥','🧹','🧺','🛒','🏠','💊','🪴','🌿',
-  '🥬','🥦','🍅','🥕','🧅','🌽','🥑','🍆','🫑','🍄'
+  '🥬','🥦','🍅','🥕','🧅','🌽','🥑','🍆','🫑','🍄',
+  '👟','👠','👡','👢','🥿','👞','👣','🩴','🥾','👒',
+  '👕','👗','👔','🧥','🧤','🧣','🎒','👜','💍','⌚'
 ];
 
 function buildEmojiPicker(currentEmoji) {
@@ -1513,7 +1563,7 @@ async function deleteProduct(catKey, itemId) {
   autoFillId();
 }
 
-function addProduct() {
+async function addProduct() {
   const id = document.getElementById('new-id').value.trim(); // 대소문자 그대로 유지
   const en = document.getElementById('new-en').value.trim();
   const ko = document.getElementById('new-ko').value.trim();
@@ -1526,12 +1576,14 @@ function addProduct() {
   if (!id) { alert('상품 ID를 입력해주세요.'); return; }
   if (!ko) { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
-  // 영문명이 없으면 한국어명으로 대체
   const finalEn = en || ko;
-  const cat = document.getElementById('new-cat').value;
-  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
-  const catKey = catMap[cat];
-  const emoji = { a:'🧊', b:'🍜', c:'🥫', d:'🧃', e:'🧴' }[cat] || '🛒';
+  const catKey = document.getElementById('new-cat').value;
+  if (!catKey) { alert('카테고리를 선택해주세요.'); return; }
+
+  // 카테고리 이모지 Firebase에서 가져오기
+  const catSnap = await db.ref('catalog/' + catKey).get();
+  const catData = catSnap.val() || {};
+  const emoji = typeof catData.emoji === 'string' ? catData.emoji : '🛒';
 
   // Firebase catalog에 바로 저장
   const newItem = {
