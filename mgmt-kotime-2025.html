@@ -424,6 +424,23 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="downloadSample()">📋 상품 등록 양식 다운로드</button>
       </div>
 
+      <!-- 일괄 재번역 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🌐 전체 상품 일괄 재번역</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:8px;">한국어명을 기준으로 영문명, 태국어명, 라오스어명을 Google 번역으로 일괄 업데이트합니다.</p>
+        <p style="font-size:12px;color:#c84b2f;margin-bottom:16px;">⚠️ 기존 번역이 덮어씌워집니다. 수동으로 수정한 번역도 초기화돼요.</p>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <select id="retranslate-cat" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+            <option value="all">전체 카테고리</option>
+          </select>
+          <button class="btn btn-primary" onclick="retranslateAll()">🌐 재번역 시작</button>
+        </div>
+        <div id="retranslate-status" style="font-size:13px;margin-top:12px;"></div>
+        <div id="retranslate-progress" style="margin-top:8px;background:#f0f0f0;border-radius:100px;height:8px;display:none;">
+          <div id="retranslate-bar" style="background:#c84b2f;height:8px;border-radius:100px;width:0%;transition:width 0.3s;"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -545,6 +562,18 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
 <script>
 const ADMIN_PW = "asia1234";
+const GOOGLE_TRANSLATE_KEY = 'AIzaSyATvGXEnesW4fCsEyals7qipskznXJvn6Q';
+
+async function googleTranslate(text, targetLang) {
+  const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: text, source: 'ko', target: targetLang, format: 'text' })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data.translations[0].translatedText;
+}
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PW) {
@@ -566,7 +595,7 @@ function switchTab(tab, triggerEl) {
   const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
-  if (tab === 'excel') {} // 엑셀 탭은 버튼 클릭으로 동작
+  if (tab === 'excel') loadRetranslateCatSelect();
 }
 
 function markChanged(id, type) {
@@ -842,6 +871,88 @@ async function uploadExcel(type) {
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+// ── 일괄 재번역 ──
+async function loadRetranslateCatSelect() {
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
+  const sel = document.getElementById('retranslate-cat');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">전체 카테고리</option>';
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...fixedOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!fixedOrder.includes(k)).sort()];
+  ordered.forEach(key => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = getLabel(data[key], key);
+    sel.appendChild(opt);
+  });
+}
+
+async function retranslateAll() {
+  const catKey = document.getElementById('retranslate-cat').value;
+  const status = document.getElementById('retranslate-status');
+  const progress = document.getElementById('retranslate-progress');
+  const bar = document.getElementById('retranslate-bar');
+
+  if (!confirm(`정말 재번역하시겠습니까?\n기존 번역이 덮어씌워집니다.`)) return;
+
+  status.textContent = '⏳ 카탈로그 로딩 중...';
+  status.style.color = '#888';
+  progress.style.display = 'block';
+  bar.style.width = '0%';
+
+  const snap = await db.ref('catalog').get();
+  const catalog = snap.val() || {};
+
+  // 대상 카테고리 결정
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const allKeys = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
+  const targetKeys = catKey === 'all' ? allKeys : [catKey];
+
+  // 전체 상품 수 계산
+  let totalItems = 0;
+  targetKeys.forEach(k => { totalItems += (catalog[k]?.items || []).length; });
+
+  let done = 0;
+  const updates = {};
+
+  for (const key of targetKeys) {
+    const cat = catalog[key];
+    if (!cat?.items) continue;
+
+    for (let i = 0; i < cat.items.length; i++) {
+      const item = cat.items[i];
+      const ko = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
+      if (!ko) { done++; continue; }
+
+      status.textContent = `⏳ 번역 중... (${done+1}/${totalItems}) ${ko}`;
+      bar.style.width = Math.round((done / totalItems) * 100) + '%';
+
+      try {
+        const [en, th, lo] = await Promise.all([
+          googleTranslate(ko, 'en'),
+          googleTranslate(ko, 'th'),
+          googleTranslate(ko, 'lo')
+        ]);
+        updates[`catalog/${key}/items/${i}/name_en`] = en;
+        updates[`catalog/${key}/items/${i}/name_th`] = th;
+        updates[`catalog/${key}/items/${i}/name_lo`] = lo;
+      } catch(e) {
+        console.error(`번역 실패: ${ko}`, e);
+      }
+      done++;
+      // API 과부하 방지
+      await new Promise(r => setTimeout(r, 100));
+    }
+  }
+
+  await db.ref().update(updates);
+  bar.style.width = '100%';
+  status.textContent = `✅ ${done}개 상품 재번역 완료!`;
+  status.style.color = '#2d7a4f';
+  showToast('✅ 재번역 완료!');
 }
 
 function showToast(msg) {
@@ -1343,40 +1454,19 @@ async function translateEditName() {
   status.style.color = '#888';
   status.textContent = '🤖 번역 중...';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: `아시아 마트 상품명을 영어, 태국어, 라오스어로 번역해줘.
-상품명: "${ko}"
-
-규칙:
-- 브랜드명(Nike, Adidas, Dove, Head&Shoulders 등)은 원문 그대로 유지
-- 운동화/신발 상품명은 영문 그대로 유지 (태국어/라오스어도 영문으로)
-- 한국어 식재료/식품명은 의미를 정확히 파악해서 번역 (예: 오리피=Duck Blood, 돼지껍데기=Pork Skin, 선지=Coagulated Blood, 꼬막=Cockle 등)
-- 동남아 식품 브랜드명(MAMA, WAI WAI 등)은 그대로 유지
-- 용량/크기(500g, 400ml 등)는 그대로 유지
-- 샴푸, 비누, 생활용품도 정확하게 번역
-- JSON만 출력 (설명 없이):
-{"en": "영어번역", "th": "태국어번역", "lo": "라오스어번역"}`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content[0].text.trim();
-    const json = JSON.parse(text.replace(/```json|```/g, '').trim());
-    document.getElementById('edit-en').value = json.en;
-    document.getElementById('edit-th').value = json.th;
-    document.getElementById('edit-lo').value = json.lo;
+    const [en, th, lo] = await Promise.all([
+      googleTranslate(ko, 'en'),
+      googleTranslate(ko, 'th'),
+      googleTranslate(ko, 'lo')
+    ]);
+    document.getElementById('edit-en').value = en;
+    document.getElementById('edit-th').value = th;
+    document.getElementById('edit-lo').value = lo;
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
     console.error(e);
-    status.textContent = '❌ 번역 실패. 직접 입력해주세요.';
+    status.textContent = '❌ 번역 실패: ' + e.message;
     status.style.color = '#c84b2f';
   }
 }
@@ -1389,43 +1479,21 @@ async function translateName() {
   status.style.color = '#888';
   status.textContent = '🤖 번역 중...';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: `아시아 마트 상품명을 영어, 태국어, 라오스어로 번역해줘.
-상품명: "${ko}"
-
-규칙:
-- 브랜드명(Nike, Adidas, Dove, Head&Shoulders 등)은 원문 그대로 유지
-- 운동화/신발 상품명은 영문 그대로 유지 (태국어/라오스어도 영문으로)
-- 한국어 식재료/식품명은 의미를 정확히 파악해서 번역 (예: 오리피=Duck Blood, 돼지껍데기=Pork Skin, 선지=Coagulated Blood, 꼬막=Cockle 등)
-- 동남아 식품 브랜드명(MAMA, WAI WAI 등)은 그대로 유지
-- 용량/크기(500g, 400ml 등)는 그대로 유지
-- 샴푸, 비누, 생활용품도 정확하게 번역
-- JSON만 출력 (설명 없이):
-{"en": "영어번역", "th": "태국어번역", "lo": "라오스어번역"}`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content[0].text.trim();
-    const json = JSON.parse(text.replace(/```json|```/g, '').trim());
-
+    const [en, th, lo] = await Promise.all([
+      googleTranslate(ko, 'en'),
+      googleTranslate(ko, 'th'),
+      googleTranslate(ko, 'lo')
+    ]);
     const id = document.getElementById('new-id').value.trim().toUpperCase();
     const prefix = id ? id + '. ' : '';
-    document.getElementById('new-en').value = prefix + json.en;
-    document.getElementById('new-th').value = prefix + json.th;
-    document.getElementById('new-lo').value = prefix + json.lo;
+    document.getElementById('new-en').value = prefix + en;
+    document.getElementById('new-th').value = prefix + th;
+    document.getElementById('new-lo').value = prefix + lo;
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
     console.error(e);
-    status.textContent = '❌ 번역 실패. 직접 입력해주세요.';
+    status.textContent = '❌ 번역 실패: ' + e.message;
     status.style.color = '#c84b2f';
   }
 }
