@@ -2248,17 +2248,16 @@ loadBestFromFirebase();
 loadNewFromFirebase();
 
 // ===== PWA =====
-// 서비스워커 등록 + 항상 최신 버전 강제 로드
+// 서비스워커 등록 + 백그라운드에서 캐시 삭제
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async function() {
-    try {
-      // 기존 캐시 전부 삭제
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
-      // 서비스워커 등록 및 즉시 업데이트
-      const reg = await navigator.serviceWorker.register('/asia-mart/sw.js');
-      await reg.update();
-    } catch(e) {}
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/asia-mart/sw.js')
+      .then(reg => reg.update())
+      .catch(() => {});
+    // 백그라운드에서 조용히 캐시 삭제
+    if ('caches' in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+    }
   });
 }
 

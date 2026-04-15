@@ -1995,11 +1995,6 @@ async function saveNew() {
   setTimeout(() => switchTab('stock'), 1000);
 }
 
-// 접속할 때마다 캐시 전부 삭제
-if ('caches' in window) {
-  caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-}
-
 </script>
 </body>
 </html>
