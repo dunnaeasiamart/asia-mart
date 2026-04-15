@@ -577,13 +577,26 @@ async function googleTranslate(text, targetLang) {
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PW) {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('main-page').style.display = 'block';
-    setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
+    sessionStorage.setItem('admin_logged_in', 'true');
+    showMainPage();
   } else {
     alert('비밀번호가 틀렸습니다.');
   }
 }
+
+function showMainPage() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('main-page').style.display = 'block';
+  setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
+}
+
+// 페이지 로드 시 로그인 상태 자동 복원
+window.addEventListener('load', function() {
+  if (sessionStorage.getItem('admin_logged_in') === 'true') {
+    showMainPage();
+  }
+});
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
 });
