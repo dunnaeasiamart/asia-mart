@@ -6,6 +6,17 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<script>
+// 페이지 로드 즉시 로그인 상태 확인 (깜빡임 방지)
+if (localStorage.getItem('admin_logged_in') === 'true') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var lp = document.getElementById('login-page');
+    var mp = document.getElementById('main-page');
+    if (lp) lp.style.display = 'none';
+    if (mp) mp.style.display = 'block';
+  });
+}
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -1077,14 +1088,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
 
-// 로그인 상태 자동 복원
+// 로그인 상태면 loadAll 실행
 if (localStorage.getItem('admin_logged_in') === 'true') {
-  // DOM이 이미 로드됐으면 바로, 아니면 이벤트 대기
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', showMainPage);
-  } else {
-    showMainPage();
-  }
+  window.addEventListener('load', function() {
+    if (window.loadAll) window.loadAll();
+    setTimeout(autoFillId, 2000);
+    restoreProductForm();
+  });
 }
 
 // ── 이미지 업로드 (여러 장) ──
