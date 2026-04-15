@@ -1126,10 +1126,14 @@ function compressImage(file) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
       const canvas = document.createElement('canvas');
-      canvas.width  = img.width  * 0.3;
-      canvas.height = img.height * 0.3;
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       URL.revokeObjectURL(url);
       canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.85);
     };
