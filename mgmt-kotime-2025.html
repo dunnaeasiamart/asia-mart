@@ -263,13 +263,20 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="number" id="new-price" placeholder="5000">
         </div>
         <div class="form-full">
-          <label>이미지 (여러 장 선택 가능)</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label>이미지</label>
+          <!-- 사진 업로드 -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
             <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewNewImgs(this)" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
             <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="uploadNewImgs()">📤 업로드</button>
           </div>
-          <div id="new-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
-          <div id="new-img-status" style="font-size:12px;color:#888;margin-top:4px;"></div>
+          <!-- URL 직접 입력 -->
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <input type="text" id="new-img-url" placeholder="🔗 이미지 URL 직접 입력 후 추가" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="addNewImgUrl()">➕ 추가</button>
+          </div>
+          <!-- 미리보기 + 상태 -->
+          <div id="new-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;"></div>
+          <div id="new-img-status" style="font-size:12px;color:#888;"></div>
           <input type="hidden" id="new-img">
         </div>
       </div>
@@ -305,7 +312,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <th style="padding:10px 12px;font-size:12px;color:#888;">이름 (label)</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">이모지</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">상품수</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">수정</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">상태</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:140px;">관리</th>
         </tr></thead>
         <tbody id="category-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
@@ -475,14 +483,21 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <input type="number" id="edit-price">
       </div>
       <div class="full">
-        <label>이미지 (여러 장 선택 가능)</label>
+        <label>이미지</label>
+        <!-- 사진 업로드 -->
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
           <input type="file" id="edit-img-file" accept="image/*" multiple onchange="previewEditImgs(this)" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
           <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="uploadEditImgs()">📤 업로드</button>
         </div>
-        <div id="edit-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
-        <div id="edit-img-status" style="font-size:12px;color:#888;margin-bottom:8px;"></div>
-        <input type="text" id="edit-img" placeholder="이미지 URL (업로드 후 자동입력)" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+        <!-- URL 직접 입력 -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <input type="text" id="edit-img-url" placeholder="🔗 이미지 URL 직접 입력 후 추가" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="addEditImgUrl()">➕ 추가</button>
+        </div>
+        <!-- 미리보기 + 상태 -->
+        <div id="edit-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;"></div>
+        <div id="edit-img-status" style="font-size:12px;color:#888;"></div>
+        <input type="hidden" id="edit-img">
       </div>
     </div>
     <div class="modal-btns">
@@ -902,16 +917,50 @@ const storage = firebase.storage();
 let _newImgUrls = [];
 let _editImgUrls = [];
 
-function previewNewImgs(input) {
-  const preview = document.getElementById('new-img-preview');
-  preview.innerHTML = '';
-  _newImgUrls = [];
-  Array.from(input.files).forEach(file => {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;';
-    preview.appendChild(img);
+// ── 이미지 압축 (30% 크기로 줄이기) ──
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.width  * 0.3;
+      canvas.height = img.height * 0.3;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.85);
+    };
+    img.src = url;
   });
+}
+
+// ── 이미지 목록 렌더링 (썸네일 + 삭제 버튼) ──
+function renderImgPreview(containerId, hiddenId, urls) {
+  const preview = document.getElementById(containerId);
+  preview.innerHTML = '';
+  urls.forEach((url, i) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;display:inline-block;';
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;';
+    const del = document.createElement('button');
+    del.textContent = '❌';
+    del.type = 'button';
+    del.style.cssText = 'position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #ddd;border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
+    del.onclick = () => {
+      urls.splice(i, 1);
+      document.getElementById(hiddenId).value = JSON.stringify(urls);
+      renderImgPreview(containerId, hiddenId, urls);
+    };
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    preview.appendChild(wrap);
+  });
+}
+
+// ── 새 상품 이미지 ──
+function previewNewImgs(input) {
   document.getElementById('new-img-status').textContent = `${input.files.length}장 선택됨 — 업로드 버튼을 눌러주세요`;
 }
 
@@ -920,36 +969,58 @@ async function uploadNewImgs() {
   if (!files.length) { alert('이미지를 선택해주세요.'); return; }
   const status = document.getElementById('new-img-status');
   status.style.color = '#888';
-  _newImgUrls = [];
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+
   for (let i = 0; i < files.length; i++) {
-    status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
     try {
-      const fileName = `products/${Date.now()}_${files[i].name}`;
+      const compressed = await compressImage(files[i]);
+      const fileName = `products/${Date.now()}_${i}.jpg`;
       const ref = storage.ref(fileName);
-      await ref.put(files[i]);
+      const task = ref.put(compressed, { contentType: 'image/jpeg' });
+      await new Promise((resolve, reject) => {
+        task.on('state_changed',
+          snap => {
+            const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
+            status.textContent = `⏳ 업로드 중... (${i+1}/${files.length}) ${pct}%`;
+          },
+          reject, resolve
+        );
+      });
       const url = await ref.getDownloadURL();
-      _newImgUrls.push(url);
+      urls.push(url);
     } catch(e) {
-      status.textContent = `❌ ${i+1}번째 업로드 실패`;
+      console.error(e);
+      status.textContent = `❌ ${i+1}번째 업로드 실패: ${e.message}`;
       status.style.color = '#c84b2f';
       return;
     }
   }
-  document.getElementById('new-img').value = JSON.stringify(_newImgUrls);
-  status.textContent = `✅ ${_newImgUrls.length}장 업로드 완료!`;
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장`;
   status.style.color = '#2d7a4f';
+  _newImgUrls = urls;
 }
 
+function addNewImgUrl() {
+  const input = document.getElementById('new-img-url');
+  const url = input.value.trim();
+  if (!url || !url.startsWith('http')) { alert('올바른 URL을 입력해주세요.'); return; }
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+  urls.push(url);
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  document.getElementById('new-img-status').textContent = `✅ 총 ${urls.length}장`;
+  document.getElementById('new-img-status').style.color = '#2d7a4f';
+  input.value = '';
+  _newImgUrls = urls;
+}
+
+// ── 수정 모달 이미지 ──
 function previewEditImgs(input) {
-  const preview = document.getElementById('edit-img-preview');
-  preview.innerHTML = '';
-  _editImgUrls = [];
-  Array.from(input.files).forEach(file => {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;';
-    preview.appendChild(img);
-  });
   document.getElementById('edit-img-status').textContent = `${input.files.length}장 선택됨 — 업로드 버튼을 눌러주세요`;
 }
 
@@ -958,24 +1029,54 @@ async function uploadEditImgs() {
   if (!files.length) { alert('이미지를 선택해주세요.'); return; }
   const status = document.getElementById('edit-img-status');
   status.style.color = '#888';
-  _editImgUrls = [];
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+
   for (let i = 0; i < files.length; i++) {
-    status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
     try {
-      const fileName = `products/${Date.now()}_${files[i].name}`;
+      const compressed = await compressImage(files[i]);
+      const fileName = `products/${Date.now()}_${i}.jpg`;
       const ref = storage.ref(fileName);
-      await ref.put(files[i]);
+      const task = ref.put(compressed, { contentType: 'image/jpeg' });
+      await new Promise((resolve, reject) => {
+        task.on('state_changed',
+          snap => {
+            const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
+            status.textContent = `⏳ 업로드 중... (${i+1}/${files.length}) ${pct}%`;
+          },
+          reject, resolve
+        );
+      });
       const url = await ref.getDownloadURL();
-      _editImgUrls.push(url);
+      urls.push(url);
     } catch(e) {
-      status.textContent = `❌ ${i+1}번째 업로드 실패`;
+      console.error(e);
+      status.textContent = `❌ ${i+1}번째 업로드 실패: ${e.message}`;
       status.style.color = '#c84b2f';
       return;
     }
   }
-  document.getElementById('edit-img').value = JSON.stringify(_editImgUrls);
-  status.textContent = `✅ ${_editImgUrls.length}장 업로드 완료!`;
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장`;
   status.style.color = '#2d7a4f';
+  _editImgUrls = urls;
+}
+
+function addEditImgUrl() {
+  const input = document.getElementById('edit-img-url');
+  const url = input.value.trim();
+  if (!url || !url.startsWith('http')) { alert('올바른 URL을 입력해주세요.'); return; }
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+  urls.push(url);
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  document.getElementById('edit-img-status').textContent = `✅ 총 ${urls.length}장`;
+  document.getElementById('edit-img-status').style.color = '#2d7a4f';
+  input.value = '';
+  _editImgUrls = urls;
 }
 
 async function loadAll() {
@@ -1327,11 +1428,10 @@ async function openEditModal(catKey, itemId, idx) {
   document.getElementById('edit-price').value = item.price1 || '';
   // 기존 이미지 표시
   const existingImgs = item.images || (item.image ? [item.image] : []);
-  const editPreview = document.getElementById('edit-img-preview');
-  editPreview.innerHTML = existingImgs.map(src =>
-    `<img src="${src}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`
-  ).join('');
-  document.getElementById('edit-img').value = existingImgs.length ? JSON.stringify(existingImgs) : '';
+  document.getElementById('edit-img').value = existingImgs.length ? JSON.stringify(existingImgs) : '[]';
+  renderImgPreview('edit-img-preview', 'edit-img', [...existingImgs]);
+  document.getElementById('edit-img-status').textContent = existingImgs.length ? `✅ 총 ${existingImgs.length}장` : '';
+  _editImgUrls = [...existingImgs];
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -1486,16 +1586,29 @@ async function loadCategories() {
     const count = (cat.items || []).length;
     const label = getLabel(cat, key);
     const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
-    tbody.innerHTML += `<tr>
+    const visible = cat.visible !== false; // 기본값 true
+    tbody.innerHTML += `<tr style="opacity:${visible ? 1 : 0.5}">
       <td style="padding:10px 12px;font-size:12px;color:#888;">${key}</td>
       <td style="padding:10px 12px;font-size:13px;">${label}</td>
       <td style="padding:10px 12px;font-size:18px;">${emoji}</td>
       <td style="padding:10px 12px;font-size:13px;color:#888;">${count}개</td>
-      <td style="padding:10px 6px;">
+      <td style="padding:10px 12px;font-size:12px;">
+        <span style="background:${visible ? '#e8f5e9' : '#fde8e8'};color:${visible ? '#2d7a4f' : '#c84b2f'};padding:3px 10px;border-radius:100px;font-weight:600;">
+          ${visible ? '👁️ 표시중' : '🙈 숨김'}
+        </span>
+      </td>
+      <td style="padding:10px 6px;display:flex;gap:6px;">
+        <button onclick="toggleCatVisible('${key}', ${visible})" style="background:${visible ? '#888' : '#2d7a4f'};border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">${visible ? '🙈 숨기기' : '👁️ 보이기'}</button>
         <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
       </td>
     </tr>`;
   });
+}
+
+async function toggleCatVisible(key, currentVisible) {
+  await db.ref('catalog/' + key + '/visible').set(!currentVisible);
+  showToast(!currentVisible ? `✅ ${key} 카테고리 표시됨` : `🙈 ${key} 카테고리 숨김`);
+  loadCategories();
 }
 
 async function openEditCatModal(key) {
