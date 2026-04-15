@@ -277,8 +277,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <label>이미지</label>
           <!-- 사진 업로드 -->
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
-            <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewNewImgs(this)" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="uploadNewImgs()">📤 업로드</button>
+            <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewAndUploadNewImgs(this)" style="display:none;">
+            <input type="file" id="new-img-camera" accept="image/*" capture="environment" onchange="previewAndUploadNewImgs(this)" style="display:none;">
+            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="document.getElementById('new-img-file').click()">🖼️ 갤러리</button>
+            <button class="btn btn-secondary" style="background:#1a1814;color:#fff;white-space:nowrap;" onclick="document.getElementById('new-img-camera').click()">📷 사진찍기</button>
           </div>
           <!-- URL 직접 입력 -->
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
@@ -518,8 +520,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <label>이미지</label>
         <!-- 사진 업로드 -->
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
-          <input type="file" id="edit-img-file" accept="image/*" multiple onchange="previewEditImgs(this)" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="uploadEditImgs()">📤 업로드</button>
+          <input type="file" id="edit-img-file" accept="image/*" multiple onchange="previewAndUploadEditImgs(this)" style="display:none;">
+          <input type="file" id="edit-img-camera" accept="image/*" capture="environment" onchange="previewAndUploadEditImgs(this)" style="display:none;">
+          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="document.getElementById('edit-img-file').click()">🖼️ 갤러리</button>
+          <button class="btn btn-secondary" type="button" style="background:#1a1814;color:#fff;white-space:nowrap;" onclick="document.getElementById('edit-img-camera').click()">📷 사진찍기</button>
         </div>
         <!-- URL 직접 입력 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
@@ -1159,6 +1163,66 @@ function renderImgPreview(containerId, hiddenId, urls) {
 }
 
 // ── 새 상품 이미지 ──
+// ── 새 상품 - 갤러리/카메라 선택 후 바로 업로드 ──
+async function previewAndUploadNewImgs(input) {
+  const files = input.files;
+  if (!files.length) return;
+  const status = document.getElementById('new-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      status.textContent = `❌ 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 완료!`;
+  status.style.color = '#2d7a4f';
+  _newImgUrls = urls;
+  input.value = ''; // input 초기화 (같은 사진 다시 찍어도 작동)
+}
+
+// ── 수정 모달 - 갤러리/카메라 선택 후 바로 업로드 ──
+async function previewAndUploadEditImgs(input) {
+  const files = input.files;
+  if (!files.length) return;
+  const status = document.getElementById('edit-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      status.textContent = `❌ 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 완료!`;
+  status.style.color = '#2d7a4f';
+  _editImgUrls = urls;
+  input.value = '';
+}
+
 function previewNewImgs(input) {
   document.getElementById('new-img-status').textContent = `${input.files.length}장 선택됨 — 업로드 버튼을 눌러주세요`;
 }
@@ -1292,6 +1356,12 @@ async function loadCatalogForAdmin() {
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+
+  // 로그인 상태 유지 보장
+  if (localStorage.getItem('admin_logged_in') === 'true') {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('main-page').style.display = 'block';
+  }
 
   // A→B→C 순서 + 새로 추가된 카테고리도 포함
   const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
