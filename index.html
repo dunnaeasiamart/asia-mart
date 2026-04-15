@@ -524,10 +524,10 @@
 
   /* ORDER MODAL */
   /* 이미지 슬라이드쇼 */
-  .thumb-slider { position:relative; width:120px; height:120px; overflow:hidden; border-radius:10px; }
+  .thumb-slider { position:relative; width:80px; height:80px; overflow:hidden; border-radius:8px; }
   .thumb-slides { display:flex; transition:transform 0.3s; height:100%; }
-  .thumb-slide { min-width:120px; height:120px; flex-shrink:0; }
-  .thumb-slide img { width:100%; height:100%; object-fit:contain; padding:4px; }
+  .thumb-slide { min-width:80px; height:80px; flex-shrink:0; }
+  .thumb-slide img { width:100%; height:100%; object-fit:contain; padding:2px; }
   .thumb-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
   .thumb-nav.prev { left:2px; }
   .thumb-nav.next { right:2px; }
@@ -1088,7 +1088,7 @@ function thumbMove(e, id, dir) {
   if (!slides) return;
   const count = slides.children.length;
   thumbIndexes[id] = ((thumbIndexes[id] || 0) + dir + count) % count;
-  slides.style.transform = `translateX(-${thumbIndexes[id] * 120}px)`;
+  slides.style.transform = `translateX(-${thumbIndexes[id] * 80}px)`;
   if (dots) {
     Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === thumbIndexes[id]));
   }
@@ -1127,7 +1127,6 @@ function renderLightbox() {
   dots.innerHTML = _lbImages.map((_, i) =>
     `<div class="lightbox-dot ${i === _lbIdx ? 'active' : ''}" onclick="lightboxGo(${i})"></div>`
   ).join('');
-  // 이미지 1장이면 nav 숨기기
   document.querySelectorAll('.lightbox-nav').forEach(n => n.style.display = _lbImages.length > 1 ? '' : 'none');
 }
 
@@ -1135,6 +1134,23 @@ function lightboxGo(idx) {
   _lbIdx = idx;
   renderLightbox();
 }
+
+// 라이트박스 터치 스와이프
+(function() {
+  let startX = 0, startY = 0;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      lightboxMove(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+})();
 
 // ── 검색 ──
 let _searchOpen = false;
