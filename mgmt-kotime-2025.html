@@ -587,8 +587,51 @@ function doLogin() {
 function showMainPage() {
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('main-page').style.display = 'block';
-  setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
+  setTimeout(() => {
+    if (window.loadAll) window.loadAll();
+    setTimeout(() => {
+      autoFillId();
+      restoreProductForm(); // 임시저장 복원
+    }, 2000);
+  }, 500);
 }
+
+// 상품 입력 내용 임시저장
+function saveProductForm() {
+  const fields = ['new-ko','new-en','new-th','new-lo','new-price','new-cat'];
+  const data = {};
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) data[f] = el.value;
+  });
+  localStorage.setItem('product_form_tmp', JSON.stringify(data));
+}
+
+// 상품 입력 내용 복원
+function restoreProductForm() {
+  try {
+    const saved = localStorage.getItem('product_form_tmp');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    // 내용이 있을 때만 복원
+    const hasContent = Object.values(data).some(v => v && v.trim());
+    if (!hasContent) return;
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    });
+  } catch(e) {}
+}
+
+// 상품 입력 필드 변경 시 자동저장
+document.addEventListener('input', function(e) {
+  if (['new-ko','new-en','new-th','new-lo','new-price'].includes(e.target.id)) {
+    saveProductForm();
+  }
+});
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'new-cat') saveProductForm();
+});
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
@@ -1034,11 +1077,14 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
 
-// 로그인 상태 자동 복원 (Firebase 초기화 직후)
+// 로그인 상태 자동 복원
 if (localStorage.getItem('admin_logged_in') === 'true') {
-  document.addEventListener('DOMContentLoaded', function() {
+  // DOM이 이미 로드됐으면 바로, 아니면 이벤트 대기
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showMainPage);
+  } else {
     showMainPage();
-  });
+  }
 }
 
 // ── 이미지 업로드 (여러 장) ──
@@ -1858,6 +1904,7 @@ async function addProduct() {
       return db.ref('discount/' + id).set({ d2: defaultD2, d3: defaultD3 });
     }).then(() => {
       showToast('✅ 상품 추가 완료!');
+      localStorage.removeItem('product_form_tmp'); // 임시저장 삭제
       // 필드 초기화
       ['new-en','new-ko','new-th','new-lo','new-price','new-img','new-img-url'].forEach(f => {
         const el = document.getElementById(f);
