@@ -577,7 +577,7 @@ async function googleTranslate(text, targetLang) {
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PW) {
-    sessionStorage.setItem('admin_logged_in', 'true');
+    localStorage.setItem('admin_logged_in', 'true');
     showMainPage();
   } else {
     alert('비밀번호가 틀렸습니다.');
@@ -589,13 +589,6 @@ function showMainPage() {
   document.getElementById('main-page').style.display = 'block';
   setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
 }
-
-// 페이지 로드 시 로그인 상태 자동 복원
-window.addEventListener('load', function() {
-  if (sessionStorage.getItem('admin_logged_in') === 'true') {
-    showMainPage();
-  }
-});
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
@@ -1040,6 +1033,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
+
+// 로그인 상태 자동 복원 (Firebase 초기화 직후)
+if (localStorage.getItem('admin_logged_in') === 'true') {
+  document.addEventListener('DOMContentLoaded', function() {
+    showMainPage();
+  });
+}
 
 // ── 이미지 업로드 (여러 장) ──
 let _newImgUrls = [];
@@ -1859,11 +1859,16 @@ async function addProduct() {
     }).then(() => {
       showToast('✅ 상품 추가 완료!');
       // 필드 초기화
-      ['new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => {
+      ['new-en','new-ko','new-th','new-lo','new-price','new-img','new-img-url'].forEach(f => {
         const el = document.getElementById(f);
         if (el) el.value = '';
       });
+      // 이미지 미리보기 초기화
+      document.getElementById('new-img-preview').innerHTML = '';
+      document.getElementById('new-img-status').textContent = '';
+      document.getElementById('new-img-file').value = '';
       document.getElementById('translate-status').style.display = 'none';
+      _newImgUrls = [];
       // 카탈로그 새로고침 완료 후 다음 ID 자동 입력
       setTimeout(() => {
         loadCatalogForAdmin().then(() => autoFillId());
