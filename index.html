@@ -1320,11 +1320,11 @@ function resetQty(id) {
 
 function getItemName(item) {
   // 신발 카테고리는 언어 관계없이 항상 영문명
-  if (item._catKey === 'shoes') return item.name_en || '';
-  if (currentLang === 'ko') return item.name_ko || item.name_en || '';
-  if (currentLang === 'th') return item.name_th || item.name_en || '';
-  if (currentLang === 'lo') return item.name_lo || item.name_th || item.name_en || '';
-  return item.name_en || item.name_ko || '';
+  if (item._catKey === 'shoes') return (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'ko') return (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'th') return (item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'lo') return (item.name_lo || item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  return (item.name_en || item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
 }
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
@@ -1889,6 +1889,32 @@ window.bestIds = bestIds;
 let newIds = []; // 신상품 목록 - Firebase에서 불러옴
 window.newIds = newIds;
 
+// 상품 카테고리로 이동 + 스크롤
+function goToItem(id) {
+  const entry = Object.entries(catalog).find(([k,v]) => v.items.some(p => p.id === id));
+  if (!entry) return;
+  const catKey = entry[0];
+  const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
+
+  // 검색창 열려있으면 닫기
+  if (_searchOpen) toggleSearch();
+
+  // 탭 전환
+  if (tabBtn) switchTab(tabBtn, catKey);
+  else { currentTab = catKey; renderTab(catKey); }
+
+  // 해당 상품으로 스크롤
+  setTimeout(() => {
+    const card = document.getElementById('card-' + id);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 잠깐 하이라이트
+      card.style.outline = '3px solid var(--accent)';
+      setTimeout(() => card.style.outline = '', 1500);
+    }
+  }, 300);
+}
+
 function renderNew() {
   const container = document.getElementById('new-scroll');
   const section = document.getElementById('new-section');
@@ -1920,16 +1946,7 @@ function renderNew() {
       </div>`;
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('best-qty-btn')) return;
-      const cat = Object.entries(catalog).find(([k,v]) => v.items.some(i => i.id === id));
-      if (cat) {
-        closeModal();
-        const tabBtn = document.querySelector(`.tab[onclick*="${cat[0]}"]`);
-        if (tabBtn) { switchTab(tabBtn, cat[0]); }
-        setTimeout(() => {
-          const mainCard = document.getElementById('card-' + id);
-          if (mainCard) mainCard.scrollIntoView({behavior:'smooth', block:'center'});
-        }, 200);
-      }
+      goToItem(id);
     });
     container.appendChild(card);
   });
@@ -1981,15 +1998,7 @@ function renderBest() {
     // 클릭하면 해당 카테고리 탭으로 이동
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('best-qty-btn')) return;
-      const cat = Object.entries(catalog).find(([k,v]) => v.items.some(p => p.id === id));
-      if (cat) {
-        const tabBtn = document.querySelector(`[onclick*="'${cat[0]}'"]`);
-        if (tabBtn) { switchTab(tabBtn, cat[0]); tabBtn.scrollIntoView({behavior:'smooth'}); }
-        setTimeout(() => {
-          const mainCard = document.getElementById('card-' + id);
-          if (mainCard) mainCard.scrollIntoView({behavior:'smooth', block:'center'});
-        }, 200);
-      }
+      goToItem(id);
     });
 
     container.appendChild(card);
