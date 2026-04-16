@@ -950,13 +950,21 @@ function setLang(lang) {
 
 // 카테고리명 다국어 매핑
 const CAT_LABELS = {
-  frozen:     { en: 'A Frozen Food',     th: 'A อาหารแช่แข็ง',   lo: 'A ອາຫານແຊ່ແຂງ',   ko: 'A 냉동, 냉장 음식' },
-  noodle:     { en: 'B Noodles',         th: 'B เส้นก๋วยเตี๋ยว', lo: 'B ເສັ້ນກ໋ວຍເຕັ້ຍວ', ko: 'B 면 종류' },
-  sauce:      { en: 'C Sauces',          th: 'C ซอสต่างๆ',       lo: 'C ຊອດຕ່າງໆ',       ko: 'C 각종 소스' },
-  other:      { en: 'D Drinks & More',   th: 'D เครื่องดื่ม',    lo: 'D ເຄື່ອງດື່ມ',     ko: 'D 음료 및 기타' },
-  essentials: { en: 'E Daily Essentials',th: 'E สินค้าอุปโภค',   lo: 'E ສິນຄ້າໃຊ້ສອຍ',   ko: 'E 생활용품' },
-  veggie:     { en: 'F Vegetables',      th: 'F ผักและผลไม้',    lo: 'F ຜັກ ແລະ ຜົນໄມ້',  ko: 'F 농산물/채소' },
-  shoes:      { en: 'G Shoes',           th: 'G รองเท้า',        lo: 'G ເກີບ',            ko: 'G 운동화' },
+  frozen:                { en: 'A Frozen & Refrigerated', th: 'A อาหารแช่แข็ง/แช่เย็น',  lo: 'A ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: 'A 냉동 및 냉장' },
+  noodle:                { en: 'B Noodles',               th: 'B เส้นก๋วยเตี๋ยว',         lo: 'B ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: 'B 면' },
+  sauce:                 { en: 'C Sauces & Seasonings',   th: 'C ซอสและเครื่องปรุง',      lo: 'C ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: 'C 소스 및 조미료' },
+  sauce_liquid:          { en: 'C Sauces & Seasonings',   th: 'C ซอสและเครื่องปรุง',      lo: 'C ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: 'C 소스 및 조미료' },
+  spice:                 { en: 'D Spices & Dried Goods',  th: 'D เครื่องเทศและของแห้ง',   lo: 'D ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: 'D 향신료 및 건조식품' },
+  other:                 { en: 'D Spices & Dried Goods',  th: 'D เครื่องเทศและของแห้ง',   lo: 'D ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: 'D 향신료 및 건조식품' },
+  veggie:                { en: 'E Produce & Processed',   th: 'E ผักและผลิตภัณฑ์',        lo: 'E ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: 'E 농산물 및 가공품' },
+  produce:               { en: 'E Produce & Processed',   th: 'E ผักและผลิตภัณฑ์',        lo: 'E ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: 'E 농산물 및 가공품' },
+  drinks:                { en: 'F Drinks & Snacks',       th: 'F เครื่องดื่มและขนม',      lo: 'F ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: 'F 음료 및 스넥' },
+  drinks_snacks:         { en: 'F Drinks & Snacks',       th: 'F เครื่องดื่มและขนม',      lo: 'F ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: 'F 음료 및 스넥' },
+  essentials:            { en: 'G Daily Essentials',      th: 'G สินค้าอุปโภค',           lo: 'G ສິນຄ້າໃຊ້ສອຍ',           ko: 'G 생활용품' },
+  shoes:                 { en: 'H Shoes & Electronics',   th: 'H รองเท้าและอิเล็กทรอนิกส์', lo: 'H ເກີບ ແລະ ອີເລັກໂທຣນິກ', ko: 'H 신발 및 소형가전' },
+  'cigarettes&lighters': { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
+  cigarettes_lighters:   { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
+  tobacco:               { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
 };
 
 function getCatLabel(cat, catKey, lang) {

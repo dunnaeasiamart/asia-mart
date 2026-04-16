@@ -1656,6 +1656,27 @@ async function translateName() {
   }
 }
 
+// 카테고리 prefix 매핑 (한글 label 첫글자 대신 알파벳 사용)
+const CAT_PREFIX = {
+  frozen: 'A',
+  noodle: 'B',
+  sauce: 'C', sauce_liquid: 'C',
+  other: 'D', spice: 'D',
+  veggie: 'E', produce: 'E',
+  drinks: 'F', drinks_snacks: 'F',
+  essentials: 'G',
+  shoes: 'H',
+  tobacco: 'I', cigarettes_lighters: 'I', 'cigarettes&lighters': 'I'
+};
+
+function getCatPrefix(catKey, label) {
+  if (CAT_PREFIX[catKey]) return CAT_PREFIX[catKey];
+  // label 영문 첫 글자 (A~Z)
+  const match = (label || '').match(/[A-Za-z]/);
+  if (match) return match[0].toUpperCase();
+  return catKey.charAt(0).toUpperCase();
+}
+
 async function autoFillEditId() {
   const catKey = document.getElementById('edit-cat').value;
   if (!catKey) return;
@@ -1663,35 +1684,29 @@ async function autoFillEditId() {
   const catData = snap.val() || {};
   const items = catData.items || [];
   const label = getLabel(catData, catKey);
-  const prefix = label.charAt(0).toUpperCase();
+  const prefix = getCatPrefix(catKey, label);
   let maxNum = 0;
   items.forEach(item => {
     const match = String(item.id).match(/\d+/);
     if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
   });
-  const nextNum = maxNum + 1;
-  document.getElementById('edit-id').value = prefix + String(nextNum).padStart(2, '0');
+  document.getElementById('edit-id').value = prefix + String(maxNum + 1).padStart(2, '0');
 }
 
 async function autoFillId() {
   const catKey = document.getElementById('new-cat').value;
   if (!catKey) return;
-
-  // Firebase에서 항상 최신 데이터 로드
   const snap = await db.ref('catalog/' + catKey).get();
   const catData = snap.val() || {};
   const items = catData.items || [];
   const label = getLabel(catData, catKey);
-  const prefix = label.charAt(0).toUpperCase();
-
+  const prefix = getCatPrefix(catKey, label);
   let maxNum = 0;
   items.forEach(item => {
     const match = String(item.id).match(/\d+/);
     if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
   });
-  const nextNum = maxNum + 1;
-  const formatted = prefix + String(nextNum).padStart(2, '0');
-  document.getElementById('new-id').value = formatted;
+  document.getElementById('new-id').value = prefix + String(maxNum + 1).padStart(2, '0');
 }
 
 // ── 상품 수정 모달 ──
