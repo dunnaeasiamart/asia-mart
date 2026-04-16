@@ -1323,7 +1323,7 @@ function renderTab(tab) {
 
   const cat = catalog[tab];
   const section = document.createElement('div');
-  const catLabel = typeof cat.label === 'object' ? cat.label[currentLang] || cat.label.en : cat.label;
+  const catLabel = getCatLabel(cat, tab, currentLang);
   section.innerHTML = `<div class="section-title">${cat.emoji} ${catLabel}</div>`;
 
   cat.items.forEach(item => {
