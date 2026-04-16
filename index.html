@@ -929,9 +929,25 @@ function setLang(lang) {
     btn.classList.toggle('active', btn.textContent === lang.toUpperCase());
   });
 
-  // Re-render current tab to update product names
+  // 카테고리 탭 이름 업데이트
+  const tabsEl = document.getElementById('cat-tabs');
+  if (tabsEl) {
+    Array.from(tabsEl.children).forEach(btn => {
+      const catKey = btn.getAttribute('data-catkey');
+      if (!catKey || !catalog[catKey]) return;
+      const cat = catalog[catKey];
+      const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
+      const label = typeof cat.label === 'object'
+        ? (cat.label[lang] || cat.label.en || catKey)
+        : (cat.label || catKey);
+      btn.textContent = emoji + ' ' + label;
+    });
+  }
+
+  // Re-render current tab, best, new
   renderTab(currentTab);
   renderBest();
+  if (typeof window.renderNew === 'function') window.renderNew();
   updateSummary();
 }
 
@@ -2131,6 +2147,7 @@ async function loadCatalogFromFirebase() {
           const label = typeof cat.label === 'object' ? (cat.label[currentLang] || cat.label.en || key) : (cat.label || key);
           const btn = document.createElement('button');
           btn.className = 'tab' + (i === 0 ? ' active' : '');
+          btn.setAttribute('data-catkey', key);
           btn.onclick = function() { switchTab(this, key); };
           btn.textContent = emoji + ' ' + label;
           tabsEl.appendChild(btn);
