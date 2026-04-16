@@ -299,6 +299,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
     <!-- 상품 목록 테이블 -->
     <div class="table-wrap">
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;">
+        <input type="text" id="product-search" placeholder="🔍 상품명, ID 검색..." oninput="filterProducts(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <button onclick="filterProducts('');document.getElementById('product-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
+      </div>
       <table>
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;font-size:12px;color:#888;width:55px;">번호</th>
@@ -315,12 +319,19 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <!-- 카테고리 관리 탭 -->
   <div id="tab-category" class="tab-content">
     <div class="table-wrap" style="max-width:1000px;margin:24px auto;">
-      <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-weight:700;font-size:14px;">카테고리 목록</span>
-        <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
+      <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div>
+          <span style="font-weight:700;font-size:14px;">카테고리 목록</span>
+          <span style="font-size:12px;color:#aaa;margin-left:8px;">☰ 드래그로 순서 변경</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="saveCatOrder()">💾 순서 저장</button>
+          <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
+        </div>
       </div>
       <table style="width:100%;border-collapse:collapse;">
         <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:40px;"></th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">키</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">이름 (label)</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">이모지</th>
@@ -1369,6 +1380,40 @@ async function loadCatSelect() {
   });
 }
 
+function filterProducts(query) {
+  const q = query.trim().toLowerCase();
+  const tbody = document.getElementById('product-tbody');
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    // 카테고리 헤더 행
+    if (row.cells.length === 1) {
+      if (!q) { row.style.display = ''; return; }
+      // 검색 시 헤더는 일단 숨기고 나중에 결과 있으면 보이기
+      row.style.display = 'none';
+      return;
+    }
+    // 상품 행
+    const text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+
+  // 검색 결과 있는 카테고리 헤더 보이기
+  if (q) {
+    rows.forEach(row => {
+      if (row.cells.length !== 1) return;
+      // 이 헤더 다음 상품 행 중 보이는 게 있으면 헤더 표시
+      let next = row.nextElementSibling;
+      let hasVisible = false;
+      while (next && next.cells.length > 1) {
+        if (next.style.display !== 'none') { hasVisible = true; break; }
+        next = next.nextElementSibling;
+      }
+      row.style.display = hasVisible ? '' : 'none';
+    });
+  }
+}
+
 async function loadCatalogForAdmin() {
   const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
@@ -1905,26 +1950,70 @@ function buildEmojiPicker(currentEmoji) {
   });
 }
 
+async function saveCatOrder() {
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  const order = Array.from(tbody.rows).map(row => row.getAttribute('data-catkey')).filter(Boolean);
+  await db.ref('catOrder').set(order);
+  showToast('✅ 카테고리 순서 저장 완료!');
+}
+
+function initCatDrag() {
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  let dragging = null;
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.setAttribute('draggable', 'true');
+    row.style.cursor = 'grab';
+
+    row.addEventListener('dragstart', e => {
+      dragging = row;
+      row.style.opacity = '0.5';
+    });
+    row.addEventListener('dragend', e => {
+      row.style.opacity = '1';
+      dragging = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragging || dragging === row) return;
+      const rect = row.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) tbody.insertBefore(dragging, row);
+      else tbody.insertBefore(dragging, row.nextSibling);
+    });
+  });
+}
+
 async function loadCategories() {
-  const snap = await db.ref('catalog').get();
+  const [snap, orderSnap] = await Promise.all([
+    db.ref('catalog').get(),
+    db.ref('catOrder').get()
+  ]);
   const data = snap.val() || {};
+  const savedOrder = orderSnap.val() || [];
   const tbody = document.getElementById('category-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  // A→B→C→D→E→F 순서 정렬
-  const ordered = [
-    ...CAT_ORDER.filter(k => data[k]),
-    ...Object.keys(data).filter(k => !CAT_ORDER.includes(k)).sort()
-  ];
+  // 저장된 순서 적용, 없는 키는 뒤에 추가
+  const allKeys = Object.keys(data);
+  const ordered = savedOrder.length > 0
+    ? [...savedOrder.filter(k=>data[k]), ...allKeys.filter(k=>!savedOrder.includes(k))]
+    : [...CAT_ORDER.filter(k=>data[k]), ...allKeys.filter(k=>!CAT_ORDER.includes(k)).sort()];
 
   ordered.forEach(key => {
     const cat = data[key];
     const count = (cat.items || []).length;
     const label = getLabel(cat, key);
     const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
-    const visible = cat.visible !== false; // 기본값 true
-    tbody.innerHTML += `<tr style="opacity:${visible ? 1 : 0.5}">
+    const visible = cat.visible !== false;
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-catkey', key);
+    tr.style.opacity = visible ? '1' : '0.5';
+    tr.innerHTML = `
+      <td style="padding:10px 12px;font-size:18px;color:#aaa;cursor:grab;text-align:center;">☰</td>
       <td style="padding:10px 12px;font-size:12px;color:#888;">${key}</td>
       <td style="padding:10px 12px;font-size:13px;">${label}</td>
       <td style="padding:10px 12px;font-size:18px;">${emoji}</td>
@@ -1937,9 +2026,11 @@ async function loadCategories() {
       <td style="padding:10px 6px;display:flex;gap:6px;">
         <button onclick="toggleCatVisible('${key}', ${visible})" style="background:${visible ? '#888' : '#2d7a4f'};border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">${visible ? '🙈 숨기기' : '👁️ 보이기'}</button>
         <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
-      </td>
-    </tr>`;
+      </td>`;
+    tbody.appendChild(tr);
   });
+
+  initCatDrag();
 }
 
 async function toggleCatVisible(key, currentVisible) {

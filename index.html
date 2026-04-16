@@ -968,12 +968,16 @@ const CAT_LABELS = {
 };
 
 function getCatLabel(cat, catKey, lang) {
-  // 1. CAT_LABELS 매핑 우선
-  if (CAT_LABELS[catKey]) return CAT_LABELS[catKey][lang] || CAT_LABELS[catKey].en || catKey;
-  // 2. Firebase label이 객체면 해당 언어
-  if (typeof cat.label === 'object') return cat.label[lang] || cat.label.en || catKey;
-  // 3. 문자열이면 그대로
-  return cat.label || catKey;
+  let label = '';
+  if (CAT_LABELS[catKey]) {
+    label = CAT_LABELS[catKey][lang] || CAT_LABELS[catKey].en || catKey;
+  } else if (typeof cat.label === 'object') {
+    label = cat.label[lang] || cat.label.en || catKey;
+  } else {
+    label = cat.label || catKey;
+  }
+  // 앞의 영문 대문자 + 공백 제거 (예: "A 냉동 및 냉장" → "냉동 및 냉장")
+  return label.replace(/^[A-Z]\s+/, '');
 }
 
 /* =====================================================
@@ -2160,8 +2164,17 @@ async function loadCatalogFromFirebase() {
       });
 
       // 카테고리 탭 동적 생성 (visible:false 제외)
+      const catOrderSnap = await get(ref(db, 'catOrder'));
+      const savedOrder = catOrderSnap.val() || [];
       const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
-      const orderedKeys = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
+      const allKeys = Object.keys(catalog);
+      let orderedKeys;
+      if (savedOrder.length > 0) {
+        // 저장된 순서 우선, 없는 키는 뒤에 추가
+        orderedKeys = [...savedOrder.filter(k=>catalog[k]), ...allKeys.filter(k=>!savedOrder.includes(k))];
+      } else {
+        orderedKeys = [...fixedOrder.filter(k=>catalog[k]), ...allKeys.filter(k=>!fixedOrder.includes(k)).sort()];
+      }
       const visibleKeys = orderedKeys.filter(k => catalog[k]?.visible !== false && catalog[k]?.items?.length > 0);
       const tabsEl = document.getElementById('cat-tabs');
       if (tabsEl) {
