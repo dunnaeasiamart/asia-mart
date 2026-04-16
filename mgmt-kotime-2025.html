@@ -1682,13 +1682,20 @@ async function autoFillEditId() {
   if (!catKey) return;
   const snap = await db.ref('catalog/' + catKey).get();
   const catData = snap.val() || {};
-  const items = catData.items || [];
   const label = getLabel(catData, catKey);
   const prefix = getCatPrefix(catKey, label);
+
+  // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
+  const allSnap = await db.ref('catalog').get();
+  const allCatalog = allSnap.val() || {};
   let maxNum = 0;
-  items.forEach(item => {
-    const match = String(item.id).match(/\d+/);
-    if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+  Object.entries(allCatalog).forEach(([key, cat]) => {
+    const p = getCatPrefix(key, getLabel(cat, key));
+    if (p !== prefix) return;
+    (cat.items || []).forEach(item => {
+      const match = String(item.id).match(/\d+/);
+      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    });
   });
   document.getElementById('edit-id').value = prefix + String(maxNum + 1).padStart(2, '0');
 }
@@ -1698,13 +1705,20 @@ async function autoFillId() {
   if (!catKey) return;
   const snap = await db.ref('catalog/' + catKey).get();
   const catData = snap.val() || {};
-  const items = catData.items || [];
   const label = getLabel(catData, catKey);
   const prefix = getCatPrefix(catKey, label);
+
+  // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
+  const allSnap = await db.ref('catalog').get();
+  const allCatalog = allSnap.val() || {};
   let maxNum = 0;
-  items.forEach(item => {
-    const match = String(item.id).match(/\d+/);
-    if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+  Object.entries(allCatalog).forEach(([key, cat]) => {
+    const p = getCatPrefix(key, getLabel(cat, key));
+    if (p !== prefix) return;
+    (cat.items || []).forEach(item => {
+      const match = String(item.id).match(/\d+/);
+      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    });
   });
   document.getElementById('new-id').value = prefix + String(maxNum + 1).padStart(2, '0');
 }
