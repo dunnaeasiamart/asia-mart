@@ -937,10 +937,7 @@ function setLang(lang) {
       if (!catKey || !catalog[catKey]) return;
       const cat = catalog[catKey];
       const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
-      const label = typeof cat.label === 'object'
-        ? (cat.label[lang] || cat.label.en || catKey)
-        : (cat.label || catKey);
-      btn.textContent = emoji + ' ' + label;
+      btn.textContent = emoji + ' ' + getCatLabel(cat, catKey, lang);
     });
   }
 
@@ -949,6 +946,26 @@ function setLang(lang) {
   renderBest();
   if (typeof window.renderNew === 'function') window.renderNew();
   updateSummary();
+}
+
+// 카테고리명 다국어 매핑
+const CAT_LABELS = {
+  frozen:     { en: 'A Frozen Food',     th: 'A อาหารแช่แข็ง',   lo: 'A ອາຫານແຊ່ແຂງ',   ko: 'A 냉동, 냉장 음식' },
+  noodle:     { en: 'B Noodles',         th: 'B เส้นก๋วยเตี๋ยว', lo: 'B ເສັ້ນກ໋ວຍເຕັ້ຍວ', ko: 'B 면 종류' },
+  sauce:      { en: 'C Sauces',          th: 'C ซอสต่างๆ',       lo: 'C ຊອດຕ່າງໆ',       ko: 'C 각종 소스' },
+  other:      { en: 'D Drinks & More',   th: 'D เครื่องดื่ม',    lo: 'D ເຄື່ອງດື່ມ',     ko: 'D 음료 및 기타' },
+  essentials: { en: 'E Daily Essentials',th: 'E สินค้าอุปโภค',   lo: 'E ສິນຄ້າໃຊ້ສອຍ',   ko: 'E 생활용품' },
+  veggie:     { en: 'F Vegetables',      th: 'F ผักและผลไม้',    lo: 'F ຜັກ ແລະ ຜົນໄມ້',  ko: 'F 농산물/채소' },
+  shoes:      { en: 'G Shoes',           th: 'G รองเท้า',        lo: 'G ເກີບ',            ko: 'G 운동화' },
+};
+
+function getCatLabel(cat, catKey, lang) {
+  // 1. CAT_LABELS 매핑 우선
+  if (CAT_LABELS[catKey]) return CAT_LABELS[catKey][lang] || CAT_LABELS[catKey].en || catKey;
+  // 2. Firebase label이 객체면 해당 언어
+  if (typeof cat.label === 'object') return cat.label[lang] || cat.label.en || catKey;
+  // 3. 문자열이면 그대로
+  return cat.label || catKey;
 }
 
 /* =====================================================
@@ -2144,7 +2161,7 @@ async function loadCatalogFromFirebase() {
         visibleKeys.forEach((key, i) => {
           const cat = catalog[key];
           const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
-          const label = typeof cat.label === 'object' ? (cat.label[currentLang] || cat.label.en || key) : (cat.label || key);
+          const label = getCatLabel(cat, key, currentLang);
           const btn = document.createElement('button');
           btn.className = 'tab' + (i === 0 ? ' active' : '');
           btn.setAttribute('data-catkey', key);
