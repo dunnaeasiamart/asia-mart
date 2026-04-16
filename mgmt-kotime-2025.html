@@ -486,7 +486,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <div class="modal-grid">
       <div>
         <label>카테고리</label>
-        <select id="edit-cat"></select>
+        <select id="edit-cat" onchange="autoFillEditId()"></select>
       </div>
       <div>
         <label>상품 ID</label>
@@ -1656,6 +1656,23 @@ async function translateName() {
   }
 }
 
+async function autoFillEditId() {
+  const catKey = document.getElementById('edit-cat').value;
+  if (!catKey) return;
+  const snap = await db.ref('catalog/' + catKey).get();
+  const catData = snap.val() || {};
+  const items = catData.items || [];
+  const label = getLabel(catData, catKey);
+  const prefix = label.charAt(0).toUpperCase();
+  let maxNum = 0;
+  items.forEach(item => {
+    const match = String(item.id).match(/\d+/);
+    if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+  });
+  const nextNum = maxNum + 1;
+  document.getElementById('edit-id').value = prefix + String(nextNum).padStart(2, '0');
+}
+
 async function autoFillId() {
   const catKey = document.getElementById('new-cat').value;
   if (!catKey) return;
@@ -1827,7 +1844,8 @@ const EMOJI_CANDIDATES = [
   '🧴','🧼','🪥','🧹','🧺','🛒','🏠','💊','🪴','🌿',
   '🥬','🥦','🍅','🥕','🧅','🌽','🥑','🍆','🫑','🍄',
   '👟','👠','👡','👢','🥿','👞','👣','🩴','🥾','👒',
-  '👕','👗','👔','🧥','🧤','🧣','🎒','👜','💍','⌚'
+  '👕','👗','👔','🧥','🧤','🧣','🎒','👜','💍','⌚',
+  '🚬','🍺','🍻','🥃','🍷','🍸','🪄','📦','🏪','💰'
 ];
 
 function buildEmojiPicker(currentEmoji) {
