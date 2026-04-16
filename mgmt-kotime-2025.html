@@ -1791,15 +1791,20 @@ async function submitEditProduct() {
 
   // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
   if (catChanged) {
-    const newCatSnap = await db.ref('catalog/' + newCatKey).get();
-    const newCatData = newCatSnap.val() || {};
-    const newCatItems = newCatData.items || [];
+    const allSnap = await db.ref('catalog').get();
+    const allCatalog = allSnap.val() || {};
+    const newCatData = allCatalog[newCatKey] || {};
+    const label = getLabel(newCatData, newCatKey);
+    const prefix = getCatPrefix(newCatKey, label);
     let maxNum = 0;
-    newCatItems.forEach(item => {
-      const match = String(item.id).match(/\d+/);
-      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    Object.entries(allCatalog).forEach(([key, cat]) => {
+      const p = getCatPrefix(key, getLabel(cat, key));
+      if (p !== prefix) return;
+      (cat.items || []).forEach(item => {
+        const match = String(item.id).match(/\d+/);
+        if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+      });
     });
-    const prefix = (newCatData.label || newCatKey).charAt(0).toUpperCase();
     newId = prefix + String(maxNum + 1).padStart(2, '0');
   }
 
