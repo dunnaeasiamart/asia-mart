@@ -540,44 +540,64 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 + 카드 이미지 생성하기</button>
       </div>
 
-      <!-- HTML 카드 이미지 (캡쳐용) -->
+      <!-- HTML 카드 (캡쳐용) -->
       <div id="post-card-wrap" style="display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size:14px;font-weight:700;margin-bottom:6px;">🖼️ 홍보 카드 이미지</div>
-        <div style="font-size:12px;color:#888;margin-bottom:14px;">📱 이 카드를 캡쳐해서 페이스북에 올리세요!</div>
-        <div id="post-card" style="width:100%;max-width:400px;margin:0 auto;border-radius:12px;overflow:hidden;font-family:Arial,sans-serif;border:1px solid #eee;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px;">🖼️ 홍보 카드 이미지</div>
+        <div style="font-size:12px;color:#888;margin-bottom:16px;">📱 이 카드를 캡쳐해서 페이스북에 올리세요!</div>
 
-          <!-- 카드 헤더 -->
-          <div id="post-card-header" style="background:#C8382A;padding:18px 20px 14px;text-align:center;">
-            <div style="color:#FFE090;font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:10px;">DUNNAE ASIA MART</div>
-            <div id="post-card-badge" style="display:inline-block;background:#2a8a45;color:#fff;font-size:14px;font-weight:700;padding:6px 24px;border-radius:20px;border:2px solid #FFE090;">🆕 NEW</div>
+        <div id="post-card" style="width:100%;max-width:420px;margin:0 auto;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+
+          <!-- 헤더 -->
+          <div id="post-card-header" style="background:linear-gradient(135deg,#B02010 0%,#E04030 50%,#B02010 100%);padding:20px;text-align:center;position:relative;">
+            <!-- 헤더 장식 패턴 -->
+            <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.08;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:8px 8px;"></div>
+            <!-- 상단 골드 라인 -->
+            <div style="height:3px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin-bottom:12px;border-radius:2px;"></div>
+            <div style="color:#FFE090;font-size:20px;font-weight:700;letter-spacing:3px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">DUNNAE ASIA MART</div>
+            <div style="height:1px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin:10px 0;"></div>
+            <!-- 뱃지 -->
+            <div id="post-card-badge" style="display:inline-block;padding:7px 28px;border-radius:24px;font-size:15px;font-weight:700;letter-spacing:1px;border:2px solid rgba(255,255,255,0.4);box-shadow:0 2px 8px rgba(0,0,0,0.2);">🆕 NEW ARRIVAL</div>
           </div>
 
-          <!-- 상품 이미지 -->
-          <div style="background:#fff8f0;padding:20px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center;">
-            <img id="post-card-img" src="" style="max-width:100%;max-height:220px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">
-            <div id="post-card-emoji" style="font-size:80px;display:none;">🛒</div>
+          <!-- 이미지 영역 -->
+          <div style="background:#FFF8F0;padding:0;text-align:center;position:relative;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center;">
+            <!-- 배경 장식 -->
+            <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(200,56,42,0.06);"></div>
+            <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(200,56,42,0.06);"></div>
+            <img id="post-card-img" src="" style="max-width:100%;max-height:240px;object-fit:contain;position:relative;z-index:1;padding:16px;" onerror="this.style.display='none'">
+            <div id="post-card-emoji" style="font-size:90px;display:none;position:relative;z-index:1;">🛒</div>
           </div>
 
           <!-- 상품 정보 -->
-          <div style="background:#fff;padding:16px 20px;border-top:2px solid #F0D090;">
-            <!-- 4개 국어 상품명 -->
-            <div id="post-card-name-th" style="font-size:16px;font-weight:700;color:#1a1200;margin-bottom:3px;"></div>
-            <div id="post-card-name-lo" style="font-size:14px;color:#444;margin-bottom:3px;"></div>
-            <div id="post-card-name-en" style="font-size:13px;color:#888;margin-bottom:12px;"></div>
+          <div style="background:#fff;padding:18px 20px;">
+            <!-- 카테고리 태그 -->
+            <div id="post-card-cat-tag" style="display:inline-block;background:#FFF0E8;color:#C84020;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;border:1px solid #FFD0B0;"></div>
 
-            <div style="border-top:1px solid #F0E0A0;margin-bottom:12px;"></div>
+            <!-- 4개 국어 상품명 -->
+            <div id="post-card-name-th" style="font-size:17px;font-weight:700;color:#1a1200;margin-bottom:3px;line-height:1.4;"></div>
+            <div id="post-card-name-lo" style="font-size:14px;color:#555;margin-bottom:3px;line-height:1.4;"></div>
+            <div id="post-card-name-en" style="font-size:13px;color:#999;margin-bottom:14px;line-height:1.4;"></div>
+
+            <!-- 구분선 -->
+            <div style="height:1px;background:linear-gradient(90deg,#F0C840,#FFE090,#F0C840);margin-bottom:14px;border-radius:1px;"></div>
 
             <!-- 가격 -->
             <div id="post-card-orig-price" style="font-size:14px;color:#bbb;text-decoration:line-through;display:none;margin-bottom:2px;"></div>
-            <div id="post-card-price" style="font-size:32px;font-weight:700;color:#C8382A;margin-bottom:4px;"></div>
-            <div id="post-card-pct-badge" style="display:none;background:#C8382A;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:10px;display:inline-block;margin-bottom:10px;"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div id="post-card-price" style="font-size:36px;font-weight:700;color:#C8382A;line-height:1;"></div>
+              <div id="post-card-pct-badge" style="display:none;background:#C8382A;color:#fff;font-size:13px;font-weight:700;padding:4px 12px;border-radius:12px;"></div>
+            </div>
 
-            <div style="font-size:12px;color:#999;margin-bottom:0;">🚚 5만원 이상 무료배송 · Free delivery over ₩50,000</div>
+            <!-- 무료배송 -->
+            <div style="background:#FFF8E8;border:1px solid #F0D890;border-radius:8px;padding:7px 12px;font-size:12px;color:#8a6010;margin-bottom:0;">
+              🚚 5만원 이상 무료배송 &nbsp;·&nbsp; Free delivery over ₩50,000
+            </div>
           </div>
 
-          <!-- 카드 푸터 -->
-          <div style="background:#C8382A;padding:10px;text-align:center;">
-            <div style="color:#FFE090;font-size:11px;">💬 DM us on Facebook · dunnaeasiamart.github.io/asia-mart</div>
+          <!-- 푸터 -->
+          <div style="background:linear-gradient(135deg,#B02010,#E04030,#B02010);padding:12px 16px;text-align:center;">
+            <div style="height:1px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin-bottom:8px;"></div>
+            <div style="color:#FFE090;font-size:11px;letter-spacing:0.5px;">💬 DM us on Facebook &nbsp;·&nbsp; dunnaeasiamart.github.io/asia-mart</div>
           </div>
         </div>
       </div>
@@ -2411,11 +2431,7 @@ async function saveNew() {
 // ===== 게시물 생성기 =====
 let postMode = 'new';
 let postProductData = {};
-
-const POST_DESC_DEFAULT = {
-  new:  '오늘 신선하게 입고됐어요! 😊',
-  sale: '한정 수량이에요! 서두르세요! 😊'
-};
+const POST_DESC_DEFAULT = { new:'오늘 신선하게 입고됐어요! 😊', sale:'한정 수량이에요! 서두르세요! 😊' };
 
 async function loadPostProducts() {
   const sel = document.getElementById('post-product-select');
@@ -2435,15 +2451,11 @@ async function loadPostProducts() {
         const opt = document.createElement('option');
         const nameKo = (item.name_ko||item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
         opt.value = JSON.stringify({
-          id: item.id,
-          name_ko: nameKo,
+          id: item.id, name_ko: nameKo,
           name_en: (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''),
-          name_th: item.name_th||'',
-          name_lo: item.name_lo||'',
-          price: item.price1||0,
-          image: item.images?.[0]||item.image||'',
-          emoji: cat.emoji||'🛒',
-          cat_ko: cat.name_ko||cat.name_en||key
+          name_th: item.name_th||'', name_lo: item.name_lo||'',
+          price: item.price1||0, image: item.images?.[0]||item.image||'',
+          emoji: cat.emoji||'🛒', cat_ko: cat.name_ko||cat.name_en||key
         });
         opt.textContent = `${item.id}. ${nameKo} — ₩${(item.price1||0).toLocaleString()}`;
         grp.appendChild(opt);
@@ -2459,8 +2471,7 @@ function onPostProductSelect() {
   if (!val) { preview.style.display='none'; postProductData={}; return; }
   postProductData = JSON.parse(val);
   const img = document.getElementById('post-preview-img');
-  if (postProductData.image) { img.src=postProductData.image; img.style.display='block'; }
-  else img.style.display='none';
+  if (postProductData.image) { img.src=postProductData.image; img.style.display='block'; } else img.style.display='none';
   document.getElementById('post-preview-name').textContent = postProductData.name_ko||postProductData.name_en;
   document.getElementById('post-preview-price').textContent = '₩'+(postProductData.price||0).toLocaleString();
   document.getElementById('post-preview-cat').textContent = postProductData.cat_ko;
@@ -2472,8 +2483,7 @@ function setPostMode(m) {
   document.getElementById('post-sale-extra').style.display = m==='sale'?'block':'none';
   document.getElementById('post-extra-desc').value = POST_DESC_DEFAULT[m];
   ['new','sale'].forEach(t => {
-    const b = document.getElementById('post-btn-'+t);
-    const on = t===m;
+    const b = document.getElementById('post-btn-'+t), on = t===m;
     b.style.background = on?'#c84b2f':'#fff';
     b.style.color = on?'#fff':'#555';
     b.style.borderColor = on?'#c84b2f':'#ddd';
@@ -2485,111 +2495,105 @@ function wonFmt(n){ return Number(n).toLocaleString()+'원'; }
 function generatePost() {
   if (!postProductData.id) { showToast('⚠️ 상품을 먼저 선택해주세요'); return; }
   const link = 'https://dunnaeasiamart.github.io/asia-mart';
-  const nTh = postProductData.name_th || postProductData.name_en || '';
-  const nLo = postProductData.name_lo || postProductData.name_en || '';
-  const nEn = postProductData.name_en || '';
-  const emoji = postProductData.emoji || '🛒';
-  const origPrice = postProductData.price || 0;
+  const nTh = postProductData.name_th||postProductData.name_en||'';
+  const nLo = postProductData.name_lo||postProductData.name_en||'';
+  const nEn = postProductData.name_en||'';
+  const emoji = postProductData.emoji||'🛒';
+  const origPrice = postProductData.price||0;
   const desc = document.getElementById('post-extra-desc').value.trim();
-  const descStr = desc ? `\n✨ ${desc}` : '';
-  let th, lo, ph, en;
+  const descStr = desc?`\n✨ ${desc}`:'';
+  let th,lo,ph,en;
 
-  if (postMode === 'new') {
-    const pTh = origPrice ? `\n💰 ราคา ${wonFmt(origPrice)}` : '';
-    const pLo = origPrice ? `\n💰 ລາຄາ ${wonFmt(origPrice)}` : '';
-    const pPh = origPrice ? `\n💰 Presyo: ${wonFmt(origPrice)}` : '';
-    const pEn = origPrice ? `\n💰 Price: ${wonFmt(origPrice)}` : '';
+  if (postMode==='new') {
+    const pTh=origPrice?`\n💰 ราคา ${wonFmt(origPrice)}`:'';
+    const pLo=origPrice?`\n💰 ລາຄາ ${wonFmt(origPrice)}`:'';
+    const pPh=origPrice?`\n💰 Presyo: ${wonFmt(origPrice)}`:'';
+    const pEn=origPrice?`\n💰 Price: ${wonFmt(origPrice)}`:'';
     th=`${emoji} สินค้าใหม่มาแล้ว! ${emoji}\n\n"${nTh}" พร้อมจำหน่ายที่ร้าน Dunnae Asia Mart แล้ววันนี้!${pTh}${descStr}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
     lo=`${emoji} ສິນຄ້າໃໝ່ມາແລ້ວ! ${emoji}\n\n"${nLo}" ພ້ອມຂາຍຢູ່ຮ້ານ Dunnae Asia Mart ແລ້ວມື້ນີ້!${pLo}${descStr}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
     ph=`${emoji} Bagong produkto! ${emoji}\n\n"${nEn}" available na sa Dunnae Asia Mart ngayon!${pPh}${descStr}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
     en=`${emoji} New arrival! ${emoji}\n\n"${nEn}" is now available at Dunnae Asia Mart!${pEn}${descStr}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
   } else {
-    const salePrice = parseInt(document.getElementById('post-sale-price').value)||0;
-    const period = document.getElementById('post-sale-period').value.trim();
-    const pct = (origPrice&&salePrice) ? Math.round((1-salePrice/origPrice)*100) : 0;
-    const pctStr = pct>0 ? ` (${pct}% OFF!)` : '';
-    const priceBlock = (origPrice&&salePrice) ? `\n💸 ${wonFmt(origPrice)} → ${wonFmt(salePrice)}${pctStr}` : salePrice ? `\n💰 ${wonFmt(salePrice)}${pctStr}` : '';
-    th=`🔥 ลดราคาพิเศษ! 🔥\n\n"${nTh}" ลดราคาแล้ววันนี้!${priceBlock}${period?`\n⏰ ${period}เท่านั้น`:''}${descStr}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
-    lo=`🔥 ລຸດລາຄາພິເສດ! 🔥\n\n"${nLo}" ລຸດລາຄາແລ້ວມື້ນີ້!${priceBlock}${period?`\n⏰ ${period}ເທົ່ານັ້ນ`:''}${descStr}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
-    ph=`🔥 Espesyal na sale! 🔥\n\n"${nEn}" sale na ngayon!${priceBlock}${period?`\n⏰ ${period} lang`:''}${descStr}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
-    en=`🔥 Special discount! 🔥\n\n"${nEn}" on sale now!${priceBlock}${period?`\n⏰ ${period} only`:''}${descStr}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
+    const salePrice=parseInt(document.getElementById('post-sale-price').value)||0;
+    const period=document.getElementById('post-sale-period').value.trim();
+    const pct=(origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
+    const pctStr=pct>0?` (${pct}% OFF!)`:'';
+    const pb=(origPrice&&salePrice)?`\n💸 ${wonFmt(origPrice)} → ${wonFmt(salePrice)}${pctStr}`:salePrice?`\n💰 ${wonFmt(salePrice)}${pctStr}`:'';
+    th=`🔥 ลดราคาพิเศษ! 🔥\n\n"${nTh}" ลดราคาแล้ววันนี้!${pb}${period?`\n⏰ ${period}เท่านั้น`:''}${descStr}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
+    lo=`🔥 ລຸດລາຄາພິເສດ! 🔥\n\n"${nLo}" ລຸດລາຄາແລ້ວມື້ນີ້!${pb}${period?`\n⏰ ${period}ເທົ່ານັ້ນ`:''}${descStr}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
+    ph=`🔥 Espesyal na sale! 🔥\n\n"${nEn}" sale na ngayon!${pb}${period?`\n⏰ ${period} lang`:''}${descStr}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
+    en=`🔥 Special discount! 🔥\n\n"${nEn}" on sale now!${pb}${period?`\n⏰ ${period} only`:''}${descStr}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
   }
 
-  // 문구 세팅
-  document.getElementById('post-out-th').textContent = th;
-  document.getElementById('post-out-lo').textContent = lo;
-  document.getElementById('post-out-ph').textContent = ph;
-  document.getElementById('post-out-en').textContent = en;
-  document.getElementById('post-text-wrap').style.display = 'flex';
-
-  // HTML 카드 업데이트
+  document.getElementById('post-out-th').textContent=th;
+  document.getElementById('post-out-lo').textContent=lo;
+  document.getElementById('post-out-ph').textContent=ph;
+  document.getElementById('post-out-en').textContent=en;
+  document.getElementById('post-text-wrap').style.display='flex';
   updatePostCard();
-  document.getElementById('post-card-wrap').style.display = 'block';
+  document.getElementById('post-card-wrap').style.display='block';
   document.getElementById('post-card-wrap').scrollIntoView({behavior:'smooth'});
 }
 
 function updatePostCard() {
-  const isSale = postMode === 'sale';
-  const origPrice = postProductData.price || 0;
-  const salePrice = isSale ? (parseInt(document.getElementById('post-sale-price').value)||0) : 0;
-  const pct = (origPrice&&salePrice) ? Math.round((1-salePrice/origPrice)*100) : 0;
+  const isSale = postMode==='sale';
+  const origPrice = postProductData.price||0;
+  const salePrice = isSale?(parseInt(document.getElementById('post-sale-price').value)||0):0;
+  const pct = (origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
 
   // 뱃지
   const badge = document.getElementById('post-card-badge');
-  badge.textContent = isSale ? '🔥 SALE' : '🆕 NEW';
-  badge.style.background = isSale ? '#FF5020' : '#2a8a45';
+  if (isSale) {
+    badge.textContent='🔥 SPECIAL SALE';
+    badge.style.background='linear-gradient(135deg,#FF4010,#FF6030)';
+    badge.style.color='#fff';
+  } else {
+    badge.textContent='🆕 NEW ARRIVAL';
+    badge.style.background='linear-gradient(135deg,#1a7a35,#2aaa50)';
+    badge.style.color='#fff';
+  }
 
   // 이미지
   const cardImg = document.getElementById('post-card-img');
   const cardEmoji = document.getElementById('post-card-emoji');
   if (postProductData.image) {
-    cardImg.src = postProductData.image;
-    cardImg.style.display = 'block';
-    cardEmoji.style.display = 'none';
+    cardImg.src=postProductData.image; cardImg.style.display='block'; cardEmoji.style.display='none';
   } else {
-    cardImg.style.display = 'none';
-    cardEmoji.textContent = postProductData.emoji || '🛒';
-    cardEmoji.style.display = 'block';
+    cardImg.style.display='none'; cardEmoji.textContent=postProductData.emoji||'🛒'; cardEmoji.style.display='block';
   }
+
+  // 카테고리 태그
+  const catTag = document.getElementById('post-card-cat-tag');
+  if (catTag) catTag.textContent = (postProductData.emoji||'') + ' ' + (postProductData.cat_ko||'');
 
   // 4개 국어 상품명 (한글 제외)
-  document.getElementById('post-card-name-th').textContent = postProductData.name_th || postProductData.name_en || '';
-  document.getElementById('post-card-name-lo').textContent = postProductData.name_lo || postProductData.name_en || '';
-  document.getElementById('post-card-name-en').textContent = postProductData.name_en || '';
+  document.getElementById('post-card-name-th').textContent = postProductData.name_th||postProductData.name_en||'';
+  document.getElementById('post-card-name-lo').textContent = postProductData.name_lo||postProductData.name_en||'';
+  document.getElementById('post-card-name-en').textContent = postProductData.name_en||'';
 
   // 가격
-  const priceEl = document.getElementById('post-card-price');
-  const origEl = document.getElementById('post-card-orig-price');
-  const pctEl = document.getElementById('post-card-pct-badge');
-
-  if (isSale && salePrice) {
-    if (origPrice) {
-      origEl.textContent = '₩' + origPrice.toLocaleString();
-      origEl.style.display = 'block';
-    }
-    priceEl.textContent = '₩' + salePrice.toLocaleString();
-    if (pct > 0) {
-      pctEl.textContent = pct + '% SAVE';
-      pctEl.style.display = 'inline-block';
-    } else {
-      pctEl.style.display = 'none';
-    }
+  const priceEl=document.getElementById('post-card-price');
+  const origEl=document.getElementById('post-card-orig-price');
+  const pctEl=document.getElementById('post-card-pct-badge');
+  if (isSale&&salePrice) {
+    if(origPrice){origEl.textContent='₩'+origPrice.toLocaleString();origEl.style.display='block';}
+    priceEl.textContent='₩'+salePrice.toLocaleString();
+    if(pct>0){pctEl.textContent=pct+'% SAVE';pctEl.style.display='inline-block';}
+    else pctEl.style.display='none';
   } else {
-    origEl.style.display = 'none';
-    pctEl.style.display = 'none';
-    priceEl.textContent = origPrice ? '₩' + origPrice.toLocaleString() : '';
+    origEl.style.display='none'; pctEl.style.display='none';
+    priceEl.textContent=origPrice?'₩'+origPrice.toLocaleString():'';
   }
 }
 
-function postCopy(id) {
+function postCopy(id){
   navigator.clipboard.writeText(document.getElementById(id).textContent)
-    .then(() => showToast('📋 복사됐어요!'));
+    .then(()=>showToast('📋 복사됐어요!'));
 }
-
-function postCopyAll() {
-  const all = ['post-out-th','post-out-lo','post-out-ph','post-out-en']
-    .map(id => document.getElementById(id).textContent).join('\n\n──────────\n\n');
-  navigator.clipboard.writeText(all).then(() => showToast('✨ 4개 국어 전체 복사됐어요!'));
+function postCopyAll(){
+  const all=['post-out-th','post-out-lo','post-out-ph','post-out-en']
+    .map(id=>document.getElementById(id).textContent).join('\n\n──────────\n\n');
+  navigator.clipboard.writeText(all).then(()=>showToast('✨ 4개 국어 전체 복사됐어요!'));
 }
 
 </script>
