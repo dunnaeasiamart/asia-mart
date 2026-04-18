@@ -1329,38 +1329,6 @@ function getItemName(item) {
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
 
-// Cloudinary URL에 f_auto,q_auto 파라미터 자동 추가 (사파리 대응)
-function fixImgUrl(src) {
-  if (!src) return src;
-  if (src.includes('res.cloudinary.com') && !src.includes('f_auto')) {
-    return src.replace('/upload/', '/upload/f_auto,q_auto/');
-  }
-  return src;
-}
-
-function retryImg(img) {
-  const retry = parseInt(img.dataset.retry || '0');
-  const src = img.dataset.src || '';
-  const emoji = img.dataset.emoji || '🛒';
-  if (retry < 3 && src) {
-    img.dataset.retry = retry + 1;
-    setTimeout(() => {
-      img.src = fixImgUrl(src) + (src.includes('?') ? '&' : '?') + '_r=' + retry;
-    }, 800 * (retry + 1));
-  } else {
-    img.style.display = 'none';
-    const slide = img.parentElement;
-    if (slide) {
-      slide.style.display = 'flex';
-      slide.style.alignItems = 'center';
-      slide.style.justifyContent = 'center';
-      slide.style.fontSize = '40px';
-      slide.style.minHeight = '120px';
-      slide.innerHTML = emoji;
-    }
-  }
-}
-
 function renderTab(tab) {
   const container = document.getElementById('main-content');
   container.innerHTML = '';
@@ -1379,26 +1347,15 @@ function renderTab(tab) {
     card.id = 'card-' + item.id;
     const images = item.images || (item.image ? [item.image] : []);
     const hasImages = images.length > 0;
+    const firstImg = images[0] || '';
     const imgKey = 'imgs_' + item.id;
     window[imgKey] = images;
     const thumbHtml = hasImages ? `
       <div class="thumb-slider" onclick="openLightbox(window['${imgKey}'], 0)" style="cursor:pointer;">
-        <div class="thumb-slides" id="slides-${item.id}">
-          ${images.map((src, idx) => `
-            <div class="thumb-slide">
-              <img src="${fixImgUrl(src)}" alt="${displayName}" loading="eager"
-                data-src="${src}"
-                data-retry="0"
-                data-emoji="${item.emoji||'🛒'}"
-                onerror="retryImg(this)">
-            </div>`).join('')}
-        </div>
-        ${images.length > 1 ? `
-          <button class="thumb-nav prev" onclick="thumbMove(event,'${item.id}',-1)">‹</button>
-          <button class="thumb-nav next" onclick="thumbMove(event,'${item.id}',1)">›</button>
-          <div class="thumb-dots" id="dots-${item.id}">
-            ${images.map((_, i) => `<div class="thumb-dot ${i===0?'active':''}"></div>`).join('')}
-          </div>` : ''}
+        <img class="best-card-img" src="${firstImg}" alt="${displayName}" loading="eager"
+          style="width:100%;height:160px;object-fit:contain;background:#fff;display:block;"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:100%;height:160px;align-items:center;justify-content:center;font-size:36px;background:#fff;">${item.emoji||'🛒'}</div>
       </div>` : `
       <div class="product-thumb">
         <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:28px;">${item.emoji}</span>
@@ -1967,7 +1924,7 @@ function renderNew() {
     const card = document.createElement('div');
     card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
     card.id = 'new-card-' + id;
-    const imgHtml = item.image ? `<img class="best-card-img" src="${fixImgUrl(item.image)}" alt="${getItemName(item)}" loading="eager" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
+    const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
     card.innerHTML = `
       ${imgHtml}${emojiHtml}
@@ -2015,7 +1972,7 @@ function renderBest() {
     card.id = 'best-card-' + id;
 
     const imgHtml = item.image
-      ? `<img class="best-card-img" src="${fixImgUrl(item.image)}" alt="${getItemName(item)}" loading="eager" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
       : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
 
