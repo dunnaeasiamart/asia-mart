@@ -1329,6 +1329,31 @@ function getItemName(item) {
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
 
+function retryImg(img) {
+  const retry = parseInt(img.dataset.retry || '0');
+  const src = img.dataset.src || '';
+  const emoji = img.dataset.emoji || '🛒';
+  if (retry < 3 && src) {
+    // 사파리: URL에 캐시 버스터 붙여서 재시도
+    img.dataset.retry = retry + 1;
+    setTimeout(() => {
+      img.src = src + (src.includes('?') ? '&' : '?') + '_r=' + retry;
+    }, 800 * (retry + 1));
+  } else {
+    // 3번 실패 → 이모지로 대체
+    img.style.display = 'none';
+    const slide = img.parentElement;
+    if (slide) {
+      slide.style.display = 'flex';
+      slide.style.alignItems = 'center';
+      slide.style.justifyContent = 'center';
+      slide.style.fontSize = '40px';
+      slide.style.minHeight = '120px';
+      slide.innerHTML = emoji;
+    }
+  }
+}
+
 function renderTab(tab) {
   const container = document.getElementById('main-content');
   container.innerHTML = '';
@@ -1352,9 +1377,13 @@ function renderTab(tab) {
     const thumbHtml = hasImages ? `
       <div class="thumb-slider" onclick="openLightbox(window['${imgKey}'], 0)" style="cursor:pointer;">
         <div class="thumb-slides" id="slides-${item.id}">
-          ${images.map(src => `
+          ${images.map((src, idx) => `
             <div class="thumb-slide">
-              <img src="${src}" alt="${displayName}" loading="eager" onerror="this.style.display='none'">
+              <img src="${src}" alt="${displayName}" loading="eager"
+                data-src="${src}"
+                data-retry="0"
+                data-emoji="${item.emoji||'🛒'}"
+                onerror="retryImg(this)">
             </div>`).join('')}
         </div>
         ${images.length > 1 ? `
