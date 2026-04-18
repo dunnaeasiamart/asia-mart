@@ -1283,7 +1283,7 @@ function doSearch(query) {
     const thumbHtml = images.length > 0 ? `
       <div class="thumb-slider" onclick="openLightbox(window['${imgKey}'], 0)" style="cursor:pointer;">
         <div class="thumb-slides">
-          <div class="thumb-slide"><img src="${images[0]}" alt="${displayName}" loading="lazy"></div>
+          <div class="thumb-slide"><img src="${images[0]}" alt="${displayName}" loading="eager"></div>
         </div>
       </div>` : `
       <div class="product-thumb">
@@ -1354,7 +1354,7 @@ function renderTab(tab) {
         <div class="thumb-slides" id="slides-${item.id}">
           ${images.map(src => `
             <div class="thumb-slide">
-              <img src="${src}" alt="${displayName}" loading="lazy" onerror="this.style.display='none'">
+              <img src="${src}" alt="${displayName}" loading="eager" onerror="this.style.display='none'">
             </div>`).join('')}
         </div>
         ${images.length > 1 ? `
@@ -1931,7 +1931,7 @@ function renderNew() {
     const card = document.createElement('div');
     card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
     card.id = 'new-card-' + id;
-    const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
+    const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="eager" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
     card.innerHTML = `
       ${imgHtml}${emojiHtml}
@@ -1979,7 +1979,7 @@ function renderBest() {
     card.id = 'best-card-' + id;
 
     const imgHtml = item.image
-      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="eager" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
       : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
 
