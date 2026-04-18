@@ -190,6 +190,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
+    <button class="tab-btn" onclick="switchTab('post',this)">📢 게시물 생성</button>
   </div>
 
   <!-- 재고 관리 -->
@@ -488,6 +489,95 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+  <!-- 게시물 생성기 -->
+  <div id="tab-post" class="tab-content">
+    <div style="max-width:700px;margin:24px auto;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 모드 선택 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size:15px;font-weight:700;margin-bottom:16px;">📢 페이스북 게시물 생성기</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+          <button id="post-btn-new" onclick="setPostMode('new')" style="padding:12px;border:2px solid #c84b2f;border-radius:10px;background:#c84b2f;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">🆕 신상품 안내</button>
+          <button id="post-btn-sale" onclick="setPostMode('sale')" style="padding:12px;border:2px solid #ddd;border-radius:10px;background:#fff;color:#555;font-size:14px;font-weight:700;cursor:pointer;">🔥 할인 안내</button>
+        </div>
+
+        <!-- 신상품 폼 -->
+        <div id="post-form-new">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">카테고리</label>
+            <select id="post-cat" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+              <option value="">로딩 중...</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품명 (한국어)</label>
+            <input type="text" id="post-product-name" placeholder="예: 새우깡, 코코넛밀크, 쌀국수" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">가격 (원)</label>
+              <input type="number" id="post-product-price" placeholder="예: 3500" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            </div>
+            <div>
+              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 (선택)</label>
+              <input type="text" id="post-product-desc" placeholder="예: 태국 정품" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 할인 폼 -->
+        <div id="post-form-sale" style="display:none;">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품명 (한국어)</label>
+            <input type="text" id="post-sale-name" placeholder="예: 재스민 쌀 10kg" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">원래 가격 (원)</label>
+              <input type="number" id="post-sale-original" placeholder="예: 35000" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            </div>
+            <div>
+              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">할인 가격 (원)</label>
+              <input type="number" id="post-sale-discounted" placeholder="예: 28000" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">할인 기간 (선택)</label>
+            <input type="text" id="post-sale-period" placeholder="예: 이번 주말까지, 오늘만" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+          </div>
+        </div>
+
+        <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 생성하기</button>
+      </div>
+
+      <!-- 결과 -->
+      <div id="post-results" style="display:none;display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#A51931;color:#fff;">🇹🇭 ไทย</div>
+          <div id="post-out-th" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
+          <button onclick="postCopyText('post-out-th')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#CE1126;color:#fff;">🇱🇦 ລາວ</div>
+          <div id="post-out-lo" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
+          <button onclick="postCopyText('post-out-lo')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#0038A8;color:#fff;">🇵🇭 Filipino</div>
+          <div id="post-out-ph" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
+          <button onclick="postCopyText('post-out-ph')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#333;color:#fff;">🌐 English</div>
+          <div id="post-out-en" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
+          <button onclick="postCopyText('post-out-en')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+        </div>
+        <button onclick="postCopyAll()" style="width:100%;padding:13px;background:#D4A857;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">✨ 전체 4개 국어 한번에 복사</button>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- end main-page -->
 
 <!-- 상품 수정 모달 -->
@@ -671,6 +761,7 @@ function switchTab(tab, triggerEl) {
   if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
   if (tab === 'excel') loadRetranslateCatSelect();
+  if (tab === 'post') loadPostCategories();
 }
 
 function markChanged(id, type) {
@@ -2284,6 +2375,109 @@ async function saveNew() {
   setTimeout(() => switchTab('stock'), 1000);
 }
 
+// ===== 게시물 생성기 =====
+let postMode = 'new';
+
+async function loadPostCategories() {
+  const sel = document.getElementById('post-cat');
+  if (!sel) return;
+  try {
+    const snap = await db.ref('catalog').get();
+    const catalog = snap.val() || {};
+    sel.innerHTML = '<option value="">카테고리 선택</option>';
+    Object.keys(catalog).forEach(key => {
+      const cat = catalog[key];
+      const label = cat.name_ko || cat.name_en || key;
+      const emoji = cat.emoji || '🛒';
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.dataset.emoji = emoji;
+      opt.textContent = emoji + ' ' + label;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">카테고리 로드 실패</option>';
+  }
+}
+
+function setPostMode(m) {
+  postMode = m;
+  document.getElementById('post-form-new').style.display = m === 'new' ? 'block' : 'none';
+  document.getElementById('post-form-sale').style.display = m === 'sale' ? 'block' : 'none';
+  document.getElementById('post-btn-new').style.background = m === 'new' ? '#c84b2f' : '#fff';
+  document.getElementById('post-btn-new').style.color = m === 'new' ? '#fff' : '#555';
+  document.getElementById('post-btn-new').style.borderColor = m === 'new' ? '#c84b2f' : '#ddd';
+  document.getElementById('post-btn-sale').style.background = m === 'sale' ? '#c84b2f' : '#fff';
+  document.getElementById('post-btn-sale').style.color = m === 'sale' ? '#fff' : '#555';
+  document.getElementById('post-btn-sale').style.borderColor = m === 'sale' ? '#c84b2f' : '#ddd';
+}
+
+function wonFmt(n) { return Number(n).toLocaleString() + '원'; }
+
+function generatePost() {
+  const link = 'https://dunnaeasiamart.github.io/asia-mart';
+  let th, lo, ph, en;
+
+  if (postMode === 'new') {
+    const name = document.getElementById('post-product-name').value.trim() || '신상품';
+    const price = document.getElementById('post-product-price').value;
+    const desc = document.getElementById('post-product-desc').value.trim();
+    const catSel = document.getElementById('post-cat');
+    const emoji = catSel.selectedOptions[0]?.dataset.emoji || '🛒';
+    const priceStr = price ? wonFmt(price) : '';
+    const priceTh = priceStr ? `\n💰 ราคา ${priceStr}` : '';
+    const priceLo = priceStr ? `\n💰 ລາຄາ ${priceStr}` : '';
+    const pricePh = priceStr ? `\n💰 Presyo: ${priceStr}` : '';
+    const priceEn = priceStr ? `\n💰 Price: ${priceStr}` : '';
+    const descAll = desc ? `\n✨ ${desc}` : '';
+
+    th = `${emoji} สินค้าใหม่มาแล้ว! ${emoji}\n\n"${name}" พร้อมจำหน่ายที่ร้าน Asia Mart Dunnae แล้ววันนี้!${priceTh}${descAll}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
+    lo = `${emoji} ສິນຄ້າໃໝ່ມາແລ້ວ! ${emoji}\n\n"${name}" ພ້ອມຂາຍຢູ່ຮ້ານ Asia Mart Dunnae ແລ້ວມື້ນີ້!${priceLo}${descAll}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
+    ph = `${emoji} Bagong produkto! ${emoji}\n\n"${name}" available na sa Asia Mart Dunnae ngayon!${pricePh}${descAll}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
+    en = `${emoji} New arrival! ${emoji}\n\n"${name}" is now available at Asia Mart Dunnae!${priceEn}${descAll}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
+
+  } else {
+    const name = document.getElementById('post-sale-name').value.trim() || '상품';
+    const orig = document.getElementById('post-sale-original').value;
+    const disc = document.getElementById('post-sale-discounted').value;
+    const period = document.getElementById('post-sale-period').value.trim();
+    const pct = (orig && disc) ? Math.round((1 - disc / orig) * 100) : 0;
+    const pctStr = pct > 0 ? ` (${pct}% OFF!)` : '';
+    const origStr = orig ? wonFmt(orig) : '';
+    const discStr = disc ? wonFmt(disc) : '';
+    const priceBlock = (origStr && discStr) ? `\n💸 ${origStr} → ${discStr}${pctStr}` : discStr ? `\n💰 ${discStr}${pctStr}` : '';
+    const periodTh = period ? `\n⏰ ${period}เท่านั้น!` : '';
+    const periodLo = period ? `\n⏰ ${period}ເທົ່ານັ້ນ!` : '';
+    const periodPh = period ? `\n⏰ ${period} lang!` : '';
+    const periodEn = period ? `\n⏰ ${period} only!` : '';
+
+    th = `🔥 ลดราคาพิเศษ! 🔥\n\n"${name}" ลดราคาแล้ววันนี้!${priceBlock}${periodTh}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
+    lo = `🔥 ລຸດລາຄາພິເສດ! 🔥\n\n"${name}" ລຸດລາຄາແລ້ວມື້ນີ້!${priceBlock}${periodLo}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
+    ph = `🔥 Espesyal na sale! 🔥\n\n"${name}" sale na ngayon!${priceBlock}${periodPh}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
+    en = `🔥 Special discount! 🔥\n\n"${name}" on sale now!${priceBlock}${periodEn}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
+  }
+
+  document.getElementById('post-out-th').textContent = th;
+  document.getElementById('post-out-lo').textContent = lo;
+  document.getElementById('post-out-ph').textContent = ph;
+  document.getElementById('post-out-en').textContent = en;
+  const res = document.getElementById('post-results');
+  res.style.display = 'flex';
+  res.scrollIntoView({ behavior: 'smooth' });
+}
+
+function postCopyText(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent)
+    .then(() => showToast('📋 복사됐어요!'));
+}
+
+function postCopyAll() {
+  const th = document.getElementById('post-out-th').textContent;
+  const lo = document.getElementById('post-out-lo').textContent;
+  const ph = document.getElementById('post-out-ph').textContent;
+  const en = document.getElementById('post-out-en').textContent;
+  const all = th + '\n\n──────────\n\n' + lo + '\n\n──────────\n\n' + ph + '\n\n──────────\n\n' + en;
+  navigator.clipboard.writeText(all).then(() => showToast('✨ 4개 국어 전체 복사됐어요!'));
+}
+
 </script>
-</body>
-</html>
