@@ -495,19 +495,16 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
       <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
         <div style="font-size:15px;font-weight:700;margin-bottom:16px;">📢 페이스북 게시물 생성기</div>
-
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
           <button id="post-btn-new" onclick="setPostMode('new')" style="padding:12px;border:2px solid #c84b2f;border-radius:10px;background:#c84b2f;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">🆕 신상품 안내</button>
           <button id="post-btn-sale" onclick="setPostMode('sale')" style="padding:12px;border:2px solid #ddd;border-radius:10px;background:#fff;color:#555;font-size:14px;font-weight:700;cursor:pointer;">🔥 할인 안내</button>
         </div>
-
         <div style="margin-bottom:14px;">
           <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품 선택</label>
           <select id="post-product-select" onchange="onPostProductSelect()" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
             <option value="">-- 상품을 선택하세요 --</option>
           </select>
         </div>
-
         <div id="post-product-preview" style="display:none;background:#fafafa;border-radius:10px;padding:14px;margin-bottom:16px;">
           <div style="display:flex;gap:14px;align-items:center;">
             <img id="post-preview-img" src="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #eee;" onerror="this.style.display='none'">
@@ -518,7 +515,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             </div>
           </div>
         </div>
-
         <div id="post-sale-extra" style="display:none;margin-bottom:14px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
@@ -531,12 +527,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             </div>
           </div>
         </div>
-
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 <span style="font-weight:400;color:#bbb;">(수정해서 사용하세요)</span></label>
           <input type="text" id="post-extra-desc" value="오늘 신선하게 입고됐어요! 😊" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
         </div>
-
         <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 + 카드 이미지 생성하기</button>
       </div>
 
@@ -548,48 +542,35 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div id="post-card" style="width:100%;max-width:420px;margin:0 auto;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
 
           <!-- 헤더 -->
-          <div id="post-card-header" style="background:linear-gradient(135deg,#B02010 0%,#E04030 50%,#B02010 100%);padding:20px;text-align:center;position:relative;">
-            <!-- 헤더 장식 패턴 -->
+          <div style="background:linear-gradient(135deg,#B02010 0%,#E04030 50%,#B02010 100%);padding:16px 20px 14px;text-align:center;position:relative;">
             <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.08;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:8px 8px;"></div>
-            <!-- 상단 골드 라인 -->
-            <div style="height:3px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin-bottom:12px;border-radius:2px;"></div>
-            <div style="color:#FFE090;font-size:20px;font-weight:700;letter-spacing:3px;text-shadow:0 1px 3px rgba(0,0,0,0.3);">DUNNAE ASIA MART</div>
-            <div style="height:1px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin:10px 0;"></div>
-            <!-- 뱃지 -->
-            <div id="post-card-badge" style="display:inline-block;padding:7px 28px;border-radius:24px;font-size:15px;font-weight:700;letter-spacing:1px;border:2px solid rgba(255,255,255,0.4);box-shadow:0 2px 8px rgba(0,0,0,0.2);">🆕 NEW ARRIVAL</div>
+            <div style="height:2px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin-bottom:10px;border-radius:2px;"></div>
+            <div style="color:#FFE090;font-size:18px;font-weight:700;letter-spacing:3px;text-shadow:0 1px 3px rgba(0,0,0,0.3);margin-bottom:10px;">DUNNAE ASIA MART</div>
+            <div id="post-card-badge" style="display:inline-block;padding:6px 24px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:1px;border:2px solid rgba(255,255,255,0.4);box-shadow:0 2px 8px rgba(0,0,0,0.2);">🆕 NEW ARRIVAL</div>
+            <div style="height:2px;background:linear-gradient(90deg,transparent,#F0C840,transparent);margin-top:10px;border-radius:2px;"></div>
           </div>
 
-          <!-- 이미지 영역 -->
-          <div style="background:#FFF8F0;padding:0;text-align:center;position:relative;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center;">
-            <!-- 배경 장식 -->
-            <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(200,56,42,0.06);"></div>
-            <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(200,56,42,0.06);"></div>
-            <img id="post-card-img" src="" style="max-width:100%;max-height:240px;object-fit:contain;position:relative;z-index:1;padding:16px;" onerror="this.style.display='none'">
-            <div id="post-card-emoji" style="font-size:90px;display:none;position:relative;z-index:1;">🛒</div>
+          <!-- 이미지 영역 - 크게! -->
+          <div style="background:#FFF8F0;text-align:center;position:relative;overflow:hidden;min-height:320px;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(200,56,42,0.05);"></div>
+            <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:rgba(200,56,42,0.05);"></div>
+            <img id="post-card-img" src="" style="width:100%;max-height:340px;object-fit:contain;position:relative;z-index:1;padding:12px;" onerror="this.style.display='none'">
+            <div id="post-card-emoji" style="font-size:110px;display:none;position:relative;z-index:1;">🛒</div>
           </div>
 
           <!-- 상품 정보 -->
-          <div style="background:#fff;padding:18px 20px;">
-            <!-- 카테고리 태그 -->
+          <div style="background:#fff;padding:16px 20px;">
             <div id="post-card-cat-tag" style="display:inline-block;background:#FFF0E8;color:#C84020;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;border:1px solid #FFD0B0;"></div>
-
-            <!-- 4개 국어 상품명 -->
             <div id="post-card-name-th" style="font-size:17px;font-weight:700;color:#1a1200;margin-bottom:3px;line-height:1.4;"></div>
             <div id="post-card-name-lo" style="font-size:14px;color:#555;margin-bottom:3px;line-height:1.4;"></div>
             <div id="post-card-name-en" style="font-size:13px;color:#999;margin-bottom:14px;line-height:1.4;"></div>
-
-            <!-- 구분선 -->
-            <div style="height:1px;background:linear-gradient(90deg,#F0C840,#FFE090,#F0C840);margin-bottom:14px;border-radius:1px;"></div>
-
-            <!-- 가격 -->
+            <div style="height:2px;background:linear-gradient(90deg,#F0C840,#FFE090,#F0C840);margin-bottom:14px;border-radius:1px;"></div>
             <div id="post-card-orig-price" style="font-size:14px;color:#bbb;text-decoration:line-through;display:none;margin-bottom:2px;"></div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-              <div id="post-card-price" style="font-size:36px;font-weight:700;color:#C8382A;line-height:1;"></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div id="post-card-price" style="font-size:38px;font-weight:700;color:#C8382A;line-height:1;"></div>
               <div id="post-card-pct-badge" style="display:none;background:#C8382A;color:#fff;font-size:13px;font-weight:700;padding:4px 12px;border-radius:12px;"></div>
             </div>
-
-            <!-- 무료배송 -->
-            <div style="background:#FFF8E8;border:1px solid #F0D890;border-radius:8px;padding:7px 12px;font-size:12px;color:#8a6010;margin-bottom:0;">
+            <div style="background:#FFF8E8;border:1px solid #F0D890;border-radius:8px;padding:7px 12px;font-size:12px;color:#8a6010;">
               🚚 5만원 이상 무료배송 &nbsp;·&nbsp; Free delivery over ₩50,000
             </div>
           </div>
@@ -2541,45 +2522,30 @@ function updatePostCard() {
   const salePrice = isSale?(parseInt(document.getElementById('post-sale-price').value)||0):0;
   const pct = (origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
 
-  // 뱃지
   const badge = document.getElementById('post-card-badge');
-  if (isSale) {
-    badge.textContent='🔥 SPECIAL SALE';
-    badge.style.background='linear-gradient(135deg,#FF4010,#FF6030)';
-    badge.style.color='#fff';
-  } else {
-    badge.textContent='🆕 NEW ARRIVAL';
-    badge.style.background='linear-gradient(135deg,#1a7a35,#2aaa50)';
-    badge.style.color='#fff';
-  }
+  if (isSale) { badge.textContent='🔥 SPECIAL SALE'; badge.style.background='linear-gradient(135deg,#FF4010,#FF6030)'; }
+  else { badge.textContent='🆕 NEW ARRIVAL'; badge.style.background='linear-gradient(135deg,#1a7a35,#2aaa50)'; }
+  badge.style.color='#fff';
 
-  // 이미지
   const cardImg = document.getElementById('post-card-img');
   const cardEmoji = document.getElementById('post-card-emoji');
-  if (postProductData.image) {
-    cardImg.src=postProductData.image; cardImg.style.display='block'; cardEmoji.style.display='none';
-  } else {
-    cardImg.style.display='none'; cardEmoji.textContent=postProductData.emoji||'🛒'; cardEmoji.style.display='block';
-  }
+  if (postProductData.image) { cardImg.src=postProductData.image; cardImg.style.display='block'; cardEmoji.style.display='none'; }
+  else { cardImg.style.display='none'; cardEmoji.textContent=postProductData.emoji||'🛒'; cardEmoji.style.display='block'; }
 
-  // 카테고리 태그
   const catTag = document.getElementById('post-card-cat-tag');
-  if (catTag) catTag.textContent = (postProductData.emoji||'') + ' ' + (postProductData.cat_ko||'');
+  if (catTag) catTag.textContent=(postProductData.emoji||'')+' '+(postProductData.cat_ko||'');
 
-  // 4개 국어 상품명 (한글 제외)
-  document.getElementById('post-card-name-th').textContent = postProductData.name_th||postProductData.name_en||'';
-  document.getElementById('post-card-name-lo').textContent = postProductData.name_lo||postProductData.name_en||'';
-  document.getElementById('post-card-name-en').textContent = postProductData.name_en||'';
+  document.getElementById('post-card-name-th').textContent=postProductData.name_th||postProductData.name_en||'';
+  document.getElementById('post-card-name-lo').textContent=postProductData.name_lo||postProductData.name_en||'';
+  document.getElementById('post-card-name-en').textContent=postProductData.name_en||'';
 
-  // 가격
   const priceEl=document.getElementById('post-card-price');
   const origEl=document.getElementById('post-card-orig-price');
   const pctEl=document.getElementById('post-card-pct-badge');
   if (isSale&&salePrice) {
     if(origPrice){origEl.textContent='₩'+origPrice.toLocaleString();origEl.style.display='block';}
     priceEl.textContent='₩'+salePrice.toLocaleString();
-    if(pct>0){pctEl.textContent=pct+'% SAVE';pctEl.style.display='inline-block';}
-    else pctEl.style.display='none';
+    if(pct>0){pctEl.textContent=pct+'% SAVE';pctEl.style.display='inline-block';} else pctEl.style.display='none';
   } else {
     origEl.style.display='none'; pctEl.style.display='none';
     priceEl.textContent=origPrice?'₩'+origPrice.toLocaleString():'';
@@ -2587,8 +2553,7 @@ function updatePostCard() {
 }
 
 function postCopy(id){
-  navigator.clipboard.writeText(document.getElementById(id).textContent)
-    .then(()=>showToast('📋 복사됐어요!'));
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>showToast('📋 복사됐어요!'));
 }
 function postCopyAll(){
   const all=['post-out-th','post-out-lo','post-out-ph','post-out-en']
