@@ -533,8 +533,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 (선택)</label>
-          <input type="text" id="post-extra-desc" placeholder="예: 태국 정품, 오늘 신선하게 입고됨" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+          <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 <span style="font-weight:400;color:#bbb;">(수정해서 사용하세요)</span></label>
+          <input type="text" id="post-extra-desc" value="오늘 신선하게 입고됐어요! 😊" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
         </div>
 
         <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 + 카드 이미지 생성하기</button>
@@ -2377,6 +2377,11 @@ async function saveNew() {
 let postMode = 'new';
 let postProductData = {};
 
+const POST_DESC_DEFAULT = {
+  new:  '오늘 신선하게 입고됐어요! 😊',
+  sale: '한정 수량이에요! 서두르세요! 😊'
+};
+
 async function loadPostProducts() {
   const sel = document.getElementById('post-product-select');
   if (!sel) return;
@@ -2430,6 +2435,9 @@ function onPostProductSelect() {
 function setPostMode(m) {
   postMode = m;
   document.getElementById('post-sale-extra').style.display = m==='sale'?'block':'none';
+  // 추가설명 기본값 모드에 맞게 변경
+  const descEl = document.getElementById('post-extra-desc');
+  if (descEl) descEl.value = POST_DESC_DEFAULT[m];
   ['new','sale'].forEach(t => {
     const b = document.getElementById('post-btn-'+t);
     const on = t===m;
@@ -2493,65 +2501,43 @@ async function drawPostCard() {
   canvas.width=W; canvas.height=H;
   const isSale = postMode==='sale';
 
-  // 배경 (밝은 크림)
   ctx.fillStyle='#FFF8E7';
   ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(200,100,0,0.07)';
+  for(let x=20;x<W;x+=20) for(let y=20;y<H;y+=20){ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill();}
 
-  // 점 패턴
-  ctx.fillStyle='rgba(200,100,0,0.08)';
-  for(let x=20;x<W;x+=20) for(let y=20;y<H;y+=20) { ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill(); }
-
-  // 상단 레드 헤더
-  ctx.fillStyle = isSale?'#C8382A':'#C8382A';
+  ctx.fillStyle='#C8382A';
   ctx.fillRect(0,0,W,180);
-
-  // 헤더 패턴
-  ctx.strokeStyle='rgba(255,255,255,0.08)';
-  ctx.lineWidth=0.5;
+  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=0.5;
   for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,180);ctx.stroke();}
   for(let y=0;y<180;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  // 로고 텍스트
-  ctx.fillStyle='#FFE090';
-  ctx.font='bold 32px Georgia,serif';
-  ctx.textAlign='center';
+  ctx.fillStyle='#FFE090'; ctx.font='bold 32px Georgia,serif'; ctx.textAlign='center';
   ctx.fillText('DUNNAE ASIA MART', W/2, 70);
+  ctx.strokeStyle='#D4A020'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(80,84);ctx.lineTo(W-80,84);ctx.stroke();
 
-  // 골드 구분선
-  ctx.strokeStyle='#D4A020';
-  ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.moveTo(80,85);ctx.lineTo(W-80,85);ctx.stroke();
-
-  // 뱃지
-  const badgeText = isSale?'🔥  SALE':'🆕  NEW';
-  const badgeColor = isSale?'#FF6030':'#2d9a50';
+  const badgeColor = isSale?'#FF5020':'#2a8a45';
   ctx.fillStyle=badgeColor;
-  roundRect(ctx,W/2-90,96,180,52,26); ctx.fill();
+  roundRect(ctx,W/2-90,94,180,54,27); ctx.fill();
   ctx.strokeStyle='#FFE090'; ctx.lineWidth=2;
-  roundRect(ctx,W/2-90,96,180,52,26); ctx.stroke();
-  ctx.fillStyle='#fff';
-  ctx.font='bold 26px Arial,sans-serif';
-  ctx.fillText(badgeText, W/2, 131);
+  roundRect(ctx,W/2-90,94,180,54,27); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 26px Arial,sans-serif';
+  ctx.fillText(isSale?'🔥  SALE':'🆕  NEW', W/2, 129);
 
-  // 상품 이미지 영역
   const imgY=190, imgH=320;
-  ctx.fillStyle='#fff';
-  roundRect(ctx,40,imgY,W-80,imgH,12); ctx.fill();
+  ctx.fillStyle='#fff'; roundRect(ctx,40,imgY,W-80,imgH,12); ctx.fill();
   ctx.strokeStyle='#E8D090'; ctx.lineWidth=1.5;
   roundRect(ctx,40,imgY,W-80,imgH,12); ctx.stroke();
 
   if (postProductData.image) {
     try {
       const img = await loadImg(postProductData.image);
-      const iW=W-80, iH=imgH;
-      const scale=Math.min(iW/img.width,iH/img.height);
-      const dw=img.width*scale, dh=img.height*scale;
-      const dx=40+(iW-dw)/2, dy=imgY+(iH-dh)/2;
-      ctx.save();
-      roundRect(ctx,40,imgY,iW,imgH,12); ctx.clip();
-      ctx.drawImage(img,dx,dy,dw,dh);
-      ctx.restore();
-    } catch(e) {
+      const iW=W-80,iH=imgH,scale=Math.min(iW/img.width,iH/img.height);
+      const dw=img.width*scale,dh=img.height*scale,dx=40+(iW-dw)/2,dy=imgY+(iH-dh)/2;
+      ctx.save(); roundRect(ctx,40,imgY,iW,imgH,12); ctx.clip();
+      ctx.drawImage(img,dx,dy,dw,dh); ctx.restore();
+    } catch(e){
       ctx.font='90px Arial'; ctx.textAlign='center';
       ctx.fillText(postProductData.emoji||'🛒',W/2,imgY+imgH/2+30);
     }
@@ -2560,66 +2546,48 @@ async function drawPostCard() {
     ctx.fillText(postProductData.emoji||'🛒',W/2,imgY+imgH/2+30);
   }
 
-  // 상품명 영역
   const infoY=imgY+imgH+20;
-  ctx.fillStyle='#fff';
-  roundRect(ctx,40,infoY,W-80,230,12); ctx.fill();
+  ctx.fillStyle='#fff'; roundRect(ctx,40,infoY,W-80,230,12); ctx.fill();
   ctx.strokeStyle='#E8D090'; ctx.lineWidth=1.5;
   roundRect(ctx,40,infoY,W-80,230,12); ctx.stroke();
 
-  // 상품명 한국어
-  ctx.fillStyle='#1a1200';
-  ctx.font='bold 38px Arial,sans-serif';
-  ctx.textAlign='center';
-  const nameKo = postProductData.name_ko||postProductData.name_en||'';
-  ctx.fillText(nameKo, W/2, infoY+52);
-
-  // 상품명 영문
-  ctx.fillStyle='#888';
-  ctx.font='18px Arial,sans-serif';
+  ctx.fillStyle='#1a1200'; ctx.font='bold 38px Arial,sans-serif'; ctx.textAlign='center';
+  ctx.fillText(postProductData.name_ko||postProductData.name_en||'', W/2, infoY+52);
+  ctx.fillStyle='#999'; ctx.font='17px Arial';
   ctx.fillText(postProductData.name_en||'', W/2, infoY+80);
 
-  // 골드 구분선
   ctx.strokeStyle='#D4A020'; ctx.lineWidth=1; ctx.globalAlpha=0.4;
   ctx.beginPath();ctx.moveTo(80,infoY+94);ctx.lineTo(W-80,infoY+94);ctx.stroke();
   ctx.globalAlpha=1;
 
-  // 가격
   const origPrice=postProductData.price||0;
   if (isSale) {
     const salePrice=parseInt(document.getElementById('post-sale-price').value)||0;
     const pct=(origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
-    if (origPrice) {
-      ctx.fillStyle='#aaa'; ctx.font='20px Arial'; ctx.textAlign='center';
+    if(origPrice){
+      ctx.fillStyle='#bbb'; ctx.font='20px Arial'; ctx.textAlign='center';
       const oStr='₩'+origPrice.toLocaleString();
       const tw=ctx.measureText(oStr).width;
       ctx.fillText(oStr,W/2,infoY+130);
-      ctx.strokeStyle='#aaa'; ctx.lineWidth=1.5;
+      ctx.strokeStyle='#bbb'; ctx.lineWidth=1.5;
       ctx.beginPath();ctx.moveTo(W/2-tw/2,infoY+124);ctx.lineTo(W/2+tw/2,infoY+124);ctx.stroke();
     }
-    ctx.fillStyle='#C8382A';
-    ctx.font='bold 52px Arial,sans-serif';
+    ctx.fillStyle='#C8382A'; ctx.font='bold 52px Arial'; ctx.textAlign='center';
     ctx.fillText('₩'+(salePrice||0).toLocaleString(),W/2,infoY+178);
     if(pct>0){
-      ctx.fillStyle='#C8382A';
-      roundRect(ctx,W/2-60,infoY+185,120,32,16); ctx.fill();
+      ctx.fillStyle='#C8382A'; roundRect(ctx,W/2-60,infoY+185,120,32,16); ctx.fill();
       ctx.fillStyle='#fff'; ctx.font='bold 16px Arial';
       ctx.fillText(pct+'% SAVE',W/2,infoY+206);
     }
   } else {
-    ctx.fillStyle='#C8382A';
-    ctx.font='bold 56px Arial,sans-serif';
-    ctx.textAlign='center';
+    ctx.fillStyle='#C8382A'; ctx.font='bold 56px Arial'; ctx.textAlign='center';
     ctx.fillText('₩'+origPrice.toLocaleString(),W/2,infoY+175);
   }
 
-  // 무료배송
-  ctx.fillStyle='#888'; ctx.font='15px Arial'; ctx.textAlign='center';
+  ctx.fillStyle='#999'; ctx.font='15px Arial'; ctx.textAlign='center';
   ctx.fillText('🚚 5만원 이상 무료배송  ·  Free delivery over ₩50,000',W/2,infoY+215);
 
-  // 하단 바
-  ctx.fillStyle='#C8382A';
-  ctx.fillRect(0,H-50,W,50);
+  ctx.fillStyle='#C8382A'; ctx.fillRect(0,H-50,W,50);
   ctx.fillStyle='#FFE090'; ctx.font='13px Arial'; ctx.textAlign='center';
   ctx.fillText('💬 DM us on Facebook  ·  dunnaeasiamart.github.io/asia-mart',W/2,H-20);
 }
@@ -2643,9 +2611,8 @@ function loadImg(src){
 function downloadPostCard(){
   const canvas=document.getElementById('post-canvas');
   const name=(postProductData.name_ko||postProductData.name_en||'product').replace(/\s+/g,'_');
-  const mode=postMode==='new'?'신상품':'할인';
   const a=document.createElement('a');
-  a.download=`아시아마트_${mode}_${name}.png`;
+  a.download=`아시아마트_${postMode==='new'?'신상품':'할인'}_${name}.png`;
   a.href=canvas.toDataURL('image/png'); a.click();
 }
 
