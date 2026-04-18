@@ -489,88 +489,86 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
-  <!-- 게시물 생성기 -->
+  <!-- 게시물 생성 -->
   <div id="tab-post" class="tab-content">
-    <div style="max-width:700px;margin:24px auto;display:flex;flex-direction:column;gap:16px;">
+    <div style="max-width:720px;margin:24px auto;display:flex;flex-direction:column;gap:16px;">
 
-      <!-- 모드 선택 -->
       <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
         <div style="font-size:15px;font-weight:700;margin-bottom:16px;">📢 페이스북 게시물 생성기</div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
           <button id="post-btn-new" onclick="setPostMode('new')" style="padding:12px;border:2px solid #c84b2f;border-radius:10px;background:#c84b2f;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">🆕 신상품 안내</button>
           <button id="post-btn-sale" onclick="setPostMode('sale')" style="padding:12px;border:2px solid #ddd;border-radius:10px;background:#fff;color:#555;font-size:14px;font-weight:700;cursor:pointer;">🔥 할인 안내</button>
         </div>
 
-        <!-- 신상품 폼 -->
-        <div id="post-form-new">
-          <div style="margin-bottom:14px;">
-            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">카테고리</label>
-            <select id="post-cat" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-              <option value="">로딩 중...</option>
-            </select>
-          </div>
-          <div style="margin-bottom:14px;">
-            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품명 (한국어)</label>
-            <input type="text" id="post-product-name" placeholder="예: 새우깡, 코코넛밀크, 쌀국수" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품 선택</label>
+          <select id="post-product-select" onchange="onPostProductSelect()" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            <option value="">-- 상품을 선택하세요 --</option>
+          </select>
+        </div>
+
+        <div id="post-product-preview" style="display:none;background:#fafafa;border-radius:10px;padding:14px;margin-bottom:16px;">
+          <div style="display:flex;gap:14px;align-items:center;">
+            <img id="post-preview-img" src="" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #eee;" onerror="this.style.display='none'">
             <div>
-              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">가격 (원)</label>
-              <input type="number" id="post-product-price" placeholder="예: 3500" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 (선택)</label>
-              <input type="text" id="post-product-desc" placeholder="예: 태국 정품" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+              <div id="post-preview-name" style="font-size:14px;font-weight:700;margin-bottom:4px;"></div>
+              <div id="post-preview-price" style="font-size:13px;color:#c84b2f;font-weight:600;"></div>
+              <div id="post-preview-cat" style="font-size:12px;color:#aaa;margin-top:2px;"></div>
             </div>
           </div>
         </div>
 
-        <!-- 할인 폼 -->
-        <div id="post-form-sale" style="display:none;">
-          <div style="margin-bottom:14px;">
-            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">상품명 (한국어)</label>
-            <input type="text" id="post-sale-name" placeholder="예: 재스민 쌀 10kg" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-            <div>
-              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">원래 가격 (원)</label>
-              <input type="number" id="post-sale-original" placeholder="예: 35000" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-            </div>
+        <div id="post-sale-extra" style="display:none;margin-bottom:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
               <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">할인 가격 (원)</label>
-              <input type="number" id="post-sale-discounted" placeholder="예: 28000" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+              <input type="number" id="post-sale-price" placeholder="예: 28000" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+            </div>
+            <div>
+              <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">할인 기간 (선택)</label>
+              <input type="text" id="post-sale-period" placeholder="예: 이번 주말까지" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
             </div>
           </div>
-          <div style="margin-bottom:14px;">
-            <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">할인 기간 (선택)</label>
-            <input type="text" id="post-sale-period" placeholder="예: 이번 주말까지, 오늘만" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-          </div>
         </div>
 
-        <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 생성하기</button>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;color:#888;font-weight:600;display:block;margin-bottom:6px;">추가 설명 (선택)</label>
+          <input type="text" id="post-extra-desc" placeholder="예: 태국 정품, 오늘 신선하게 입고됨" style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+        </div>
+
+        <button onclick="generatePost()" style="width:100%;padding:13px;background:#c84b2f;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">게시물 + 카드 이미지 생성하기</button>
       </div>
 
-      <!-- 결과 -->
-      <div id="post-results" style="display:none;display:flex;flex-direction:column;gap:12px;">
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#A51931;color:#fff;">🇹🇭 ไทย</div>
+      <!-- 카드 이미지 -->
+      <div id="post-card-wrap" style="display:none;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px;">🖼️ 홍보 카드 이미지</div>
+        <canvas id="post-canvas" width="800" height="800" style="width:100%;max-width:400px;display:block;margin:0 auto;border-radius:10px;border:1px solid #eee;"></canvas>
+        <button onclick="downloadPostCard()" style="width:100%;margin-top:14px;padding:12px;background:#1a1814;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">⬇️ 이미지 다운로드</button>
+      </div>
+
+      <!-- 문구 -->
+      <div id="post-text-wrap" style="display:none;flex-direction:column;gap:12px;">
+        <div style="font-size:14px;font-weight:700;padding:0 4px;">📝 게시물 문구</div>
+        <div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#A51931;color:#fff;">🇹🇭 ไทย</span>
           <div id="post-out-th" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
-          <button onclick="postCopyText('post-out-th')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+          <button onclick="postCopy('post-out-th')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;">복사</button>
         </div>
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#CE1126;color:#fff;">🇱🇦 ລາວ</div>
+        <div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#CE1126;color:#fff;">🇱🇦 ລາວ</span>
           <div id="post-out-lo" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
-          <button onclick="postCopyText('post-out-lo')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+          <button onclick="postCopy('post-out-lo')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;">복사</button>
         </div>
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#0038A8;color:#fff;">🇵🇭 Filipino</div>
+        <div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#0038A8;color:#fff;">🇵🇭 Filipino</span>
           <div id="post-out-ph" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
-          <button onclick="postCopyText('post-out-ph')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+          <button onclick="postCopy('post-out-ph')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;">복사</button>
         </div>
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <div style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#333;color:#fff;">🌐 English</div>
+        <div style="background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span style="display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;background:#333;color:#fff;">🌐 English</span>
           <div id="post-out-en" style="font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;"></div>
-          <button onclick="postCopyText('post-out-en')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#555;">복사</button>
+          <button onclick="postCopy('post-out-en')" style="margin-top:10px;padding:6px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:12px;cursor:pointer;">복사</button>
         </div>
         <button onclick="postCopyAll()" style="width:100%;padding:13px;background:#D4A857;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">✨ 전체 4개 국어 한번에 복사</button>
       </div>
@@ -761,7 +759,7 @@ function switchTab(tab, triggerEl) {
   if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
   if (tab === 'excel') loadRetranslateCatSelect();
-  if (tab === 'post') loadPostCategories();
+  if (tab === 'post') loadPostProducts();
 }
 
 function markChanged(id, type) {
@@ -2377,107 +2375,291 @@ async function saveNew() {
 
 // ===== 게시물 생성기 =====
 let postMode = 'new';
+let postProductData = {};
 
-async function loadPostCategories() {
-  const sel = document.getElementById('post-cat');
+async function loadPostProducts() {
+  const sel = document.getElementById('post-product-select');
   if (!sel) return;
+  sel.innerHTML = '<option value="">-- 상품을 선택하세요 --</option>';
   try {
     const snap = await db.ref('catalog').get();
     const catalog = snap.val() || {};
-    sel.innerHTML = '<option value="">카테고리 선택</option>';
-    Object.keys(catalog).forEach(key => {
+    const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+    const ordered = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
+    ordered.forEach(key => {
       const cat = catalog[key];
-      const label = cat.name_ko || cat.name_en || key;
-      const emoji = cat.emoji || '🛒';
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.dataset.emoji = emoji;
-      opt.textContent = emoji + ' ' + label;
-      sel.appendChild(opt);
+      if (!cat || !cat.items) return;
+      const grp = document.createElement('optgroup');
+      grp.label = (cat.emoji||'🛒') + ' ' + (cat.name_ko||cat.name_en||key);
+      (cat.items||[]).forEach(item => {
+        const opt = document.createElement('option');
+        const nameKo = (item.name_ko||item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+        opt.value = JSON.stringify({
+          id: item.id,
+          name_ko: nameKo,
+          name_en: (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          name_th: item.name_th||'',
+          name_lo: item.name_lo||'',
+          price: item.price1||0,
+          image: item.images?.[0]||item.image||'',
+          emoji: cat.emoji||'🛒',
+          cat_ko: cat.name_ko||cat.name_en||key
+        });
+        opt.textContent = `${item.id}. ${nameKo} — ₩${(item.price1||0).toLocaleString()}`;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
     });
-  } catch(e) {
-    sel.innerHTML = '<option value="">카테고리 로드 실패</option>';
-  }
+  } catch(e) { sel.innerHTML = '<option value="">상품 로드 실패</option>'; }
+}
+
+function onPostProductSelect() {
+  const val = document.getElementById('post-product-select').value;
+  const preview = document.getElementById('post-product-preview');
+  if (!val) { preview.style.display='none'; postProductData={}; return; }
+  postProductData = JSON.parse(val);
+  const img = document.getElementById('post-preview-img');
+  if (postProductData.image) { img.src=postProductData.image; img.style.display='block'; }
+  else img.style.display='none';
+  document.getElementById('post-preview-name').textContent = postProductData.name_ko||postProductData.name_en;
+  document.getElementById('post-preview-price').textContent = '₩'+(postProductData.price||0).toLocaleString();
+  document.getElementById('post-preview-cat').textContent = postProductData.cat_ko;
+  preview.style.display='block';
 }
 
 function setPostMode(m) {
   postMode = m;
-  document.getElementById('post-form-new').style.display = m === 'new' ? 'block' : 'none';
-  document.getElementById('post-form-sale').style.display = m === 'sale' ? 'block' : 'none';
-  document.getElementById('post-btn-new').style.background = m === 'new' ? '#c84b2f' : '#fff';
-  document.getElementById('post-btn-new').style.color = m === 'new' ? '#fff' : '#555';
-  document.getElementById('post-btn-new').style.borderColor = m === 'new' ? '#c84b2f' : '#ddd';
-  document.getElementById('post-btn-sale').style.background = m === 'sale' ? '#c84b2f' : '#fff';
-  document.getElementById('post-btn-sale').style.color = m === 'sale' ? '#fff' : '#555';
-  document.getElementById('post-btn-sale').style.borderColor = m === 'sale' ? '#c84b2f' : '#ddd';
+  document.getElementById('post-sale-extra').style.display = m==='sale'?'block':'none';
+  ['new','sale'].forEach(t => {
+    const b = document.getElementById('post-btn-'+t);
+    const on = t===m;
+    b.style.background = on?'#c84b2f':'#fff';
+    b.style.color = on?'#fff':'#555';
+    b.style.borderColor = on?'#c84b2f':'#ddd';
+  });
 }
 
-function wonFmt(n) { return Number(n).toLocaleString() + '원'; }
+function wonFmt(n){ return Number(n).toLocaleString()+'원'; }
 
-function generatePost() {
+async function generatePost() {
+  if (!postProductData.id) { showToast('⚠️ 상품을 먼저 선택해주세요'); return; }
   const link = 'https://dunnaeasiamart.github.io/asia-mart';
-  let th, lo, ph, en;
+  const nKo = postProductData.name_ko||postProductData.name_en||'';
+  const nTh = postProductData.name_th||nKo;
+  const nLo = postProductData.name_lo||nKo;
+  const nEn = postProductData.name_en||nKo;
+  const emoji = postProductData.emoji||'🛒';
+  const origPrice = postProductData.price||0;
+  const desc = document.getElementById('post-extra-desc').value.trim();
+  const descStr = desc?`\n✨ ${desc}`:'';
+  let th,lo,ph,en;
 
-  if (postMode === 'new') {
-    const name = document.getElementById('post-product-name').value.trim() || '신상품';
-    const price = document.getElementById('post-product-price').value;
-    const desc = document.getElementById('post-product-desc').value.trim();
-    const catSel = document.getElementById('post-cat');
-    const emoji = catSel.selectedOptions[0]?.dataset.emoji || '🛒';
-    const priceStr = price ? wonFmt(price) : '';
-    const priceTh = priceStr ? `\n💰 ราคา ${priceStr}` : '';
-    const priceLo = priceStr ? `\n💰 ລາຄາ ${priceStr}` : '';
-    const pricePh = priceStr ? `\n💰 Presyo: ${priceStr}` : '';
-    const priceEn = priceStr ? `\n💰 Price: ${priceStr}` : '';
-    const descAll = desc ? `\n✨ ${desc}` : '';
-
-    th = `${emoji} สินค้าใหม่มาแล้ว! ${emoji}\n\n"${name}" พร้อมจำหน่ายที่ร้าน Asia Mart Dunnae แล้ววันนี้!${priceTh}${descAll}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
-    lo = `${emoji} ສິນຄ້າໃໝ່ມາແລ້ວ! ${emoji}\n\n"${name}" ພ້ອມຂາຍຢູ່ຮ້ານ Asia Mart Dunnae ແລ້ວມື້ນີ້!${priceLo}${descAll}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
-    ph = `${emoji} Bagong produkto! ${emoji}\n\n"${name}" available na sa Asia Mart Dunnae ngayon!${pricePh}${descAll}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
-    en = `${emoji} New arrival! ${emoji}\n\n"${name}" is now available at Asia Mart Dunnae!${priceEn}${descAll}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
-
+  if (postMode==='new') {
+    const pTh = origPrice?`\n💰 ราคา ${wonFmt(origPrice)}`:'';
+    const pLo = origPrice?`\n💰 ລາຄາ ${wonFmt(origPrice)}`:'';
+    const pPh = origPrice?`\n💰 Presyo: ${wonFmt(origPrice)}`:'';
+    const pEn = origPrice?`\n💰 Price: ${wonFmt(origPrice)}`:'';
+    th=`${emoji} สินค้าใหม่มาแล้ว! ${emoji}\n\n"${nTh}" พร้อมจำหน่ายที่ร้าน Dunnae Asia Mart แล้ววันนี้!${pTh}${descStr}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
+    lo=`${emoji} ສິນຄ້າໃໝ່ມາແລ້ວ! ${emoji}\n\n"${nLo}" ພ້ອມຂາຍຢູ່ຮ້ານ Dunnae Asia Mart ແລ້ວມື້ນີ້!${pLo}${descStr}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
+    ph=`${emoji} Bagong produkto! ${emoji}\n\n"${nEn}" available na sa Dunnae Asia Mart ngayon!${pPh}${descStr}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
+    en=`${emoji} New arrival! ${emoji}\n\n"${nEn}" is now available at Dunnae Asia Mart!${pEn}${descStr}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
   } else {
-    const name = document.getElementById('post-sale-name').value.trim() || '상품';
-    const orig = document.getElementById('post-sale-original').value;
-    const disc = document.getElementById('post-sale-discounted').value;
+    const salePrice = parseInt(document.getElementById('post-sale-price').value)||0;
     const period = document.getElementById('post-sale-period').value.trim();
-    const pct = (orig && disc) ? Math.round((1 - disc / orig) * 100) : 0;
-    const pctStr = pct > 0 ? ` (${pct}% OFF!)` : '';
-    const origStr = orig ? wonFmt(orig) : '';
-    const discStr = disc ? wonFmt(disc) : '';
-    const priceBlock = (origStr && discStr) ? `\n💸 ${origStr} → ${discStr}${pctStr}` : discStr ? `\n💰 ${discStr}${pctStr}` : '';
-    const periodTh = period ? `\n⏰ ${period}เท่านั้น!` : '';
-    const periodLo = period ? `\n⏰ ${period}ເທົ່ານັ້ນ!` : '';
-    const periodPh = period ? `\n⏰ ${period} lang!` : '';
-    const periodEn = period ? `\n⏰ ${period} only!` : '';
-
-    th = `🔥 ลดราคาพิเศษ! 🔥\n\n"${name}" ลดราคาแล้ววันนี้!${priceBlock}${periodTh}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
-    lo = `🔥 ລຸດລາຄາພິເສດ! 🔥\n\n"${name}" ລຸດລາຄາແລ້ວມື້ນີ້!${priceBlock}${periodLo}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
-    ph = `🔥 Espesyal na sale! 🔥\n\n"${name}" sale na ngayon!${priceBlock}${periodPh}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
-    en = `🔥 Special discount! 🔥\n\n"${name}" on sale now!${priceBlock}${periodEn}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
+    const pct = (origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
+    const pctStr = pct>0?` (${pct}% OFF!)`:'';
+    const priceBlock = (origPrice&&salePrice)?`\n💸 ${wonFmt(origPrice)} → ${wonFmt(salePrice)}${pctStr}`:salePrice?`\n💰 ${wonFmt(salePrice)}${pctStr}`:'';
+    th=`🔥 ลดราคาพิเศษ! 🔥\n\n"${nTh}" ลดราคาแล้ววันนี้!${priceBlock}${period?`\n⏰ ${period}เท่านั้น`:''}${descStr}\n\n🚚 สั่งออนไลน์ได้เลย! ส่งฟรีเมื่อซื้อครบ 50,000 วอน\n👉 ${link}\n💬 สอบถามได้ทาง DM`;
+    lo=`🔥 ລຸດລາຄາພິເສດ! 🔥\n\n"${nLo}" ລຸດລາຄາແລ້ວມື້ນີ້!${priceBlock}${period?`\n⏰ ${period}ເທົ່ານັ້ນ`:''}${descStr}\n\n🚚 ສັ່ງອອນໄລນ໌ໄດ້ເລີຍ! ສົ່ງຟຣີເມື່ອຊື້ຄົບ 50,000 ວອນ\n👉 ${link}\n💬 ຖາມໄດ້ທາງ DM`;
+    ph=`🔥 Espesyal na sale! 🔥\n\n"${nEn}" sale na ngayon!${priceBlock}${period?`\n⏰ ${period} lang`:''}${descStr}\n\n🚚 Mag-order online na! Libreng delivery kapag umabot sa ₩50,000\n👉 ${link}\n💬 Mag-DM para sa katanungan`;
+    en=`🔥 Special discount! 🔥\n\n"${nEn}" on sale now!${priceBlock}${period?`\n⏰ ${period} only`:''}${descStr}\n\n🚚 Order online! Free delivery over ₩50,000\n👉 ${link}\n💬 DM us for any questions`;
   }
 
-  document.getElementById('post-out-th').textContent = th;
-  document.getElementById('post-out-lo').textContent = lo;
-  document.getElementById('post-out-ph').textContent = ph;
-  document.getElementById('post-out-en').textContent = en;
-  const res = document.getElementById('post-results');
-  res.style.display = 'flex';
-  res.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('post-out-th').textContent=th;
+  document.getElementById('post-out-lo').textContent=lo;
+  document.getElementById('post-out-ph').textContent=ph;
+  document.getElementById('post-out-en').textContent=en;
+  document.getElementById('post-text-wrap').style.display='flex';
+
+  await drawPostCard();
+  document.getElementById('post-card-wrap').style.display='block';
+  document.getElementById('post-card-wrap').scrollIntoView({behavior:'smooth'});
 }
 
-function postCopyText(id) {
+async function drawPostCard() {
+  const canvas = document.getElementById('post-canvas');
+  const ctx = canvas.getContext('2d');
+  const W=800, H=800;
+  canvas.width=W; canvas.height=H;
+  const isSale = postMode==='sale';
+
+  // 배경 (밝은 크림)
+  ctx.fillStyle='#FFF8E7';
+  ctx.fillRect(0,0,W,H);
+
+  // 점 패턴
+  ctx.fillStyle='rgba(200,100,0,0.08)';
+  for(let x=20;x<W;x+=20) for(let y=20;y<H;y+=20) { ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill(); }
+
+  // 상단 레드 헤더
+  ctx.fillStyle = isSale?'#C8382A':'#C8382A';
+  ctx.fillRect(0,0,W,180);
+
+  // 헤더 패턴
+  ctx.strokeStyle='rgba(255,255,255,0.08)';
+  ctx.lineWidth=0.5;
+  for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,180);ctx.stroke();}
+  for(let y=0;y<180;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // 로고 텍스트
+  ctx.fillStyle='#FFE090';
+  ctx.font='bold 32px Georgia,serif';
+  ctx.textAlign='center';
+  ctx.fillText('DUNNAE ASIA MART', W/2, 70);
+
+  // 골드 구분선
+  ctx.strokeStyle='#D4A020';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(80,85);ctx.lineTo(W-80,85);ctx.stroke();
+
+  // 뱃지
+  const badgeText = isSale?'🔥  SALE':'🆕  NEW';
+  const badgeColor = isSale?'#FF6030':'#2d9a50';
+  ctx.fillStyle=badgeColor;
+  roundRect(ctx,W/2-90,96,180,52,26); ctx.fill();
+  ctx.strokeStyle='#FFE090'; ctx.lineWidth=2;
+  roundRect(ctx,W/2-90,96,180,52,26); ctx.stroke();
+  ctx.fillStyle='#fff';
+  ctx.font='bold 26px Arial,sans-serif';
+  ctx.fillText(badgeText, W/2, 131);
+
+  // 상품 이미지 영역
+  const imgY=190, imgH=320;
+  ctx.fillStyle='#fff';
+  roundRect(ctx,40,imgY,W-80,imgH,12); ctx.fill();
+  ctx.strokeStyle='#E8D090'; ctx.lineWidth=1.5;
+  roundRect(ctx,40,imgY,W-80,imgH,12); ctx.stroke();
+
+  if (postProductData.image) {
+    try {
+      const img = await loadImg(postProductData.image);
+      const iW=W-80, iH=imgH;
+      const scale=Math.min(iW/img.width,iH/img.height);
+      const dw=img.width*scale, dh=img.height*scale;
+      const dx=40+(iW-dw)/2, dy=imgY+(iH-dh)/2;
+      ctx.save();
+      roundRect(ctx,40,imgY,iW,imgH,12); ctx.clip();
+      ctx.drawImage(img,dx,dy,dw,dh);
+      ctx.restore();
+    } catch(e) {
+      ctx.font='90px Arial'; ctx.textAlign='center';
+      ctx.fillText(postProductData.emoji||'🛒',W/2,imgY+imgH/2+30);
+    }
+  } else {
+    ctx.font='90px Arial'; ctx.textAlign='center';
+    ctx.fillText(postProductData.emoji||'🛒',W/2,imgY+imgH/2+30);
+  }
+
+  // 상품명 영역
+  const infoY=imgY+imgH+20;
+  ctx.fillStyle='#fff';
+  roundRect(ctx,40,infoY,W-80,230,12); ctx.fill();
+  ctx.strokeStyle='#E8D090'; ctx.lineWidth=1.5;
+  roundRect(ctx,40,infoY,W-80,230,12); ctx.stroke();
+
+  // 상품명 한국어
+  ctx.fillStyle='#1a1200';
+  ctx.font='bold 38px Arial,sans-serif';
+  ctx.textAlign='center';
+  const nameKo = postProductData.name_ko||postProductData.name_en||'';
+  ctx.fillText(nameKo, W/2, infoY+52);
+
+  // 상품명 영문
+  ctx.fillStyle='#888';
+  ctx.font='18px Arial,sans-serif';
+  ctx.fillText(postProductData.name_en||'', W/2, infoY+80);
+
+  // 골드 구분선
+  ctx.strokeStyle='#D4A020'; ctx.lineWidth=1; ctx.globalAlpha=0.4;
+  ctx.beginPath();ctx.moveTo(80,infoY+94);ctx.lineTo(W-80,infoY+94);ctx.stroke();
+  ctx.globalAlpha=1;
+
+  // 가격
+  const origPrice=postProductData.price||0;
+  if (isSale) {
+    const salePrice=parseInt(document.getElementById('post-sale-price').value)||0;
+    const pct=(origPrice&&salePrice)?Math.round((1-salePrice/origPrice)*100):0;
+    if (origPrice) {
+      ctx.fillStyle='#aaa'; ctx.font='20px Arial'; ctx.textAlign='center';
+      const oStr='₩'+origPrice.toLocaleString();
+      const tw=ctx.measureText(oStr).width;
+      ctx.fillText(oStr,W/2,infoY+130);
+      ctx.strokeStyle='#aaa'; ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(W/2-tw/2,infoY+124);ctx.lineTo(W/2+tw/2,infoY+124);ctx.stroke();
+    }
+    ctx.fillStyle='#C8382A';
+    ctx.font='bold 52px Arial,sans-serif';
+    ctx.fillText('₩'+(salePrice||0).toLocaleString(),W/2,infoY+178);
+    if(pct>0){
+      ctx.fillStyle='#C8382A';
+      roundRect(ctx,W/2-60,infoY+185,120,32,16); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='bold 16px Arial';
+      ctx.fillText(pct+'% SAVE',W/2,infoY+206);
+    }
+  } else {
+    ctx.fillStyle='#C8382A';
+    ctx.font='bold 56px Arial,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('₩'+origPrice.toLocaleString(),W/2,infoY+175);
+  }
+
+  // 무료배송
+  ctx.fillStyle='#888'; ctx.font='15px Arial'; ctx.textAlign='center';
+  ctx.fillText('🚚 5만원 이상 무료배송  ·  Free delivery over ₩50,000',W/2,infoY+215);
+
+  // 하단 바
+  ctx.fillStyle='#C8382A';
+  ctx.fillRect(0,H-50,W,50);
+  ctx.fillStyle='#FFE090'; ctx.font='13px Arial'; ctx.textAlign='center';
+  ctx.fillText('💬 DM us on Facebook  ·  dunnaeasiamart.github.io/asia-mart',W/2,H-20);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function loadImg(src){
+  return new Promise((res,rej)=>{
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>res(img); img.onerror=rej; img.src=src;
+  });
+}
+
+function downloadPostCard(){
+  const canvas=document.getElementById('post-canvas');
+  const name=(postProductData.name_ko||postProductData.name_en||'product').replace(/\s+/g,'_');
+  const mode=postMode==='new'?'신상품':'할인';
+  const a=document.createElement('a');
+  a.download=`아시아마트_${mode}_${name}.png`;
+  a.href=canvas.toDataURL('image/png'); a.click();
+}
+
+function postCopy(id){
   navigator.clipboard.writeText(document.getElementById(id).textContent)
-    .then(() => showToast('📋 복사됐어요!'));
+    .then(()=>showToast('📋 복사됐어요!'));
 }
 
-function postCopyAll() {
-  const th = document.getElementById('post-out-th').textContent;
-  const lo = document.getElementById('post-out-lo').textContent;
-  const ph = document.getElementById('post-out-ph').textContent;
-  const en = document.getElementById('post-out-en').textContent;
-  const all = th + '\n\n──────────\n\n' + lo + '\n\n──────────\n\n' + ph + '\n\n──────────\n\n' + en;
-  navigator.clipboard.writeText(all).then(() => showToast('✨ 4개 국어 전체 복사됐어요!'));
+function postCopyAll(){
+  const all=['post-out-th','post-out-lo','post-out-ph','post-out-en']
+    .map(id=>document.getElementById(id).textContent).join('\n\n──────────\n\n');
+  navigator.clipboard.writeText(all).then(()=>showToast('✨ 4개 국어 전체 복사됐어요!'));
 }
 
 </script>
+</body>
+</html>
