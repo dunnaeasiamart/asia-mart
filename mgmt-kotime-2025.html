@@ -487,7 +487,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
       <div id="best-search-results" style="display:none;margin-bottom:16px;border:1px solid #f0f0f0;border-radius:8px;max-height:220px;overflow-y:auto;"></div>
       <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="saveBest()">💾 베스트 상품 저장</button>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetBest()">🗑️ 목록 초기화</button>
+      </div>
     </div>
   </div>
 
@@ -502,7 +505,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
       <div id="new-search-results" style="display:none;margin-bottom:16px;border:1px solid #f0f0f0;border-radius:8px;max-height:220px;overflow-y:auto;"></div>
       <div id="new-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <button class="btn btn-primary" style="margin-top:20px;" onclick="saveNew()">💾 신상품 저장</button>
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="saveNew()">💾 신상품 저장</button>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetNew()">🗑️ 목록 초기화</button>
+      </div>
     </div>
   </div>
 
@@ -2368,6 +2374,20 @@ async function loadBest() {
   const snap = await db.ref('best').get();
   const data = snap.val() || [];
   renderBestSlots(data);
+}
+
+async function resetBest() {
+  if (!confirm('베스트 상품 목록을 전체 초기화하시겠습니까?')) return;
+  await db.ref('best').set([]);
+  renderBestSlots([]);
+  showToast('🗑️ 베스트 상품 목록 초기화 완료');
+}
+
+async function resetNew() {
+  if (!confirm('신상품 목록을 전체 초기화하시겠습니까?')) return;
+  await db.ref('newItems').set([]);
+  renderNewSlots([]);
+  showToast('🗑️ 신상품 목록 초기화 완료');
 }
 
 async function saveBest() {
