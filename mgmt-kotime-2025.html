@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asia Mart — 관리자</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+// 페이지 로드 즉시 로그인 상태 확인 (깜빡임 방지)
+if (localStorage.getItem('admin_logged_in') === 'true') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var lp = document.getElementById('login-page');
+    var mp = document.getElementById('main-page');
+    if (lp) lp.style.display = 'none';
+    if (mp) mp.style.display = 'block';
+  });
+}
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -79,8 +92,71 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 .form-grid input:focus, .form-grid select:focus { border-color: #c84b2f; }
 .form-full { grid-column: 1 / -1; }
 
+/* 모달 */
+.modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff;border-radius:16px;padding:28px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18); }
+.modal-box h3 { font-size:16px;font-weight:700;margin-bottom:20px; }
+.modal-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px; }
+.modal-grid .full { grid-column:1/-1; }
+.modal-grid label { font-size:12px;color:#888;display:block;margin-bottom:4px; }
+.modal-grid input, .modal-grid select { width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none; }
+.modal-grid input:focus, .modal-grid select:focus { border-color:#c84b2f; }
+.modal-btns { display:flex;gap:8px;justify-content:flex-end;margin-top:20px; }
+
 /* 토스트 */
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1a1814; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 14px; z-index: 999; display: none; white-space: nowrap; }
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  /* 헤더 */
+  .header { padding: 0 12px; }
+  .header-title { font-size: 14px; }
+  .btn { padding: 6px 10px; font-size: 12px; }
+
+  /* 탭 */
+  .tabs { padding: 0; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tab-btn { padding: 12px 14px; font-size: 12px; }
+
+  /* 상품 추가 폼 - 1열로 변경 */
+  .add-product-form { margin: 12px; padding: 16px; border-radius: 10px; }
+  .add-product-form h3 { font-size: 14px; margin-bottom: 12px; }
+  .form-grid { grid-template-columns: 1fr; gap: 10px; }
+  .form-grid .form-full { grid-column: 1; }
+  .form-grid input, .form-grid select { padding: 12px 14px; font-size: 15px; }
+
+  /* 번역 버튼 */
+  .form-grid button { padding: 12px 16px; font-size: 14px; }
+
+  /* 상품 추가 버튼 */
+  .add-product-form > .btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 12px; }
+
+  /* 이미지 업로드 */
+  #new-img-file { font-size: 14px; padding: 10px; }
+  #new-img-preview img { width: 80px; height: 80px; }
+
+  /* 테이블 - 모바일에선 스크롤 */
+  .table-wrap { margin: 12px; border-radius: 10px; overflow-x: auto; }
+  table { min-width: 600px; }
+
+  /* bulk-box */
+  .bulk-box { margin: 12px; padding: 14px; gap: 10px; }
+
+  /* 고객 관리 */
+  .customer-wrap { margin: 12px; }
+  .customer-form { padding: 16px; }
+  .form-row { flex-direction: column; }
+
+  /* 카테고리 탭 */
+  #tab-category .table-wrap { margin: 12px; }
+
+  /* 모달 */
+  .modal-box { padding: 20px 16px; width: 95%; border-radius: 12px; }
+  .modal-grid { grid-template-columns: 1fr; }
+  .modal-grid .full { grid-column: 1; }
+  .modal-btns { flex-direction: column-reverse; }
+  .modal-btns .btn { width: 100%; padding: 13px; text-align: center; }
+}
 </style>
 </head>
 <body>
@@ -106,21 +182,23 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('stock')">📦 재고 관리</button>
-    <button class="tab-btn" onclick="switchTab('discount')">🏷️ 할인율</button>
-    <button class="tab-btn" onclick="switchTab('product')">📝 상품 관리</button>
-    <button class="tab-btn" onclick="switchTab('customer')">👥 고객 관리</button>
-    <button class="tab-btn" onclick="switchTab('best')">🔥 베스트 상품</button>
-    <button class="tab-btn" onclick="switchTab('new')">🆕 신상품</button>
+    <button class="tab-btn active" onclick="switchTab('stock',this)">📦 재고 관리</button>
+    <button class="tab-btn" onclick="switchTab('discount',this)">🏷️ 할인율</button>
+    <button class="tab-btn" onclick="switchTab('product',this)">📝 상품 관리</button>
+    <button class="tab-btn" onclick="switchTab('category',this)">📂 카테고리</button>
+    <button class="tab-btn" onclick="switchTab('customer',this)">👥 고객 관리</button>
+    <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
+    <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
+    <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
   </div>
 
   <!-- 재고 관리 -->
   <div id="tab-stock" class="tab-content active">
-    <div style="max-width:1000px;margin:20px auto 0;">
-      <input type="text" oninput="filterTable('stock-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
-        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-    </div>
     <div class="table-wrap">
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;">
+        <input type="text" id="stock-search" placeholder="🔍 상품명, ID 검색..." oninput="filterStockTable(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <button onclick="filterStockTable('');document.getElementById('stock-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
+      </div>
       <table>
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:60px;">번호</th>
@@ -139,11 +217,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <label>전체/카테고리 일괄 적용:</label>
       <select id="bulk-cat" onchange="filterDiscountTable()">
         <option value="all">전체</option>
-        <option value="A">A 냉동음식</option>
-        <option value="B">B 면 종류</option>
-        <option value="C">C 각종 소스</option>
-        <option value="D">D 음료 및 기타</option>
-        <option value="E">E 생활용품</option>
       </select>
       <label>2개 할인:</label>
       <input type="number" id="bulk-disc2" value="5" min="0" max="50"> %
@@ -151,18 +224,14 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <input type="number" id="bulk-disc3" value="10" min="0" max="50"> %
       <button class="btn btn-primary" onclick="applyBulkDiscount()">적용</button>
     </div>
-    <div style="max-width:1000px;margin:12px auto 0;">
-      <input type="text" oninput="filterTable('discount-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
-        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-    </div>
     <div class="table-wrap">
       <table>
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:60px;">번호</th>
           <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">영문명</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">2개 할인율</th>
-          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:120px;">3개 할인율</th>
-          <th style="padding:10px 12px;width:40px;"></th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;">한글명</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:130px;">2개 할인율</th>
+          <th style="padding:10px 12px;text-align:left;font-size:12px;color:#888;width:130px;">3개 할인율</th>
         </tr></thead>
         <tbody id="discount-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
@@ -178,11 +247,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div>
           <label>카테고리</label>
           <select id="new-cat" onchange="autoFillId()">
-            <option value="a">A 냉동음식</option>
-            <option value="b">B 면 종류</option>
-            <option value="c">C 각종 소스</option>
-            <option value="d">D 음료 및 기타</option>
-            <option value="e">E 생활용품</option>
+            <option value="">로딩 중...</option>
           </select>
         </div>
         <div>
@@ -213,38 +278,72 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="number" id="new-price" placeholder="5000">
         </div>
         <div class="form-full">
-          <label>이미지 업로드 또는 URL 직접 입력</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewNewImages(this)"
-              style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-            <span style="color:#aaa;font-size:12px;">또는</span>
-            <input type="text" id="new-img" placeholder="https://... URL 직접 입력" style="flex:2;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+          <label>이미지</label>
+          <!-- 사진 업로드 -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+            <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewAndUploadNewImgs(this)" style="display:none;">
+            <input type="file" id="new-img-camera" accept="image/*" capture="environment" onchange="previewAndUploadNewImgs(this)" style="display:none;">
+            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="document.getElementById('new-img-file').click()">🖼️ 갤러리</button>
+            <button class="btn btn-secondary" style="background:#1a1814;color:#fff;white-space:nowrap;" onclick="document.getElementById('new-img-camera').click()">📷 사진찍기</button>
           </div>
-          <div id="new-img-preview" style="margin-top:8px;display:none;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;">
+          <!-- URL 직접 입력 -->
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <input type="text" id="new-img-url" placeholder="🔗 이미지 URL 직접 입력 후 추가" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+            <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="addNewImgUrl()">➕ 추가</button>
           </div>
-          <span id="new-img-upload-status" style="font-size:12px;color:#888;display:block;margin-top:4px;"></span>
+          <!-- 미리보기 + 상태 -->
+          <div id="new-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;"></div>
+          <div id="new-img-status" style="font-size:12px;color:#888;"></div>
+          <input type="hidden" id="new-img">
         </div>
       </div>
       <div id="translate-status" style="margin-top:8px;font-size:12px;color:#888;display:none;">🤖 번역 중...</div>
-      <button class="btn btn-primary" style="margin-top:16px;" onclick="addProduct()">상품 추가</button>
+      <button class="btn btn-primary" style="margin-top:16px;width:100%;" onclick="addProduct()">상품 추가</button>
     </div>
 
-    <!-- 상품 수정 -->
-    <div style="max-width:1000px;margin:12px auto 0;">
-      <input type="text" oninput="filterTable('product-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
-        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-    </div>
+    <!-- 상품 목록 테이블 -->
     <div class="table-wrap">
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;">
+        <input type="text" id="product-search" placeholder="🔍 상품명, ID 검색..." oninput="filterProducts(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <button onclick="filterProducts('');document.getElementById('product-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
+      </div>
       <table>
         <thead><tr style="background:#f5f5f5;">
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">번호</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:55px;">번호</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">영문명</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">한국명</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">1개 가격</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;">이미지</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">관리</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:90px;">가격</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:120px;">수정/삭제</th>
         </tr></thead>
         <tbody id="product-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 카테고리 관리 탭 -->
+  <div id="tab-category" class="tab-content">
+    <div class="table-wrap" style="max-width:1000px;margin:24px auto;">
+      <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div>
+          <span style="font-weight:700;font-size:14px;">카테고리 목록</span>
+          <span style="font-size:12px;color:#aaa;margin-left:8px;">☰ 드래그로 순서 변경</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="saveCatOrder()">💾 순서 저장</button>
+          <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:40px;"></th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">키</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">이름 (label)</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">이모지</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">상품수</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">상태</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:140px;">관리</th>
+        </tr></thead>
+        <tbody id="category-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -292,16 +391,92 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+  <!-- 엑셀 -->
+  <div id="tab-excel" class="tab-content">
+    <div style="max-width:1000px;margin:24px auto;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 다운로드 섹션 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📥 엑셀 다운로드</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-primary" onclick="downloadExcel('products')">📦 전체 상품 목록</button>
+          <button class="btn btn-primary" onclick="downloadExcel('stock')">🗃️ 재고 현황</button>
+          <button class="btn btn-primary" onclick="downloadExcel('discount')">🏷️ 할인율</button>
+          <button class="btn btn-primary" onclick="downloadExcel('customers')">👥 고객 목록</button>
+        </div>
+      </div>
+
+      <!-- 업로드 섹션 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📤 엑셀 업로드</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">다운로드한 엑셀 파일을 수정 후 다시 올리면 Firebase에 자동 반영됩니다.</p>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">📦 상품 일괄 등록/수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 카테고리, 영문명, 한국명, 태국어명, 라오스어명, 가격, 이미지URL 포함</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-products" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('products')">업로드</button>
+            </div>
+            <div id="upload-products-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🗃️ 재고 일괄 수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 재고수량 포함 (-1=무제한)</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-stock" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('stock')">업로드</button>
+            </div>
+            <div id="upload-stock-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+          <div style="border:1px solid #eee;border-radius:10px;padding:16px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🏷️ 할인율 일괄 수정</div>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">상품ID, 2개할인율(%), 3개할인율(%) 포함</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="file" id="upload-discount" accept=".xlsx,.xls" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+              <button class="btn btn-primary" onclick="uploadExcel('discount')">업로드</button>
+            </div>
+            <div id="upload-discount-status" style="font-size:12px;margin-top:8px;"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 샘플 다운로드 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📋 샘플 양식 다운로드</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">신규 상품 등록 시 이 양식에 맞춰 입력해주세요.</p>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="downloadSample()">📋 상품 등록 양식 다운로드</button>
+      </div>
+
+      <!-- 일괄 재번역 -->
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🌐 전체 상품 일괄 재번역</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:8px;">한국어명을 기준으로 영문명, 태국어명, 라오스어명을 Google 번역으로 일괄 업데이트합니다.</p>
+        <p style="font-size:12px;color:#c84b2f;margin-bottom:16px;">⚠️ 기존 번역이 덮어씌워집니다. 수동으로 수정한 번역도 초기화돼요.</p>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <select id="retranslate-cat" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+            <option value="all">전체 카테고리</option>
+          </select>
+          <button class="btn btn-primary" onclick="retranslateAll()">🌐 재번역 시작</button>
+        </div>
+        <div id="retranslate-status" style="font-size:13px;margin-top:12px;"></div>
+        <div id="retranslate-progress" style="margin-top:8px;background:#f0f0f0;border-radius:100px;height:8px;display:none;">
+          <div id="retranslate-bar" style="background:#c84b2f;height:8px;border-radius:100px;width:0%;transition:width 0.3s;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 베스트 상품 -->
   <div id="tab-best" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 10개)</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:12px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
-      <div style="position:relative;margin-bottom:16px;">
-        <input type="text" id="best-search" placeholder="🔍 상품명 또는 ID 검색..." oninput="filterSlots('best')"
-          style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-        <div id="best-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:250px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-      </div>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
       <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
     </div>
@@ -311,12 +486,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <div id="tab-new" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🆕 신상품 선택 (최대 10개)</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:12px;">새로 들어온 상품을 선택하면 메인 페이지 상단에 표시됩니다.</p>
-      <div style="position:relative;margin-bottom:16px;">
-        <input type="text" id="new-search" placeholder="🔍 상품명 또는 ID 검색..." oninput="filterSlots('new')"
-          style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-        <div id="new-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:250px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-      </div>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">새로 들어온 상품을 선택하면 메인 페이지 상단에 표시됩니다.</p>
       <div id="new-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveNew()">💾 신상품 저장</button>
     </div>
@@ -324,58 +494,192 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
 </div><!-- end main-page -->
 
+<!-- 상품 수정 모달 -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <h3>✏️ 상품 수정</h3>
+    <div class="modal-grid">
+      <div>
+        <label>카테고리</label>
+        <select id="edit-cat" onchange="autoFillEditId()"></select>
+      </div>
+      <div>
+        <label>상품 ID</label>
+        <input type="text" id="edit-id" placeholder="A01">
+      </div>
+      <div class="full">
+        <label>한국어명</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="edit-ko" style="flex:1;">
+          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="translateEditName()">🤖 번역</button>
+        </div>
+        <div id="edit-translate-status" style="font-size:12px;color:#888;margin-top:4px;display:none;"></div>
+      </div>
+      <div>
+        <label>영문명</label>
+        <input type="text" id="edit-en">
+      </div>
+      <div>
+        <label>태국어명</label>
+        <input type="text" id="edit-th">
+      </div>
+      <div>
+        <label>라오스어명</label>
+        <input type="text" id="edit-lo">
+      </div>
+      <div>
+        <label>1개 가격 (₩)</label>
+        <input type="number" id="edit-price">
+      </div>
+      <div class="full">
+        <label>이미지</label>
+        <!-- 사진 업로드 -->
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+          <input type="file" id="edit-img-file" accept="image/*" multiple onchange="previewAndUploadEditImgs(this)" style="display:none;">
+          <input type="file" id="edit-img-camera" accept="image/*" capture="environment" onchange="previewAndUploadEditImgs(this)" style="display:none;">
+          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="document.getElementById('edit-img-file').click()">🖼️ 갤러리</button>
+          <button class="btn btn-secondary" type="button" style="background:#1a1814;color:#fff;white-space:nowrap;" onclick="document.getElementById('edit-img-camera').click()">📷 사진찍기</button>
+        </div>
+        <!-- URL 직접 입력 -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <input type="text" id="edit-img-url" placeholder="🔗 이미지 URL 직접 입력 후 추가" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <button class="btn btn-secondary" type="button" style="background:#f0f0f0;color:#333;white-space:nowrap;" onclick="addEditImgUrl()">➕ 추가</button>
+        </div>
+        <!-- 미리보기 + 상태 -->
+        <div id="edit-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;"></div>
+        <div id="edit-img-status" style="font-size:12px;color:#888;"></div>
+        <input type="hidden" id="edit-img">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="closeEditModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitEditProduct()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 카테고리 수정/추가 모달 -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal-box" style="max-width:440px;">
+    <h3 id="cat-modal-title">📂 카테고리 수정</h3>
+    <div class="modal-grid">
+      <div class="full">
+        <label>키 (영문, 변경불가)</label>
+        <input type="text" id="cat-key" placeholder="예: frozen" style="background:#f5f5f5;" readonly>
+      </div>
+      <div class="full" id="cat-key-edit-wrap" style="display:none;">
+        <label>새 키 (영문 소문자, 공백없이)</label>
+        <input type="text" id="cat-key-new" placeholder="예: seafood">
+      </div>
+      <div class="full">
+        <label>이름 (label)</label>
+        <input type="text" id="cat-label" placeholder="예: A 냉동음식">
+      </div>
+      <div class="full">
+        <label>이모지 선택</label>
+        <div id="emoji-picker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+        <input type="text" id="cat-emoji" placeholder="직접 입력 또는 위에서 선택" style="margin-top:4px;">
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="closeCatModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitCatEdit()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const ADMIN_PW = "asia1234";
+const GOOGLE_TRANSLATE_KEY = 'AIzaSyATvGXEnesW4fCsEyals7qipskznXJvn6Q';
+
+async function googleTranslate(text, targetLang) {
+  const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: text, source: 'ko', target: targetLang, format: 'text' })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.data.translations[0].translatedText;
+}
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PW) {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('main-page').style.display = 'block';
-    setTimeout(() => { if (window.loadAll) window.loadAll(); setTimeout(autoFillId, 2000); }, 500);
+    localStorage.setItem('admin_logged_in', 'true');
+    showMainPage();
   } else {
     alert('비밀번호가 틀렸습니다.');
   }
 }
+
+function showMainPage() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('main-page').style.display = 'block';
+  setTimeout(() => {
+    if (window.loadAll) window.loadAll();
+    setTimeout(() => {
+      autoFillId();
+      restoreProductForm(); // 임시저장 복원
+    }, 2000);
+  }, 500);
+}
+
+// 상품 입력 내용 임시저장
+function saveProductForm() {
+  const fields = ['new-ko','new-en','new-th','new-lo','new-price','new-cat'];
+  const data = {};
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) data[f] = el.value;
+  });
+  localStorage.setItem('product_form_tmp', JSON.stringify(data));
+}
+
+// 상품 입력 내용 복원
+function restoreProductForm() {
+  try {
+    const saved = localStorage.getItem('product_form_tmp');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    // 내용이 있을 때만 복원
+    const hasContent = Object.values(data).some(v => v && v.trim());
+    if (!hasContent) return;
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el && val) el.value = val;
+    });
+  } catch(e) {}
+}
+
+// 상품 입력 필드 변경 시 자동저장
+document.addEventListener('input', function(e) {
+  if (['new-ko','new-en','new-th','new-lo','new-price'].includes(e.target.id)) {
+    saveProductForm();
+  }
+});
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'new-cat') saveProductForm();
+});
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && document.getElementById('login-page').style.display !== 'none') doLogin();
 });
 
-function switchTab(tab) {
+function switchTab(tab, triggerEl) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  event.target.classList.add('active');
+  const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
+  if (btn) btn.classList.add('active');
+  if (tab === 'category') loadCategories();
+  if (tab === 'excel') loadRetranslateCatSelect();
 }
 
 function markChanged(id, type) {
   const badge = document.getElementById(`badge_${type == 'stock' ? 'stock' : type == 'disc' ? 'disc' : 'prod'}_${id}`);
   if (badge) badge.style.display = 'inline';
-}
-
-function filterDiscountTable() {
-  const cat = document.getElementById('bulk-cat').value;
-  const rows = document.querySelectorAll('#discount-tbody tr');
-  rows.forEach(row => {
-    const idCell = row.querySelector('.td-id');
-    if (!idCell) {
-      // 카테고리 헤더 행
-      const headerText = row.querySelector('td')?.textContent || '';
-      if (cat === 'all') {
-        row.style.display = '';
-      } else {
-        row.style.display = headerText.startsWith(cat) ? '' : 'none';
-      }
-      return;
-    }
-    const id = idCell.textContent.trim();
-    if (cat === 'all') {
-      row.style.display = '';
-    } else {
-      row.style.display = id.toUpperCase().startsWith(cat.toUpperCase()) ? '' : 'none';
-    }
-  });
 }
 
 function applyBulkDiscount() {
@@ -391,6 +695,343 @@ function applyBulkDiscount() {
     if (cat === 'all' || id.toUpperCase().startsWith(cat.toUpperCase())) inp.value = d3;
   });
   showToast('✅ 할인율 적용됨 (저장 버튼 눌러주세요)');
+}
+
+function filterDiscountTable() {
+  const cat = document.getElementById('bulk-cat').value;
+  const tbody = document.getElementById('discount-tbody');
+  if (!tbody) return;
+  Array.from(tbody.rows).forEach(row => {
+    // cat-header 행 (colspan=5인 카테고리 구분선)
+    if (row.cells.length === 1) {
+      const text = row.cells[0].textContent.trim(); // 예: "A 냉동음식"
+      const rowCat = text.charAt(0).toUpperCase(); // "A"
+      row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
+    } else {
+      // 상품 행
+      const id = row.cells[0]?.textContent.trim(); // 예: "B01"
+      const rowCat = id.charAt(0).toUpperCase();
+      row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
+    }
+  });
+}
+
+// ── 엑셀 다운로드 ──
+async function downloadExcel(type) {
+  const wb = XLSX.utils.book_new();
+  let ws, fileName;
+
+  if (type === 'products') {
+    const snap = await db.ref('catalog').get();
+    const catalog = snap.val() || {};
+    const rows = [['상품ID','카테고리키','카테고리명','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL']];
+    const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+    const allKeys = [...catOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!catOrder.includes(k))];
+    allKeys.forEach(catKey => {
+      const cat = catalog[catKey];
+      if (!cat || !cat.items) return;
+      const label = typeof cat.label === 'string' ? cat.label : (cat.label?.ko || catKey);
+      cat.items.forEach(item => {
+        rows.push([
+          item.id, catKey, label,
+          (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          (item.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,''),
+          item.price1||0,
+          item.image||''
+        ]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,10,12,20,20,20,20,10,40].map(w=>({wch:w}));
+    fileName = 'asia-mart-상품목록.xlsx';
+
+  } else if (type === 'stock') {
+    const [catSnap, stockSnap] = await Promise.all([db.ref('catalog').get(), db.ref('stock').get()]);
+    const catalog = catSnap.val() || {};
+    const stock = stockSnap.val() || {};
+    const rows = [['상품ID','영문명','한국명','재고(-1=무제한)']];
+    Object.values(catalog).forEach(cat => {
+      (cat.items||[]).forEach(item => {
+        rows.push([item.id, (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''), (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''), stock[item.id]??-1]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,25,25,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-재고.xlsx';
+
+  } else if (type === 'discount') {
+    const [catSnap, discSnap] = await Promise.all([db.ref('catalog').get(), db.ref('discount').get()]);
+    const catalog = catSnap.val() || {};
+    const disc = discSnap.val() || {};
+    const rows = [['상품ID','영문명','한국명','2개할인율(%)','3개할인율(%)']];
+    Object.values(catalog).forEach(cat => {
+      (cat.items||[]).forEach(item => {
+        const d = disc[item.id] || {};
+        rows.push([item.id, (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,''), (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,''), d.d2??5, d.d3??10]);
+      });
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [8,25,25,12,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-할인율.xlsx';
+
+  } else if (type === 'customers') {
+    const snap = await db.ref('customers').get();
+    const data = snap.val() || {};
+    const rows = [['이름','전화번호','메모','등록일']];
+    Object.values(data).sort((a,b)=>b.date-a.date).forEach(c => {
+      rows.push([c.name, c.phone||'', c.note||'', new Date(c.date).toLocaleDateString('ko-KR')]);
+    });
+    ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [15,15,25,12].map(w=>({wch:w}));
+    fileName = 'asia-mart-고객목록.xlsx';
+  }
+
+  // 헤더 스타일
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = ws[XLSX.utils.encode_cell({r:0, c})];
+    if (cell) cell.s = { font:{bold:true}, fill:{fgColor:{rgb:'1A1814'}}, font:{bold:true,color:{rgb:'FFFFFF'}} };
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, fileName);
+  showToast(`✅ ${fileName} 다운로드 완료!`);
+}
+
+// ── 샘플 양식 다운로드 ──
+function downloadSample() {
+  const wb = XLSX.utils.book_new();
+  const rows = [
+    ['카테고리키','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL'],
+    ['shoes','Nike Air Force 1 250','나이키 에어포스 1 250','','',89000,''],
+    ['shoes','Nike Air Force 1 260','나이키 에어포스 1 260','','',89000,''],
+    ['shoes','Adidas Stan Smith 255','아디다스 스탄스미스 255','','',75000,''],
+  ];
+  const note = wb.SheetNames;
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [10,25,25,20,20,10,40].map(w=>({wch:w}));
+  // 안내 메모
+  ws['A1'].c = [{a:'Asia Mart', t:'상품ID는 자동 생성됩니다. 카테고리키만 입력하세요.\n예: shoes, frozen, noodle 등'}];
+  XLSX.utils.book_append_sheet(wb, ws, '상품등록양식');
+  XLSX.writeFile(wb, 'asia-mart-상품등록양식.xlsx');
+  showToast('✅ 샘플 양식 다운로드 완료!');
+}
+
+// ── 엑셀 업로드 ──
+async function uploadExcel(type) {
+  const fileInput = document.getElementById('upload-' + type);
+  const statusEl = document.getElementById('upload-' + type + '-status');
+  const file = fileInput.files[0];
+  if (!file) { alert('파일을 선택해주세요.'); return; }
+
+  statusEl.textContent = '⏳ 처리 중...';
+  statusEl.style.color = '#888';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const headers = rows[0];
+      const data = rows.slice(1).filter(r => r.some(c => c !== undefined && c !== ''));
+
+      if (type === 'products') {
+        // 카탈로그에 상품 일괄 등록 (ID 자동 생성)
+        const catSnap = await db.ref('catalog').get();
+        const catalog = catSnap.val() || {};
+        const updates = {};
+        let count = 0;
+
+        // 카테고리별로 그룹화 (컬럼: 카테고리키, 영문명, 한국명, 태국어명, 라오스어명, 가격, 이미지URL)
+        const byCat = {};
+        data.forEach(row => {
+          const catKey = String(row[0]||'').trim();
+          if (!catKey) return;
+          if (!byCat[catKey]) byCat[catKey] = [];
+          byCat[catKey].push({
+            name_en: String(row[1]||'').trim(),
+            name_ko: String(row[2]||'').trim(),
+            name_th: String(row[3]||'').trim(),
+            name_lo: String(row[4]||'').trim(),
+            price1: parseInt(row[5])||0,
+            image: String(row[6]||'').trim(),
+            images: row[6] ? [String(row[6]).trim()] : []
+          });
+          count++;
+        });
+
+        // 각 카테고리에 자동 ID 부여 후 추가
+        for (const [catKey, newItems] of Object.entries(byCat)) {
+          const existing = catalog[catKey]?.items || [];
+          const catData = catalog[catKey] || {};
+
+          // 카테고리 prefix: label 첫 글자 또는 catKey 첫 글자 대문자
+          const label = typeof catData.label === 'string' ? catData.label : (catData.label?.ko || catKey);
+          const prefix = label.charAt(0).toUpperCase();
+
+          // 현재 최대 번호 계산
+          let maxNum = 0;
+          existing.forEach(item => {
+            const match = String(item.id).match(/\d+/);
+            if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+          });
+
+          // 카테고리 이모지
+          const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿', shoes:'👟' };
+          const emoji = catEmojis[catKey] || catData.emoji || '🛒';
+
+          // 새 상품에 ID 자동 부여
+          newItems.forEach(item => {
+            maxNum++;
+            const newId = prefix + String(maxNum).padStart(2, '0');
+            existing.push({
+              id: newId, emoji,
+              price2: 0, price3: 0,
+              ...item
+            });
+          });
+
+          updates[`catalog/${catKey}/items`] = existing;
+
+          // 기본 할인율도 자동 등록
+          const discUpdates = {};
+          newItems.forEach((_, i) => {
+            const idx = existing.length - newItems.length + i;
+            const id = existing[idx]?.id;
+            if (id) discUpdates['discount/' + id] = { d2: 5, d3: 10 };
+          });
+          Object.assign(updates, discUpdates);
+        }
+
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 상품 등록 완료! (ID 자동 생성)`;
+        statusEl.style.color = '#2d7a4f';
+        loadCatalogForAdmin();
+        autoFillId();
+
+      } else if (type === 'stock') {
+        const updates = {};
+        let count = 0;
+        data.forEach(row => {
+          const id = String(row[0]||'').trim();
+          const qty = parseInt(row[3]);
+          if (!id || isNaN(qty)) return;
+          updates['stock/' + id] = qty;
+          count++;
+        });
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 재고 수정 완료!`;
+        statusEl.style.color = '#2d7a4f';
+
+      } else if (type === 'discount') {
+        const updates = {};
+        let count = 0;
+        data.forEach(row => {
+          const id = String(row[0]||'').trim();
+          const d2 = parseFloat(row[3]);
+          const d3 = parseFloat(row[4]);
+          if (!id || isNaN(d2) || isNaN(d3)) return;
+          updates['discount/' + id] = { d2, d3 };
+          count++;
+        });
+        await db.ref().update(updates);
+        statusEl.textContent = `✅ ${count}개 할인율 수정 완료!`;
+        statusEl.style.color = '#2d7a4f';
+      }
+
+      showToast('✅ 업로드 완료!');
+    } catch(e) {
+      statusEl.textContent = '❌ 오류: ' + e.message;
+      statusEl.style.color = '#c84b2f';
+      console.error(e);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── 일괄 재번역 ──
+async function loadRetranslateCatSelect() {
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
+  const sel = document.getElementById('retranslate-cat');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">전체 카테고리</option>';
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...fixedOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!fixedOrder.includes(k)).sort()];
+  ordered.forEach(key => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = getLabel(data[key], key);
+    sel.appendChild(opt);
+  });
+}
+
+async function retranslateAll() {
+  const catKey = document.getElementById('retranslate-cat').value;
+  const status = document.getElementById('retranslate-status');
+  const progress = document.getElementById('retranslate-progress');
+  const bar = document.getElementById('retranslate-bar');
+
+  if (!confirm(`정말 재번역하시겠습니까?\n기존 번역이 덮어씌워집니다.`)) return;
+
+  status.textContent = '⏳ 카탈로그 로딩 중...';
+  status.style.color = '#888';
+  progress.style.display = 'block';
+  bar.style.width = '0%';
+
+  const snap = await db.ref('catalog').get();
+  const catalog = snap.val() || {};
+
+  // 대상 카테고리 결정
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const allKeys = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
+  const targetKeys = catKey === 'all' ? allKeys : [catKey];
+
+  // 전체 상품 수 계산
+  let totalItems = 0;
+  targetKeys.forEach(k => { totalItems += (catalog[k]?.items || []).length; });
+
+  let done = 0;
+  const updates = {};
+
+  for (const key of targetKeys) {
+    const cat = catalog[key];
+    if (!cat?.items) continue;
+
+    for (let i = 0; i < cat.items.length; i++) {
+      const item = cat.items[i];
+      const ko = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
+      if (!ko) { done++; continue; }
+
+      status.textContent = `⏳ 번역 중... (${done+1}/${totalItems}) ${ko}`;
+      bar.style.width = Math.round((done / totalItems) * 100) + '%';
+
+      try {
+        const [en, th, lo] = await Promise.all([
+          googleTranslate(ko, 'en'),
+          googleTranslate(ko, 'th'),
+          googleTranslate(ko, 'lo')
+        ]);
+        updates[`catalog/${key}/items/${i}/name_en`] = en;
+        updates[`catalog/${key}/items/${i}/name_th`] = th;
+        updates[`catalog/${key}/items/${i}/name_lo`] = lo;
+      } catch(e) {
+        console.error(`번역 실패: ${ko}`, e);
+      }
+      done++;
+      // API 과부하 방지
+      await new Promise(r => setTimeout(r, 100));
+    }
+  }
+
+  await db.ref().update(updates);
+  bar.style.width = '100%';
+  status.textContent = `✅ ${done}개 상품 재번역 완료!`;
+  status.style.color = '#2d7a4f';
+  showToast('✅ 재번역 완료!');
 }
 
 function showToast(msg) {
@@ -451,6 +1092,7 @@ function toggleSelectAll(cb) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
@@ -465,8 +1107,256 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
 
+// 로그인 상태면 loadAll 실행
+if (localStorage.getItem('admin_logged_in') === 'true') {
+  window.addEventListener('load', function() {
+    if (window.loadAll) window.loadAll();
+    setTimeout(autoFillId, 2000);
+    restoreProductForm();
+  });
+}
+
+// ── 이미지 업로드 (여러 장) ──
+let _newImgUrls = [];
+let _editImgUrls = [];
+
+// ── Cloudinary 업로드 ──
+const CLOUDINARY_CLOUD = 'dwexpbvq7';
+const CLOUDINARY_PRESET = 'asia-mart';
+
+async function uploadToCloudinary(blob) {
+  const formData = new FormData();
+  formData.append('file', blob);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  if (!res.ok) throw new Error('Cloudinary 업로드 실패');
+  const data = await res.json();
+  return data.secure_url;
+}
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const MAX = 400;
+    // createImageBitmap으로 메모리 효율적으로 처리
+    createImageBitmap(file).then(bitmap => {
+      let w = bitmap.width, h = bitmap.height;
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+      bitmap.close(); // 메모리 즉시 해제
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.82);
+    }).catch(() => {
+      // createImageBitmap 미지원 시 기존 방식
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.82);
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  });
+}
+
+// ── 이미지 목록 렌더링 (썸네일 + 삭제 버튼) ──
+function renderImgPreview(containerId, hiddenId, urls) {
+  const preview = document.getElementById(containerId);
+  preview.innerHTML = '';
+  urls.forEach((url, i) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;display:inline-block;';
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;';
+    const del = document.createElement('button');
+    del.textContent = '❌';
+    del.type = 'button';
+    del.style.cssText = 'position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #ddd;border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;';
+    del.onclick = () => {
+      urls.splice(i, 1);
+      document.getElementById(hiddenId).value = JSON.stringify(urls);
+      renderImgPreview(containerId, hiddenId, urls);
+    };
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    preview.appendChild(wrap);
+  });
+}
+
+// ── 새 상품 이미지 ──
+// ── 새 상품 - 갤러리/카메라 선택 후 바로 업로드 ──
+async function previewAndUploadNewImgs(input) {
+  const files = input.files;
+  if (!files.length) return;
+  const status = document.getElementById('new-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      status.textContent = `❌ 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 완료!`;
+  status.style.color = '#2d7a4f';
+  _newImgUrls = urls;
+  input.value = ''; // input 초기화 (같은 사진 다시 찍어도 작동)
+}
+
+// ── 수정 모달 - 갤러리/카메라 선택 후 바로 업로드 ──
+async function previewAndUploadEditImgs(input) {
+  const files = input.files;
+  if (!files.length) return;
+  const status = document.getElementById('edit-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      status.textContent = `❌ 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 완료!`;
+  status.style.color = '#2d7a4f';
+  _editImgUrls = urls;
+  input.value = '';
+}
+
+function previewNewImgs(input) {
+  document.getElementById('new-img-status').textContent = `${input.files.length}장 선택됨 — 업로드 버튼을 눌러주세요`;
+}
+
+async function uploadNewImgs() {
+  const files = document.getElementById('new-img-file').files;
+  if (!files.length) { alert('이미지를 선택해주세요.'); return; }
+  const status = document.getElementById('new-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      console.error(e);
+      status.textContent = `❌ ${i+1}번째 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 업로드 완료!`;
+  status.style.color = '#2d7a4f';
+  _newImgUrls = urls;
+}
+
+function addNewImgUrl() {
+  const input = document.getElementById('new-img-url');
+  const url = input.value.trim();
+  if (!url || !url.startsWith('http')) { alert('올바른 URL을 입력해주세요.'); return; }
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('new-img').value || '[]'); } catch(e) { urls = []; }
+  urls.push(url);
+  document.getElementById('new-img').value = JSON.stringify(urls);
+  renderImgPreview('new-img-preview', 'new-img', urls);
+  document.getElementById('new-img-status').textContent = `✅ 총 ${urls.length}장`;
+  document.getElementById('new-img-status').style.color = '#2d7a4f';
+  input.value = '';
+  _newImgUrls = urls;
+}
+
+// ── 수정 모달 이미지 ──
+function previewEditImgs(input) {
+  document.getElementById('edit-img-status').textContent = `${input.files.length}장 선택됨 — 업로드 버튼을 눌러주세요`;
+}
+
+async function uploadEditImgs() {
+  const files = document.getElementById('edit-img-file').files;
+  if (!files.length) { alert('이미지를 선택해주세요.'); return; }
+  const status = document.getElementById('edit-img-status');
+  status.style.color = '#888';
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+
+  for (let i = 0; i < files.length; i++) {
+    status.textContent = `⏳ 압축 중... (${i+1}/${files.length})`;
+    try {
+      const compressed = await compressImage(files[i]);
+      status.textContent = `⏳ 업로드 중... (${i+1}/${files.length})`;
+      const url = await uploadToCloudinary(compressed);
+      urls.push(url);
+    } catch(e) {
+      console.error(e);
+      status.textContent = `❌ ${i+1}번째 업로드 실패: ${e.message}`;
+      status.style.color = '#c84b2f';
+      return;
+    }
+  }
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  status.textContent = `✅ 총 ${urls.length}장 업로드 완료!`;
+  status.style.color = '#2d7a4f';
+  _editImgUrls = urls;
+}
+
+function addEditImgUrl() {
+  const input = document.getElementById('edit-img-url');
+  const url = input.value.trim();
+  if (!url || !url.startsWith('http')) { alert('올바른 URL을 입력해주세요.'); return; }
+  let urls = [];
+  try { urls = JSON.parse(document.getElementById('edit-img').value || '[]'); } catch(e) { urls = []; }
+  urls.push(url);
+  document.getElementById('edit-img').value = JSON.stringify(urls);
+  renderImgPreview('edit-img-preview', 'edit-img', urls);
+  document.getElementById('edit-img-status').textContent = `✅ 총 ${urls.length}장`;
+  document.getElementById('edit-img-status').style.color = '#2d7a4f';
+  input.value = '';
+  _editImgUrls = urls;
+}
+
 async function loadAll() {
   await buildAllOptions();
+  await loadCatSelect();
   await loadStock();
   await loadDiscount();
   await loadCatalogForAdmin();
@@ -476,47 +1366,106 @@ async function loadAll() {
   await autoFillId();
 }
 
+async function loadCatSelect() {
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
+  const sel = document.getElementById('new-cat');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
+  ordered.forEach(key => {
+    const cat = data[key];
+    const label = getLabel(cat, key);
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+}
+
+function filterStockTable(query) {
+  const q = query.trim().toLowerCase();
+  const tbody = document.getElementById('stock-tbody');
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    if (row.cells.length === 1) {
+      row.style.display = !q ? '' : 'none';
+      return;
+    }
+    const text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+function filterProducts(query) {
+  const q = query.trim().toLowerCase();
+  const tbody = document.getElementById('product-tbody');
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    // 카테고리 헤더 행
+    if (row.cells.length === 1) {
+      if (!q) { row.style.display = ''; return; }
+      // 검색 시 헤더는 일단 숨기고 나중에 결과 있으면 보이기
+      row.style.display = 'none';
+      return;
+    }
+    // 상품 행
+    const text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+
+  // 검색 결과 있는 카테고리 헤더 보이기
+  if (q) {
+    rows.forEach(row => {
+      if (row.cells.length !== 1) return;
+      // 이 헤더 다음 상품 행 중 보이는 게 있으면 헤더 표시
+      let next = row.nextElementSibling;
+      let hasVisible = false;
+      while (next && next.cells.length > 1) {
+        if (next.style.display !== 'none') { hasVisible = true; break; }
+        next = next.nextElementSibling;
+      }
+      row.style.display = hasVisible ? '' : 'none';
+    });
+  }
+}
+
 async function loadCatalogForAdmin() {
   const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
-  // 카테고리별 상품 테이블 렌더링
-  const catMap = {
-    frozen: { label: 'A 냉동음식', prefix: 'A' },
-    noodle: { label: 'B 면 종류', prefix: 'B' },
-    sauce:  { label: 'C 각종 소스', prefix: 'C' },
-    other:  { label: 'D 음료 및 기타', prefix: 'D' },
-    essentials: { label: 'E 생활용품', prefix: 'E' },
-    veggie: { label: 'F 농산물', prefix: 'F' }
-  };
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  Object.entries(catMap).forEach(([catKey, catInfo]) => {
+
+  // 로그인 상태 유지 보장
+  if (localStorage.getItem('admin_logged_in') === 'true') {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('main-page').style.display = 'block';
+  }
+
+  // A→B→C 순서 + 새로 추가된 카테고리도 포함
+  const catOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
+
+  ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
-    tbody.innerHTML += `<tr><td colspan="5" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${catInfo.label}</td></tr>`;
+    const label = getLabel(cat, catKey);
+    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr id="prod-row-${item.id}" data-search="${item.id.toLowerCase()} ${cleanEn.toLowerCase()} ${cleanKo.toLowerCase()}">
+      tbody.innerHTML += `<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
-        <td><input id="en_${item.id}" value="${cleanEn}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
-        <td><input id="ko_${item.id}" value="${cleanKo}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
-        <td><input id="price_${item.id}" value="${item.price1||''}" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="가격"></td>
-        <td style="padding:6px 8px;">
-          <div id="imgthumb_${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">
-            ${item.image ? `<img src="${item.image}" style="height:48px;border-radius:4px;border:1px solid #eee;">` : ''}
-          </div>
-          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-            <input type="file" id="imgfile_${item.id}" accept="image/*" multiple onchange="previewProductImages(this,'${item.id}')"
-              style="font-size:10px;width:100px;">
-            <input id="img_${item.id}" value="${item.image||''}" placeholder="URL" style="flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;">
-          </div>
-          <span id="imgstatus_${item.id}" style="font-size:10px;color:#888;"></span>
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          <button onclick="saveProduct('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;margin-bottom:4px;">✏️ 저장</button>
-          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️ 삭제</button>
+        <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
+        <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
+        <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
+        <td style="padding:8px 6px;display:flex;gap:4px;">
+          <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
+          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
       </tr>`;
     });
@@ -531,28 +1480,23 @@ async function loadStock() {
   const catalog = catalogSnap.val() || {};
   const stock = stockSnap.val() || {};
 
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' }
-  ];
+  const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  catOrder.forEach(({ key, label }) => {
+  ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr data-search="${item.id.toLowerCase()} ${cleanName.toLowerCase()} ${cleanKo.toLowerCase()}">
+      tbody.innerHTML += `<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -573,34 +1517,44 @@ async function loadDiscount() {
   const catalog = catalogSnap.val() || {};
   const disc = discSnap.val() || {};
 
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' }
-  ];
+  const fixedOrder2 = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered2 = [...fixedOrder2.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder2.includes(k)).sort()];
+
+  // bulk-cat select 동적 채우기
+  const bulkCat = document.getElementById('bulk-cat');
+  if (bulkCat) {
+    bulkCat.innerHTML = '<option value="all">전체</option>';
+    ordered2.forEach(key => {
+      const cat = catalog[key];
+      if (!cat) return;
+      const label = getLabel(cat, key);
+      const prefix = label.charAt(0).toUpperCase();
+      const opt = document.createElement('option');
+      opt.value = prefix;
+      opt.textContent = label;
+      bulkCat.appendChild(opt);
+    });
+  }
 
   const tbody = document.getElementById('discount-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  catOrder.forEach(({ key, label }) => {
+  ordered2.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     tbody.innerHTML += `<tr><td colspan="5" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const d2 = disc[item.id]?.d2 !== undefined ? disc[item.id].d2 : 5;
       const d3 = disc[item.id]?.d3 !== undefined ? disc[item.id].d3 : 10;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr data-search="${item.id.toLowerCase()} ${cleanName.toLowerCase()} ${cleanKo.toLowerCase()}">
+      tbody.innerHTML += `<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
-        <td class="td-ko">${cleanKo}</td>
-        <td class="td-stock"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
-        <td class="td-stock"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
+        <td class="td-ko">${(item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '')}</td>
+        <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
+        <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
       </tr>`;
     });
   });
@@ -714,6 +1668,31 @@ async function saveAll() {
   showToast('💾 저장 완료!');
 }
 
+async function translateEditName() {
+  const ko = document.getElementById('edit-ko').value.trim();
+  if (!ko) { alert('한국어명을 먼저 입력해주세요.'); return; }
+  const status = document.getElementById('edit-translate-status');
+  status.style.display = 'block';
+  status.style.color = '#888';
+  status.textContent = '🤖 번역 중...';
+  try {
+    const [en, th, lo] = await Promise.all([
+      googleTranslate(ko, 'en'),
+      googleTranslate(ko, 'th'),
+      googleTranslate(ko, 'lo')
+    ]);
+    document.getElementById('edit-en').value = en;
+    document.getElementById('edit-th').value = th;
+    document.getElementById('edit-lo').value = lo;
+    status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
+    status.style.color = '#2d7a4f';
+  } catch(e) {
+    console.error(e);
+    status.textContent = '❌ 번역 실패: ' + e.message;
+    status.style.color = '#c84b2f';
+  }
+}
+
 async function translateName() {
   const ko = document.getElementById('new-ko').value.trim();
   if (!ko) { alert('한국어 상품명을 먼저 입력해주세요.'); return; }
@@ -722,18 +1701,11 @@ async function translateName() {
   status.style.color = '#888';
   status.textContent = '🤖 번역 중...';
   try {
-    const enRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|en`);
-    const enData = await enRes.json();
-    const en = enData.responseData.translatedText;
-
-    const thRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|th`);
-    const thData = await thRes.json();
-    const th = thData.responseData.translatedText;
-
-    const loRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|lo`);
-    const loData = await loRes.json();
-    const lo = loData.responseData.translatedText;
-
+    const [en, th, lo] = await Promise.all([
+      googleTranslate(ko, 'en'),
+      googleTranslate(ko, 'th'),
+      googleTranslate(ko, 'lo')
+    ]);
     const id = document.getElementById('new-id').value.trim().toUpperCase();
     const prefix = id ? id + '. ' : '';
     document.getElementById('new-en').value = prefix + en;
@@ -742,29 +1714,402 @@ async function translateName() {
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
-    status.textContent = '❌ 번역 실패. 직접 입력해주세요.';
+    console.error(e);
+    status.textContent = '❌ 번역 실패: ' + e.message;
     status.style.color = '#c84b2f';
   }
 }
 
-function autoFillId() {
-  const cat = document.getElementById('new-cat').value.toLowerCase();
-  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials', f: 'veggie' };
-  const catKey = catMap[cat];
-  if (!catKey) return;
+// 카테고리 prefix 매핑 (한글 label 첫글자 대신 알파벳 사용)
+const CAT_PREFIX = {
+  frozen: 'A',
+  noodle: 'B',
+  sauce: 'C', sauce_liquid: 'C',
+  other: 'D', spice: 'D',
+  veggie: 'E', produce: 'E',
+  drinks: 'F', drinks_snacks: 'F',
+  essentials: 'G',
+  shoes: 'H',
+  tobacco: 'I', cigarettes_lighters: 'I', 'cigarettes&lighters': 'I'
+};
 
-  // Firebase에서 카탈로그 로드
-  db.ref('catalog/' + catKey + '/items').once('value', snap => {
-    const items = snap.val() || [];
-    let maxNum = 0;
-    items.forEach(item => {
+function getCatPrefix(catKey, label) {
+  if (CAT_PREFIX[catKey]) return CAT_PREFIX[catKey];
+  // label 영문 첫 글자 (A~Z)
+  const match = (label || '').match(/[A-Za-z]/);
+  if (match) return match[0].toUpperCase();
+  return catKey.charAt(0).toUpperCase();
+}
+
+async function autoFillEditId() {
+  const catKey = document.getElementById('edit-cat').value;
+  if (!catKey) return;
+  const snap = await db.ref('catalog/' + catKey).get();
+  const catData = snap.val() || {};
+  const label = getLabel(catData, catKey);
+  const prefix = getCatPrefix(catKey, label);
+
+  // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
+  const allSnap = await db.ref('catalog').get();
+  const allCatalog = allSnap.val() || {};
+  let maxNum = 0;
+  Object.entries(allCatalog).forEach(([key, cat]) => {
+    const p = getCatPrefix(key, getLabel(cat, key));
+    if (p !== prefix) return;
+    (cat.items || []).forEach(item => {
       const match = String(item.id).match(/\d+/);
       if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
     });
-    const nextNum = maxNum + 1;
-    const formatted = cat.toUpperCase() + String(nextNum).padStart(2, '0');
-    document.getElementById('new-id').value = formatted;
   });
+  document.getElementById('edit-id').value = prefix + String(maxNum + 1).padStart(2, '0');
+}
+
+async function autoFillId() {
+  const catKey = document.getElementById('new-cat').value;
+  if (!catKey) return;
+  const snap = await db.ref('catalog/' + catKey).get();
+  const catData = snap.val() || {};
+  const label = getLabel(catData, catKey);
+  const prefix = getCatPrefix(catKey, label);
+
+  // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
+  const allSnap = await db.ref('catalog').get();
+  const allCatalog = allSnap.val() || {};
+  let maxNum = 0;
+  Object.entries(allCatalog).forEach(([key, cat]) => {
+    const p = getCatPrefix(key, getLabel(cat, key));
+    if (p !== prefix) return;
+    (cat.items || []).forEach(item => {
+      const match = String(item.id).match(/\d+/);
+      if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+    });
+  });
+  document.getElementById('new-id').value = prefix + String(maxNum + 1).padStart(2, '0');
+}
+
+// ── 상품 수정 모달 ──
+let _editMeta = {}; // { catKey, oldId, idx }
+
+async function openEditModal(catKey, itemId, idx) {
+  const snap = await db.ref('catalog/' + catKey + '/items/' + idx).get();
+  const item = snap.val();
+  if (!item) { showToast('상품 정보를 불러올 수 없습니다.'); return; }
+
+  _editMeta = { catKey, oldId: itemId, idx };
+
+  // 카테고리 select 옵션 동적 생성 (A→B→C 순서)
+  const catSnap = await db.ref('catalog').get();
+  const catData = catSnap.val() || {};
+  const sel = document.getElementById('edit-cat');
+  sel.innerHTML = '';
+  const orderedKeys = [
+    ...CAT_ORDER.filter(k => catData[k]),
+    ...Object.keys(catData).filter(k => !CAT_ORDER.includes(k)).sort()
+  ];
+  orderedKeys.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = getLabel(catData[k], k);
+    if (k === catKey) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  const clean = v => (v || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  document.getElementById('edit-id').value    = item.id || itemId;
+  document.getElementById('edit-ko').value    = clean(item.name_ko);
+  document.getElementById('edit-en').value    = clean(item.name_en);
+  document.getElementById('edit-th').value    = clean(item.name_th);
+  document.getElementById('edit-lo').value    = clean(item.name_lo);
+  document.getElementById('edit-price').value = item.price1 || '';
+  // 기존 이미지 표시
+  const existingImgs = item.images || (item.image ? [item.image] : []);
+  document.getElementById('edit-img').value = existingImgs.length ? JSON.stringify(existingImgs) : '[]';
+  renderImgPreview('edit-img-preview', 'edit-img', [...existingImgs]);
+  document.getElementById('edit-img-status').textContent = existingImgs.length ? `✅ 총 ${existingImgs.length}장` : '';
+  _editImgUrls = [...existingImgs];
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function submitEditProduct() {
+  const newCatKey = document.getElementById('edit-cat').value;
+  let newId       = document.getElementById('edit-id').value.trim().toUpperCase();
+  const ko        = document.getElementById('edit-ko').value.trim();
+  const en        = document.getElementById('edit-en').value.trim();
+  const th        = document.getElementById('edit-th').value.trim();
+  const lo        = document.getElementById('edit-lo').value.trim();
+  const price     = parseInt(document.getElementById('edit-price').value);
+  const imgRaw    = document.getElementById('edit-img').value.trim();
+  let images = [];
+  try { images = imgRaw ? JSON.parse(imgRaw) : []; } catch(e) { images = imgRaw ? [imgRaw] : []; }
+
+  if (!ko)    { alert('한국어 상품명을 입력해주세요.'); return; }
+  if (!price) { alert('가격을 입력해주세요.'); return; }
+
+  const { catKey: oldCatKey, oldId, idx } = _editMeta;
+  const catChanged = newCatKey !== oldCatKey;
+
+  // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
+  if (catChanged) {
+    const allSnap = await db.ref('catalog').get();
+    const allCatalog = allSnap.val() || {};
+    const newCatData = allCatalog[newCatKey] || {};
+    const label = getLabel(newCatData, newCatKey);
+    const prefix = getCatPrefix(newCatKey, label);
+    let maxNum = 0;
+    Object.entries(allCatalog).forEach(([key, cat]) => {
+      const p = getCatPrefix(key, getLabel(cat, key));
+      if (p !== prefix) return;
+      (cat.items || []).forEach(item => {
+        const match = String(item.id).match(/\d+/);
+        if (match) maxNum = Math.max(maxNum, parseInt(match[0]));
+      });
+    });
+    newId = prefix + String(maxNum + 1).padStart(2, '0');
+  }
+
+  const idChanged = newId !== oldId;
+
+  const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿' };
+  const updatedItem = {
+    id: newId, emoji: '',
+    name_en: en || ko, name_ko: ko, name_th: th, name_lo: lo,
+    price1: price, price2: 0, price3: 0,
+    image: images[0] || '',
+    images: images
+  };
+
+  if (catChanged || idChanged) {
+    // 기존 카테고리에서 제거
+    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
+    const oldItems = (oldSnap.val() || []).filter((_, i) => i !== idx);
+    await db.ref('catalog/' + oldCatKey + '/items').set(oldItems);
+
+    // 새 카테고리에 추가
+    const newSnap = await db.ref('catalog/' + newCatKey + '/items').get();
+    const newItems = newSnap.val() || [];
+    updatedItem.emoji = catEmojis[newCatKey] || '🛒';
+    newItems.push(updatedItem);
+    await db.ref('catalog/' + newCatKey + '/items').set(newItems);
+
+    // discount 키도 이동
+    const discSnap = await db.ref('discount/' + oldId).get();
+    if (discSnap.val()) {
+      await db.ref('discount/' + newId).set(discSnap.val());
+      await db.ref('discount/' + oldId).remove();
+    }
+  } else {
+    // 같은 카테고리, 같은 ID → 필드만 업데이트
+    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items/' + idx).get();
+    const existing = oldSnap.val() || {};
+    updatedItem.emoji  = existing.emoji || '';
+    updatedItem.price2 = existing.price2 || 0;
+    updatedItem.price3 = existing.price3 || 0;
+    await db.ref('catalog/' + oldCatKey + '/items/' + idx).set(updatedItem);
+  }
+
+  closeEditModal();
+  showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
+  await loadCatalogForAdmin();
+  autoFillId();
+}
+
+// ── 카테고리 관리 ──
+let _catEditKey = null; // null이면 추가 모드
+
+const FALLBACK_LABELS = { frozen:'A 냉동음식', noodle:'B 면 종류', sauce:'C 각종 소스', other:'D 음료 및 기타', essentials:'E 생활용품', veggie:'F 농산물' };
+const CAT_ORDER = ['frozen','noodle','sauce','other','essentials','veggie'];
+
+// label이 객체({ko,en,...})이거나 문자열이거나 모두 안전하게 처리
+function getLabel(cat, key) {
+  const raw = cat?.label;
+  if (!raw) return FALLBACK_LABELS[key] || key;
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') return raw.ko || raw.en || Object.values(raw)[0] || FALLBACK_LABELS[key] || key;
+  return FALLBACK_LABELS[key] || key;
+}
+
+// 이모지 후보 목록
+const EMOJI_CANDIDATES = [
+  '🧊','🥶','❄️','🍖','🥩','🥓','🍗','🦐','🦑','🐟','🐷','🐄',
+  '🍜','🍝','🍣','🍱','🥟','🍛','🍲','🫕','🥘','🍚',
+  '🥫','🧄','🧅','🌶️','🫙','🍯','🧂','🥚','🧆',
+  '🧃','🥤','🍺','🧊','🥛','☕','🫖','🍵','🧋','💧',
+  '🧴','🧼','🪥','🧹','🧺','🛒','🏠','💊','🪴','🌿',
+  '🥬','🥦','🍅','🥕','🧅','🌽','🥑','🍆','🫑','🍄',
+  '👟','👠','👡','👢','🥿','👞','👣','🩴','🥾','👒',
+  '👕','👗','👔','🧥','🧤','🧣','🎒','👜','💍','⌚',
+  '🚬','🍺','🍻','🥃','🍷','🍸','🪄','📦','🏪','💰'
+];
+
+function buildEmojiPicker(currentEmoji) {
+  const picker = document.getElementById('emoji-picker');
+  picker.innerHTML = '';
+  EMOJI_CANDIDATES.forEach(em => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = em;
+    btn.title = em;
+    const isSelected = em === currentEmoji;
+    btn.style.cssText = `font-size:22px;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid ${isSelected ? '#c84b2f' : 'transparent'};background:${isSelected ? '#fde8e8' : '#f5f5f5'};transition:all 0.1s;`;
+    btn.onclick = () => {
+      document.getElementById('cat-emoji').value = em;
+      picker.querySelectorAll('button').forEach(b => {
+        b.style.borderColor = 'transparent';
+        b.style.background = '#f5f5f5';
+      });
+      btn.style.borderColor = '#c84b2f';
+      btn.style.background = '#fde8e8';
+    };
+    picker.appendChild(btn);
+  });
+}
+
+async function saveCatOrder() {
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  const order = Array.from(tbody.rows).map(row => row.getAttribute('data-catkey')).filter(Boolean);
+  await db.ref('catOrder').set(order);
+  showToast('✅ 카테고리 순서 저장 완료!');
+}
+
+function initCatDrag() {
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  let dragging = null;
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.setAttribute('draggable', 'true');
+    row.style.cursor = 'grab';
+
+    row.addEventListener('dragstart', e => {
+      dragging = row;
+      row.style.opacity = '0.5';
+    });
+    row.addEventListener('dragend', e => {
+      row.style.opacity = '1';
+      dragging = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragging || dragging === row) return;
+      const rect = row.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      if (e.clientY < mid) tbody.insertBefore(dragging, row);
+      else tbody.insertBefore(dragging, row.nextSibling);
+    });
+  });
+}
+
+async function loadCategories() {
+  const [snap, orderSnap] = await Promise.all([
+    db.ref('catalog').get(),
+    db.ref('catOrder').get()
+  ]);
+  const data = snap.val() || {};
+  const savedOrder = orderSnap.val() || [];
+  const tbody = document.getElementById('category-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  // 저장된 순서 적용, 없는 키는 뒤에 추가
+  const allKeys = Object.keys(data);
+  const ordered = savedOrder.length > 0
+    ? [...savedOrder.filter(k=>data[k]), ...allKeys.filter(k=>!savedOrder.includes(k))]
+    : [...CAT_ORDER.filter(k=>data[k]), ...allKeys.filter(k=>!CAT_ORDER.includes(k)).sort()];
+
+  ordered.forEach(key => {
+    const cat = data[key];
+    const count = (cat.items || []).length;
+    const label = getLabel(cat, key);
+    const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
+    const visible = cat.visible !== false;
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-catkey', key);
+    tr.style.opacity = visible ? '1' : '0.5';
+    tr.innerHTML = `
+      <td style="padding:10px 12px;font-size:18px;color:#aaa;cursor:grab;text-align:center;">☰</td>
+      <td style="padding:10px 12px;font-size:12px;color:#888;">${key}</td>
+      <td style="padding:10px 12px;font-size:13px;">${label}</td>
+      <td style="padding:10px 12px;font-size:18px;">${emoji}</td>
+      <td style="padding:10px 12px;font-size:13px;color:#888;">${count}개</td>
+      <td style="padding:10px 12px;font-size:12px;">
+        <span style="background:${visible ? '#e8f5e9' : '#fde8e8'};color:${visible ? '#2d7a4f' : '#c84b2f'};padding:3px 10px;border-radius:100px;font-weight:600;">
+          ${visible ? '👁️ 표시중' : '🙈 숨김'}
+        </span>
+      </td>
+      <td style="padding:10px 6px;display:flex;gap:6px;">
+        <button onclick="toggleCatVisible('${key}', ${visible})" style="background:${visible ? '#888' : '#2d7a4f'};border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">${visible ? '🙈 숨기기' : '👁️ 보이기'}</button>
+        <button onclick="openEditCatModal('${key}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  initCatDrag();
+}
+
+async function toggleCatVisible(key, currentVisible) {
+  await db.ref('catalog/' + key + '/visible').set(!currentVisible);
+  showToast(!currentVisible ? `✅ ${key} 카테고리 표시됨` : `🙈 ${key} 카테고리 숨김`);
+  loadCategories();
+}
+
+async function openEditCatModal(key) {
+  _catEditKey = key;
+  const snap = await db.ref('catalog/' + key).get();
+  const cat = snap.val() || {};
+  const currentEmoji = typeof cat.emoji === 'string' ? cat.emoji : '';
+  document.getElementById('cat-modal-title').textContent = '📂 카테고리 수정';
+  document.getElementById('cat-key').value = key;
+  document.getElementById('cat-key-edit-wrap').style.display = 'none';
+  document.getElementById('cat-label').value = getLabel(cat, key);
+  document.getElementById('cat-emoji').value = currentEmoji;
+  buildEmojiPicker(currentEmoji);
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function openAddCatModal() {
+  _catEditKey = null;
+  document.getElementById('cat-modal-title').textContent = '📂 카테고리 추가';
+  document.getElementById('cat-key').value = '';
+  document.getElementById('cat-key').removeAttribute('readonly');
+  document.getElementById('cat-key-edit-wrap').style.display = 'none';
+  document.getElementById('cat-label').value = '';
+  document.getElementById('cat-emoji').value = '';
+  buildEmojiPicker('');
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function closeCatModal() {
+  document.getElementById('cat-modal').classList.remove('open');
+  document.getElementById('cat-key').setAttribute('readonly', true);
+}
+
+async function submitCatEdit() {
+  const label = document.getElementById('cat-label').value.trim();
+  const emoji = document.getElementById('cat-emoji').value.trim();
+
+  if (!label) { alert('카테고리 이름을 입력해주세요.'); return; }
+
+  if (_catEditKey) {
+    // 수정
+    await db.ref('catalog/' + _catEditKey).update({ label, emoji });
+    showToast('✅ 카테고리 수정 완료!');
+  } else {
+    // 추가
+    const key = document.getElementById('cat-key').value.trim().toLowerCase().replace(/\s/g,'');
+    if (!key) { alert('키를 입력해주세요.'); return; }
+    const exists = await db.ref('catalog/' + key).get();
+    if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
+    await db.ref('catalog/' + key).set({ label, emoji, items: [] });
+    showToast('✅ 카테고리 추가 완료!');
+  }
+  closeCatModal();
+  loadCategories();
 }
 
 async function deleteProduct(catKey, itemId) {
@@ -778,154 +2123,68 @@ async function deleteProduct(catKey, itemId) {
   autoFillId();
 }
 
-// 신규 상품 추가 - 다중 이미지 미리보기
-function previewNewImages(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  const preview = document.getElementById('new-img-preview');
-  preview.style.display = 'flex';
-  preview.innerHTML = '';
-  files.forEach((file, i) => {
-    const url = URL.createObjectURL(file);
-    const wrap = document.createElement('div');
-    wrap.style = 'position:relative;';
-    wrap.innerHTML = `
-      <img src="${url}" style="height:80px;border-radius:8px;border:1px solid #ddd;display:block;">
-      <span style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);color:#fff;font-size:10px;padding:1px 4px;border-radius:4px;">${i+1}</span>`;
-    preview.appendChild(wrap);
-  });
-  // 첫 번째 이미지 URL 입력란에 미리 표시 (업로드 전)
-  document.getElementById('new-img-upload-status').textContent = `📁 ${files.length}장 선택됨 — 저장 시 업로드됩니다.`;
-}
-
-// 기존 상품 - 다중 이미지 즉시 미리보기 (업로드 전)
-function previewProductImages(input, itemId) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-  const thumbBox = document.getElementById('imgthumb_' + itemId);
-  // 기존 썸네일 유지 + 새 미리보기 추가
-  const existing = thumbBox.querySelector('img');
-  thumbBox.innerHTML = existing ? existing.outerHTML : '';
-  files.forEach((file, i) => {
-    const url = URL.createObjectURL(file);
-    const wrap = document.createElement('div');
-    wrap.style = 'position:relative;';
-    wrap.innerHTML = `
-      <img src="${url}" style="height:48px;border-radius:4px;border:2px dashed #c84b2f;">
-      <span style="position:absolute;top:1px;right:1px;background:#c84b2f;color:#fff;font-size:9px;padding:1px 3px;border-radius:3px;">NEW</span>`;
-    thumbBox.appendChild(wrap);
-  });
-  document.getElementById('imgstatus_' + itemId).textContent = `📁 ${files.length}장 선택 — 저장 버튼으로 업로드`;
-}
-
-// 기존 상품 수정 저장 (다중 이미지 업로드)
-async function uploadAndSetImage(input, itemId) {
-  // 이 함수는 saveProduct에서 처리
-}
-
-// 기존 상품 수정 저장
-async function saveProduct(catKey, itemId) {
-  const en = document.getElementById('en_' + itemId)?.value.trim();
-  const ko = document.getElementById('ko_' + itemId)?.value.trim();
-  const price = parseInt(document.getElementById('price_' + itemId)?.value);
-  let img = document.getElementById('img_' + itemId)?.value.trim();
-  const statusEl = document.getElementById('imgstatus_' + itemId);
-
-  const fileInput = document.getElementById('imgfile_' + itemId);
-  const files = fileInput?.files ? Array.from(fileInput.files) : [];
-
-  if (files.length > 0) {
-    statusEl.textContent = `⏫ ${files.length}장 업로드 중...`;
-    try {
-      const urls = await Promise.all(files.map(file => {
-        const ref = storage.ref(`products/${itemId}_${Date.now()}_${file.name}`);
-        return ref.put(file).then(() => ref.getDownloadURL());
-      }));
-      img = urls[0]; // 첫 번째 이미지를 대표 이미지로
-      document.getElementById('img_' + itemId).value = img;
-      // 썸네일 갱신
-      const thumbBox = document.getElementById('imgthumb_' + itemId);
-      thumbBox.innerHTML = urls.map(u => `<img src="${u}" style="height:48px;border-radius:4px;border:1px solid #eee;">`).join('');
-      statusEl.textContent = `✅ ${urls.length}장 업로드 완료!`;
-      statusEl.style.color = '#2d7a4f';
-    } catch(e) {
-      statusEl.textContent = '❌ 업로드 실패';
-      statusEl.style.color = '#c84b2f';
-      showToast('❌ 이미지 업로드 실패');
-      return;
-    }
-  }
-
-  const snap = await db.ref('catalog/' + catKey + '/items').get();
-  const items = snap.val() || [];
-  const idx = items.findIndex(i => i.id === itemId);
-  if (idx === -1) { showToast('❌ 상품을 찾을 수 없습니다.'); return; }
-  items[idx] = { ...items[idx], name_en: en, name_ko: ko, price1: price || items[idx].price1, image: img };
-  await db.ref('catalog/' + catKey + '/items').set(items);
-  showToast(`✅ ${itemId} 수정 완료!`);
-}
-
-function addProduct() {
-  const id = document.getElementById('new-id').value.trim();
+async function addProduct() {
+  const id = document.getElementById('new-id').value.trim(); // 대소문자 그대로 유지
   const en = document.getElementById('new-en').value.trim();
   const ko = document.getElementById('new-ko').value.trim();
   const th = document.getElementById('new-th').value.trim();
   const lo = document.getElementById('new-lo').value.trim();
   const price = parseInt(document.getElementById('new-price').value);
-  const imgUrl = document.getElementById('new-img').value.trim();
-  const imgFile = document.getElementById('new-img-file').files[0];
-  const imgFiles = Array.from(document.getElementById('new-img-file').files);
+  const imgRaw = document.getElementById('new-img').value.trim();
+  let images = [];
+  try { images = imgRaw ? JSON.parse(imgRaw) : []; } catch(e) { images = imgRaw ? [imgRaw] : []; }
   if (!id) { alert('상품 ID를 입력해주세요.'); return; }
   if (!ko) { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
-
   const finalEn = en || ko;
-  const cat = document.getElementById('new-cat').value;
-  const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
-  const catKey = catMap[cat];
-  const emoji = { a:'🧊', b:'🍜', c:'🥫', d:'🧃', e:'🧴' }[cat] || '🛒';
+  const catKey = document.getElementById('new-cat').value;
+  if (!catKey) { alert('카테고리를 선택해주세요.'); return; }
 
-  const statusEl = document.getElementById('new-img-upload-status');
+  // 카테고리 이모지 Firebase에서 가져오기
+  const catSnap = await db.ref('catalog/' + catKey).get();
+  const catData = catSnap.val() || {};
+  const emoji = typeof catData.emoji === 'string' ? catData.emoji : '🛒';
 
-  async function doAdd(imageUrl) {
-    const newItem = {
-      id, emoji,
-      name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
-      price1: price, price2: 0, price3: 0, image: imageUrl
-    };
-    db.ref('catalog/' + catKey + '/items').once('value', snap => {
-      const items = snap.val() || [];
-      items.push(newItem);
-      db.ref('catalog/' + catKey + '/items').set(items).then(() => {
-        showToast('✅ 상품 추가 완료!');
-        ['new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => {
-          const el = document.getElementById(f);
-          if (el) el.value = '';
-        });
-        document.getElementById('new-img-file').value = '';
-        document.getElementById('new-img-preview').style.display = 'none';
-        document.getElementById('translate-status').style.display = 'none';
-        setTimeout(() => { loadCatalogForAdmin(); autoFillId(); }, 500);
+  // Firebase catalog에 바로 저장
+  const newItem = {
+    id, emoji,
+    name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
+    price1: price, price2: 0, price3: 0,
+    image: images[0] || '',
+    images: images
+  };
+
+  db.ref('catalog/' + catKey + '/items').once('value', snap => {
+    const items = snap.val() || [];
+    items.push(newItem);
+    // 기본 할인율 (할인율 탭의 현재 설정값 사용, 없으면 5%/10%)
+    const defaultD2 = parseFloat(document.getElementById('bulk-disc2')?.value) || 5;
+    const defaultD3 = parseFloat(document.getElementById('bulk-disc3')?.value) || 10;
+    db.ref('catalog/' + catKey + '/items').set(items).then(() => {
+      // discount 노드에도 새 상품 기본 할인율 저장
+      return db.ref('discount/' + id).set({ d2: defaultD2, d3: defaultD3 });
+    }).then(() => {
+      showToast('✅ 상품 추가 완료!');
+      localStorage.removeItem('product_form_tmp'); // 임시저장 삭제
+      // 필드 초기화
+      ['new-en','new-ko','new-th','new-lo','new-price','new-img','new-img-url'].forEach(f => {
+        const el = document.getElementById(f);
+        if (el) el.value = '';
       });
+      // 이미지 미리보기 초기화
+      document.getElementById('new-img-preview').innerHTML = '';
+      document.getElementById('new-img-status').textContent = '';
+      document.getElementById('new-img-file').value = '';
+      document.getElementById('translate-status').style.display = 'none';
+      _newImgUrls = [];
+      // 카탈로그 새로고침 완료 후 다음 ID 자동 입력
+      setTimeout(() => {
+        loadCatalogForAdmin().then(() => autoFillId());
+      }, 500);
     });
-  }
+  });
 
-  if (imgFiles.length > 0) {
-    if (statusEl) statusEl.textContent = `⏫ ${imgFiles.length}장 업로드 중...`;
-    try {
-      const urls = await Promise.all(imgFiles.map(file => {
-        const ref = storage.ref(`products/${id}_${Date.now()}_${file.name}`);
-        return ref.put(file).then(() => ref.getDownloadURL());
-      }));
-      if (statusEl) statusEl.textContent = `✅ ${urls.length}장 업로드 완료!`;
-      doAdd(urls[0]); // 첫 번째 이미지를 대표 이미지로
-    } catch(e) {
-      if (statusEl) statusEl.textContent = '❌ 업로드 실패';
-      showToast('❌ 이미지 업로드 실패');
-    }
-  } else {
-    doAdd(imgUrl);
-  }
+  // (초기화는 Firebase 저장 완료 후 위에서 처리)
 }
 
 function addCustomer() {
@@ -949,96 +2208,23 @@ async function deleteCustomer(key) {
 // 베스트 상품 관련
 let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
-// 전체 상품 목록 (buildAllOptions 후 채워짐)
-let allProductList = [];
-
 async function buildAllOptions() {
   const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
-  const catOrder = [
-    { key: 'frozen', label: 'A 냉동음식' },
-    { key: 'noodle', label: 'B 면 종류' },
-    { key: 'sauce',  label: 'C 각종 소스' },
-    { key: 'other',  label: 'D 음료 및 기타' },
-    { key: 'essentials', label: 'E 생활용품' },
-    { key: 'veggie', label: 'F 농산물' },
-    { key: 'shoes',  label: 'G 신발' }
-  ];
+  const fixedOrder3 = ['frozen','noodle','sauce','other','essentials','veggie'];
+  const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
   ALL_OPTIONS = '';
-  allProductList = [];
-  catOrder.forEach(({ key, label }) => {
+  ordered3.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
+    const label = getLabel(cat, key);
     ALL_OPTIONS += `<optgroup label="${label}">`;
     cat.items.forEach(item => {
-      const rawKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
-      const rawEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
-      const displayName = rawKo || rawEn || '';
-      ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${displayName}</option>`;
-      allProductList.push({
-        id: item.id,
-        name_ko: rawKo,
-        name_en: rawEn,
-        label: `${item.id}. ${displayName}`
-      });
+      const rawName = (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+      ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${rawName}</option>`;
     });
     ALL_OPTIONS += '</optgroup>';
   });
-}
-
-function filterTable(tbodyId, keyword) {
-  const q = keyword.trim().toLowerCase();
-  const rows = document.querySelectorAll(`#${tbodyId} tr`);
-  rows.forEach(row => {
-    if (!row.dataset.search) {
-      // 카테고리 헤더 행: 검색 중이면 숨김
-      row.style.display = q ? 'none' : '';
-      return;
-    }
-    row.style.display = (!q || row.dataset.search.includes(q)) ? '' : 'none';
-  });
-}
-
-
-  const keyword = document.getElementById(type + '-search').value.toLowerCase().trim();
-  const resultBox = document.getElementById(type + '-search-results');
-  if (!keyword) { resultBox.style.display = 'none'; return; }
-
-  const matched = allProductList.filter(p =>
-    p.id.toLowerCase().includes(keyword) ||
-    p.name_ko.toLowerCase().includes(keyword)
-  ).slice(0, 20);
-
-  if (matched.length === 0) { resultBox.innerHTML = '<div style="padding:10px;color:#aaa;">검색 결과 없음</div>'; resultBox.style.display = 'block'; return; }
-
-  resultBox.innerHTML = matched.map(p => `
-    <div onclick="selectProduct('${type}','${p.id}','${p.label.replace(/'/g,"&#39;")}')"
-      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:13px;"
-      onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
-      <div>${p.label}</div>
-    </div>`).join('');
-  resultBox.style.display = 'block';
-}
-
-function selectProduct(type, id, label) {
-  // 빈 슬롯 찾기
-  for (let i = 0; i < 10; i++) {
-    const sel = document.getElementById(type + '-slot-' + i);
-    if (sel && !sel.value) {
-      sel.value = id;
-      if (!sel.value) {
-        // 옵션에 없으면 추가
-        const opt = document.createElement('option');
-        opt.value = id; opt.text = label;
-        sel.add(opt); sel.value = id;
-      }
-      document.getElementById(type + '-search').value = '';
-      document.getElementById(type + '-search-results').style.display = 'none';
-      showToast(`✅ ${label} 추가됨`);
-      return;
-    }
-  }
-  showToast('⚠️ 슬롯이 꽉 찼습니다! 기존 선택을 지워주세요.');
 }
 
 function renderBestSlots(selectedIds) {
@@ -1047,8 +2233,8 @@ function renderBestSlots(selectedIds) {
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
     container.innerHTML += `
-      <div data-idx="${i}" style="display:flex;align-items:center;gap:12px;">
-        <span class="slot-label" style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
         <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
           <option value="">-- 상품 선택 --</option>
           ${ALL_OPTIONS}
@@ -1086,8 +2272,8 @@ function renderNewSlots(selectedIds = []) {
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
     container.innerHTML += `
-      <div data-idx="${i}" style="display:flex;align-items:center;gap:12px;">
-        <span class="slot-label" style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
         <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
           <option value="">-- 상품 선택 --</option>
           ${ALL_OPTIONS}
