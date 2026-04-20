@@ -2274,10 +2274,9 @@ function filterBestSearch(query) {
   matched.forEach(opt => {
     const count = _bestHistory[opt.value] || 0;
     const div = document.createElement('div');
-    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:8px;';
-    div.innerHTML = '<span style="color:#c84b2f;font-weight:700;">' + opt.value + '</span> '
-      + opt.textContent.replace(/^\S+\.\s*/, '')
-      + (count > 0 ? ' ' + historyBadge(count, '#c84b2f') : '');
+    div.style.cssText = 'padding:8px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:10px;';
+    div.innerHTML = '<div style="flex:1;min-width:0;"><span style="color:#c84b2f;font-weight:700;">' + opt.value + '</span> ' + opt.textContent.replace(/^\S+\.\s*/, '') + '</div>'
+      + historyCountBox(count, '#c84b2f');
     div.onmouseover = () => div.style.background = '#fafafa';
     div.onmouseout = () => div.style.background = '';
     div.onclick = () => bestSearchSelect(opt.value);
@@ -2314,10 +2313,9 @@ function filterNewSearch(query) {
   matched.forEach(opt => {
     const count = _newHistory[opt.value] || 0;
     const div = document.createElement('div');
-    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:8px;';
-    div.innerHTML = '<span style="color:#2d7a4f;font-weight:700;">' + opt.value + '</span> '
-      + opt.textContent.replace(/^\S+\.\s*/, '')
-      + (count > 0 ? ' ' + historyBadge(count, '#2d7a4f') : '');
+    div.style.cssText = 'padding:8px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:10px;';
+    div.innerHTML = '<div style="flex:1;min-width:0;"><span style="color:#2d7a4f;font-weight:700;">' + opt.value + '</span> ' + opt.textContent.replace(/^\S+\.\s*/, '') + '</div>'
+      + historyCountBox(count, '#2d7a4f');
     div.onmouseover = () => div.style.background = '#fafafa';
     div.onmouseout = () => div.style.background = '';
     div.onclick = () => newSearchSelect(opt.value);
@@ -2367,6 +2365,17 @@ function historyBadge(count, color) {
   return `<span style="font-size:11px;font-weight:700;color:${color};background:${color}18;border:1px solid ${color}44;border-radius:100px;padding:2px 8px;white-space:nowrap;">🔁 ${label}</span>`;
 }
 
+function historyCountBox(count, color) {
+  const c = count > 0 ? color : '#ccc';
+  const bg = count > 0 ? color + '12' : '#f5f5f5';
+  const border = count > 0 ? color + '44' : '#e8e8e8';
+  const textColor = count > 0 ? color + 'bb' : '#bbb';
+  return '<div style="width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:' + bg + ';border:1px solid ' + border + ';border-radius:8px;padding:5px 4px;text-align:center;">'
+    + '<span style="font-size:18px;font-weight:800;color:' + c + ';line-height:1;">' + count + '</span>'
+    + '<span style="font-size:10px;color:' + textColor + ';margin-top:2px;white-space:nowrap;">등록 횟수</span>'
+    + '</div>';
+}
+
 function renderBestSlots(selectedIds) {
   const container = document.getElementById('best-slots');
   container.innerHTML = '';
@@ -2380,7 +2389,7 @@ function renderBestSlots(selectedIds) {
         <option value="">-- 상품 선택 --</option>
         ${ALL_OPTIONS}
       </select>
-      <span id="best-badge-${i}" style="min-width:90px;"></span>`;
+      <span id="best-badge-${i}"></span>`;
     container.appendChild(row);
     // 값 설정 + 배지 초기 렌더
     setTimeout(() => {
@@ -2388,6 +2397,8 @@ function renderBestSlots(selectedIds) {
       if (sel && val) {
         sel.value = val;
         updateBestBadge(i, val);
+      } else {
+        updateBestBadge(i, '');
       }
       sel.addEventListener('change', () => updateBestBadge(i, sel.value));
     }, 50);
@@ -2398,7 +2409,7 @@ function updateBestBadge(i, val) {
   const badge = document.getElementById('best-badge-' + i);
   if (!badge) return;
   const count = val ? (_bestHistory[val] || 0) : 0;
-  badge.innerHTML = val ? historyBadge(count, '#c84b2f') : '';
+  badge.innerHTML = historyCountBox(count, '#c84b2f');
 }
 
 async function loadBest() {
@@ -2451,13 +2462,15 @@ function renderNewSlots(selectedIds = []) {
         <option value="">-- 상품 선택 --</option>
         ${ALL_OPTIONS}
       </select>
-      <span id="new-badge-${i}" style="min-width:90px;"></span>`;
+      <span id="new-badge-${i}"></span>`;
     container.appendChild(row);
     setTimeout(() => {
       const sel = document.getElementById('new-slot-' + i);
       if (sel && val) {
         sel.value = val;
         updateNewBadge(i, val);
+      } else {
+        updateNewBadge(i, '');
       }
       sel.addEventListener('change', () => updateNewBadge(i, sel.value));
     }, 50);
@@ -2468,7 +2481,7 @@ function updateNewBadge(i, val) {
   const badge = document.getElementById('new-badge-' + i);
   if (!badge) return;
   const count = val ? (_newHistory[val] || 0) : 0;
-  badge.innerHTML = val ? historyBadge(count, '#2d7a4f') : '';
+  badge.innerHTML = historyCountBox(count, '#2d7a4f');
 }
 
 async function loadNew() {
