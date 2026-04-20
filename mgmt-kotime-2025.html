@@ -831,12 +831,28 @@ async function buildAllOptions() {
 
 function filterSlots(type) {
   const keyword = document.getElementById(type + '-search').value.toLowerCase();
-  const slots = document.querySelectorAll(`#${type}-slots select`);
-  slots.forEach(sel => {
-    Array.from(sel.options).forEach(opt => {
-      if (!opt.value) return; // "-- 상품 선택 --" 제외
-      opt.style.display = opt.text.toLowerCase().includes(keyword) ? '' : 'none';
-    });
+  const container = document.getElementById(type + '-slots');
+  const rows = container.querySelectorAll('div[data-idx]');
+  rows.forEach(row => {
+    const sel = row.querySelector('select');
+    const label = row.querySelector('.slot-label');
+    // 현재 선택된 값 유지
+    const currentVal = sel ? sel.value : '';
+    // 옵션 재구성
+    if (sel) {
+      const allOpts = sel._allOptions || sel.innerHTML;
+      sel._allOptions = allOpts;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString('<select>' + allOpts + '</select>', 'text/html');
+      const filtered = Array.from(doc.querySelectorAll('option, optgroup')).filter(el => {
+        if (el.tagName === 'OPTGROUP') return true;
+        if (!el.value) return true;
+        return el.text.toLowerCase().includes(keyword);
+      });
+      sel.innerHTML = '';
+      filtered.forEach(el => sel.appendChild(el.cloneNode(true)));
+      sel.value = currentVal;
+    }
   });
 }
 
@@ -846,8 +862,8 @@ function renderBestSlots(selectedIds) {
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
     container.innerHTML += `
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
+      <div data-idx="${i}" style="display:flex;align-items:center;gap:12px;">
+        <span class="slot-label" style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
         <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
           <option value="">-- 상품 선택 --</option>
           ${ALL_OPTIONS}
@@ -885,8 +901,8 @@ function renderNewSlots(selectedIds = []) {
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
     container.innerHTML += `
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
+      <div data-idx="${i}" style="display:flex;align-items:center;gap:12px;">
+        <span class="slot-label" style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
         <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
           <option value="">-- 상품 선택 --</option>
           ${ALL_OPTIONS}
