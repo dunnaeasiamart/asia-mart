@@ -831,9 +831,16 @@ async function buildAllOptions() {
     if (!cat || !cat.items) return;
     ALL_OPTIONS += `<optgroup label="${label}">`;
     cat.items.forEach(item => {
-      const rawName = (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${rawName}</option>`;
-      allProductList.push({ id: item.id, name: rawName, label: `${item.id}. ${rawName}` });
+      const rawKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
+      const rawEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '').trim();
+      const displayName = rawKo || rawEn || '';
+      ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${displayName}</option>`;
+      allProductList.push({
+        id: item.id,
+        name_ko: rawKo,
+        name_en: rawEn,
+        label: `${item.id}. ${displayName}`
+      });
     });
     ALL_OPTIONS += '</optgroup>';
   });
@@ -845,7 +852,9 @@ function filterSlots(type) {
   if (!keyword) { resultBox.style.display = 'none'; return; }
 
   const matched = allProductList.filter(p =>
-    p.id.toLowerCase().includes(keyword) || p.name.toLowerCase().includes(keyword)
+    p.id.toLowerCase().includes(keyword) ||
+    p.name_ko.toLowerCase().includes(keyword) ||
+    p.name_en.toLowerCase().includes(keyword)
   ).slice(0, 20);
 
   if (matched.length === 0) { resultBox.innerHTML = '<div style="padding:10px;color:#aaa;">검색 결과 없음</div>'; resultBox.style.display = 'block'; return; }
