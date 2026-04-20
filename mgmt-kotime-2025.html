@@ -2286,7 +2286,7 @@ function filterBestSearch(query) {
 function bestSearchSelect(val) {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('best-slot-' + i);
-    if (sel && !sel.value) { sel.value = val; updateBestBadge(i, val); break; }
+    if (sel && !sel.value) { sel.value = val; checkBestDuplicate(i); updateBestBadge(i, val); break; }
   }
   document.getElementById('best-search').value = '';
   document.getElementById('best-search-results').style.display = 'none';
@@ -2325,7 +2325,7 @@ function filterNewSearch(query) {
 function newSearchSelect(val) {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('new-slot-' + i);
-    if (sel && !sel.value) { sel.value = val; updateNewBadge(i, val); break; }
+    if (sel && !sel.value) { sel.value = val; checkNewDuplicate(i); updateNewBadge(i, val); break; }
   }
   document.getElementById('new-search').value = '';
   document.getElementById('new-search-results').style.display = 'none';
@@ -2400,8 +2400,24 @@ function renderBestSlots(selectedIds) {
       } else {
         updateBestBadge(i, '');
       }
-      sel.addEventListener('change', () => updateBestBadge(i, sel.value));
+      sel.addEventListener('change', () => { checkBestDuplicate(i); updateBestBadge(i, sel.value); });
     }, 50);
+  }
+}
+
+function checkBestDuplicate(changedIdx) {
+  const vals = [];
+  for (let i = 0; i < 10; i++) {
+    const s = document.getElementById('best-slot-' + i);
+    vals.push(s ? s.value : '');
+  }
+  for (let i = 0; i < 10; i++) {
+    const s = document.getElementById('best-slot-' + i);
+    if (!s) continue;
+    const v = s.value;
+    const isDup = v && vals.indexOf(v) !== vals.lastIndexOf(v);
+    s.style.border = isDup ? '2px solid #e53e3e' : '1px solid #ddd';
+    s.style.background = isDup ? '#fff5f5' : '';
   }
 }
 
@@ -2434,6 +2450,10 @@ async function saveBest() {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('best-slot-' + i);
     if (sel && sel.value) ids.push(sel.value);
+  }
+  if (new Set(ids).size !== ids.length) {
+    alert('❌ 중복된 상품이 있습니다. 확인 후 다시 저장해주세요.');
+    return;
   }
   // 히스토리 카운트 업데이트
   const histUpdates = {};
@@ -2472,8 +2492,24 @@ function renderNewSlots(selectedIds = []) {
       } else {
         updateNewBadge(i, '');
       }
-      sel.addEventListener('change', () => updateNewBadge(i, sel.value));
+      sel.addEventListener('change', () => { checkNewDuplicate(i); updateNewBadge(i, sel.value); });
     }, 50);
+  }
+}
+
+function checkNewDuplicate(changedIdx) {
+  const vals = [];
+  for (let i = 0; i < 10; i++) {
+    const s = document.getElementById('new-slot-' + i);
+    vals.push(s ? s.value : '');
+  }
+  for (let i = 0; i < 10; i++) {
+    const s = document.getElementById('new-slot-' + i);
+    if (!s) continue;
+    const v = s.value;
+    const isDup = v && vals.indexOf(v) !== vals.lastIndexOf(v);
+    s.style.border = isDup ? '2px solid #e53e3e' : '1px solid #ddd';
+    s.style.background = isDup ? '#fff5f5' : '';
   }
 }
 
@@ -2506,6 +2542,10 @@ async function saveNew() {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('new-slot-' + i);
     if (sel && sel.value) ids.push(sel.value);
+  }
+  if (new Set(ids).size !== ids.length) {
+    alert('❌ 중복된 상품이 있습니다. 확인 후 다시 저장해주세요.');
+    return;
   }
   // 히스토리 카운트 업데이트
   const histUpdates = {};
