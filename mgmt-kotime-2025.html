@@ -116,6 +116,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 
   <!-- 재고 관리 -->
   <div id="tab-stock" class="tab-content active">
+    <div style="max-width:1000px;margin:20px auto 0;">
+      <input type="text" oninput="filterTable('stock-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
+        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+    </div>
     <div class="table-wrap">
       <table>
         <thead><tr style="background:#f5f5f5;">
@@ -146,6 +150,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <label>3개 할인:</label>
       <input type="number" id="bulk-disc3" value="10" min="0" max="50"> %
       <button class="btn btn-primary" onclick="applyBulkDiscount()">적용</button>
+    </div>
+    <div style="max-width:1000px;margin:12px auto 0;">
+      <input type="text" oninput="filterTable('discount-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
+        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
     </div>
     <div class="table-wrap">
       <table>
@@ -205,8 +213,17 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="number" id="new-price" placeholder="5000">
         </div>
         <div class="form-full">
-          <label>이미지 URL</label>
-          <input type="text" id="new-img" placeholder="https://...">
+          <label>이미지 업로드 또는 URL 직접 입력</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="file" id="new-img-file" accept="image/*" onchange="previewNewImage(this)"
+              style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+            <span style="color:#aaa;font-size:12px;">또는</span>
+            <input type="text" id="new-img" placeholder="https://... URL 직접 입력" style="flex:2;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+          </div>
+          <div id="new-img-preview" style="margin-top:8px;display:none;">
+            <img id="new-img-preview-img" style="height:80px;border-radius:8px;border:1px solid #ddd;">
+            <span id="new-img-upload-status" style="font-size:12px;color:#888;margin-left:8px;"></span>
+          </div>
         </div>
       </div>
       <div id="translate-status" style="margin-top:8px;font-size:12px;color:#888;display:none;">🤖 번역 중...</div>
@@ -214,6 +231,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
 
     <!-- 상품 수정 -->
+    <div style="max-width:1000px;margin:12px auto 0;">
+      <input type="text" oninput="filterTable('product-tbody', this.value)" placeholder="🔍 상품명 또는 ID 검색..."
+        style="width:100%;padding:10px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+    </div>
     <div class="table-wrap">
       <table>
         <thead><tr style="background:#f5f5f5;">
@@ -221,8 +242,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <th style="padding:10px 12px;font-size:12px;color:#888;">영문명</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;">한국명</th>
           <th style="padding:10px 12px;font-size:12px;color:#888;width:100px;">1개 가격</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;">이미지 URL</th>
-          <th style="padding:10px 12px;font-size:12px;color:#888;width:60px;">삭제</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;">이미지</th>
+          <th style="padding:10px 12px;font-size:12px;color:#888;width:80px;">관리</th>
         </tr></thead>
         <tbody id="product-tbody"><tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">로딩 중...</td></tr></tbody>
       </table>
@@ -430,6 +451,7 @@ function toggleSelectAll(cb) {
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
@@ -442,6 +464,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const storage = firebase.storage();
 
 async function loadAll() {
   await buildAllOptions();
@@ -476,13 +499,24 @@ async function loadCatalogForAdmin() {
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr id="prod-row-${item.id}">
+      tbody.innerHTML += `<tr id="prod-row-${item.id}" data-search="${item.id.toLowerCase()} ${cleanEn.toLowerCase()} ${cleanKo.toLowerCase()}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
         <td><input id="en_${item.id}" value="${cleanEn}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
         <td><input id="ko_${item.id}" value="${cleanKo}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
         <td><input id="price_${item.id}" value="${item.price1||''}" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="가격"></td>
-        <td><input id="img_${item.id}" value="${item.image||''}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="이미지 URL"></td>
-        <td style="text-align:center;"><button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️</button></td>
+        <td style="padding:6px 8px;">
+          ${item.image ? `<img src="${item.image}" style="height:40px;border-radius:4px;border:1px solid #eee;display:block;margin-bottom:4px;">` : ''}
+          <div style="display:flex;gap:4px;align-items:center;">
+            <input type="file" id="imgfile_${item.id}" accept="image/*" onchange="uploadAndSetImage(this,'${item.id}')"
+              style="font-size:10px;width:90px;">
+            <input id="img_${item.id}" value="${item.image||''}" placeholder="URL" style="flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;">
+          </div>
+          <span id="imgstatus_${item.id}" style="font-size:10px;color:#888;"></span>
+        </td>
+        <td style="text-align:center;white-space:nowrap;">
+          <button onclick="saveProduct('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;margin-bottom:4px;">✏️ 저장</button>
+          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;">🗑️ 삭제</button>
+        </td>
       </tr>`;
     });
   });
@@ -517,7 +551,7 @@ async function loadStock() {
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr>
+      tbody.innerHTML += `<tr data-search="${item.id.toLowerCase()} ${cleanName.toLowerCase()} ${cleanKo.toLowerCase()}">
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -559,10 +593,11 @@ async function loadDiscount() {
       const d2 = disc[item.id]?.d2 !== undefined ? disc[item.id].d2 : 5;
       const d3 = disc[item.id]?.d3 !== undefined ? disc[item.id].d3 : 10;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr>
+      const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+      tbody.innerHTML += `<tr data-search="${item.id.toLowerCase()} ${cleanName.toLowerCase()} ${cleanKo.toLowerCase()}">
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
-        <td class="td-ko">${(item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '')}</td>
+        <td class="td-ko">${cleanKo}</td>
         <td class="td-stock"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
         <td class="td-stock"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"> %</td>
       </tr>`;
@@ -742,51 +777,136 @@ async function deleteProduct(catKey, itemId) {
   autoFillId();
 }
 
+// 신규 상품 추가 - 이미지 미리보기
+function previewNewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('new-img-preview');
+  const previewImg = document.getElementById('new-img-preview-img');
+  preview.style.display = 'block';
+  previewImg.src = URL.createObjectURL(file);
+  document.getElementById('new-img-upload-status').textContent = '저장 시 자동 업로드됩니다.';
+}
+
+// 기존 상품 - 이미지 즉시 업로드 후 URL 반영
+async function uploadAndSetImage(input, itemId) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('imgstatus_' + itemId);
+  statusEl.textContent = '⏫ 업로드 중...';
+  try {
+    const ref = storage.ref(`products/${itemId}_${Date.now()}_${file.name}`);
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    document.getElementById('img_' + itemId).value = url;
+    // 썸네일 즉시 갱신
+    const row = document.getElementById('prod-row-' + itemId);
+    const existingImg = row.querySelector('img');
+    if (existingImg) existingImg.src = url;
+    else {
+      const imgEl = document.createElement('img');
+      imgEl.src = url;
+      imgEl.style = 'height:40px;border-radius:4px;border:1px solid #eee;display:block;margin-bottom:4px;';
+      input.parentElement.parentElement.insertBefore(imgEl, input.parentElement);
+    }
+    statusEl.textContent = '✅ 업로드 완료!';
+    statusEl.style.color = '#2d7a4f';
+  } catch(e) {
+    statusEl.textContent = '❌ 업로드 실패';
+    statusEl.style.color = '#c84b2f';
+  }
+}
+
+// 기존 상품 수정 저장
+async function saveProduct(catKey, itemId) {
+  const en = document.getElementById('en_' + itemId)?.value.trim();
+  const ko = document.getElementById('ko_' + itemId)?.value.trim();
+  const price = parseInt(document.getElementById('price_' + itemId)?.value);
+  let img = document.getElementById('img_' + itemId)?.value.trim();
+
+  // 이미지 파일 업로드가 선택된 경우 (아직 안 된 경우)
+  const fileInput = document.getElementById('imgfile_' + itemId);
+  if (fileInput?.files[0] && !img.startsWith('http')) {
+    const statusEl = document.getElementById('imgstatus_' + itemId);
+    statusEl.textContent = '⏫ 업로드 중...';
+    try {
+      const ref = storage.ref(`products/${itemId}_${Date.now()}_${fileInput.files[0].name}`);
+      await ref.put(fileInput.files[0]);
+      img = await ref.getDownloadURL();
+      document.getElementById('img_' + itemId).value = img;
+    } catch(e) {
+      showToast('❌ 이미지 업로드 실패');
+      return;
+    }
+  }
+
+  const snap = await db.ref('catalog/' + catKey + '/items').get();
+  const items = snap.val() || [];
+  const idx = items.findIndex(i => i.id === itemId);
+  if (idx === -1) { showToast('❌ 상품을 찾을 수 없습니다.'); return; }
+  items[idx] = { ...items[idx], name_en: en, name_ko: ko, price1: price || items[idx].price1, image: img };
+  await db.ref('catalog/' + catKey + '/items').set(items);
+  showToast(`✅ ${itemId} 수정 완료!`);
+  loadCatalogForAdmin();
+}
+
 function addProduct() {
-  const id = document.getElementById('new-id').value.trim(); // 대소문자 그대로 유지
+  const id = document.getElementById('new-id').value.trim();
   const en = document.getElementById('new-en').value.trim();
   const ko = document.getElementById('new-ko').value.trim();
   const th = document.getElementById('new-th').value.trim();
   const lo = document.getElementById('new-lo').value.trim();
   const price = parseInt(document.getElementById('new-price').value);
-  const img = document.getElementById('new-img').value.trim();
+  const imgUrl = document.getElementById('new-img').value.trim();
+  const imgFile = document.getElementById('new-img-file').files[0];
   if (!id) { alert('상품 ID를 입력해주세요.'); return; }
   if (!ko) { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
-  // 영문명이 없으면 한국어명으로 대체
+
   const finalEn = en || ko;
   const cat = document.getElementById('new-cat').value;
   const catMap = { a: 'frozen', b: 'noodle', c: 'sauce', d: 'other', e: 'essentials' };
   const catKey = catMap[cat];
   const emoji = { a:'🧊', b:'🍜', c:'🥫', d:'🧃', e:'🧴' }[cat] || '🛒';
 
-  // Firebase catalog에 바로 저장
-  const newItem = {
-    id, emoji,
-    name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
-    price1: price, price2: 0, price3: 0, image: img
-  };
+  const statusEl = document.getElementById('new-img-upload-status');
 
-  db.ref('catalog/' + catKey + '/items').once('value', snap => {
-    const items = snap.val() || [];
-    items.push(newItem);
-    db.ref('catalog/' + catKey + '/items').set(items).then(() => {
-      showToast('✅ 상품 추가 완료!');
-      // 필드 초기화
-      ['new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => {
-        const el = document.getElementById(f);
-        if (el) el.value = '';
+  async function doAdd(imageUrl) {
+    const newItem = {
+      id, emoji,
+      name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
+      price1: price, price2: 0, price3: 0, image: imageUrl
+    };
+    db.ref('catalog/' + catKey + '/items').once('value', snap => {
+      const items = snap.val() || [];
+      items.push(newItem);
+      db.ref('catalog/' + catKey + '/items').set(items).then(() => {
+        showToast('✅ 상품 추가 완료!');
+        ['new-en','new-ko','new-th','new-lo','new-price','new-img'].forEach(f => {
+          const el = document.getElementById(f);
+          if (el) el.value = '';
+        });
+        document.getElementById('new-img-file').value = '';
+        document.getElementById('new-img-preview').style.display = 'none';
+        document.getElementById('translate-status').style.display = 'none';
+        setTimeout(() => { loadCatalogForAdmin(); autoFillId(); }, 500);
       });
-      document.getElementById('translate-status').style.display = 'none';
-      // 카탈로그 새로고침 + 다음 ID 자동 입력
-      setTimeout(() => {
-        loadCatalogForAdmin();
-        autoFillId();
-      }, 500);
     });
-  });
+  }
 
-  // (초기화는 Firebase 저장 완료 후 위에서 처리)
+  if (imgFile) {
+    if (statusEl) { statusEl.textContent = '⏫ 업로드 중...'; }
+    const ref = storage.ref(`products/${id}_${Date.now()}_${imgFile.name}`);
+    ref.put(imgFile).then(() => ref.getDownloadURL()).then(url => {
+      if (statusEl) statusEl.textContent = '✅ 업로드 완료!';
+      doAdd(url);
+    }).catch(() => {
+      if (statusEl) statusEl.textContent = '❌ 업로드 실패';
+      showToast('❌ 이미지 업로드 실패');
+    });
+  } else {
+    doAdd(imgUrl);
+  }
 }
 
 function addCustomer() {
@@ -847,7 +967,20 @@ async function buildAllOptions() {
   });
 }
 
-function filterSlots(type) {
+function filterTable(tbodyId, keyword) {
+  const q = keyword.trim().toLowerCase();
+  const rows = document.querySelectorAll(`#${tbodyId} tr`);
+  rows.forEach(row => {
+    if (!row.dataset.search) {
+      // 카테고리 헤더 행: 검색 중이면 숨김
+      row.style.display = q ? 'none' : '';
+      return;
+    }
+    row.style.display = (!q || row.dataset.search.includes(q)) ? '' : 'none';
+  });
+}
+
+
   const keyword = document.getElementById(type + '-search').value.toLowerCase().trim();
   const resultBox = document.getElementById(type + '-search-results');
   if (!keyword) { resultBox.style.display = 'none'; return; }
