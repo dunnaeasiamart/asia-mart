@@ -277,8 +277,11 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🔥 베스트 상품 선택 (최대 10개)</h3>
       <p style="font-size:13px;color:#888;margin-bottom:12px;">선택한 순서대로 메인 페이지에 표시됩니다.</p>
-      <input type="text" id="best-search" placeholder="🔍 상품 검색..." oninput="filterSlots('best')"
-        style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:16px;outline:none;">
+      <div style="position:relative;margin-bottom:16px;">
+        <input type="text" id="best-search" placeholder="🔍 상품명 또는 ID 검색..." oninput="filterSlots('best')"
+          style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <div id="best-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:250px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+      </div>
       <div id="best-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveBest()">💾 베스트 상품 저장</button>
     </div>
@@ -289,8 +292,11 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🆕 신상품 선택 (최대 10개)</h3>
       <p style="font-size:13px;color:#888;margin-bottom:12px;">새로 들어온 상품을 선택하면 메인 페이지 상단에 표시됩니다.</p>
-      <input type="text" id="new-search" placeholder="🔍 상품 검색..." oninput="filterSlots('new')"
-        style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:16px;outline:none;">
+      <div style="position:relative;margin-bottom:16px;">
+        <input type="text" id="new-search" placeholder="🔍 상품명 또는 ID 검색..." oninput="filterSlots('new')"
+          style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <div id="new-search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:250px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+      </div>
       <div id="new-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="saveNew()">💾 신상품 저장</button>
     </div>
@@ -804,6 +810,9 @@ async function deleteCustomer(key) {
 // 베스트 상품 관련
 let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
+// 전체 상품 목록 (buildAllOptions 후 채워짐)
+let allProductList = [];
+
 async function buildAllOptions() {
   const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
@@ -816,44 +825,58 @@ async function buildAllOptions() {
     { key: 'veggie', label: 'F 농산물' }
   ];
   ALL_OPTIONS = '';
+  allProductList = [];
   catOrder.forEach(({ key, label }) => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     ALL_OPTIONS += `<optgroup label="${label}">`;
     cat.items.forEach(item => {
-      // name_ko에서 "A01. " 같은 ID 접두사 제거
       const rawName = (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       ALL_OPTIONS += `<option value="${item.id}">${item.id}. ${rawName}</option>`;
+      allProductList.push({ id: item.id, name: rawName, label: `${item.id}. ${rawName}` });
     });
     ALL_OPTIONS += '</optgroup>';
   });
 }
 
 function filterSlots(type) {
-  const keyword = document.getElementById(type + '-search').value.toLowerCase();
-  const container = document.getElementById(type + '-slots');
-  const rows = container.querySelectorAll('div[data-idx]');
-  rows.forEach(row => {
-    const sel = row.querySelector('select');
-    const label = row.querySelector('.slot-label');
-    // 현재 선택된 값 유지
-    const currentVal = sel ? sel.value : '';
-    // 옵션 재구성
-    if (sel) {
-      const allOpts = sel._allOptions || sel.innerHTML;
-      sel._allOptions = allOpts;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString('<select>' + allOpts + '</select>', 'text/html');
-      const filtered = Array.from(doc.querySelectorAll('option, optgroup')).filter(el => {
-        if (el.tagName === 'OPTGROUP') return true;
-        if (!el.value) return true;
-        return el.text.toLowerCase().includes(keyword);
-      });
-      sel.innerHTML = '';
-      filtered.forEach(el => sel.appendChild(el.cloneNode(true)));
-      sel.value = currentVal;
+  const keyword = document.getElementById(type + '-search').value.toLowerCase().trim();
+  const resultBox = document.getElementById(type + '-search-results');
+  if (!keyword) { resultBox.style.display = 'none'; return; }
+
+  const matched = allProductList.filter(p =>
+    p.id.toLowerCase().includes(keyword) || p.name.toLowerCase().includes(keyword)
+  ).slice(0, 20);
+
+  if (matched.length === 0) { resultBox.innerHTML = '<div style="padding:10px;color:#aaa;">검색 결과 없음</div>'; resultBox.style.display = 'block'; return; }
+
+  resultBox.innerHTML = matched.map(p => `
+    <div onclick="selectProduct('${type}','${p.id}','${p.label.replace(/'/g,"&#39;")}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:13px;hover:background:#f5f5f5;">
+      ${p.label}
+    </div>`).join('');
+  resultBox.style.display = 'block';
+}
+
+function selectProduct(type, id, label) {
+  // 빈 슬롯 찾기
+  for (let i = 0; i < 10; i++) {
+    const sel = document.getElementById(type + '-slot-' + i);
+    if (sel && !sel.value) {
+      sel.value = id;
+      if (!sel.value) {
+        // 옵션에 없으면 추가
+        const opt = document.createElement('option');
+        opt.value = id; opt.text = label;
+        sel.add(opt); sel.value = id;
+      }
+      document.getElementById(type + '-search').value = '';
+      document.getElementById(type + '-search-results').style.display = 'none';
+      showToast(`✅ ${label} 추가됨`);
+      return;
     }
-  });
+  }
+  showToast('⚠️ 슬롯이 꽉 찼습니다! 기존 선택을 지워주세요.');
 }
 
 function renderBestSlots(selectedIds) {
