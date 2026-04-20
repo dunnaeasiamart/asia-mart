@@ -215,15 +215,14 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div class="form-full">
           <label>이미지 업로드 또는 URL 직접 입력</label>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="file" id="new-img-file" accept="image/*" onchange="previewNewImage(this)"
+            <input type="file" id="new-img-file" accept="image/*" multiple onchange="previewNewImages(this)"
               style="flex:1;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
             <span style="color:#aaa;font-size:12px;">또는</span>
             <input type="text" id="new-img" placeholder="https://... URL 직접 입력" style="flex:2;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
           </div>
-          <div id="new-img-preview" style="margin-top:8px;display:none;">
-            <img id="new-img-preview-img" style="height:80px;border-radius:8px;border:1px solid #ddd;">
-            <span id="new-img-upload-status" style="font-size:12px;color:#888;margin-left:8px;"></span>
+          <div id="new-img-preview" style="margin-top:8px;display:none;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;">
           </div>
+          <span id="new-img-upload-status" style="font-size:12px;color:#888;display:block;margin-top:4px;"></span>
         </div>
       </div>
       <div id="translate-status" style="margin-top:8px;font-size:12px;color:#888;display:none;">🤖 번역 중...</div>
@@ -505,10 +504,12 @@ async function loadCatalogForAdmin() {
         <td><input id="ko_${item.id}" value="${cleanKo}" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;"></td>
         <td><input id="price_${item.id}" value="${item.price1||''}" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;" placeholder="가격"></td>
         <td style="padding:6px 8px;">
-          ${item.image ? `<img src="${item.image}" style="height:40px;border-radius:4px;border:1px solid #eee;display:block;margin-bottom:4px;">` : ''}
-          <div style="display:flex;gap:4px;align-items:center;">
-            <input type="file" id="imgfile_${item.id}" accept="image/*" onchange="uploadAndSetImage(this,'${item.id}')"
-              style="font-size:10px;width:90px;">
+          <div id="imgthumb_${item.id}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;">
+            ${item.image ? `<img src="${item.image}" style="height:48px;border-radius:4px;border:1px solid #eee;">` : ''}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+            <input type="file" id="imgfile_${item.id}" accept="image/*" multiple onchange="previewProductImages(this,'${item.id}')"
+              style="font-size:10px;width:100px;">
             <input id="img_${item.id}" value="${item.image||''}" placeholder="URL" style="flex:1;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;">
           </div>
           <span id="imgstatus_${item.id}" style="font-size:10px;color:#888;"></span>
@@ -777,44 +778,49 @@ async function deleteProduct(catKey, itemId) {
   autoFillId();
 }
 
-// 신규 상품 추가 - 이미지 미리보기
-function previewNewImage(input) {
-  const file = input.files[0];
-  if (!file) return;
+// 신규 상품 추가 - 다중 이미지 미리보기
+function previewNewImages(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
   const preview = document.getElementById('new-img-preview');
-  const previewImg = document.getElementById('new-img-preview-img');
-  preview.style.display = 'block';
-  previewImg.src = URL.createObjectURL(file);
-  document.getElementById('new-img-upload-status').textContent = '저장 시 자동 업로드됩니다.';
+  preview.style.display = 'flex';
+  preview.innerHTML = '';
+  files.forEach((file, i) => {
+    const url = URL.createObjectURL(file);
+    const wrap = document.createElement('div');
+    wrap.style = 'position:relative;';
+    wrap.innerHTML = `
+      <img src="${url}" style="height:80px;border-radius:8px;border:1px solid #ddd;display:block;">
+      <span style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);color:#fff;font-size:10px;padding:1px 4px;border-radius:4px;">${i+1}</span>`;
+    preview.appendChild(wrap);
+  });
+  // 첫 번째 이미지 URL 입력란에 미리 표시 (업로드 전)
+  document.getElementById('new-img-upload-status').textContent = `📁 ${files.length}장 선택됨 — 저장 시 업로드됩니다.`;
 }
 
-// 기존 상품 - 이미지 즉시 업로드 후 URL 반영
+// 기존 상품 - 다중 이미지 즉시 미리보기 (업로드 전)
+function previewProductImages(input, itemId) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const thumbBox = document.getElementById('imgthumb_' + itemId);
+  // 기존 썸네일 유지 + 새 미리보기 추가
+  const existing = thumbBox.querySelector('img');
+  thumbBox.innerHTML = existing ? existing.outerHTML : '';
+  files.forEach((file, i) => {
+    const url = URL.createObjectURL(file);
+    const wrap = document.createElement('div');
+    wrap.style = 'position:relative;';
+    wrap.innerHTML = `
+      <img src="${url}" style="height:48px;border-radius:4px;border:2px dashed #c84b2f;">
+      <span style="position:absolute;top:1px;right:1px;background:#c84b2f;color:#fff;font-size:9px;padding:1px 3px;border-radius:3px;">NEW</span>`;
+    thumbBox.appendChild(wrap);
+  });
+  document.getElementById('imgstatus_' + itemId).textContent = `📁 ${files.length}장 선택 — 저장 버튼으로 업로드`;
+}
+
+// 기존 상품 수정 저장 (다중 이미지 업로드)
 async function uploadAndSetImage(input, itemId) {
-  const file = input.files[0];
-  if (!file) return;
-  const statusEl = document.getElementById('imgstatus_' + itemId);
-  statusEl.textContent = '⏫ 업로드 중...';
-  try {
-    const ref = storage.ref(`products/${itemId}_${Date.now()}_${file.name}`);
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
-    document.getElementById('img_' + itemId).value = url;
-    // 썸네일 즉시 갱신
-    const row = document.getElementById('prod-row-' + itemId);
-    const existingImg = row.querySelector('img');
-    if (existingImg) existingImg.src = url;
-    else {
-      const imgEl = document.createElement('img');
-      imgEl.src = url;
-      imgEl.style = 'height:40px;border-radius:4px;border:1px solid #eee;display:block;margin-bottom:4px;';
-      input.parentElement.parentElement.insertBefore(imgEl, input.parentElement);
-    }
-    statusEl.textContent = '✅ 업로드 완료!';
-    statusEl.style.color = '#2d7a4f';
-  } catch(e) {
-    statusEl.textContent = '❌ 업로드 실패';
-    statusEl.style.color = '#c84b2f';
-  }
+  // 이 함수는 saveProduct에서 처리
 }
 
 // 기존 상품 수정 저장
@@ -823,18 +829,28 @@ async function saveProduct(catKey, itemId) {
   const ko = document.getElementById('ko_' + itemId)?.value.trim();
   const price = parseInt(document.getElementById('price_' + itemId)?.value);
   let img = document.getElementById('img_' + itemId)?.value.trim();
+  const statusEl = document.getElementById('imgstatus_' + itemId);
 
-  // 이미지 파일 업로드가 선택된 경우 (아직 안 된 경우)
   const fileInput = document.getElementById('imgfile_' + itemId);
-  if (fileInput?.files[0] && !img.startsWith('http')) {
-    const statusEl = document.getElementById('imgstatus_' + itemId);
-    statusEl.textContent = '⏫ 업로드 중...';
+  const files = fileInput?.files ? Array.from(fileInput.files) : [];
+
+  if (files.length > 0) {
+    statusEl.textContent = `⏫ ${files.length}장 업로드 중...`;
     try {
-      const ref = storage.ref(`products/${itemId}_${Date.now()}_${fileInput.files[0].name}`);
-      await ref.put(fileInput.files[0]);
-      img = await ref.getDownloadURL();
+      const urls = await Promise.all(files.map(file => {
+        const ref = storage.ref(`products/${itemId}_${Date.now()}_${file.name}`);
+        return ref.put(file).then(() => ref.getDownloadURL());
+      }));
+      img = urls[0]; // 첫 번째 이미지를 대표 이미지로
       document.getElementById('img_' + itemId).value = img;
+      // 썸네일 갱신
+      const thumbBox = document.getElementById('imgthumb_' + itemId);
+      thumbBox.innerHTML = urls.map(u => `<img src="${u}" style="height:48px;border-radius:4px;border:1px solid #eee;">`).join('');
+      statusEl.textContent = `✅ ${urls.length}장 업로드 완료!`;
+      statusEl.style.color = '#2d7a4f';
     } catch(e) {
+      statusEl.textContent = '❌ 업로드 실패';
+      statusEl.style.color = '#c84b2f';
       showToast('❌ 이미지 업로드 실패');
       return;
     }
@@ -847,7 +863,6 @@ async function saveProduct(catKey, itemId) {
   items[idx] = { ...items[idx], name_en: en, name_ko: ko, price1: price || items[idx].price1, image: img };
   await db.ref('catalog/' + catKey + '/items').set(items);
   showToast(`✅ ${itemId} 수정 완료!`);
-  loadCatalogForAdmin();
 }
 
 function addProduct() {
@@ -859,6 +874,7 @@ function addProduct() {
   const price = parseInt(document.getElementById('new-price').value);
   const imgUrl = document.getElementById('new-img').value.trim();
   const imgFile = document.getElementById('new-img-file').files[0];
+  const imgFiles = Array.from(document.getElementById('new-img-file').files);
   if (!id) { alert('상품 ID를 입력해주세요.'); return; }
   if (!ko) { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
@@ -894,16 +910,19 @@ function addProduct() {
     });
   }
 
-  if (imgFile) {
-    if (statusEl) { statusEl.textContent = '⏫ 업로드 중...'; }
-    const ref = storage.ref(`products/${id}_${Date.now()}_${imgFile.name}`);
-    ref.put(imgFile).then(() => ref.getDownloadURL()).then(url => {
-      if (statusEl) statusEl.textContent = '✅ 업로드 완료!';
-      doAdd(url);
-    }).catch(() => {
+  if (imgFiles.length > 0) {
+    if (statusEl) statusEl.textContent = `⏫ ${imgFiles.length}장 업로드 중...`;
+    try {
+      const urls = await Promise.all(imgFiles.map(file => {
+        const ref = storage.ref(`products/${id}_${Date.now()}_${file.name}`);
+        return ref.put(file).then(() => ref.getDownloadURL());
+      }));
+      if (statusEl) statusEl.textContent = `✅ ${urls.length}장 업로드 완료!`;
+      doAdd(urls[0]); // 첫 번째 이미지를 대표 이미지로
+    } catch(e) {
       if (statusEl) statusEl.textContent = '❌ 업로드 실패';
       showToast('❌ 이미지 업로드 실패');
-    });
+    }
   } else {
     doAdd(imgUrl);
   }
