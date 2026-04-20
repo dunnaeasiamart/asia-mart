@@ -1253,12 +1253,9 @@ function doSearch(query) {
   // 전체 상품에서 검색
   const allItems = Object.values(catalog).flatMap(cat => cat.items || []);
   const matched = allItems.filter(item => {
-    const en = (item.name_en || '').toLowerCase();
-    const ko = (item.name_ko || '').toLowerCase();
-    const th = (item.name_th || '').toLowerCase();
-    const lo = (item.name_lo || '').toLowerCase();
     const id = (item.id || '').toLowerCase();
-    return en.includes(q) || ko.includes(q) || th.includes(q) || lo.includes(q) || id.includes(q);
+    const name = getItemName(item).toLowerCase();
+    return name.includes(q) || id.includes(q);
   });
 
   if (matched.length === 0) {
@@ -1319,8 +1316,6 @@ function resetQty(id) {
 }
 
 function getItemName(item) {
-  // 신발 카테고리는 언어 관계없이 항상 영문명
-  if (item._catKey === 'shoes') return (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   if (currentLang === 'ko') return (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   if (currentLang === 'th') return (item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   if (currentLang === 'lo') return (item.name_lo || item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
