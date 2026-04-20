@@ -2272,9 +2272,12 @@ function filterBestSearch(query) {
   resultsEl.style.display = 'block';
   resultsEl.innerHTML = '';
   matched.forEach(opt => {
+    const count = _bestHistory[opt.value] || 0;
     const div = document.createElement('div');
-    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;';
-    div.innerHTML = '<span style="color:#c84b2f;font-weight:700;">' + opt.value + '</span> ' + opt.textContent.replace(/^\S+\.\s*/, '');
+    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:8px;';
+    div.innerHTML = '<span style="color:#c84b2f;font-weight:700;">' + opt.value + '</span> '
+      + opt.textContent.replace(/^\S+\.\s*/, '')
+      + (count > 0 ? ' ' + historyBadge(count, '#c84b2f') : '');
     div.onmouseover = () => div.style.background = '#fafafa';
     div.onmouseout = () => div.style.background = '';
     div.onclick = () => bestSearchSelect(opt.value);
@@ -2284,7 +2287,7 @@ function filterBestSearch(query) {
 function bestSearchSelect(val) {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('best-slot-' + i);
-    if (sel && !sel.value) { sel.value = val; break; }
+    if (sel && !sel.value) { sel.value = val; updateBestBadge(i, val); break; }
   }
   document.getElementById('best-search').value = '';
   document.getElementById('best-search-results').style.display = 'none';
@@ -2309,9 +2312,12 @@ function filterNewSearch(query) {
   resultsEl.style.display = 'block';
   resultsEl.innerHTML = '';
   matched.forEach(opt => {
+    const count = _newHistory[opt.value] || 0;
     const div = document.createElement('div');
-    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;';
-    div.innerHTML = '<span style="color:#2d7a4f;font-weight:700;">' + opt.value + '</span> ' + opt.textContent.replace(/^\S+\.\s*/, '');
+    div.style.cssText = 'padding:10px 16px;font-size:13px;border-bottom:1px solid #f5f5f5;cursor:pointer;display:flex;align-items:center;gap:8px;';
+    div.innerHTML = '<span style="color:#2d7a4f;font-weight:700;">' + opt.value + '</span> '
+      + opt.textContent.replace(/^\S+\.\s*/, '')
+      + (count > 0 ? ' ' + historyBadge(count, '#2d7a4f') : '');
     div.onmouseover = () => div.style.background = '#fafafa';
     div.onmouseout = () => div.style.background = '';
     div.onclick = () => newSearchSelect(opt.value);
@@ -2321,7 +2327,7 @@ function filterNewSearch(query) {
 function newSearchSelect(val) {
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('new-slot-' + i);
-    if (sel && !sel.value) { sel.value = val; break; }
+    if (sel && !sel.value) { sel.value = val; updateNewBadge(i, val); break; }
   }
   document.getElementById('new-search').value = '';
   document.getElementById('new-search-results').style.display = 'none';
@@ -2350,28 +2356,57 @@ async function buildAllOptions() {
   });
 }
 
+// 베스트/신상품 히스토리 캐시
+let _bestHistory = {};
+let _newHistory = {};
+
+// 히스토리 배지 HTML 생성
+function historyBadge(count, color) {
+  if (!count || count === 0) return '';
+  const label = count === 1 ? '이전 등록 있음' : `${count}회 등록됨`;
+  return `<span style="font-size:11px;font-weight:700;color:${color};background:${color}18;border:1px solid ${color}44;border-radius:100px;padding:2px 8px;white-space:nowrap;">🔁 ${label}</span>`;
+}
+
 function renderBestSlots(selectedIds) {
   const container = document.getElementById('best-slots');
   container.innerHTML = '';
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
-    container.innerHTML += `
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;">${i+1}</span>
-        <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-          <option value="">-- 상품 선택 --</option>
-          ${ALL_OPTIONS}
-        </select>
-      </div>`;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;';
+    row.innerHTML = `
+      <span style="font-size:13px;font-weight:700;color:#c84b2f;width:20px;flex-shrink:0;">${i+1}</span>
+      <select id="best-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <option value="">-- 상품 선택 --</option>
+        ${ALL_OPTIONS}
+      </select>
+      <span id="best-badge-${i}" style="min-width:90px;"></span>`;
+    container.appendChild(row);
+    // 값 설정 + 배지 초기 렌더
     setTimeout(() => {
       const sel = document.getElementById('best-slot-' + i);
-      if (sel && val) sel.value = val;
+      if (sel && val) {
+        sel.value = val;
+        updateBestBadge(i, val);
+      }
+      sel.addEventListener('change', () => updateBestBadge(i, sel.value));
     }, 50);
   }
 }
 
+function updateBestBadge(i, val) {
+  const badge = document.getElementById('best-badge-' + i);
+  if (!badge) return;
+  const count = val ? (_bestHistory[val] || 0) : 0;
+  badge.innerHTML = val ? historyBadge(count, '#c84b2f') : '';
+}
+
 async function loadBest() {
-  const snap = await db.ref('best').get();
+  const [snap, histSnap] = await Promise.all([
+    db.ref('best').get(),
+    db.ref('bestHistory').get()
+  ]);
+  _bestHistory = histSnap.val() || {};
   const data = snap.val() || [];
   renderBestSlots(data);
 }
@@ -2383,20 +2418,20 @@ async function resetBest() {
   showToast('🗑️ 베스트 상품 목록 초기화 완료');
 }
 
-async function resetNew() {
-  if (!confirm('신상품 목록을 전체 초기화하시겠습니까?')) return;
-  await db.ref('newItems').set([]);
-  renderNewSlots([]);
-  showToast('🗑️ 신상품 목록 초기화 완료');
-}
-
 async function saveBest() {
   const ids = [];
   for (let i = 0; i < 10; i++) {
     const sel = document.getElementById('best-slot-' + i);
     if (sel && sel.value) ids.push(sel.value);
   }
+  // 히스토리 카운트 업데이트
+  const histUpdates = {};
+  ids.forEach(id => {
+    _bestHistory[id] = (_bestHistory[id] || 0) + 1;
+    histUpdates['bestHistory/' + id] = _bestHistory[id];
+  });
   await db.ref('best').set(ids);
+  if (Object.keys(histUpdates).length) await db.ref().update(histUpdates);
   showToast('🔥 베스트 상품 저장 완료!');
   setTimeout(() => switchTab('stock'), 1000);
 }
@@ -2408,25 +2443,49 @@ function renderNewSlots(selectedIds = []) {
   container.innerHTML = '';
   for (let i = 0; i < 10; i++) {
     const val = selectedIds[i] || '';
-    container.innerHTML += `
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;">${i+1}</span>
-        <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-          <option value="">-- 상품 선택 --</option>
-          ${ALL_OPTIONS}
-        </select>
-      </div>`;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;';
+    row.innerHTML = `
+      <span style="font-size:13px;font-weight:700;color:#2d7a4f;width:24px;flex-shrink:0;">${i+1}</span>
+      <select id="new-slot-${i}" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <option value="">-- 상품 선택 --</option>
+        ${ALL_OPTIONS}
+      </select>
+      <span id="new-badge-${i}" style="min-width:90px;"></span>`;
+    container.appendChild(row);
     setTimeout(() => {
       const sel = document.getElementById('new-slot-' + i);
-      if (sel && val) sel.value = val;
+      if (sel && val) {
+        sel.value = val;
+        updateNewBadge(i, val);
+      }
+      sel.addEventListener('change', () => updateNewBadge(i, sel.value));
     }, 50);
   }
 }
 
+function updateNewBadge(i, val) {
+  const badge = document.getElementById('new-badge-' + i);
+  if (!badge) return;
+  const count = val ? (_newHistory[val] || 0) : 0;
+  badge.innerHTML = val ? historyBadge(count, '#2d7a4f') : '';
+}
+
 async function loadNew() {
-  const snap = await db.ref('newItems').get();
+  const [snap, histSnap] = await Promise.all([
+    db.ref('newItems').get(),
+    db.ref('newHistory').get()
+  ]);
+  _newHistory = histSnap.val() || {};
   const data = snap.val() || [];
   renderNewSlots(data);
+}
+
+async function resetNew() {
+  if (!confirm('신상품 목록을 전체 초기화하시겠습니까?')) return;
+  await db.ref('newItems').set([]);
+  renderNewSlots([]);
+  showToast('🗑️ 신상품 목록 초기화 완료');
 }
 
 async function saveNew() {
@@ -2435,7 +2494,14 @@ async function saveNew() {
     const sel = document.getElementById('new-slot-' + i);
     if (sel && sel.value) ids.push(sel.value);
   }
+  // 히스토리 카운트 업데이트
+  const histUpdates = {};
+  ids.forEach(id => {
+    _newHistory[id] = (_newHistory[id] || 0) + 1;
+    histUpdates['newHistory/' + id] = _newHistory[id];
+  });
   await db.ref('newItems').set(ids);
+  if (Object.keys(histUpdates).length) await db.ref().update(histUpdates);
   showToast('🆕 신상품 저장 완료!');
   setTimeout(() => switchTab('stock'), 1000);
 }
