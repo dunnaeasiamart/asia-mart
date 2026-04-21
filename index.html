@@ -288,18 +288,16 @@
     z-index: 90;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
   }
-  .tabs-wrap::-webkit-scrollbar { display: none; }
   .tabs {
     display: flex;
-    padding: 0 16px;
-    min-width: max-content;
+    flex-wrap: wrap;
+    padding: 0 4px;
   }
   .tab {
-    padding: 14px 18px;
-    font-size: 13px;
+    flex: 1 0 auto;
+    padding: 10px 8px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--muted);
     border-bottom: 2px solid transparent;
@@ -311,6 +309,7 @@
     border-left: none;
     border-right: none;
     font-family: 'Noto Sans KR', sans-serif;
+    text-align: center;
   }
   .tab.active {
     color: var(--accent);
