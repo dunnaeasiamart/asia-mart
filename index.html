@@ -969,12 +969,15 @@ const CAT_LABELS = {
 
 function getCatLabel(cat, catKey, lang) {
   let label = '';
-  if (CAT_LABELS[catKey]) {
+  // Firebase 값 우선 사용, 없을 때만 CAT_LABELS fallback
+  if (typeof cat.label === 'object') {
+    label = cat.label[lang] || cat.label.ko || cat.label.en || catKey;
+  } else if (typeof cat.label === 'string' && cat.label) {
+    label = cat.label;
+  } else if (CAT_LABELS[catKey]) {
     label = CAT_LABELS[catKey][lang] || CAT_LABELS[catKey].en || catKey;
-  } else if (typeof cat.label === 'object') {
-    label = cat.label[lang] || cat.label.en || catKey;
   } else {
-    label = cat.label || catKey;
+    label = catKey;
   }
   // 앞의 영문 대문자 + 공백 제거 (예: "A 냉동 및 냉장" → "냉동 및 냉장")
   return label.replace(/^[A-Z]\s+/, '');
