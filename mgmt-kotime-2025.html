@@ -600,6 +600,16 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div id="emoji-picker" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
         <input type="text" id="cat-emoji" placeholder="직접 입력 또는 위에서 선택" style="margin-top:4px;">
       </div>
+      <div class="full">
+        <label style="margin-bottom:8px;display:block;">가격표 표시 (1개/2개/3개 가격)</label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <div id="price-tag-toggle" onclick="togglePriceTag()" style="width:44px;height:24px;border-radius:100px;background:#c84b2f;position:relative;transition:background 0.2s;flex-shrink:0;">
+            <div id="price-tag-thumb" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:22px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+          </div>
+          <span id="price-tag-label" style="font-size:13px;color:#555;">표시함</span>
+        </label>
+        <input type="hidden" id="cat-show-price" value="true">
+      </div>
     </div>
     <div class="modal-btns">
       <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="closeCatModal()">취소</button>
@@ -2089,6 +2099,8 @@ async function openEditCatModal(key) {
   document.getElementById('cat-label').value = getLabel(cat, key);
   document.getElementById('cat-emoji').value = currentEmoji;
   buildEmojiPicker(currentEmoji);
+  const showPrice = cat.showPriceTags !== false;
+  setPriceTagToggle(showPrice);
   document.getElementById('cat-modal').classList.add('open');
 }
 
@@ -2101,6 +2113,7 @@ function openAddCatModal() {
   document.getElementById('cat-label').value = '';
   document.getElementById('cat-emoji').value = '';
   buildEmojiPicker('');
+  setPriceTagToggle(true);
   document.getElementById('cat-modal').classList.add('open');
 }
 
@@ -2109,15 +2122,40 @@ function closeCatModal() {
   document.getElementById('cat-key').setAttribute('readonly', true);
 }
 
+function setPriceTagToggle(val) {
+  const toggle = document.getElementById('price-tag-toggle');
+  const thumb = document.getElementById('price-tag-thumb');
+  const label = document.getElementById('price-tag-label');
+  const hidden = document.getElementById('cat-show-price');
+  if (!toggle) return;
+  if (val) {
+    toggle.style.background = '#c84b2f';
+    thumb.style.left = '22px';
+    label.textContent = '표시함';
+    hidden.value = 'true';
+  } else {
+    toggle.style.background = '#ccc';
+    thumb.style.left = '2px';
+    label.textContent = '숨김';
+    hidden.value = 'false';
+  }
+}
+
+function togglePriceTag() {
+  const hidden = document.getElementById('cat-show-price');
+  setPriceTagToggle(hidden.value === 'false');
+}
+
 async function submitCatEdit() {
   const label = document.getElementById('cat-label').value.trim();
   const emoji = document.getElementById('cat-emoji').value.trim();
 
   if (!label) { alert('카테고리 이름을 입력해주세요.'); return; }
 
+  const showPriceTags = document.getElementById('cat-show-price').value !== 'false';
   if (_catEditKey) {
     // 수정
-    await db.ref('catalog/' + _catEditKey).update({ label, emoji });
+    await db.ref('catalog/' + _catEditKey).update({ label, emoji, showPriceTags });
     showToast('✅ 카테고리 수정 완료!');
   } else {
     // 추가
@@ -2125,7 +2163,7 @@ async function submitCatEdit() {
     if (!key) { alert('키를 입력해주세요.'); return; }
     const exists = await db.ref('catalog/' + key).get();
     if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
-    await db.ref('catalog/' + key).set({ label, emoji, items: [] });
+    await db.ref('catalog/' + key).set({ label, emoji, showPriceTags, items: [] });
     showToast('✅ 카테고리 추가 완료!');
   }
   closeCatModal();

@@ -1032,6 +1032,9 @@ function getUnit(n) {
 }
 
 function getPriceTags(item) {
+  // 카테고리에서 가격표 숨김 설정 확인
+  const cat = catalog[currentTab];
+  if (cat && cat.showPriceTags === false) return '';
   const makeTag = (n, price, style) => {
     return `<span class="price-tag" onclick="setQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${style}">${getUnit(n)} ${fmt(price)}</span>`;
   };
@@ -2166,6 +2169,7 @@ async function loadCatalogFromFirebase() {
         catalog[catKey] = {
           label: cat.label,
           emoji: cat.emoji,
+          showPriceTags: cat.showPriceTags !== false,
           items
         };
       });
