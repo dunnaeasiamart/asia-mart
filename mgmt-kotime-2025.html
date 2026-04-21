@@ -579,6 +579,13 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
 
       <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadSnsCard()">⬇️ 이미지 저장</button>
+
+      <!-- 타이틀 카드 -->
+      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-top:16px;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:6px;">🎬 릴스용 타이틀 카드</h3>
+        <p style="font-size:12px;color:#888;margin-bottom:16px;">오프닝 · 전환 · 마지막 이미지 3장을 ZIP으로 다운로드</p>
+        <button class="btn btn-primary" style="width:100%;padding:12px;font-size:14px;background:#2d7a4f;" onclick="downloadTitleCards()">⬇️ 타이틀 카드 3장 다운로드</button>
+      </div>
     </div>
   </div>
 
@@ -2778,6 +2785,239 @@ async function _makeAllCards(type, badgeVal) {
   showToast('✅ ' + ids.length + '개 카드 ZIP 다운로드 완료!');
 }
 
+
+// ── 타이틀 카드 3장 생성 ──
+async function downloadTitleCards() {
+  const zip = new JSZip();
+  const W = 540;
+  const DARK   = '#7a1a1a';
+  const ACCENT = '#c84b2f';
+  const CREAM  = '#faf6f0';
+  const BORDER = '#c8a882';
+  const GREEN  = '#2d7a4f';
+
+  // 헤더 그리기 공통 함수
+  function drawHeader(ctx, H) {
+    ctx.fillStyle = CREAM;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = DARK;
+    ctx.fillRect(0, 0, W, 7);
+    ctx.fillRect(0, H - 7, W, 7);
+    ctx.fillStyle = DARK;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 52px Georgia, serif';
+    ctx.fillText('DUNNAE', W/2, 54);
+    ctx.fillText('ASIA MART', W/2, 104);
+    ctx.font = '16px Arial';
+    ctx.fillStyle = ACCENT;
+    ctx.fillText('둔내아시아마트', W/2, 124);
+    // 국기
+    const flagOrder = ['TH','LA','PH','MM','KH','VN'];
+    const flagW = 36, flagH = 22, flagGap = 10;
+    const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
+    let fx = (W - totalFlagW) / 2;
+    const fy = 136;
+    flagOrder.forEach(code => {
+      const fi = window._snsFlags && window._snsFlags[code];
+      if (fi && fi.complete && fi.naturalWidth > 0) {
+        ctx.save();
+        roundRect(ctx, fx, fy, flagW, flagH, 3);
+        ctx.clip();
+        ctx.drawImage(fi, fx, fy, flagW, flagH);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#ddd';
+        roundRect(ctx, fx, fy, flagW, flagH, 3);
+        ctx.fill();
+      }
+      fx += flagW + flagGap;
+    });
+  }
+
+  // ── 카드 1: 오프닝 — 신상품 ──
+  const c1 = document.createElement('canvas');
+  c1.width = W; c1.height = 960;
+  const ctx1 = c1.getContext('2d');
+  drawHeader(ctx1, 170);
+
+  // 중앙 영역
+  ctx1.fillStyle = '#fff';
+  ctx1.fillRect(0, 170, W, 960-170);
+
+  // 큰 배지
+  ctx1.fillStyle = ACCENT;
+  roundRect(ctx1, 40, 220, W-80, 80, 16);
+  ctx1.fill();
+  ctx1.strokeStyle = '#fff';
+  ctx1.lineWidth = 2;
+  roundRect(ctx1, 46, 226, W-92, 68, 12);
+  ctx1.stroke();
+  ctx1.fillStyle = '#fff';
+  ctx1.font = 'bold 32px Arial';
+  ctx1.textAlign = 'center';
+  ctx1.fillText('🆕  NEW ARRIVALS', W/2, 270);
+
+  // 3개국어
+  ctx1.fillStyle = '#1a1814';
+  ctx1.font = 'bold 28px Arial';
+  ctx1.fillText('สินค้าใหม่มาแล้ว!', W/2, 360);
+  ctx1.font = 'bold 26px Arial';
+  ctx1.fillText('ສິນຄ້າໃໝ່ມາແລ້ວ!', W/2, 410);
+  ctx1.fillStyle = '#888';
+  ctx1.font = '22px Arial';
+  ctx1.fillText('New arrivals are here!', W/2, 458);
+
+  // 구분선
+  ctx1.strokeStyle = ACCENT;
+  ctx1.lineWidth = 2;
+  ctx1.beginPath(); ctx1.moveTo(60, 490); ctx1.lineTo(W-60, 490); ctx1.stroke();
+
+  // 링크
+  ctx1.fillStyle = '#555';
+  ctx1.font = '16px Arial';
+  ctx1.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 540);
+  ctx1.fillText('📲  DM us on Facebook', W/2, 570);
+
+  // 하단 바
+  ctx1.fillStyle = DARK;
+  ctx1.fillRect(0, 960-52, W, 52);
+  ctx1.fillStyle = '#fff';
+  ctx1.font = 'bold 14px Arial';
+  ctx1.fillText('DUNNAE ASIA MART', W/2, 960-20);
+
+  zip.file('01_opening_new_arrivals.jpg', c1.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
+
+  // ── 카드 2: 전환 — 베스트 ──
+  const c2 = document.createElement('canvas');
+  c2.width = W; c2.height = 960;
+  const ctx2 = c2.getContext('2d');
+  drawHeader(ctx2, 170);
+
+  ctx2.fillStyle = '#fff';
+  ctx2.fillRect(0, 170, W, 960-170);
+
+  // 큰 배지 (주황빨간)
+  ctx2.fillStyle = '#d44000';
+  roundRect(ctx2, 40, 220, W-80, 80, 16);
+  ctx2.fill();
+  ctx2.strokeStyle = '#fff';
+  ctx2.lineWidth = 2;
+  roundRect(ctx2, 46, 226, W-92, 68, 12);
+  ctx2.stroke();
+  ctx2.fillStyle = '#fff';
+  ctx2.font = 'bold 32px Arial';
+  ctx2.textAlign = 'center';
+  ctx2.fillText('🔥  BEST SELLERS', W/2, 270);
+
+  ctx2.fillStyle = '#1a1814';
+  ctx2.font = 'bold 28px Arial';
+  ctx2.fillText('สินค้าขายดีประจำสัปดาห์!', W/2, 360);
+  ctx2.font = 'bold 26px Arial';
+  ctx2.fillText('ສິນຄ້າຂາຍດີປະຈຳອາທິດ!', W/2, 410);
+  ctx2.fillStyle = '#888';
+  ctx2.font = '22px Arial';
+  ctx2.fillText("This week's best sellers!", W/2, 458);
+
+  ctx2.strokeStyle = '#d44000';
+  ctx2.lineWidth = 2;
+  ctx2.beginPath(); ctx2.moveTo(60, 490); ctx2.lineTo(W-60, 490); ctx2.stroke();
+
+  ctx2.fillStyle = '#555';
+  ctx2.font = '16px Arial';
+  ctx2.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 540);
+  ctx2.fillText('📲  DM us on Facebook', W/2, 570);
+
+  ctx2.fillStyle = DARK;
+  ctx2.fillRect(0, 960-52, W, 52);
+  ctx2.fillStyle = '#fff';
+  ctx2.font = 'bold 14px Arial';
+  ctx2.fillText('DUNNAE ASIA MART', W/2, 960-20);
+
+  zip.file('02_transition_best_sellers.jpg', c2.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
+
+  // ── 카드 3: 마지막 — ORDER NOW ──
+  const c3 = document.createElement('canvas');
+  c3.width = W; c3.height = 960;
+  const ctx3 = c3.getContext('2d');
+  drawHeader(ctx3, 170);
+
+  ctx3.fillStyle = '#fff';
+  ctx3.fillRect(0, 170, W, 960-170);
+
+  // 초록 ORDER NOW 배지
+  ctx3.fillStyle = GREEN;
+  roundRect(ctx3, 40, 220, W-80, 80, 16);
+  ctx3.fill();
+  ctx3.strokeStyle = '#fff';
+  ctx3.lineWidth = 2;
+  roundRect(ctx3, 46, 226, W-92, 68, 12);
+  ctx3.stroke();
+  ctx3.fillStyle = '#fff';
+  ctx3.font = 'bold 30px Arial';
+  ctx3.textAlign = 'center';
+  ctx3.fillText('🛒  ORDER NOW', W/2, 270);
+
+  // 3개국어 주문 유도
+  ctx3.fillStyle = '#1a1814';
+  ctx3.font = 'bold 24px Arial';
+  ctx3.fillText('สั่งได้เลยที่ลิงก์ด้านล่าง', W/2, 355);
+  ctx3.font = 'bold 22px Arial';
+  ctx3.fillText('ສັ່ງໄດ້ເລີຍທີ່ລິ້ງດ້ານລຸ່ມ', W/2, 400);
+  ctx3.fillStyle = '#888';
+  ctx3.font = '20px Arial';
+  ctx3.fillText('Order now via the link below', W/2, 442);
+
+  // 구분선
+  ctx3.strokeStyle = GREEN;
+  ctx3.lineWidth = 2;
+  ctx3.beginPath(); ctx3.moveTo(60, 470); ctx3.lineTo(W-60, 470); ctx3.stroke();
+
+  // 링크 강조
+  ctx3.fillStyle = ACCENT;
+  ctx3.font = 'bold 18px Arial';
+  ctx3.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 520);
+
+  ctx3.fillStyle = '#555';
+  ctx3.font = '16px Arial';
+  ctx3.fillText('📲  DM us on Facebook', W/2, 554);
+
+  // 무료배송
+  ctx3.fillStyle = '#fff8e1';
+  roundRect(ctx3, 40, 580, W-80, 58, 8);
+  ctx3.fill();
+  ctx3.strokeStyle = '#f0c040';
+  ctx3.lineWidth = 1;
+  roundRect(ctx3, 40, 580, W-80, 58, 8);
+  ctx3.stroke();
+  ctx3.fillStyle = '#7a5800';
+  ctx3.font = 'bold 12px Arial';
+  ctx3.fillText('🚚  ส่งฟรีเมื่อซื้อครบ ₩50,000  ·  ສົ່ງຟຣີເມື່ອຊື້ຄົບ ₩50,000', W/2, 604);
+  ctx3.font = '12px Arial';
+  ctx3.fillText('Free delivery over ₩50,000', W/2, 626);
+
+  // 태그 유도
+  ctx3.fillStyle = '#aaa';
+  ctx3.font = '14px Arial';
+  ctx3.fillText('💬 Tag a friend who loves Asian food! 👇', W/2, 680);
+
+  ctx3.fillStyle = DARK;
+  ctx3.fillRect(0, 960-52, W, 52);
+  ctx3.fillStyle = '#fff';
+  ctx3.font = 'bold 14px Arial';
+  ctx3.fillText('DUNNAE ASIA MART', W/2, 960-20);
+
+  zip.file('03_closing_order_now.jpg', c3.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
+
+  // ZIP 다운로드
+  showToast('📦 타이틀 카드 생성 중...');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = 'title_cards.zip';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('✅ 타이틀 카드 3장 다운로드 완료!');
+}
 
 // ── SNS 카드 ──
 let _snsItem = null;
