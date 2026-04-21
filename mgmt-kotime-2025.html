@@ -2937,33 +2937,29 @@ function renderSnsCard() {
   // 크림 배경
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, 0, W, HDR_H);
-  // 위아래 붉은 테두리선
+  // 위아래 붉은 테두리선만 (내부 선 제거)
   ctx.fillStyle = DARK;
   ctx.fillRect(0, 0, W, 7);
   ctx.fillRect(0, HDR_H - 7, W, 7);
-  // 위쪽 내부 가는 선만 (국기와 겹치는 아래쪽 선 제거)
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(8, 12); ctx.lineTo(W-8, 12); ctx.stroke();
 
-  // DUNNAE 큰 글씨
+  // DUNNAE 큰 글씨 (위로 올림)
   ctx.fillStyle = DARK;
   ctx.textAlign = 'center';
   ctx.font = 'bold 52px Georgia, serif';
-  ctx.fillText('DUNNAE', W/2, 62);
-  ctx.fillText('ASIA MART', W/2, 112);
+  ctx.fillText('DUNNAE', W/2, 54);
+  ctx.fillText('ASIA MART', W/2, 104);
 
   // 한글 부제
   ctx.font = '16px Arial';
   ctx.fillStyle = ACCENT;
-  ctx.fillText('둔내아시아마트', W/2, 133);
+  ctx.fillText('둔내아시아마트', W/2, 124);
 
-  // 국기 이미지 (SVG)
+  // 국기 이미지 (SVG) — 하단바에 닿지 않게 여백 확보
   const flagOrder = ['TH','LA','PH','MM','KH','VN'];
   const flagW = 36, flagH = 22, flagGap = 10;
   const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
   let fx = (W - totalFlagW) / 2;
-  const fy = 141;
+  const fy = 136;   // 국기 Y — 하단바(HDR_H-7=163)와 여유 gap 확보
   flagOrder.forEach(code => {
     const fi = window._snsFlags && window._snsFlags[code];
     if (fi && fi.complete && fi.naturalWidth > 0) {
