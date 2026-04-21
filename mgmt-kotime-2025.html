@@ -190,6 +190,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
+    <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
   </div>
 
   <!-- 재고 관리 -->
@@ -512,6 +513,60 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+  <!-- SNS 카드 -->
+  <div id="tab-sns" class="tab-content">
+    <div style="max-width:600px;margin:24px auto;padding:0 12px;">
+
+      <!-- 설정 패널 -->
+      <div style="background:#fff;border-radius:12px;padding:20px 20px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📸 SNS 홍보 카드 만들기</h3>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">상품 선택</label>
+            <select id="sns-product-sel" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;" onchange="snsProductChanged()">
+              <option value="">-- 상품을 선택하세요 --</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">배지 유형</label>
+            <select id="sns-badge" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;" onchange="renderSnsCard()">
+              <option value="NEW ARRIVAL">🆕 NEW ARRIVAL</option>
+              <option value="BEST SELLER">🔥 BEST SELLER</option>
+              <option value="SALE">💸 SALE</option>
+              <option value="SPECIAL">⭐ SPECIAL</option>
+              <option value="">없음</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="flex:1;">
+              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">헤더 색상</label>
+              <input type="color" id="sns-color" value="#c84b2f" oninput="renderSnsCard()" style="width:100%;height:38px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:2px 4px;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">가게 이름</label>
+              <input type="text" id="sns-shopname" value="DUNNAE ASIA MART" oninput="renderSnsCard()" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">하단 문구</label>
+            <input type="text" id="sns-footer" value="DM us on Facebook · dunnaeasiamart.github.io/asia-mart" oninput="renderSnsCard()" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+        </div>
+      </div>
+
+      <!-- 카드 미리보기 -->
+      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div style="font-size:12px;color:#888;margin-bottom:12px;">미리보기</div>
+        <div id="sns-card-wrap" style="display:flex;justify-content:center;">
+          <canvas id="sns-canvas" width="540" height="720" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadSnsCard()">⬇️ 이미지 저장</button>
+    </div>
+  </div>
+
 </div><!-- end main-page -->
 
 <!-- 상품 수정 모달 -->
@@ -705,6 +760,7 @@ function switchTab(tab, triggerEl) {
   if (btn) btn.classList.add('active');
   if (tab === 'category') loadCategories();
   if (tab === 'excel') loadRetranslateCatSelect();
+  if (tab === 'sns') loadSnsProductSelect();
 }
 
 function markChanged(id, type) {
@@ -1386,6 +1442,8 @@ function addEditImgUrl() {
 
 async function loadAll() {
   await buildAllOptions();
+  // catalog 캐시 저장 (SNS 카드용)
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
   await loadCatSelect();
   await loadStock();
   await loadDiscount();
@@ -2596,6 +2654,225 @@ async function saveNew() {
   showToast('🆕 신상품 저장 완료!');
   setTimeout(() => switchTab('stock'), 1000);
 }
+
+// ── SNS 카드 ──
+let _snsItem = null;
+let _snsImgObj = null;
+
+async function loadSnsProductSelect() {
+  await buildAllOptions();
+  const sel = document.getElementById('sns-product-sel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- 상품을 선택하세요 --</option>' + ALL_OPTIONS;
+  renderSnsCard();
+}
+
+function snsProductChanged() {
+  const sel = document.getElementById('sns-product-sel');
+  const id = sel.value;
+  if (!id) { _snsItem = null; _snsImgObj = null; renderSnsCard(); return; }
+
+  // catalog에서 상품 찾기
+  _snsItem = null;
+  Object.values(catalog || {}).forEach(cat => {
+    (cat.items || []).forEach(item => {
+      if (item.id === id) _snsItem = item;
+    });
+  });
+
+  // Firebase catalog에서 직접 조회 (catalog 변수가 없을 경우 대비)
+  if (!_snsItem) {
+    db.ref('catalog').get().then(snap => {
+      const data = snap.val() || {};
+      Object.values(data).forEach(cat => {
+        (cat.items || []).forEach(item => {
+          if (item.id === id) _snsItem = item;
+        });
+      });
+      loadSnsImage();
+    });
+  } else {
+    loadSnsImage();
+  }
+}
+
+function loadSnsImage() {
+  if (!_snsItem) { renderSnsCard(); return; }
+  const imgSrc = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
+  if (!imgSrc) { _snsImgObj = null; renderSnsCard(); return; }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { _snsImgObj = img; renderSnsCard(); };
+  img.onerror = () => { _snsImgObj = null; renderSnsCard(); };
+  img.src = imgSrc;
+}
+
+function renderSnsCard() {
+  const canvas = document.getElementById('sns-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 720;
+  canvas.width = W; canvas.height = H;
+
+  const color = document.getElementById('sns-color')?.value || '#c84b2f';
+  const shopName = document.getElementById('sns-shopname')?.value || 'ASIA MART';
+  const badge = document.getElementById('sns-badge')?.value || '';
+  const footer = document.getElementById('sns-footer')?.value || '';
+
+  // 배경
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // 헤더
+  const hh = 90;
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, W, hh);
+
+  // 헤더 장식 원
+  ctx.globalAlpha = 0.12;
+  ctx.beginPath(); ctx.arc(480, -20, 100, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(60, 100, 70, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 가게 이름
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px "Arial", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.letterSpacing = '3px';
+  ctx.fillText(shopName.toUpperCase(), W/2, 42);
+  ctx.letterSpacing = '0px';
+
+  // 배지
+  if (badge) {
+    const bw = ctx.measureText(badge).width + 48;
+    const bx = (W - bw) / 2, by = 54;
+    ctx.fillStyle = '#fff';
+    roundRect(ctx, bx, by, bw, 26, 13);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(badge, W/2, by+17);
+  }
+
+  // 이미지 영역
+  const imgY = hh + 10, imgH = 340;
+  ctx.fillStyle = '#f9f8f6';
+  ctx.fillRect(20, imgY, W-40, imgH);
+
+  if (_snsImgObj) {
+    const iw = _snsImgObj.width, ih = _snsImgObj.height;
+    const scale = Math.min((W-80)/iw, (imgH-20)/ih);
+    const dw = iw*scale, dh = ih*scale;
+    const dx = (W-dw)/2, dy = imgY + (imgH-dh)/2;
+    ctx.drawImage(_snsImgObj, dx, dy, dw, dh);
+  } else {
+    ctx.fillStyle = '#ddd';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🖼️', W/2, imgY + imgH/2 + 16);
+  }
+
+  // 구분선
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(20, imgY+imgH+12); ctx.lineTo(W-20, imgY+imgH+12); ctx.stroke();
+
+  if (_snsItem) {
+    const bodyY = imgY + imgH + 28;
+
+    // 카테고리 태그
+    const catName = (() => {
+      let found = '';
+      Object.entries(window._catalogCache || {}).forEach(([k, cat]) => {
+        (cat.items||[]).forEach(it => { if (it.id === _snsItem.id) found = cat.label || k; });
+      });
+      return found;
+    })();
+
+    if (catName) {
+      const tagLabel = (typeof catName === 'object' ? catName.ko || catName.en : catName).replace(/^[A-Z]\s+/,'');
+      ctx.fillStyle = color + '22';
+      const tw = ctx.measureText(tagLabel).width + 24;
+      roundRect(ctx, 28, bodyY, tw, 22, 11);
+      ctx.fill();
+      ctx.fillStyle = color;
+      ctx.font = '11px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(tagLabel, 40, bodyY+15);
+    }
+
+    // 상품명 (태국어)
+    const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+
+    ctx.fillStyle = '#1a1814';
+    ctx.font = 'bold 26px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(nameTh || nameEn, 28, bodyY+54);
+
+    ctx.fillStyle = '#888';
+    ctx.font = '14px Arial';
+    ctx.fillText(nameLo || nameEn, 28, bodyY+76);
+    ctx.fillText(nameEn, 28, bodyY+96);
+
+    // 가격
+    const price = _snsItem.price1 || 0;
+    ctx.fillStyle = color;
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('₩' + price.toLocaleString(), 28, bodyY+148);
+
+    // 무료배송 안내
+    ctx.fillStyle = '#fef3cd';
+    roundRect(ctx, 20, bodyY+162, W-40, 34, 8);
+    ctx.fill();
+    ctx.fillStyle = '#856404';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🚚 5만원 이상 무료배송  ·  Free delivery over ₩50,000', W/2, bodyY+184);
+  } else {
+    ctx.fillStyle = '#ccc';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('상품을 선택하세요', W/2, imgY+imgH+80);
+  }
+
+  // 푸터
+  ctx.fillStyle = color;
+  ctx.fillRect(0, H-48, W, 48);
+  ctx.fillStyle = '#fff';
+  ctx.font = '12px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('💬 ' + footer, W/2, H-20);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function downloadSnsCard() {
+  const canvas = document.getElementById('sns-canvas');
+  if (!canvas) return;
+  const name = _snsItem ? (_snsItem.id + '_sns.png') : 'sns_card.png';
+  const a = document.createElement('a');
+  a.download = name;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  showToast('📸 이미지 저장 완료!');
+}
+
 
 </script>
 </body>
