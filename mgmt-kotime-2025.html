@@ -1194,6 +1194,7 @@ function toggleSelectAll(cb) {
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
@@ -2717,7 +2718,7 @@ async function _makeAllCards(type, badgeVal) {
     if (sel && sel.value && chk && chk.checked) ids.push(sel.value);
   }
   if (!ids.length) { alert('체크된 상품이 없습니다.'); return; }
-  if (!confirm(ids.length + '개 상품의 SNS 카드를 순서대로 다운로드합니다.')) return;
+  if (!confirm(ids.length + '개 상품의 SNS 카드를 ZIP으로 묶어 다운로드합니다.')) return;
 
   // SNS 탭으로 이동
   switchTab('sns', document.querySelector(".tab-btn[onclick*=\"'sns'\"]"));
@@ -2727,18 +2728,19 @@ async function _makeAllCards(type, badgeVal) {
   const badgeSel = document.getElementById('sns-badge');
   if (badgeSel) badgeSel.value = badgeVal;
 
+  const zip = new JSZip();
+
   for (let i = 0; i < ids.length; i++) {
     showToast(`📸 카드 제작 중... (${i+1}/${ids.length})`);
+
     // 상품 로드
     await new Promise(resolve => {
-      // catalog에서 상품 찾기
       _snsItem = null;
       const src = window._catalogCache || {};
       Object.values(src).forEach(cat => {
         (cat.items||[]).forEach(item => { if (item.id === ids[i]) _snsItem = item; });
       });
       if (!_snsItem) { resolve(); return; }
-      // 이미지 로드
       let imgSrc = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
       if (!imgSrc) { _snsImgObj = null; renderSnsCard(); resolve(); return; }
       if (imgSrc.includes('cloudinary.com')) imgSrc = imgSrc.replace('/upload/', '/upload/fl_attachment/');
@@ -2754,17 +2756,26 @@ async function _makeAllCards(type, badgeVal) {
       img.src = imgSrc;
     });
     await new Promise(r => setTimeout(r, 300));
-    // 다운로드
+
+    // canvas → base64 → ZIP에 추가
     const canvas = document.getElementById('sns-canvas');
     if (canvas) {
-      const a = document.createElement('a');
-      a.download = ids[i] + '_' + type + '_sns.jpg';
-      a.href = canvas.toDataURL('image/jpeg', 0.92);
-      a.click();
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      const base64 = dataUrl.split(',')[1];
+      zip.file((i+1) + '_' + ids[i] + '_' + type + '.jpg', base64, { base64: true });
     }
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 100));
   }
-  showToast('✅ ' + ids.length + '개 카드 제작 완료!');
+
+  // ZIP 생성 & 다운로드
+  showToast('📦 ZIP 파일 생성 중...');
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = type + '_sns_cards.zip';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('✅ ' + ids.length + '개 카드 ZIP 다운로드 완료!');
 }
 
 
@@ -3038,25 +3049,48 @@ function renderSnsCard() {
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const price   = _snsItem.price1 || 0;
 
+    // ── 줄바꿈 헬퍼 ──
+    function wrapText(c, text, x, y, maxW, lineH) {
+      // 단어 단위로 자르되, 단어 자체가 너무 길면 글자 단위로 자름
+      const words = text.split(' ');
+      let line = '';
+      let ty = y;
+      for (let n = 0; n < words.length; n++) {
+        const test = line + (line ? ' ' : '') + words[n];
+        if (c.measureText(test).width > maxW && line) {
+          c.fillText(line, x, ty);
+          line = words[n];
+          ty += lineH;
+        } else {
+          line = test;
+        }
+      }
+      if (line) c.fillText(line, x, ty);
+      return ty; // 마지막 줄 y 반환
+    }
+
+    const maxTxtW = W - 48;
+
     // 상품명 (태국어)
     ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 26px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(nameTh || nameEn, 24, curY + 28);
+    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 28, maxTxtW, 30);
 
     // 라오/영문 소형
     ctx.fillStyle = '#888';
     ctx.font = '13px Arial';
-    ctx.fillText(nameLo || nameEn, 24, curY + 50);
-    ctx.fillText(nameEn, 24, curY + 68);
+    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 16, maxTxtW, 18);
+    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 4, maxTxtW, 18);
 
     // 가격
     ctx.fillStyle = ACCENT;
-    ctx.font = 'bold 42px Arial';
+    ctx.font = 'bold 40px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText('₩' + price.toLocaleString(), 24, curY + 118);
+    const priceY = enEndY + 44;
+    ctx.fillText('₩' + price.toLocaleString(), 24, priceY);
 
-    curY += 130;
+    curY += (priceY - curY) + 16;
 
     // 무료배송 3개 언어
     const DEL_H3 = 58;
