@@ -288,42 +288,30 @@
     z-index: 90;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
   .tabs {
     display: flex;
-    flex-wrap: wrap;
-    padding: 0 4px;
-  }
-  /* 2단 구분선 — 첫 번째 줄 탭들 아래에 경계선 */
-  .tabs::after {
-    content: '';
-    display: block;
-    width: 100%;
-    height: 1px;
-    background: var(--border);
-    order: 5;
-    flex-shrink: 0;
+    padding: 0 16px;
+    min-width: max-content;
   }
   .tab {
-    flex: 1 0 auto;
-    padding: 10px 8px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--muted);
     border-bottom: 2px solid transparent;
-    border-right: 1px solid var(--border);
     cursor: pointer;
     white-space: nowrap;
     transition: color 0.15s, border-color 0.15s;
     background: none;
     border-top: none;
     border-left: none;
+    border-right: none;
     font-family: 'Noto Sans KR', sans-serif;
-    text-align: center;
   }
-  .tab:last-child { border-right: none; }
-  /* 2단 탭 배경 구분 */
-  .tab-row2 { background: #efefed; }
   .tab.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
@@ -2205,8 +2193,6 @@ async function loadCatalogFromFirebase() {
           btn.onclick = function() { switchTab(this, key); };
           btn.textContent = emoji + ' ' + label;
           // 5개씩 2단 분리: 1~5번째 order=1, 6번째~ order=10
-          btn.style.order = i < 5 ? '1' : '10';
-          if (i >= 5) btn.classList.add('tab-row2');
           tabsEl.appendChild(btn);
         });
       }
