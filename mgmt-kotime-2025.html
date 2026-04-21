@@ -3076,8 +3076,8 @@ function renderSnsCard() {
     // 라오/영문 소형
     ctx.fillStyle = '#888';
     ctx.font = '13px Arial';
-    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 16, maxTxtW, 18);
-    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 4, maxTxtW, 18);
+    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 18, maxTxtW, 18);
+    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 14, maxTxtW, 18);
 
     // 가격
     ctx.fillStyle = ACCENT;
