@@ -661,16 +661,16 @@
     <div style="font-size:12px; font-weight:700; color:#e8a87c;" data-t="update_notice">✨ New products added regularly!</div>
   </div>
   <!-- 방문자 카운터 -->
-  <div style="margin-top:12px; display:flex; gap:10px; justify-content:center; max-width:400px; margin-left:auto; margin-right:auto;">
-    <div style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:10px 12px; text-align:center;">
-      <div style="font-size:10px; color:rgba(255,255,255,0.55); letter-spacing:0.06em; margin-bottom:4px;">TODAY</div>
-      <div style="font-size:20px; font-weight:700; color:#fff; letter-spacing:0.02em;" id="visitor-today">–</div>
-      <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px;">visitors</div>
+  <div style="margin-top:10px; display:flex; gap:8px; justify-content:center; max-width:400px; margin-left:auto; margin-right:auto;">
+    <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:5px 12px;">
+      <span style="font-size:11px; color:rgba(255,255,255,0.5);" id="vc-label-today">오늘</span>
+      <span style="font-size:13px; font-weight:700; color:#fff;" id="visitor-today">–</span>
+      <span style="font-size:11px; color:rgba(255,255,255,0.4);" id="vc-unit-today">명</span>
     </div>
-    <div style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:10px 12px; text-align:center;">
-      <div style="font-size:10px; color:rgba(255,255,255,0.55); letter-spacing:0.06em; margin-bottom:4px;">TOTAL</div>
-      <div style="font-size:20px; font-weight:700; color:#e8a87c; letter-spacing:0.02em;" id="visitor-total">–</div>
-      <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px;">visitors</div>
+    <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:5px 12px;">
+      <span style="font-size:11px; color:rgba(255,255,255,0.5);" id="vc-label-total">누적</span>
+      <span style="font-size:13px; font-weight:700; color:#e8a87c;" id="visitor-total">–</span>
+      <span style="font-size:11px; color:rgba(255,255,255,0.4);" id="vc-unit-total">명</span>
     </div>
   </div>
 </div>
@@ -959,6 +959,23 @@ function setLang(lang) {
   renderBest();
   if (typeof window.renderNew === 'function') window.renderNew();
   updateSummary();
+
+  // 방문자 카운터 라벨 언어 업데이트
+  const vcLabels = {
+    en: { today: 'Today', total: 'Total', unit: '' },
+    th: { today: 'วันนี้', total: 'รวม', unit: 'คน' },
+    lo: { today: 'ມື້ນີ້', total: 'ລວມ', unit: 'ຄົນ' },
+    ko: { today: '오늘', total: '누적', unit: '명' },
+  };
+  const vc = vcLabels[lang] || vcLabels.en;
+  const elLT = document.getElementById('vc-label-today');
+  const elLL = document.getElementById('vc-label-total');
+  const elUT = document.getElementById('vc-unit-today');
+  const elUL = document.getElementById('vc-unit-total');
+  if (elLT) elLT.textContent = vc.today;
+  if (elLL) elLL.textContent = vc.total;
+  if (elUT) elUT.textContent = vc.unit;
+  if (elUL) elUL.textContent = vc.unit;
 }
 
 // 카테고리명 다국어 매핑
@@ -2386,6 +2403,23 @@ async function loadNewFromFirebase() {
     const elTotal = document.getElementById('visitor-total');
     if (elToday) elToday.textContent = formatNum(todayCount);
     if (elTotal) elTotal.textContent = formatNum(total);
+
+    // 초기 언어 라벨 적용
+    const vcLabels = {
+      en: { today: 'Today', total: 'Total', unit: '' },
+      th: { today: 'วันนี้', total: 'รวม', unit: 'คน' },
+      lo: { today: 'ມື້ນີ້', total: 'ລວມ', unit: 'ຄົນ' },
+      ko: { today: '오늘', total: '누적', unit: '명' },
+    };
+    const vc = vcLabels[typeof currentLang !== 'undefined' ? currentLang : 'en'] || vcLabels.en;
+    const elLT = document.getElementById('vc-label-today');
+    const elLL = document.getElementById('vc-label-total');
+    const elUT = document.getElementById('vc-unit-today');
+    const elUL = document.getElementById('vc-unit-total');
+    if (elLT) elLT.textContent = vc.today;
+    if (elLL) elLL.textContent = vc.total;
+    if (elUT) elUT.textContent = vc.unit;
+    if (elUL) elUL.textContent = vc.unit;
 
     const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
     setTimeout(function() { localStorage.removeItem(todayKey); }, msToMidnight);
