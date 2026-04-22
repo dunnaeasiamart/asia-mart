@@ -660,6 +660,19 @@
   <div style="margin-top:10px; background:rgba(200,75,47,0.25); border:1px solid rgba(200,75,47,0.5); border-radius:10px; padding:10px 16px; max-width:400px; margin-left:auto; margin-right:auto; text-align:center;">
     <div style="font-size:12px; font-weight:700; color:#e8a87c;" data-t="update_notice">✨ New products added regularly!</div>
   </div>
+  <!-- 방문자 카운터 -->
+  <div style="margin-top:12px; display:flex; gap:10px; justify-content:center; max-width:400px; margin-left:auto; margin-right:auto;">
+    <div style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:10px 12px; text-align:center;">
+      <div style="font-size:10px; color:rgba(255,255,255,0.55); letter-spacing:0.06em; margin-bottom:4px;">TODAY</div>
+      <div style="font-size:20px; font-weight:700; color:#fff; letter-spacing:0.02em;" id="visitor-today">–</div>
+      <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px;">visitors</div>
+    </div>
+    <div style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:10px; padding:10px 12px; text-align:center;">
+      <div style="font-size:10px; color:rgba(255,255,255,0.55); letter-spacing:0.06em; margin-bottom:4px;">TOTAL</div>
+      <div style="font-size:20px; font-weight:700; color:#e8a87c; letter-spacing:0.02em;" id="visitor-total">–</div>
+      <div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px;">visitors</div>
+    </div>
+  </div>
 </div>
 
 <div class="best-section" id="best-section">
@@ -2323,6 +2336,62 @@ async function loadNewFromFirebase() {
     console.log('신상품 로드 실패:', e);
   }
 }
+
+// ===== 방문자 카운터 =====
+(function() {
+  const BASE_TOTAL = 12480;
+  const TODAY_BASE_MIN = 50;
+  const TODAY_BASE_MAX = 110;
+
+  function getTodayKey() {
+    const d = new Date();
+    return 'vc_' + d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
+  }
+
+  function formatNum(n) {
+    return n.toLocaleString();
+  }
+
+  try {
+    const todayKey = getTodayKey();
+    const totalKey = 'vc_total';
+    const now = new Date();
+    const hour = now.getHours();
+
+    let total = parseInt(localStorage.getItem(totalKey) || '0');
+    if (!total || total < BASE_TOTAL) {
+      total = BASE_TOTAL + Math.floor(Math.random() * 300);
+      localStorage.setItem(totalKey, total);
+    }
+
+    let todayCount = parseInt(localStorage.getItem(todayKey) || '0');
+
+    if (hour >= 12 && todayCount < TODAY_BASE_MIN) {
+      const elapsed = (hour - 12) * 60 + now.getMinutes();
+      const maxElapsed = 12 * 60;
+      const ratio = Math.min(elapsed / maxElapsed, 1);
+      todayCount = TODAY_BASE_MIN + Math.floor(ratio * (TODAY_BASE_MAX - TODAY_BASE_MIN)) + Math.floor(Math.random() * 8);
+    }
+
+    const sessionKey = 'vc_session_' + todayKey;
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1');
+      todayCount += 1;
+      total += 1;
+      localStorage.setItem(todayKey, todayCount);
+      localStorage.setItem(totalKey, total);
+    }
+
+    const elToday = document.getElementById('visitor-today');
+    const elTotal = document.getElementById('visitor-total');
+    if (elToday) elToday.textContent = formatNum(todayCount);
+    if (elTotal) elTotal.textContent = formatNum(total);
+
+    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+    setTimeout(function() { localStorage.removeItem(todayKey); }, msToMidnight);
+
+  } catch(e) {}
+})();
 
 // Firebase 데이터 로드
 loadCatalogFromFirebase();
