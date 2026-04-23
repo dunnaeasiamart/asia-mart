@@ -2357,12 +2357,24 @@ async function loadNewFromFirebase() {
 // ===== 방문자 카운터 =====
 (function() {
   const BASE_TOTAL = 12480;
-  const TODAY_BASE_MIN = 50;
-  const TODAY_BASE_MAX = 110;
+  const TODAY_BASE_MIN = 30;
+  const TODAY_BASE_MAX = 50;
 
   function getTodayKey() {
     const d = new Date();
     return 'vc_' + d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
+  }
+
+  // 오늘의 카운트 반영 시작 시각 (매일 랜덤: 오후 3:30 ~ 5:30)
+  function getTodayTriggerMinutes() {
+    const triggerKey = 'vc_trigger_' + getTodayKey();
+    let saved = parseInt(localStorage.getItem(triggerKey) || '0');
+    if (!saved) {
+      // 210분(3:30) ~ 330분(5:30) 사이 랜덤
+      saved = 210 + Math.floor(Math.random() * 121);
+      localStorage.setItem(triggerKey, saved);
+    }
+    return saved; // 자정 이후 분 단위 (예: 270 = 오후 4:30)
   }
 
   function formatNum(n) {
@@ -2383,11 +2395,20 @@ async function loadNewFromFirebase() {
 
     let todayCount = parseInt(localStorage.getItem(todayKey) || '0');
 
-    if (hour >= 12 && todayCount < TODAY_BASE_MIN) {
-      const elapsed = (hour - 12) * 60 + now.getMinutes();
-      const maxElapsed = 12 * 60;
+    // 오늘의 랜덤 트리거 시각 (분 단위, 예: 270 = 오후 4:30)
+    const triggerMinutes = getTodayTriggerMinutes();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if (nowMinutes >= triggerMinutes && todayCount < TODAY_BASE_MIN) {
+      const elapsed = nowMinutes - triggerMinutes;
+      const maxElapsed = 60 * 8; // 트리거 후 8시간에 걸쳐 자연스럽게 증가
       const ratio = Math.min(elapsed / maxElapsed, 1);
-      todayCount = TODAY_BASE_MIN + Math.floor(ratio * (TODAY_BASE_MAX - TODAY_BASE_MIN)) + Math.floor(Math.random() * 8);
+      const newTodayCount = TODAY_BASE_MIN + Math.floor(ratio * (TODAY_BASE_MAX - TODAY_BASE_MIN)) + Math.floor(Math.random() * 8);
+      const diff = newTodayCount - todayCount;
+      if (diff > 0) total += diff;
+      todayCount = newTodayCount;
+      localStorage.setItem(todayKey, todayCount);
+      localStorage.setItem(totalKey, total);
     }
 
     const sessionKey = 'vc_session_' + todayKey;
