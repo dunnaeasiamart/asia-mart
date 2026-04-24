@@ -600,12 +600,12 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <div>
             <div style="font-size:15px;font-weight:700;color:#1a1814;">📈 판매 순위 그래프</div>
-            <div style="font-size:11px;color:#bbb;margin-top:1px;">릴스·SNS 마케팅용 — 화면 녹화 후 활용</div>
+            <div style="font-size:11px;color:#bbb;margin-top:1px;">릴스·SNS 마케팅용</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="openChartEdit()" style="font-size:12px;padding:6px 13px;">✏️ 수치 편집</button>
             <button class="btn btn-secondary" onclick="openFeaturedPicker()" style="font-size:12px;padding:6px 13px;">🖼️ 대표 이미지</button>
-            <button onclick="playChartAnim()" style="padding:8px 22px;background:#c84b2f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">▶ 재생</button>
+            <button onclick="playChartAnim()" id="chart-play-btn" style="padding:8px 22px;background:#c84b2f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">▶ 재생</button>
           </div>
         </div>
         <div style="font-size:11px;font-weight:600;color:#bbb;margin-bottom:7px;letter-spacing:0.04em;">표시할 상품 선택 (최대 10개)</div>
@@ -613,35 +613,36 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <span style="font-size:12px;color:#ddd;">상품을 검색해서 추가하세요</span>
         </div>
         <div style="position:relative;">
-          <input type="text" id="chart-search" placeholder="🔍 태국어/영어 상품명 검색..." oninput="chartSearch(this.value)"
+          <input type="text" id="chart-search" placeholder="🔍 한글 상품명 검색..." oninput="chartSearch(this.value)"
             style="width:100%;padding:9px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;outline:none;">
           <div id="chart-dropdown" style="display:none;position:absolute;top:calc(100%+4px);left:0;right:0;background:#fff;border:1px solid #eee;border-radius:10px;max-height:220px;overflow-y:auto;z-index:80;box-shadow:0 6px 24px rgba(0,0,0,0.1);"></div>
         </div>
       </div>
 
       <!-- 그래프 뷰 -->
-      <div id="chart-view" style="background:#1e1e1e;border-radius:18px;padding:22px 20px 18px;box-shadow:0 10px 48px rgba(0,0,0,0.3);overflow:hidden;position:relative;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:12px;">
+      <div id="chart-view" style="background:#1e1e1e;border-radius:18px;padding:22px 20px 20px;box-shadow:0 10px 48px rgba(0,0,0,0.3);overflow:hidden;">
+        <!-- 헤더 -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
           <div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.1em;margin-bottom:3px;">ASIA MART</div>
-            <div style="font-size:17px;font-weight:800;color:#fff;">🏆 인기 상품 판매 순위</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.1em;margin-bottom:3px;">Dunnae Asia Mart</div>
+            <div id="chart-title-line" style="font-size:17px;font-weight:800;color:#fff;">🏆 สินค้าขายดีอันดับ 1 / Best Selling Products</div>
           </div>
         </div>
+        <!-- x축 -->
         <div id="chart-xaxis" style="display:flex;padding:3px 0 10px 118px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:14px;"></div>
-
         <!-- 막대 + 우측 이미지 -->
         <div style="display:flex;gap:16px;align-items:flex-start;">
           <div id="chart-rows" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;">
-            <div style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>
+            <div id="chart-empty-msg" style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>
           </div>
           <!-- 우측 대표 이미지 -->
           <div id="chart-featured-panel" style="width:155px;flex-shrink:0;display:none;flex-direction:column;align-items:center;">
             <div style="width:155px;height:155px;border-radius:14px;overflow:hidden;background:#2a2520;border:2px solid rgba(255,255,255,0.12);margin-bottom:8px;position:relative;">
-              <img id="chart-featured-img" src="" style="width:100%;height:100%;object-fit:cover;filter:grayscale(20%);">
-              <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%);"></div>
+              <img id="chart-featured-img" src="" style="width:100%;height:100%;object-fit:cover;filter:grayscale(15%);">
+              <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 55%);"></div>
             </div>
             <div id="chart-featured-name" style="font-size:13px;font-weight:800;color:#fff;text-align:center;line-height:1.35;max-width:150px;word-break:break-all;"></div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;">#1 베스트</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;">#1 Best Seller</div>
           </div>
         </div>
       </div>
@@ -676,9 +677,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <button id="fp-product-btn" onclick="setFeaturedMode('product')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;color:#888;font-size:12px;font-weight:600;cursor:pointer;">상품에서 선택</button>
           <button id="fp-file-btn" onclick="setFeaturedMode('file')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;color:#888;font-size:12px;font-weight:600;cursor:pointer;">내 PC에서 선택</button>
         </div>
-        <!-- 상품 선택 목록 -->
         <div id="fp-product-list" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-        <!-- PC 파일 선택 -->
         <div id="fp-file-area" style="display:none;flex-direction:column;align-items:center;gap:10px;padding:16px;border:2px dashed #e0e0e0;border-radius:10px;margin-bottom:10px;">
           <input type="file" id="fp-file-input" accept="image/*" onchange="onFeaturedFileSelect(this)" style="display:none;">
           <button onclick="document.getElementById('fp-file-input').click()" style="padding:10px 20px;background:#1a1814;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📁 이미지 파일 선택</button>
@@ -3492,7 +3491,7 @@ function downloadSnsCard() {
 }
 
 
-// ===== 판매 순위 레이싱 바 차트 v3 =====
+// ===== 판매 순위 레이싱 바 차트 v4 =====
 (function(){
   const COLORS = [
     '#4A9EF5','#F5A623','#E8503A','#2ECC96',
@@ -3500,271 +3499,337 @@ function downloadSnsCard() {
     '#FF6B35','#00BCD4'
   ];
 
-  let chartItems    = [];      // {id, name, image, count}
-  let featuredMode  = 'auto';  // 'auto' | 'product' | 'file'
-  let featuredId    = null;
-  let featuredFileUrl = null;  // PC에서 올린 이미지 objectURL
-  let animFrame     = null;
-  let animPhase     = 0;       // 현재 몇 번째 막대까지 표시 중
-  let animRunning   = false;
+  let chartItems     = [];      // {id, name, nameTh, nameEn, image, count}
+  let featuredMode   = 'auto';
+  let featuredId     = null;
+  let featuredFileUrl= null;
+  let slotTimers     = [];      // 슬롯머신 interval ids
+  let animPlaying    = false;
 
   // ── x축 ──
   function renderXAxis(maxVal){
     const el = document.getElementById('chart-xaxis');
     if(!el) return;
     el.innerHTML = [1,2,3,4].map(i=>{
-      const v = Math.round(maxVal * i / 4);
+      const v = Math.round(maxVal*i/4);
       return `<span style="flex:1;text-align:right;font-size:10px;color:rgba(255,255,255,0.2);">${v.toLocaleString()}</span>`;
     }).join('');
   }
 
   // ── 대표 이미지 갱신 ──
-  function updateFeatured(){
-    const panel = document.getElementById('chart-featured-panel');
-    const imgEl = document.getElementById('chart-featured-img');
-    const nameEl= document.getElementById('chart-featured-name');
+  function updateFeatured(overrideItem){
+    const panel  = document.getElementById('chart-featured-panel');
+    const imgEl  = document.getElementById('chart-featured-img');
+    const nameEl = document.getElementById('chart-featured-name');
     if(!panel||!imgEl||!nameEl) return;
-
     let url='', name='';
-    if(featuredMode==='file' && featuredFileUrl){
-      url = featuredFileUrl; name = '';
-    } else if(featuredMode==='product' && featuredId){
-      const item = chartItems.find(i=>i.id===featuredId);
-      if(item){ url=item.image; name=item.name; }
+    if(overrideItem){ url=overrideItem.image; name=overrideItem.nameTh||overrideItem.name; }
+    else if(featuredMode==='file' && featuredFileUrl){ url=featuredFileUrl; name=''; }
+    else if(featuredMode==='product' && featuredId){
+      const it=chartItems.find(i=>i.id===featuredId);
+      if(it){ url=it.image; name=it.nameTh||it.name; }
     } else {
-      // auto: 1위 상품
-      const sorted = getSorted();
-      if(sorted[0]){ url=sorted[0].image; name=sorted[0].name; }
+      const sorted=getSorted();
+      if(sorted[0]){ url=sorted[0].image; name=sorted[0].nameTh||sorted[0].name; }
     }
-
     if(!url){ panel.style.display='none'; return; }
     panel.style.display='flex';
     imgEl.src=url;
     nameEl.textContent=name;
   }
 
-  // ── 검색: 태국어·영어로 표시 ──
+  // ── 한글 검색, 결과는 한글 표시 ──
   window.chartSearch = function(q){
-    const dd = document.getElementById('chart-dropdown');
+    const dd=document.getElementById('chart-dropdown');
     if(!q.trim()){dd.style.display='none';return;}
-    const catalog = window._catalogCache||{};
+    const catalog=window._catalogCache||{};
     const res=[];
     Object.values(catalog).forEach(cat=>{
       (cat.items||[]).forEach(item=>{
-        const th = (item.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-        const en = (item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-        const ko = (item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-        if(th.includes(q)||en.toLowerCase().includes(q.toLowerCase())||ko.includes(q))
-          res.push({...item, _th:th, _en:en, _ko:ko});
+        const ko=(item.name_ko||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+        const th=(item.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+        const en=(item.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+        if(ko.includes(q)||th.includes(q)||en.toLowerCase().includes(q.toLowerCase()))
+          res.push({...item,_ko:ko,_th:th,_en:en});
       });
     });
     if(!res.length){dd.style.display='none';return;}
-    dd.innerHTML = res.slice(0,12).map(item=>{
-      const display = item._th || item._en;
-      const sub = item._en;
-      const imgEl2 = item.image
-        ? `<img src="${item.image}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
-        : `<div style="width:32px;height:32px;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛒</div>`;
-      const safeImg  = (item.image||'').replace(/\\/g,'\\\\').replace(/'/g,'%27');
-      const safeTh   = item._th.replace(/'/g,'&#39;');
-      const safeEn   = item._en.replace(/'/g,'&#39;');
+    dd.innerHTML=res.slice(0,12).map(item=>{
+      const imgEl2=item.image
+        ?`<img src="${item.image}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;flex-shrink:0;">`
+        :`<div style="width:32px;height:32px;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛒</div>`;
+      const safeImg=(item.image||'').replace(/'/g,'%27');
+      const safeKo=item._ko.replace(/'/g,'&#39;');
+      const safeTh=item._th.replace(/'/g,'&#39;');
+      const safeEn=item._en.replace(/'/g,'&#39;');
       return `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid #f8f8f8;"
         onmouseover="this.style.background='#fdf5f3'" onmouseout="this.style.background=''"
-        onclick="chartAddItem('${item.id}','${safeTh}','${safeEn}','${safeImg}')">
+        onclick="chartAddItem('${item.id}','${safeKo}','${safeTh}','${safeEn}','${safeImg}')">
         ${imgEl2}
         <div style="min-width:0;">
-          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${display}</div>
-          <div style="font-size:11px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub}</div>
+          <div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item._ko||item._en}</div>
+          <div style="font-size:10px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item._th}</div>
         </div>
       </div>`;
     }).join('');
     dd.style.display='block';
   };
 
-  window.chartAddItem = function(id, nameTh, nameEn, image){
+  window.chartAddItem = function(id,nameKo,nameTh,nameEn,image){
     document.getElementById('chart-dropdown').style.display='none';
     document.getElementById('chart-search').value='';
     if(chartItems.length>=10){showToast('최대 10개까지 선택 가능합니다.');return;}
     if(chartItems.find(i=>i.id===id)){showToast('이미 선택된 상품입니다.');return;}
-    const base = 9500 - chartItems.length*600;
-    const count = base + Math.floor(Math.random()*800);
-    const name = (nameTh||nameEn||'').replace(/&#39;/g,"'");
-    const img  = decodeURIComponent(image||'');
-    chartItems.push({id, name, nameTh: name, nameEn: nameEn.replace(/&#39;/g,"'"), image:img, count});
+    const base=9500-chartItems.length*600;
+    const count=base+Math.floor(Math.random()*800);
+    chartItems.push({
+      id,
+      name: nameKo.replace(/&#39;/g,"'"),
+      nameKo: nameKo.replace(/&#39;/g,"'"),
+      nameTh: nameTh.replace(/&#39;/g,"'"),
+      nameEn: nameEn.replace(/&#39;/g,"'"),
+      image: decodeURIComponent(image||''),
+      count
+    });
     renderChips();
-    renderGraph(false);
-    updateFeatured();
+    renderGraphStatic();
   };
 
   window.chartRemoveItem = function(id){
-    chartItems = chartItems.filter(i=>i.id!==id);
+    if(animPlaying){stopAnim();}
+    chartItems=chartItems.filter(i=>i.id!==id);
     if(featuredId===id) featuredId=null;
     renderChips();
-    renderGraph(false);
+    renderGraphStatic();
     updateFeatured();
   };
 
   function renderChips(){
-    const el = document.getElementById('chart-chips');
+    const el=document.getElementById('chart-chips');
     if(!chartItems.length){
       el.innerHTML='<span style="font-size:12px;color:#ddd;">상품을 검색해서 추가하세요</span>';
       return;
     }
-    el.innerHTML = chartItems.map((item,i)=>`
+    el.innerHTML=chartItems.map((item,i)=>`
       <div style="display:flex;align-items:center;gap:5px;background:#fff7f5;border:1.5px solid #f5c4b3;border-radius:20px;padding:4px 8px 4px 5px;max-width:160px;">
-        ${item.image?`<img src="${item.image}" style="width:20px;height:20px;object-fit:cover;border-radius:50%;flex-shrink:0;">`
-          :`<div style="width:20px;height:20px;border-radius:50%;background:${COLORS[i%COLORS.length]};flex-shrink:0;"></div>`}
-        <span style="font-size:11px;color:#993C1D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${item.name}</span>
+        ${item.image?`<img src="${item.image}" style="width:20px;height:20px;object-fit:cover;border-radius:50%;flex-shrink:0;">`:`<div style="width:20px;height:20px;border-radius:50%;background:${COLORS[i%COLORS.length]};flex-shrink:0;"></div>`}
+        <span style="font-size:11px;color:#993C1D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${item.nameKo||item.name}</span>
         <button onclick="chartRemoveItem('${item.id}')" style="background:none;border:none;font-size:11px;color:#ccc;cursor:pointer;padding:0;flex-shrink:0;">✕</button>
       </div>`).join('');
   }
 
   function getSorted(){ return [...chartItems].sort((a,b)=>b.count-a.count); }
 
-  // ── 그래프 렌더 ──
-  function renderGraph(animate){
-    if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
-    animRunning=false;
-    const rows = document.getElementById('chart-rows');
+  // ── 정적 렌더 (선택 후 즉시 표시) ──
+  function renderGraphStatic(){
+    stopAnim();
+    const rows=document.getElementById('chart-rows');
     if(!rows) return;
-
     if(!chartItems.length){
-      rows.innerHTML='<div style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>';
+      rows.innerHTML='<div id="chart-empty-msg" style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>';
       document.getElementById('chart-featured-panel').style.display='none';
       return;
     }
-
-    const sorted  = getSorted();
-    const maxVal  = sorted[0].count;
+    const sorted=getSorted();
+    const maxVal=sorted[0].count;
     renderXAxis(maxVal);
+    rows.innerHTML=sorted.map((item,rank)=>buildRowHTML(item,rank,maxVal,item.count)).join('');
+    updateFeatured();
+    document.getElementById('chart-play-btn').textContent='▶ 재생';
+  }
+
+  // ── 행 HTML 생성 ──
+  function buildRowHTML(item, rank, maxVal, curCount, blank){
+    const color=COLORS[rank%COLORS.length];
+    const isTop3=rank<3;
+    const pct=maxVal>0?Math.max((curCount/maxVal)*100,0.5):0.5;
+    const imgEl=blank
+      ?`<div style="width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.05);"></div>`
+      :(item.image
+        ?`<img src="${item.image}" style="width:38px;height:38px;object-fit:cover;border-radius:8px;display:block;">`
+        :`<div style="width:38px;height:38px;border-radius:8px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name||'?').charAt(0)}</div>`);
+    const nameBlock=blank
+      ?`<div style="height:14px;background:rgba(255,255,255,0.06);border-radius:4px;width:60%;margin-bottom:5px;"></div>`
+      :`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${item.nameTh||item.name}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;margin-bottom:3px;">${item.nameEn}</div>`;
+    return `
+      <div id="crow-${item.id}" style="display:flex;align-items:center;gap:9px;">
+        <div style="width:20px;text-align:right;font-size:14px;font-weight:900;color:rgba(255,255,255,${isTop3?'0.85':'0.35'});flex-shrink:0;">${rank+1}</div>
+        <div id="cimg-${item.id}" style="flex-shrink:0;">${imgEl}</div>
+        <div style="flex:1;min-width:0;">
+          <div id="cname-${item.id}">${nameBlock}</div>
+          <div style="position:relative;height:24px;background:rgba(255,255,255,0.05);border-radius:5px;overflow:hidden;">
+            <div id="cbar-${item.id}" style="position:absolute;left:0;top:0;bottom:0;width:${blank?0:pct}%;background:linear-gradient(90deg,${color}88,${color});border-radius:5px;transition:none;"></div>
+          </div>
+        </div>
+        <div id="ccount-${item.id}" style="width:58px;text-align:right;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;">${blank?'':curCount.toLocaleString()}</div>
+      </div>`;
+  }
+
+  // ── 슬롯머신: 이미지+이름 랜덤 플리커 ──
+  function startSlot(itemId, allItems){
+    const imgEl=document.getElementById('cimg-'+itemId);
+    const nameEl=document.getElementById('cname-'+itemId);
+    if(!imgEl||!nameEl) return null;
+    const color=COLORS[0]; // 임시
+    let idx=0;
+    const tid=setInterval(()=>{
+      const rand=allItems[Math.floor(Math.random()*allItems.length)];
+      if(rand.image){
+        imgEl.innerHTML=`<img src="${rand.image}" style="width:38px;height:38px;object-fit:cover;border-radius:8px;display:block;opacity:0.7;">`;
+      }
+      nameEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${rand.nameTh||rand.name}</div>`;
+    },80);
+    return tid;
+  }
+
+  function stopSlot(tid){ if(tid) clearInterval(tid); }
+
+  function stopAnim(){
+    slotTimers.forEach(t=>{ if(t) clearInterval(t); });
+    slotTimers=[];
+    animPlaying=false;
+  }
+
+  // ── 메인 애니메이션 ──
+  window.playChartAnim = function(){
+    if(!chartItems.length){showToast('상품을 먼저 선택해 주세요.');return;}
+    stopAnim();
+    animPlaying=true;
+    document.getElementById('chart-play-btn').textContent='■ 정지';
+
+    const sorted   = getSorted();
+    const maxVal   = sorted[0].count;
+    const reversed = [...sorted].reverse(); // 꼴찌→1위 순서로 등장
+    const n        = reversed.length;
+
+    renderXAxis(maxVal);
+
+    // 1. 모든 행을 빈칸으로 먼저 그리기 (최종 순위 위치 확정)
+    const rows=document.getElementById('chart-rows');
+    rows.innerHTML=sorted.map((item,rank)=>buildRowHTML(item,rank,maxVal,0,true)).join('');
     updateFeatured();
 
-    if(!animate){
-      // 즉시 전체 표시
-      rows.innerHTML = sorted.map((item,rank)=>buildRowHTML(item,rank,maxVal,item.count)).join('');
-      return;
-    }
+    // 2. 모든 행에 슬롯머신 시작
+    const allSlots={};
+    sorted.forEach(item=>{
+      allSlots[item.id]=startSlot(item.id, chartItems);
+      slotTimers.push(allSlots[item.id]);
+    });
 
-    // ── 역순 등장 애니메이션 ──
-    // 꼴찌부터 한 줄씩 등장, 막대는 서서히 채워짐
-    // 1단계: 빈 컨테이너 준비 (역순 순서로 placeholder)
-    const reversed = [...sorted].reverse(); // 꼴찌→1위 순서
-    rows.innerHTML = ''; // 비움
+    const BAR_DURATION = 3000;  // 막대 채우기 3초
+    const STEP_DELAY   = 800;   // 각 순위 등장 간격
 
-    const STEP_DELAY  = 600;   // 각 막대 등장 간격 (ms)
-    const BAR_DURATION = 2000; // 막대 한 개 채워지는 시간 (ms)
+    // 3. 꼴찌(reversed[0])부터 순서대로 확정
+    function revealRank(revIdx){
+      if(!animPlaying) return;
+      if(revIdx >= n){
+        // 모두 완료
+        animPlaying=false;
+        document.getElementById('chart-play-btn').textContent='▶ 재생';
+        return;
+      }
+      const item  = reversed[revIdx];
+      const rank  = sorted.findIndex(s=>s.id===item.id);
+      const color = COLORS[rank%COLORS.length];
 
-    function showBar(idx){
-      if(idx >= reversed.length) return;
-      const item = reversed[idx];
-      const rank = sorted.findIndex(s=>s.id===item.id); // 실제 순위
+      // 슬롯 멈추고 실제 데이터 확정
+      stopSlot(allSlots[item.id]);
+      slotTimers=slotTimers.filter(t=>t!==allSlots[item.id]);
 
-      // 새 행 추가 (맨 위에 prepend해서 최종적으로 1위가 위에)
-      const div = document.createElement('div');
-      div.innerHTML = buildRowHTML(item, rank, maxVal, 0);
-      rows.insertBefore(div.firstElementChild, rows.firstChild);
+      // 이미지 확정
+      const imgEl=document.getElementById('cimg-'+item.id);
+      if(imgEl){
+        imgEl.innerHTML=item.image
+          ?`<img src="${item.image}" style="width:38px;height:38px;object-fit:cover;border-radius:8px;display:block;">`
+          :`<div style="width:38px;height:38px;border-radius:8px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name).charAt(0)}</div>`;
+      }
+      // 상품명 확정
+      const nameEl=document.getElementById('cname-'+item.id);
+      if(nameEl){
+        nameEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${item.nameTh||item.name}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;margin-bottom:3px;">${item.nameEn}</div>`;
+      }
 
-      // 막대 채우기 애니메이션
+      // 대표 이미지: 1위가 확정되면 갱신
+      if(revIdx===n-1){ updateFeatured(); }
+
+      // 막대 채우기 (3초)
       const barEl   = document.getElementById('cbar-'+item.id);
       const countEl = document.getElementById('ccount-'+item.id);
-      const targetW = Math.max((item.count/maxVal)*100, 1);
-      const start   = performance.now();
+      const targetW = Math.max((item.count/maxVal)*100, 0.5);
+      const startT  = performance.now();
 
       function fillBar(now){
-        const p = Math.min((now-start)/BAR_DURATION, 1);
+        if(!animPlaying && revIdx<n-1) return;
+        const p    = Math.min((now-startT)/BAR_DURATION, 1);
         const ease = p===1 ? 1 : 1-Math.pow(2,-10*p);
-        const cur  = Math.round(item.count*ease);
         if(barEl)   barEl.style.width   = (targetW*ease)+'%';
-        if(countEl) countEl.textContent = cur.toLocaleString();
+        if(countEl) countEl.textContent = Math.round(item.count*ease).toLocaleString();
         if(p<1) requestAnimationFrame(fillBar);
       }
       requestAnimationFrame(fillBar);
 
-      // 다음 막대 예약
-      if(idx+1 < reversed.length){
-        setTimeout(()=>showBar(idx+1), STEP_DELAY);
-      }
+      // 다음 순위 예약
+      setTimeout(()=>revealRank(revIdx+1), STEP_DELAY);
     }
 
-    showBar(0);
-  }
-
-  function buildRowHTML(item, rank, maxVal, curCount){
-    const color  = COLORS[rank % COLORS.length];
-    const isTop3 = rank < 3;
-    const pct    = maxVal>0 ? Math.max((curCount/maxVal)*100,1) : 1;
-    const imgEl  = item.image
-      ? `<img src="${item.image}" style="width:38px;height:38px;object-fit:cover;border-radius:8px;display:block;">`
-      : `<div style="width:38px;height:38px;border-radius:8px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${item.name.charAt(0)}</div>`;
-    // 상품명: 태국어 + 영어
-    const nameLine = item.nameEn
-      ? `<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${item.nameTh||item.name}</div>
-         <div style="font-size:9px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;margin-bottom:3px;">${item.nameEn}</div>`
-      : `<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;margin-bottom:3px;">${item.name}</div>`;
-    return `
-      <div id="crow-${item.id}" style="display:flex;align-items:center;gap:9px;">
-        <div style="width:20px;text-align:right;font-size:14px;font-weight:900;color:rgba(255,255,255,${isTop3?'0.85':'0.35'});flex-shrink:0;">${rank+1}</div>
-        <div style="flex-shrink:0;">${imgEl}</div>
-        <div style="flex:1;min-width:0;">
-          ${nameLine}
-          <div style="position:relative;height:24px;background:rgba(255,255,255,0.05);border-radius:5px;overflow:hidden;">
-            <div id="cbar-${item.id}" style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:linear-gradient(90deg,${color}99,${color});border-radius:5px;"></div>
-          </div>
-        </div>
-        <div id="ccount-${item.id}" style="width:58px;text-align:right;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;">${curCount.toLocaleString()}</div>
-      </div>`;
-  }
-
-  // ── 재생 버튼 ──
-  window.playChartAnim = function(){
-    if(!chartItems.length){showToast('상품을 먼저 선택해 주세요.');return;}
-    renderGraph(true);
+    // 잠깐 슬롯머신만 보여주다가 시작
+    setTimeout(()=>revealRank(0), 400);
   };
 
+  // 정지 버튼 겸용
+  document.addEventListener('click', function(e){
+    if(e.target.id==='chart-play-btn' && animPlaying){
+      stopAnim();
+      renderGraphStatic();
+    }
+  });
+
   // ── 수치 편집 ──
-  window.openChartEdit = function(){
+  window.openChartEdit=function(){
     if(!chartItems.length){showToast('상품을 먼저 선택해 주세요.');return;}
-    document.getElementById('chart-modal-rows').innerHTML = chartItems.map((item,i)=>`
+    document.getElementById('chart-modal-rows').innerHTML=chartItems.map((item,i)=>`
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="width:34px;height:34px;border-radius:8px;overflow:hidden;background:#f5f5f5;flex-shrink:0;">
           ${item.image?`<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:15px;">🛒</div>`}
         </div>
-        <span style="flex:1;font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name}</span>
+        <span style="flex:1;font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.nameKo||item.name}</span>
         <input type="number" id="cedit-${i}" value="${item.count}" min="1"
           style="width:90px;padding:7px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;text-align:right;outline:none;font-weight:600;">
       </div>`).join('');
     document.getElementById('chart-modal').style.display='flex';
   };
-  window.closeChartModal = function(){ document.getElementById('chart-modal').style.display='none'; };
-  window.applyChartModal = function(){
+  window.closeChartModal=function(){ document.getElementById('chart-modal').style.display='none'; };
+  window.applyChartModal=function(){
     chartItems.forEach((item,i)=>{
       const v=parseInt(document.getElementById('cedit-'+i)?.value||'0');
       if(v>0) item.count=v;
     });
     closeChartModal();
-    renderGraph(true);
+    playChartAnim();
   };
 
   // ── 대표 이미지 모달 ──
-  window.openFeaturedPicker = function(){
-    if(!chartItems.length&&featuredMode!=='file'){showToast('상품을 먼저 선택해 주세요.');return;}
+  window.openFeaturedPicker=function(){
     renderFeaturedProductList();
     document.getElementById('featured-modal').style.display='flex';
   };
-  window.closeFeaturedModal = function(){ document.getElementById('featured-modal').style.display='none'; };
+  window.closeFeaturedModal=function(){ document.getElementById('featured-modal').style.display='none'; };
 
-  window.setFeaturedMode = function(mode){
+  window.setFeaturedMode=function(mode){
     featuredMode=mode;
     ['auto','product','file'].forEach(m=>{
       const btn=document.getElementById('fp-'+m+'-btn');
       if(!btn) return;
-      btn.style.border = m===mode ? '2px solid #c84b2f' : '1px solid #e0e0e0';
-      btn.style.background = m===mode ? '#fff7f5' : '#fff';
-      btn.style.color = m===mode ? '#c84b2f' : '#888';
-      btn.style.fontWeight = m===mode ? '700' : '600';
+      const sel=m===mode;
+      btn.style.border=sel?'2px solid #c84b2f':'1px solid #e0e0e0';
+      btn.style.background=sel?'#fff7f5':'#fff';
+      btn.style.color=sel?'#c84b2f':'#888';
+      btn.style.fontWeight=sel?'700':'600';
     });
-    document.getElementById('fp-product-list').style.display = mode==='product' ? 'flex' : 'none';
-    document.getElementById('fp-file-area').style.display    = mode==='file'    ? 'flex' : 'none';
+    document.getElementById('fp-product-list').style.display=mode==='product'?'flex':'none';
+    document.getElementById('fp-file-area').style.display=mode==='file'?'flex':'none';
     updateFeatured();
   };
 
@@ -3778,25 +3843,23 @@ function downloadSnsCard() {
         <div style="width:40px;height:40px;border-radius:8px;overflow:hidden;background:#f5f5f5;flex-shrink:0;">
           ${item.image?`<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;">🛒</div>`}
         </div>
-        <span style="font-size:13px;font-weight:${sel?700:500};color:${sel?'#c84b2f':'#333'};">${item.name}</span>
+        <span style="font-size:13px;font-weight:${sel?700:500};color:${sel?'#c84b2f':'#333'};">${item.nameKo||item.name}</span>
         ${sel?'<span style="margin-left:auto;font-size:16px;">✅</span>':''}
       </div>`;
     }).join('');
   }
-  window.selectFeaturedProduct = function(id){ featuredId=id; renderFeaturedProductList(); updateFeatured(); };
+  window.selectFeaturedProduct=function(id){ featuredId=id; renderFeaturedProductList(); updateFeatured(); };
 
-  // PC 파일 선택
-  window.onFeaturedFileSelect = function(input){
-    const file=input.files[0];
-    if(!file) return;
+  window.onFeaturedFileSelect=function(input){
+    const file=input.files[0]; if(!file) return;
     if(featuredFileUrl) URL.revokeObjectURL(featuredFileUrl);
-    featuredFileUrl = URL.createObjectURL(file);
-    const preview=document.getElementById('fp-file-preview');
-    const previewImg=document.getElementById('fp-file-preview-img');
-    const previewName=document.getElementById('fp-file-preview-name');
-    if(preview){preview.style.display='flex';}
-    if(previewImg){previewImg.src=featuredFileUrl;}
-    if(previewName){previewName.textContent=file.name;}
+    featuredFileUrl=URL.createObjectURL(file);
+    const p=document.getElementById('fp-file-preview');
+    const pi=document.getElementById('fp-file-preview-img');
+    const pn=document.getElementById('fp-file-preview-name');
+    if(p) p.style.display='flex';
+    if(pi) pi.src=featuredFileUrl;
+    if(pn) pn.textContent=file.name;
     updateFeatured();
   };
 
@@ -3806,7 +3869,7 @@ function downloadSnsCard() {
     _orig&&_orig(tab,el);
     if(tab==='chart'){
       if(!window._catalogCache) db.ref('catalog').get().then(s=>{window._catalogCache=s.val()||{};});
-      if(chartItems.length) renderGraph(false);
+      if(chartItems.length) renderGraphStatic();
     }
   };
 
