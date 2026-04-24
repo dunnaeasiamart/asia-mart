@@ -3739,15 +3739,25 @@ function downloadSnsCard() {
     const rows=document.getElementById('chart-rows');
     rows.innerHTML=sorted.map((item,rank)=>buildRowHTML(item,rank,maxVal,0,true)).join('');
 
-    // 2. 우측 패널 숨기고 시작 (1위 막대 완성 후 등장)
+    // 2. 우측 패널 처음부터 표시 + 슬롯머신으로 이미지 계속 바뀜
     const featPanel=document.getElementById('chart-featured-panel');
     const featImg=document.getElementById('chart-featured-img');
     const featName=document.getElementById('chart-featured-name');
     const hasImg=chartItems.some(i=>i.image);
-    if(featPanel){ featPanel.style.display='none'; }
     const thanks0=document.getElementById('chart-thanks-msg');
     if(thanks0) thanks0.style.display='none';
-    const featSlotTid = null; // 패널 숨겨두므로 슬롯 불필요
+
+    // 패널 바로 표시, 이름은 비워두고 이미지만 슬롯머신
+    if(featPanel){ featPanel.style.display='flex'; featPanel.style.animation=''; }
+    if(featName){ featName.textContent=''; }
+
+    // 이미지 슬롯머신: 전체 재생 동안 100ms마다 랜덤 교체
+    const imgPool = chartItems.filter(i=>i.image);
+    const featSlotTid = (hasImg && imgPool.length) ? setInterval(()=>{
+      const rand = imgPool[Math.floor(Math.random()*imgPool.length)];
+      if(featImg){ featImg.src=rand.image; featImg.style.opacity='0.6'; }
+    }, 100) : null;
+    if(featSlotTid) slotTimers.push(featSlotTid);
 
     // 3. 모든 행에 슬롯머신 시작
     const allSlots={};
