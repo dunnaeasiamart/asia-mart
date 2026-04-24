@@ -625,7 +625,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
           <div>
             <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.1em;margin-bottom:3px;">Dunnae Asia Mart</div>
-            <div id="chart-title-line" style="font-size:17px;font-weight:800;color:#fff;">🏆 สินค้าขายดีอันดับ 1 / Best Selling Products</div>
+            <div id="chart-title-line" style="font-size:17px;font-weight:800;color:#fff;">🏆 สินค้าขายดีประจำสัปดาห์นี้ / This Week's Best Selling Products</div>
           </div>
         </div>
         <!-- x축 -->
@@ -647,9 +647,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;">#1 Best Seller</div>
             <!-- 감사 메시지 -->
             <div id="chart-thanks-msg" style="display:none;margin-top:10px;text-align:center;">
-              <div style="font-size:12px;font-weight:800;color:#F5A623;line-height:1.6;">🙏 많이 구매해 주셔서<br>감사합니다!</div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;font-weight:600;">ขอบคุณที่ซื้อสินค้า<br>มากมาย! 🙏</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Thank you so much<br>for your purchase!</div>
+              <div style="font-size:12px;font-weight:800;color:#F5A623;line-height:1.6;">🙏 ขอบคุณที่ซื้อสินค้า<br>มากมาย!</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:4px;">Thank you so much<br>for your purchase! 🙏</div>
             </div>
           </div>
         </div>
@@ -3652,10 +3651,10 @@ function downloadSnsCard() {
     const isTop3=rank<3;
     const pct=maxVal>0?Math.max((curCount/maxVal)*100,0.5):0.5;
     const imgEl=blank
-      ?`<div style="width:64px;height:64px;border-radius:10px;background:rgba(255,255,255,0.05);"></div>`
+      ?`<div style="width:80px;height:80px;border-radius:12px;background:rgba(255,255,255,0.05);"></div>`
       :(item.image
-        ?`<img src="${item.image}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;display:block;">` 
-        :`<div style="width:64px;height:64px;border-radius:10px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name||'?').charAt(0)}</div>`);
+        ?`<img src="${item.image}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;display:block;">` 
+        :`<div style="width:80px;height:80px;border-radius:12px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name||'?').charAt(0)}</div>`);
     const nameBlock=blank
       ?`<div style="height:14px;background:rgba(255,255,255,0.06);border-radius:4px;width:60%;margin-bottom:5px;"></div>`
       :`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${item.nameTh||item.name}</div>
@@ -3670,7 +3669,7 @@ function downloadSnsCard() {
             <div id="cbar-${item.id}" style="position:absolute;left:0;top:0;bottom:0;width:${blank?0:pct}%;background:linear-gradient(90deg,${color}88,${color});border-radius:5px;transition:none;"></div>
           </div>
         </div>
-        <div id="ccount-${item.id}" style="width:58px;text-align:right;font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);flex-shrink:0;">${blank?'':curCount.toLocaleString()}</div>
+        <div id="ccount-${item.id}" style="width:52px;text-align:right;font-size:12px;font-weight:800;color:rgba(255,255,255,0.8);flex-shrink:0;">${blank?'':curCount.toLocaleString()}</div>
       </div>`;
   }
 
@@ -3684,7 +3683,7 @@ function downloadSnsCard() {
     const tid=setInterval(()=>{
       const rand=allItems[Math.floor(Math.random()*allItems.length)];
       if(rand.image){
-        imgEl.innerHTML=`<img src="${rand.image}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;display:block;opacity:0.7;">`;
+        imgEl.innerHTML=`<img src="${rand.image}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;display:block;opacity:0.7;">`;
       }
       nameEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${rand.nameTh||rand.name}</div>`;
     },80);
@@ -3721,6 +3720,18 @@ function downloadSnsCard() {
     const maxVal   = sorted[0].count;
     const reversed = [...sorted].reverse(); // 꼴찌→1위 순서로 등장
     const n        = reversed.length;
+
+    // 마케팅용 % 배분 (1위부터 순서대로 자연스럽게, 합계 100%)
+    (function(){
+      const weights = sorted.map((_,i) => Math.pow(0.75, i));
+      const total   = weights.reduce((a,b)=>a+b, 0);
+      sorted.forEach((item,i)=>{
+        item._pct = Math.round((weights[i]/total*100 + (Math.random()-0.5)*3)*10)/10;
+      });
+      // 합계 100% 보정
+      const sum = sorted.reduce((a,b)=>a+b._pct, 0);
+      sorted[0]._pct = Math.round((sorted[0]._pct+(100-sum))*10)/10;
+    })();
 
     renderXAxis(maxVal);
 
@@ -3768,8 +3779,8 @@ function downloadSnsCard() {
       const imgEl2=document.getElementById('cimg-'+item.id);
       if(imgEl2){
         imgEl2.innerHTML=item.image
-          ?`<img src="${item.image}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;display:block;">` 
-          :`<div style="width:64px;height:64px;border-radius:10px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name).charAt(0)}</div>`;
+          ?`<img src="${item.image}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;display:block;">` 
+          :`<div style="width:80px;height:80px;border-radius:12px;background:${color}22;display:flex;align-items:center;justify-content:center;font-size:17px;color:${color};font-weight:700;">${(item.nameTh||item.name).charAt(0)}</div>`;
       }
       // 상품명 확정
       const nameEl2=document.getElementById('cname-'+item.id);
@@ -3792,7 +3803,7 @@ function downloadSnsCard() {
         const p    = Math.min((now-startT)/BAR_DURATION, 1);
         const ease = 1-Math.pow(1-p, 3);
         if(barEl2)   barEl2.style.width   = (targetW*ease)+'%';
-        if(countEl2) countEl2.textContent = Math.round(item.count*ease).toLocaleString();
+        if(countEl2) countEl2.textContent = (Math.round(item._pct * ease * 10)/10).toFixed(1) + '%';
 
         if(p<1){
           requestAnimationFrame(fillBar);
