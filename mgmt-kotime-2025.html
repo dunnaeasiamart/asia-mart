@@ -620,7 +620,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
 
       <!-- 그래프 뷰 -->
-      <div id="chart-view" style="background:#1e1e1e;border-radius:18px;padding:22px 20px 20px;box-shadow:0 10px 48px rgba(0,0,0,0.3);overflow:hidden;">
+      <div id="chart-view" style="background:#1e1e1e;border-radius:18px;padding:22px 20px 20px;box-shadow:0 10px 48px rgba(0,0,0,0.3);overflow:hidden;position:relative;max-width:450px;margin:0 auto;aspect-ratio:9/16;display:flex;flex-direction:column;">
         <!-- 헤더 -->
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
           <div>
@@ -629,10 +629,12 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           </div>
         </div>
         <!-- x축 -->
-        <div id="chart-xaxis" style="display:flex;padding:3px 0 10px 118px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:14px;"></div>
+        <!-- 카운트다운 오버레이 -->
+        <div id="chart-countdown" style="display:none;position:absolute;inset:0;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);border-radius:18px;font-size:80px;font-weight:900;color:#fff;letter-spacing:-2px;"></div>
+        <div id="chart-xaxis" style="display:none;"></div>
         <!-- 막대 + 우측 이미지 -->
         <div style="display:flex;gap:16px;align-items:flex-start;">
-          <div id="chart-rows" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+          <div id="chart-rows" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;overflow:hidden;">
             <div id="chart-empty-msg" style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>
           </div>
           <!-- 우측 대표 이미지 -->
@@ -3661,7 +3663,7 @@ function downloadSnsCard() {
         <div style="font-size:9px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;margin-bottom:3px;">${item.nameEn}</div>`;
     return `
       <div id="crow-${item.id}" style="display:flex;align-items:center;gap:9px;">
-        <div style="width:20px;text-align:right;font-size:14px;font-weight:900;color:rgba(255,255,255,${isTop3?'0.85':'0.35'});flex-shrink:0;">${rank+1}</div>
+        <div style="width:36px;text-align:center;font-size:26px;font-weight:900;color:rgba(255,255,255,${isTop3?'1':'0.5'});flex-shrink:0;line-height:1;">${rank+1}</div>
         <div id="cimg-${item.id}" style="flex-shrink:0;">${imgEl}</div>
         <div style="flex:1;min-width:0;">
           <div id="cname-${item.id}">${nameBlock}</div>
@@ -3678,15 +3680,25 @@ function downloadSnsCard() {
     const imgEl=document.getElementById('cimg-'+itemId);
     const nameEl=document.getElementById('cname-'+itemId);
     if(!imgEl||!nameEl) return null;
-    const color=COLORS[0]; // 임시
-    let idx=0;
+    // 전체 카탈로그 이미지 풀 구성
+    const allImgs = [];
+    const cat2 = window._catalogCache||{};
+    Object.values(cat2).forEach(c=>{
+      (c.items||[]).forEach(it=>{ if(it.image) allImgs.push(it.image); });
+    });
+    // 선택 상품 이미지도 포함
+    allItems.forEach(it=>{ if(it.image) allImgs.push(it.image); });
+    const pool = allImgs.length ? allImgs : allItems.filter(i=>i.image).map(i=>i.image);
     const tid=setInterval(()=>{
-      const rand=allItems[Math.floor(Math.random()*allItems.length)];
-      if(rand.image){
-        imgEl.innerHTML=`<img src="${rand.image}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;display:block;opacity:0.7;">`;
+      // 이미지: 전체 풀에서 랜덤
+      const randImg = pool[Math.floor(Math.random()*pool.length)];
+      if(randImg){
+        imgEl.innerHTML=`<img src="${randImg}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;display:block;opacity:0.7;">`;
       }
-      nameEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${rand.nameTh||rand.name}</div>`;
-    },80);
+      // 이름: 선택 상품에서 랜덤
+      const randItem=allItems[Math.floor(Math.random()*allItems.length)];
+      nameEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;">${randItem.nameTh||randItem.name}</div>`;
+    },40);
     return tid;
   }
 
@@ -3751,12 +3763,21 @@ function downloadSnsCard() {
     if(featPanel){ featPanel.style.display='flex'; featPanel.style.animation=''; }
     if(featName){ featName.textContent=''; }
 
-    // 이미지 슬롯머신: 전체 재생 동안 100ms마다 랜덤 교체
-    const imgPool = chartItems.filter(i=>i.image);
-    const featSlotTid = (hasImg && imgPool.length) ? setInterval(()=>{
+    // 전체 카탈로그에서 이미지 풀 구성 (선택 상품 + 카탈로그 전체)
+    const catalogImgs = [];
+    const cat = window._catalogCache || {};
+    Object.values(cat).forEach(c=>{
+      (c.items||[]).forEach(it=>{ if(it.image) catalogImgs.push(it.image); });
+    });
+    // 선택 상품 이미지 앞에 추가 (더 자주 나오게)
+    const imgPool = [
+      ...chartItems.filter(i=>i.image).map(i=>i.image),
+      ...catalogImgs
+    ];
+    const featSlotTid = (imgPool.length) ? setInterval(()=>{
       const rand = imgPool[Math.floor(Math.random()*imgPool.length)];
-      if(featImg){ featImg.src=rand.image; featImg.style.opacity='0.6'; }
-    }, 100) : null;
+      if(featImg){ featImg.src=rand; featImg.style.opacity='0.6'; }
+    }, 40) : null;
     if(featSlotTid) slotTimers.push(featSlotTid);
 
     // 3. 모든 행에 슬롯머신 시작
@@ -3855,7 +3876,23 @@ function downloadSnsCard() {
       requestAnimationFrame(fillBar);
     }
 
-    setTimeout(()=>revealRank(0), 500);
+    // 3초 카운트다운 후 시작 (별도 타이머로 관리 - stopAnim에 안 걸림)
+    let countdown = 3;
+    const cdEl = document.getElementById('chart-countdown');
+    if(cdEl){ cdEl.style.display='flex'; cdEl.textContent=String(countdown); }
+    const cdTid = setInterval(()=>{
+      countdown--;
+      if(countdown > 0){
+        if(cdEl) cdEl.textContent = String(countdown);
+      } else {
+        clearInterval(cdTid);
+        if(cdEl){ cdEl.textContent='▶'; }
+        setTimeout(()=>{
+          if(cdEl) cdEl.style.display='none';
+          revealRank(0);
+        }, 500);
+      }
+    }, 1000);
   };
 
 
