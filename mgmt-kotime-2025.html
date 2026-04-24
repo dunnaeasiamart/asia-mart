@@ -647,8 +647,9 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:3px;">#1 Best Seller</div>
             <!-- 감사 메시지 -->
             <div id="chart-thanks-msg" style="display:none;margin-top:10px;text-align:center;">
-              <div style="font-size:11px;font-weight:800;color:#F5A623;line-height:1.5;">🙏 많이 구매해 주셔서<br>감사합니다!</div>
-              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px;">ขอบคุณที่ซื้อสินค้า</div>
+              <div style="font-size:12px;font-weight:800;color:#F5A623;line-height:1.6;">🙏 많이 구매해 주셔서<br>감사합니다!</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:3px;font-weight:600;">ขอบคุณที่ซื้อสินค้า<br>มากมาย! 🙏</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:3px;">Thank you so much<br>for your purchase!</div>
             </div>
           </div>
         </div>
@@ -3727,21 +3728,15 @@ function downloadSnsCard() {
     const rows=document.getElementById('chart-rows');
     rows.innerHTML=sorted.map((item,rank)=>buildRowHTML(item,rank,maxVal,0,true)).join('');
 
-    // 2. 우측 대표 이미지도 슬롯처럼 시작 (패널 표시, 내용은 랜덤)
+    // 2. 우측 패널 숨기고 시작 (1위 막대 완성 후 등장)
     const featPanel=document.getElementById('chart-featured-panel');
     const featImg=document.getElementById('chart-featured-img');
     const featName=document.getElementById('chart-featured-name');
     const hasImg=chartItems.some(i=>i.image);
-    if(hasImg && featPanel){
-      featPanel.style.display='flex';
-      if(featName) featName.textContent='';
-    }
-    // 대표 이미지 슬롯머신
-    const featSlotTid = hasImg ? setInterval(()=>{
-      const rand=chartItems[Math.floor(Math.random()*chartItems.length)];
-      if(rand.image && featImg){ featImg.src=rand.image; featImg.style.opacity='0.5'; }
-    }, 100) : null;
-    if(featSlotTid) slotTimers.push(featSlotTid);
+    if(featPanel){ featPanel.style.display='none'; }
+    const thanks0=document.getElementById('chart-thanks-msg');
+    if(thanks0) thanks0.style.display='none';
+    const featSlotTid = null; // 패널 숨겨두므로 슬롯 불필요
 
     // 3. 모든 행에 슬롯머신 시작
     const allSlots={};
@@ -3750,8 +3745,7 @@ function downloadSnsCard() {
       slotTimers.push(allSlots[item.id]);
     });
 
-    const BAR_DURATION = 4500;  // 막대 채우기 4.5초 (더 느리게)
-    const STEP_DELAY   = 3800;  // 각 순위 등장 간격 (막대 거의 다 그려지면 다음 등장)
+    const BAR_DURATION = 4500;  // 막대 채우기 4.5초
 
     // 4. 꼴찌(reversed[0])부터 순서대로 확정
     const animId = ++window._chartAnimId;
@@ -3784,45 +3778,60 @@ function downloadSnsCard() {
           <div style="font-size:9px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;margin-bottom:3px;">${item.nameEn}</div>`;
       }
 
-      // 1위 확정 시 대표 이미지 슬롯 멈추고 고정
-      if(revIdx===n-1){
-        if(featSlotTid){ stopSlot(featSlotTid); slotTimers=slotTimers.filter(t=>t!==featSlotTid); }
-        // 설정된 모드에 따라 최종 이미지 결정
-        let finalUrl='', finalName='';
-        if(featuredMode==='file' && featuredFileUrl){ finalUrl=featuredFileUrl; }
-        else if(featuredMode==='product' && featuredId){
-          const fi=chartItems.find(i=>i.id===featuredId);
-          if(fi){ finalUrl=fi.image; finalName=fi.nameTh||fi.name; }
-        } else {
-          finalUrl=item.image; finalName=item.nameTh||item.name;
-        }
-        if(featImg){ featImg.src=finalUrl||''; featImg.style.opacity='1'; }
-        if(featName){ featName.textContent=finalName; }
-        // 막대가 다 그려진 후 축포 + 감사 메시지
-        setTimeout(()=>{
-          launchConfetti();
-          const thanks=document.getElementById('chart-thanks-msg');
-          if(thanks){ thanks.style.display='block'; thanks.style.animation='fadeInUp 0.6s ease'; }
-        }, BAR_DURATION * 0.85);
-      }
-
       // 막대 채우기
       const barEl2   = document.getElementById('cbar-'+item.id);
       const countEl2 = document.getElementById('ccount-'+item.id);
       const targetW  = Math.max((item.count/maxVal)*100, 0.5);
       const startT   = performance.now();
 
+      const AFTER_BAR_DELAY = 800;  // 막대 완성 후 다음 순위 등장 전 딜레이
+      const BEFORE_1ST_DELAY = 2500; // 2위 완성 후 1위 등장 전 특별 대기
+
       function fillBar(now){
         if(!animPlaying && revIdx<n-1) return;
         const p    = Math.min((now-startT)/BAR_DURATION, 1);
-        const ease = 1-Math.pow(1-p, 3); // easeOutCubic (더 선형적, 천천히)
+        const ease = 1-Math.pow(1-p, 3);
         if(barEl2)   barEl2.style.width   = (targetW*ease)+'%';
         if(countEl2) countEl2.textContent = Math.round(item.count*ease).toLocaleString();
-        if(p<1) requestAnimationFrame(fillBar);
+
+        if(p<1){
+          requestAnimationFrame(fillBar);
+        } else {
+          // ── 막대 완전히 완성된 후 처리 ──
+          if(revIdx===n-1){
+            // 1위: 막대 완성 → 1.5초 후 우측 이미지 등장
+            setTimeout(()=>{
+              if(!animPlaying) return;
+              if(featSlotTid){ stopSlot(featSlotTid); slotTimers=slotTimers.filter(t=>t!==featSlotTid); }
+              let finalUrl='', finalName='';
+              if(featuredMode==='file' && featuredFileUrl){ finalUrl=featuredFileUrl; }
+              else if(featuredMode==='product' && featuredId){
+                const fi=chartItems.find(i=>i.id===featuredId);
+                if(fi){ finalUrl=fi.image; finalName=fi.nameTh||fi.name; }
+              } else {
+                finalUrl=item.image; finalName=item.nameTh||item.name;
+              }
+              const fp=document.getElementById('chart-featured-panel');
+              if(fp){ fp.style.display='flex'; fp.style.animation='fadeInUp 0.7s ease'; }
+              if(featImg){ featImg.src=finalUrl||''; featImg.style.opacity='1'; }
+              if(featName){ featName.textContent=finalName; }
+              // 이미지 등장 0.8초 후 축포 + 감사
+              setTimeout(()=>{
+                launchConfetti();
+                const thanks=document.getElementById('chart-thanks-msg');
+                if(thanks){ thanks.style.display='block'; thanks.style.animation='fadeInUp 0.6s ease'; }
+                animPlaying=false;
+                document.getElementById('chart-play-btn').textContent='▶ 재생';
+              }, 800);
+            }, 1500);
+          } else {
+            // 1위 아닌 경우: 막대 완성 → 딜레이 → 다음 순위
+            const delay = (revIdx===n-2) ? BEFORE_1ST_DELAY : AFTER_BAR_DELAY;
+            setTimeout(()=>revealRank(revIdx+1), delay);
+          }
+        }
       }
       requestAnimationFrame(fillBar);
-
-      setTimeout(()=>revealRank(revIdx+1), STEP_DELAY);
     }
 
     setTimeout(()=>revealRank(0), 500);
