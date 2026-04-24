@@ -3594,8 +3594,16 @@ function downloadSnsCard() {
     document.getElementById('chart-search').value='';
     if(chartItems.length>=10){showToast('최대 10개까지 선택 가능합니다.');return;}
     if(chartItems.find(i=>i.id===id)){showToast('이미 선택된 상품입니다.');return;}
-    const base=9500-chartItems.length*600;
-    const count=base+Math.floor(Math.random()*800);
+    // 랜덤 count 생성: 불규칙하고 드라마틱한 격차
+    let count;
+    if(!chartItems.length){
+      count = 7000 + Math.floor(Math.random()*5000);
+    } else {
+      const minCount = Math.min(...chartItems.map(i=>i.count));
+      // 20%~80% 사이 랜덤 감소 → 상품마다 격차가 크게 다름
+      const dropRatio = 0.20 + Math.random()*0.60;
+      count = Math.max(300, Math.floor(minCount * (1 - dropRatio) + Math.random()*1200));
+    }
     chartItems.push({
       id,
       name: nameKo.replace(/&#39;/g,"'"),
