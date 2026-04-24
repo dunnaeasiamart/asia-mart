@@ -605,7 +605,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="openChartEdit()" style="font-size:12px;padding:6px 13px;">✏️ 수치 편집</button>
             <button class="btn btn-secondary" onclick="openFeaturedPicker()" style="font-size:12px;padding:6px 13px;">🖼️ 대표 이미지</button>
-            <button onclick="playChartAnim()" id="chart-play-btn" style="padding:8px 22px;background:#c84b2f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">▶ 재생</button>
+            <button onclick="toggleChartAnim()" id="chart-play-btn" style="padding:8px 22px;background:#c84b2f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">▶ 재생</button>
           </div>
         </div>
         <div style="font-size:11px;font-weight:600;color:#bbb;margin-bottom:7px;letter-spacing:0.04em;">표시할 상품 선택 (최대 10개)</div>
@@ -3692,10 +3692,21 @@ function downloadSnsCard() {
   }
 
   // ── 메인 애니메이션 ──
+  // ── 재생/정지 토글 ──
+  window.toggleChartAnim = function(){
+    if(animPlaying){
+      stopAnim();
+      renderGraphStatic();
+    } else {
+      playChartAnim();
+    }
+  };
+
   window.playChartAnim = function(){
     if(!chartItems.length){showToast('상품을 먼저 선택해 주세요.');return;}
     stopAnim();
     animPlaying=true;
+    window._chartAnimId=(window._chartAnimId||0)+1;
     document.getElementById('chart-play-btn').textContent='■ 정지';
 
     const sorted   = getSorted();
@@ -3721,8 +3732,9 @@ function downloadSnsCard() {
     const STEP_DELAY   = 800;   // 각 순위 등장 간격
 
     // 3. 꼴찌(reversed[0])부터 순서대로 확정
+    const animId = ++window._chartAnimId;
     function revealRank(revIdx){
-      if(!animPlaying) return;
+      if(!animPlaying || window._chartAnimId!==animId) return;
       if(revIdx >= n){
         // 모두 완료
         animPlaying=false;
@@ -3778,13 +3790,7 @@ function downloadSnsCard() {
     setTimeout(()=>revealRank(0), 400);
   };
 
-  // 정지 버튼 겸용
-  document.addEventListener('click', function(e){
-    if(e.target.id==='chart-play-btn' && animPlaying){
-      stopAnim();
-      renderGraphStatic();
-    }
-  });
+
 
   // ── 수치 편집 ──
   window.openChartEdit=function(){
@@ -3868,7 +3874,10 @@ function downloadSnsCard() {
   window.switchTab=function(tab,el){
     _orig&&_orig(tab,el);
     if(tab==='chart'){
-      if(!window._catalogCache) db.ref('catalog').get().then(s=>{window._catalogCache=s.val()||{};});
+      try {
+        if(!window._catalogCache && typeof db !== 'undefined')
+          db.ref('catalog').get().then(s=>{window._catalogCache=s.val()||{};});
+      } catch(e){}
       if(chartItems.length) renderGraphStatic();
     }
   };
