@@ -633,12 +633,12 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <!-- 축포 캔버스 (1위 행 위에 전체 오버레이) -->
         <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:18px;z-index:5;"></canvas>
         <!-- 감사 메시지 오버레이 -->
-        <div id="chart-thanks-msg" style="display:none;position:absolute;bottom:28px;left:0;right:0;z-index:6;text-align:center;">
-          <div style="font-size:16px;font-weight:800;color:#F5A623;line-height:1.6;text-shadow:0 2px 8px rgba(0,0,0,0.6);">🙏 ขอบคุณที่ซื้อสินค้า<br>มากมาย!</div>
-          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:4px;text-shadow:0 2px 8px rgba(0,0,0,0.6);">Thank you so much for your purchase! 🙏</div>
+        <div id="chart-thanks-msg" style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:6;text-align:center;padding:18px 16px 24px;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.5) 70%,transparent 100%);border-radius:0 0 18px 18px;">
+          <div style="font-size:22px;font-weight:900;color:#F5A623;line-height:1.5;text-shadow:0 2px 12px rgba(0,0,0,0.8);">🙏 ขอบคุณที่ซื้อสินค้า<br>มากมาย!</div>
+          <div style="font-size:16px;font-weight:700;color:#fff;margin-top:6px;text-shadow:0 2px 12px rgba(0,0,0,0.8);">Thank you so much<br>for your purchase! 🙏</div>
         </div>
         <!-- 막대 -->
-        <div id="chart-rows" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+        <div id="chart-rows" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow:hidden;">
           <div id="chart-empty-msg" style="color:rgba(255,255,255,0.25);font-size:13px;padding:24px 0;text-align:center;">상품을 선택하면 그래프가 표시됩니다</div>
         </div>
         <!-- 숨김 요소들 (JS 호환용) -->
@@ -3655,10 +3655,10 @@ function downloadSnsCard() {
       ?`<div style="height:10px;background:rgba(255,255,255,0.06);border-radius:3px;width:52px;margin-top:3px;"></div>`
       :`<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:52px;margin-top:3px;text-align:center;">${item.nameTh||item.name}</div>`;
     return `
-      <div id="crow-${item.id}" style="display:flex;align-items:center;gap:7px;">
+      <div id="crow-${item.id}" style="display:flex;align-items:center;gap:7px;overflow:hidden;">
         <div style="width:32px;text-align:center;font-size:22px;font-weight:900;color:rgba(255,255,255,${isTop3?'1':'0.45'});flex-shrink:0;line-height:1;">${rank+1}</div>
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;width:52px;">
-          <div id="cimg-${item.id}" style="width:52px;height:52px;">${imgEl}</div>
+          <div id="cimg-${item.id}" style="width:52px;height:52px;overflow:hidden;border-radius:10px;flex-shrink:0;">${imgEl}</div>
           <div id="cname-${item.id}" style="width:52px;">${nameUnder}</div>
         </div>
         <div style="flex:1;min-width:0;">
@@ -3999,53 +3999,69 @@ function downloadSnsCard() {
     canvas.width=view ? view.offsetWidth : 400;
     canvas.height=view ? view.offsetHeight : 700;
 
-    const COLORS_CF=['#F5A623','#E8503A','#4A9EF5','#2ECC96','#B06AE8','#fff','#FFD700','#FF6B35'];
+    const W=canvas.width, H=canvas.height;
+    const COLORS_CF=['#F5A623','#E8503A','#4A9EF5','#2ECC96','#B06AE8','#fff','#FFD700','#FF6B35','#ff4dff','#00ffcc'];
     const particles=[];
-    const N=80;
+    const N=180; // 파티클 많이
+
+    // 여러 발사 지점 (왼쪽, 가운데, 오른쪽 상단)
+    const origins=[
+      {x:W*0.2, y:H*0.3},
+      {x:W*0.5, y:H*0.2},
+      {x:W*0.8, y:H*0.3},
+    ];
 
     for(let i=0;i<N;i++){
+      const o=origins[i%origins.length];
       particles.push({
-        x: canvas.width/2 + (Math.random()-0.5)*40,
-        y: canvas.height/2 + (Math.random()-0.5)*20,
-        vx: (Math.random()-0.5)*7,
-        vy: -(Math.random()*8+3),
+        x: o.x + (Math.random()-0.5)*30,
+        y: o.y + (Math.random()-0.5)*20,
+        vx: (Math.random()-0.5)*12,
+        vy: -(Math.random()*14+4),
         color: COLORS_CF[Math.floor(Math.random()*COLORS_CF.length)],
-        w: Math.random()*6+3,
-        h: Math.random()*3+2,
+        w: Math.random()*8+3,
+        h: Math.random()*4+2,
         rot: Math.random()*360,
-        rotV: (Math.random()-0.5)*12,
+        rotV: (Math.random()-0.5)*16,
         alpha: 1,
-        gravity: 0.25
+        gravity: 0.35,
+        shape: Math.random()>0.5 ? 'rect' : 'circle'
       });
     }
 
-    const duration=3000;
+    const duration=4000;
     const startT=performance.now();
 
     function drawCF(now){
       const elapsed=now-startT;
       const progress=elapsed/duration;
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.clearRect(0,0,W,H);
 
       particles.forEach(p=>{
         p.x+=p.vx;
         p.y+=p.vy;
         p.vy+=p.gravity;
-        p.vx*=0.99;
+        p.vx*=0.98;
         p.rot+=p.rotV;
-        p.alpha=Math.max(0, 1-progress*1.2);
+        p.alpha=Math.max(0, 1-progress*1.1);
 
         ctx.save();
         ctx.globalAlpha=p.alpha;
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot*Math.PI/180);
         ctx.fillStyle=p.color;
-        ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        if(p.shape==='circle'){
+          ctx.beginPath();
+          ctx.arc(0,0,p.w/2,0,Math.PI*2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        }
         ctx.restore();
       });
 
       if(elapsed<duration) requestAnimationFrame(drawCF);
-      else ctx.clearRect(0,0,canvas.width,canvas.height);
+      else ctx.clearRect(0,0,W,H);
     }
     requestAnimationFrame(drawCF);
   }
