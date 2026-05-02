@@ -2171,6 +2171,8 @@ async function submitEditProduct() {
 
   closeEditModal();
   showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
+  // SNS 카드 캐시 갱신 (가격 수정이 카드에 즉시 반영되도록)
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
   await loadCatalogForAdmin();
   autoFillId();
 }
@@ -3379,24 +3381,16 @@ function selectSnsProduct(id, name) {
   const selName = document.getElementById('sns-selected-name');
   if (selBox && selName) { selBox.style.display = 'flex'; selName.textContent = id + '. ' + name; }
 
-  // 상품 찾기
+  // 상품 찾기 - 항상 Firebase에서 최신 데이터 로드 (가격 수정 즉시 반영)
   _snsItem = null;
-  const src = window._catalogCache || {};
-  Object.values(src).forEach(cat => {
-    (cat.items || []).forEach(item => { if (item.id === id) _snsItem = item; });
-  });
-  if (!_snsItem) {
-    db.ref('catalog').get().then(snap => {
-      const data = snap.val() || {};
-      window._catalogCache = data;
-      Object.values(data).forEach(cat => {
-        (cat.items || []).forEach(item => { if (item.id === id) _snsItem = item; });
-      });
-      loadSnsImage();
+  db.ref('catalog').get().then(snap => {
+    const data = snap.val() || {};
+    window._catalogCache = data;
+    Object.values(data).forEach(cat => {
+      (cat.items || []).forEach(item => { if (item.id === id) _snsItem = item; });
     });
-  } else {
     loadSnsImage();
-  }
+  });
 }
 
 function clearSnsProduct() {
