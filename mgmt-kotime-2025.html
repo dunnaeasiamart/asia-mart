@@ -3471,8 +3471,8 @@ function renderSnsCard() {
   const IMG_H   = 428;   // 상품 이미지 영역 (배지 없앤 만큼 확대)
   const SEP     = 16;    // 구분선 영역
   const BODY_H  = _snsItem ? 140 : 60; // 상품 정보 (동적으로 curY 직접 제어)
-  const DEL_H   = 44;    // 무료배송 박스
-  const FTR_H   = 14;    // 푸터
+  const DEL_H   = 0;     // 무료배송 박스 제거
+  const FTR_H   = 7;     // 푸터 (상단 바와 동일)
   const PAD     = 12;    // 상하 여백
   const H = HDR_H + BADGE_H + IMG_H + SEP + BODY_H + DEL_H + PAD + FTR_H;
 
@@ -3593,13 +3593,13 @@ function renderSnsCard() {
     ctx.fillStyle = '#1a1814';
     ctx.font = 'bold 17px Arial';
     ctx.textAlign = 'left';
-    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 28, maxTxtW, 18);
+    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 36, maxTxtW, 22);
 
     // 라오/영문 소형
     ctx.fillStyle = '#888';
     ctx.font = '17px Arial';
-    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 14, maxTxtW, 18);
-    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 14, maxTxtW, 18);
+    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 20, maxTxtW, 22);
+    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 20, maxTxtW, 22);
 
     // 가격
     ctx.fillStyle = ACCENT;
@@ -3610,20 +3610,6 @@ function renderSnsCard() {
 
     curY += (priceY - curY) + 16;
 
-    // 무료배송 3개 언어
-    const DEL_H3 = 29;
-    ctx.fillStyle = '#fff8e1';
-    roundRect(ctx, 16, curY, W-32, DEL_H3, 8);
-    ctx.fill();
-    ctx.strokeStyle = '#f0c040';
-    ctx.lineWidth = 1;
-    roundRect(ctx, 16, curY, W-32, DEL_H3, 8);
-    ctx.stroke();
-    ctx.fillStyle = '#7a5800';
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 10px Arial';
-    ctx.fillText('🚚  ส่งฟรีเมื่อซื้อครบ ₩50,000  ·  ສົ່ງຟຣີເມື່ອຊື້ຄົບ ₩50,000  ·  Free delivery over ₩50,000', W/2, curY + 18);
-    curY += DEL_H3 + PAD;
   } else {
     ctx.fillStyle = '#bbb';
     ctx.font = '15px Arial';
