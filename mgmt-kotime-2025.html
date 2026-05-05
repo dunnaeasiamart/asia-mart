@@ -3473,8 +3473,8 @@ function renderSnsCard() {
   // ── 전체 캔버스 크기를 내용에 맞게 동적 계산 ──
   const W       = 540;
   const HDR_H   = 170;   // 헤더
-  const BADGE_H = badge ? 48 : 0;
-  const IMG_H   = 380;   // 상품 이미지 영역
+  const BADGE_H = 0;     // 배지 없음
+  const IMG_H   = 428;   // 상품 이미지 영역 (배지 없앤 만큼 확대)
   const SEP     = 16;    // 구분선 영역
   const BODY_H  = _snsItem ? 140 : 60; // 상품 정보 (동적으로 curY 직접 제어)
   const DEL_H   = 44;    // 무료배송 박스
@@ -3532,36 +3532,8 @@ function renderSnsCard() {
     fx += flagW + flagGap;
   });
 
-  // ── 배지 ──
-  let curY = HDR_H;
-  if (badge) {
-    // 배지 배경 (진한 빨간 pill)
-    const BADGE_TEXTS = {
-      'NEW ARRIVAL':  '✨ NEW ARRIVAL ✨',
-      'BEST SELLER':  '🔥 BEST SELLER 🔥',
-      'SALE':         '💸 SPECIAL SALE 💸',
-      'SPECIAL':      '⭐ SPECIAL ITEM ⭐',
-    };
-    const badgeText = BADGE_TEXTS[badge] || badge;
-    ctx.font = 'bold 15px Arial';
-    const bw = ctx.measureText(badgeText).width + 56;
-    const bx = (W - bw) / 2;
-    const by = curY + 10;
-    ctx.fillStyle = ACCENT;
-    roundRect(ctx, bx, by, bw, 30, 15);
-    ctx.fill();
-    // 테두리
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, bx+3, by+3, bw-6, 24, 12);
-    ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.fillText(badgeText, W/2, by + 20);
-    curY += BADGE_H;
-  }
-
   // ── 상품 이미지 영역 ──
+  let curY = HDR_H;
   const imgY = curY + 8;
   ctx.fillStyle = CREAM;
   roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
