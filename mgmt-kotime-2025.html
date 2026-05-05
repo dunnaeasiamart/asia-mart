@@ -3468,13 +3468,32 @@ function renderSnsCard() {
   const W       = 540;
   const HDR_H   = 170;   // 헤더
   const BADGE_H = 0;     // 배지 없음
-  const IMG_H   = 428;   // 상품 이미지 영역 (배지 없앤 만큼 확대)
+  const IMG_H   = 428;   // 상품 이미지 영역
   const SEP     = 16;    // 구분선 영역
-  const BODY_H  = _snsItem ? 140 : 60; // 상품 정보 (동적으로 curY 직접 제어)
   const DEL_H   = 0;     // 무료배송 박스 제거
-  const FTR_H   = 7;     // 푸터 (상단 바와 동일)
+  const FTR_H   = 7;     // 푸터
   const PAD     = 12;    // 상하 여백
-  const H = HDR_H + BADGE_H + IMG_H + SEP + BODY_H + DEL_H + PAD + FTR_H;
+
+  // 텍스트 높이를 먼저 측정해서 캔버스 높이 결정
+  let BODY_H = 60;
+  if (_snsItem) {
+    const tmpC = document.createElement('canvas');
+    tmpC.width = W; tmpC.height = 2000;
+    const tmpCtx = tmpC.getContext('2d');
+    const maxTxtW = W - 48;
+    const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    let ty = HDR_H + IMG_H + SEP + 36;
+    tmpCtx.font = 'bold 26px Arial'; tmpCtx.textAlign = 'center';
+    ty = wrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
+    tmpCtx.font = '24px Arial';
+    ty = wrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
+    ty = wrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 44 + 52 + 16;
+    BODY_H = ty - (HDR_H + IMG_H + SEP);
+  }
+
+  const H = HDR_H + BADGE_H + IMG_H + SEP + BODY_H + PAD + FTR_H;
 
   canvas.width  = W;
   canvas.height = H;
@@ -3591,20 +3610,20 @@ function renderSnsCard() {
 
     // 상품명 (태국어)
     ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 26px Arial';
     ctx.textAlign = 'center';
-    const thEndY = wrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 28);
+    const thEndY = wrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 32);
 
     // 라오/영문
-    ctx.fillStyle = '#888';
-    ctx.font = '20px Arial';
+    ctx.fillStyle = '#1a1814';
+    ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    const loEndY = wrapText(ctx, nameLo || nameEn, W/2, thEndY + 24, maxTxtW, 26);
-    const enEndY = wrapText(ctx, nameEn, W/2, loEndY + 24, maxTxtW, 26);
+    const loEndY = wrapText(ctx, nameLo || nameEn, W/2, thEndY + 28, maxTxtW, 30);
+    const enEndY = wrapText(ctx, nameEn, W/2, loEndY + 28, maxTxtW, 30);
 
     // 가격
     ctx.fillStyle = ACCENT;
-    ctx.font = 'bold 40px Arial';
+    ctx.font = 'bold 52px Arial';
     ctx.textAlign = 'center';
     const priceY = enEndY + 44;
     ctx.fillText('₩' + price.toLocaleString(), W/2, priceY);
