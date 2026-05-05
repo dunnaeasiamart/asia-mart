@@ -596,15 +596,20 @@ td input[type="number"]:focus { border-color: #c84b2f; }
             <input type="text" id="sns-footer" value="" oninput="renderSnsCard()">
           </div>
           <!-- 할인 설정 -->
-          <div style="display:flex;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-end;">
             <div style="flex:1;">
               <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">원래 가격 (₩, 선택)</label>
               <input type="number" id="sns-original-price" placeholder="예: 10000" oninput="renderSnsCard()"
                 style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
             </div>
             <div style="flex:1;">
-              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">할인율 (%, 선택)</label>
-              <input type="number" id="sns-discount-rate" placeholder="예: 20" min="1" max="99" oninput="applySnsDiscount()"
+              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">할인 방식</label>
+              <select id="sns-discount-type" onchange="renderSnsCard()"
+                style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;margin-bottom:6px;">
+                <option value="rate">% 할인율</option>
+                <option value="amount">₩ 할인금액</option>
+              </select>
+              <input type="number" id="sns-discount-rate" placeholder="예: 20" min="0" oninput="applySnsDiscount()"
                 style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
             </div>
           </div>
@@ -3441,17 +3446,21 @@ async function applySnsDiscount() {
   renderSnsCard();
   if (!_snsItem) return;
 
-  const discountRate = parseInt(document.getElementById('sns-discount-rate')?.value) || 0;
+  const discountVal  = parseInt(document.getElementById('sns-discount-rate')?.value) || 0;
+  const discountType = document.getElementById('sns-discount-type')?.value || 'rate';
   const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || _snsItem.price1 || 0;
-  if (!discountRate || !originalPrice) return;
+  if (!discountVal || !originalPrice) return;
 
-  const newPrice = Math.round(originalPrice * (1 - discountRate / 100));
+  const newPrice = discountType === 'rate'
+    ? Math.round(originalPrice * (1 - discountVal / 100))
+    : Math.round(originalPrice - discountVal);
   if (newPrice <= 0 || newPrice === _snsItem.price1) return;
 
+  const discountLabel = discountType === 'rate' ? `${discountVal}%` : `₩${discountVal.toLocaleString()}`;
   const confirmed = confirm(
     `"${(_snsItem.name_ko||_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'')}"\n\n` +
     `원래 가격: ₩${originalPrice.toLocaleString()}\n` +
-    `할인율: ${discountRate}%\n` +
+    `할인: ${discountLabel}\n` +
     `할인가: ₩${newPrice.toLocaleString()}\n\n` +
     `Firebase price1을 ₩${newPrice.toLocaleString()}으로 업데이트할까요?`
   );
@@ -3560,10 +3569,10 @@ function renderSnsCard() {
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     let ty = HDR_H + IMG_H + SEP + 36;
     tmpCtx.font = 'bold 26px Arial'; tmpCtx.textAlign = 'center';
-    ty = snsWrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
-    tmpCtx.font = '24px Arial';
-    ty = snsWrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
-    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 72 + 52 + 80;
+    ty += 36 + 26 + 12; // 태국어 한 줄
+    ty += 24 + 12;       // 라오 한 줄
+    ty += 24 + 12;       // 영어 한 줄
+    ty += 72 + 52 + 80;  // 구분선 + 할인 + 가격
     BODY_H = ty - (HDR_H + IMG_H + SEP);
   }
 
@@ -3664,18 +3673,37 @@ function renderSnsCard() {
 
     const maxTxtW = W - 48;
 
-    // 상품명 (태국어)
-    ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 26px Arial';
-    ctx.textAlign = 'center';
-    const thEndY = snsWrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 32);
+    // 폰트 크기를 줄여가며 한 줄에 맞추는 헬퍼
+    function fitOneLine(c, text, maxW, maxSize, minSize) {
+      let size = maxSize;
+      while (size >= minSize) {
+        c.font = (size === maxSize ? 'bold ' : '') + size + 'px Arial';
+        if (c.measureText(text).width <= maxW) break;
+        size -= 1;
+      }
+      return size;
+    }
 
-    // 라오/영문
+    // 상품명 (태국어) - 한 줄
     ctx.fillStyle = '#1a1814';
-    ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    const loEndY = snsWrapText(ctx, nameLo || nameEn, W/2, thEndY + 28, maxTxtW, 30);
-    const enEndY = snsWrapText(ctx, nameEn, W/2, loEndY + 28, maxTxtW, 30);
+    const thSize = fitOneLine(ctx, nameTh || nameEn, maxTxtW, 26, 12);
+    ctx.font = 'bold ' + thSize + 'px Arial';
+    const thEndY = curY + 36;
+    ctx.fillText(nameTh || nameEn, W/2, thEndY);
+
+    // 라오 - 한 줄
+    ctx.fillStyle = '#1a1814';
+    const loSize = fitOneLine(ctx, nameLo || nameEn, maxTxtW, 24, 12);
+    ctx.font = loSize + 'px Arial';
+    const loEndY = thEndY + loSize + 12;
+    ctx.fillText(nameLo || nameEn, W/2, loEndY);
+
+    // 영문 - 한 줄
+    const enSize = fitOneLine(ctx, nameEn, maxTxtW, 24, 12);
+    ctx.font = enSize + 'px Arial';
+    const enEndY = loEndY + enSize + 12;
+    ctx.fillText(nameEn, W/2, enEndY);
 
     // 가격
     // 구분선
@@ -3687,15 +3715,18 @@ function renderSnsCard() {
     ctx.stroke();
 
     const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || 0;
-    const discountRate  = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
+    const discountVal   = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
+    const discountType  = document.getElementById('sns-discount-type')?.value || 'rate';
 
     let priceY = enEndY + 72;
 
     // 할인 배지 + 원래 가격 취소선
-    if (originalPrice > 0 || discountRate > 0) {
-      // 할인율 배지
-      if (discountRate > 0) {
-        const badgeText = discountRate + '% OFF';
+    if (originalPrice > 0 || discountVal > 0) {
+      // 할인 배지
+      if (discountVal > 0) {
+        const badgeText = discountType === 'rate'
+          ? discountVal + '% OFF'
+          : '₩' + discountVal.toLocaleString() + ' OFF';
         ctx.font = 'bold 18px Arial';
         const bw = ctx.measureText(badgeText).width + 24;
         const bx = (W - bw) / 2;
