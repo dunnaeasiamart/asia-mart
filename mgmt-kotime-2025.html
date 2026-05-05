@@ -592,9 +592,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
               <option value="">없음</option>
             </select>
           </div>
-          <div>
-            <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">하단 문구 (SNS 주소 등)</label>
-            <input type="text" id="sns-footer" value="DM us on Facebook" oninput="renderSnsCard()" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+          <div style="display:none;">
+            <input type="text" id="sns-footer" value="" oninput="renderSnsCard()">
           </div>
         </div>
       </div>
@@ -3184,7 +3183,7 @@ async function downloadTitleCards() {
   roundRect(ctx1, 46, 226, W-92, 68, 12);
   ctx1.stroke();
   ctx1.fillStyle = '#fff';
-  ctx1.font = 'bold 32px Arial';
+  ctx1.font = 'bold 52px Arial';
   ctx1.textAlign = 'center';
   ctx1.fillText('🆕  NEW ARRIVALS', W/2, 270);
 
@@ -3207,7 +3206,6 @@ async function downloadTitleCards() {
   ctx1.fillStyle = '#555';
   ctx1.font = '16px Arial';
   ctx1.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 540);
-  ctx1.fillText('📲  DM us on Facebook', W/2, 570);
 
   // 하단 바
   ctx1.fillStyle = DARK;
@@ -3236,7 +3234,7 @@ async function downloadTitleCards() {
   roundRect(ctx2, 46, 226, W-92, 68, 12);
   ctx2.stroke();
   ctx2.fillStyle = '#fff';
-  ctx2.font = 'bold 32px Arial';
+  ctx2.font = 'bold 52px Arial';
   ctx2.textAlign = 'center';
   ctx2.fillText('🔥  BEST SELLERS', W/2, 270);
 
@@ -3256,7 +3254,6 @@ async function downloadTitleCards() {
   ctx2.fillStyle = '#555';
   ctx2.font = '16px Arial';
   ctx2.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 540);
-  ctx2.fillText('📲  DM us on Facebook', W/2, 570);
 
   ctx2.fillStyle = DARK;
   ctx2.fillRect(0, 960-52, W, 52);
@@ -3284,7 +3281,7 @@ async function downloadTitleCards() {
   roundRect(ctx3, 46, 226, W-92, 68, 12);
   ctx3.stroke();
   ctx3.fillStyle = '#fff';
-  ctx3.font = 'bold 30px Arial';
+  ctx3.font = 'bold 52px Arial';
   ctx3.textAlign = 'center';
   ctx3.fillText('🛒  ORDER NOW', W/2, 270);
 
@@ -3307,10 +3304,6 @@ async function downloadTitleCards() {
   ctx3.fillStyle = ACCENT;
   ctx3.font = 'bold 18px Arial';
   ctx3.fillText('👉  dunnaeasiamart.github.io/asia-mart', W/2, 520);
-
-  ctx3.fillStyle = '#555';
-  ctx3.font = '16px Arial';
-  ctx3.fillText('📲  DM us on Facebook', W/2, 554);
 
   // 무료배송
   ctx3.fillStyle = '#fff8e1';
