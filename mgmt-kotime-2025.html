@@ -337,6 +337,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="saveCatOrder()">💾 순서 저장</button>
+          <button class="btn btn-secondary" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc02;" onclick="migrateClothing()">👕 "중고" 상품 → 의류로 이동</button>
           <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
         </div>
       </div>
@@ -978,7 +979,7 @@ async function downloadExcel(type) {
     const snap = await db.ref('catalog').get();
     const catalog = snap.val() || {};
     const rows = [['상품ID','카테고리키','카테고리명','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL']];
-    const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+    const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
     const allKeys = [...catOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!catOrder.includes(k))];
     allKeys.forEach(catKey => {
       const cat = catalog[catKey];
@@ -1133,7 +1134,7 @@ async function uploadExcel(type) {
           });
 
           // 카테고리 이모지
-          const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿', shoes:'👟' };
+          const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿', shoes:'👟', clothing:'👕' };
           const emoji = catEmojis[catKey] || catData.emoji || '🛒';
 
           // 새 상품에 ID 자동 부여
@@ -1212,7 +1213,7 @@ async function loadRetranslateCatSelect() {
   const sel = document.getElementById('retranslate-cat');
   if (!sel) return;
   sel.innerHTML = '<option value="all">전체 카테고리</option>';
-  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...fixedOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!fixedOrder.includes(k)).sort()];
   ordered.forEach(key => {
     const opt = document.createElement('option');
@@ -1239,7 +1240,7 @@ async function retranslateAll() {
   const catalog = snap.val() || {};
 
   // 대상 카테고리 결정
-  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const allKeys = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
   const targetKeys = catKey === 'all' ? allKeys : [catKey];
 
@@ -1629,7 +1630,7 @@ async function loadCatSelect() {
   const sel = document.getElementById('new-cat');
   if (!sel) return;
   sel.innerHTML = '';
-  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
   ordered.forEach(key => {
     const cat = data[key];
@@ -1704,7 +1705,7 @@ async function loadCatalogForAdmin() {
   }
 
   // A→B→C 순서 + 새로 추가된 카테고리도 포함
-  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
 
   ordered.forEach(catKey => {
@@ -1737,7 +1738,7 @@ async function loadStock() {
   const catalog = catalogSnap.val() || {};
   const stock = stockSnap.val() || {};
 
-  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...fixedOrder.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder.includes(k)).sort()];
 
   const tbody = document.getElementById('stock-tbody');
@@ -1774,7 +1775,7 @@ async function loadDiscount() {
   const catalog = catalogSnap.val() || {};
   const disc = discSnap.val() || {};
 
-  const fixedOrder2 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const fixedOrder2 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered2 = [...fixedOrder2.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder2.includes(k)).sort()];
 
   // bulk-cat select 동적 채우기
@@ -1987,7 +1988,8 @@ const CAT_PREFIX = {
   drinks_snacks: 'F', drinks: 'F',
   essentials: 'G',
   shoes: 'H',
-  tobacco: 'I', cigarettes_lighters: 'I', 'cigarettes&lighters': 'I'
+  clothing: 'I',
+  tobacco: 'J', cigarettes_lighters: 'J', 'cigarettes&lighters': 'J'
 };
 
 function getCatPrefix(catKey, label) {
@@ -2178,10 +2180,52 @@ async function submitEditProduct() {
 }
 
 // ── 카테고리 관리 ──
+
+async function migrateClothing() {
+  const snap = await db.ref('catalog/shoes').get();
+  const shoesData = snap.val();
+  if (!shoesData || !shoesData.items) {
+    showToast('❌ shoes 카테고리에 상품이 없습니다.');
+    return;
+  }
+
+  const allItems = shoesData.items;
+  const toMove = allItems.filter(item => item && (item.name_ko || '').includes('중고'));
+  const toKeep = allItems.filter(item => item && !(item.name_ko || '').includes('중고'));
+
+  if (toMove.length === 0) {
+    showToast('❌ "중고" 상품이 없습니다.');
+    return;
+  }
+
+  const confirmed = confirm(`shoes 카테고리에서 "중고" 상품 ${toMove.length}개를 의류(clothing)로 이동합니다.\n계속할까요?`);
+  if (!confirmed) return;
+
+  // clothing 카테고리 기존 상품 가져오기
+  const clothingSnap = await db.ref('catalog/clothing').get();
+  const clothingData = clothingSnap.val() || {};
+  const existingItems = clothingData.items || [];
+
+  // clothing 카테고리 기본 정보 설정
+  const clothingBase = {
+    label: clothingData.label || '의류',
+    emoji: clothingData.emoji || '👕',
+    visible: clothingData.visible !== false,
+    items: [...existingItems, ...toMove]
+  };
+
+  const updates = {};
+  updates['catalog/shoes/items'] = toKeep;
+  updates['catalog/clothing'] = clothingBase;
+
+  await db.ref().update(updates);
+  showToast(`✅ "중고" 상품 ${toMove.length}개를 의류 카테고리로 이동했습니다!`);
+  loadCategories();
+}
 let _catEditKey = null; // null이면 추가 모드
 
-const FALLBACK_LABELS = { frozen:'A 냉동, 냉장 음식', sauce_liquid:'B 소스 및 조미료', spice:'C 향신료 및 건조식품', noodle:'D 면 종류', veggie:'E 농산물/채소', drinks_snacks:'F 음료 및 스낵', essentials:'G 생활용품 및 충전기', shoes:'H 운동화 및 의류', 'cigarettes&lighters':'I 담배 및 라이타' };
-const CAT_ORDER = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+const FALLBACK_LABELS = { frozen:'A 냉동, 냉장 음식', sauce_liquid:'B 소스 및 조미료', spice:'C 향신료 및 건조식품', noodle:'D 면 종류', veggie:'E 농산물/채소', drinks_snacks:'F 음료 및 스낵', essentials:'G 생활용품 및 충전기', shoes:'H 신발', clothing:'I 의류', 'cigarettes&lighters':'J 담배 및 라이타' };
+const CAT_ORDER = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
 
 // label이 객체({ko,en,...})이거나 문자열이거나 모두 안전하게 처리
 function getLabel(cat, key) {
@@ -2605,7 +2649,7 @@ let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 async function buildAllOptions() {
   const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
-  const fixedOrder3 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+  const fixedOrder3 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
   ALL_OPTIONS = '';
   ordered3.forEach(key => {
