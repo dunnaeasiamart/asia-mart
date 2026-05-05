@@ -691,12 +691,7 @@
 
 <div class="tabs-wrap">
   <div class="tabs" id="cat-tabs">
-    <button class="tab active" onclick="switchTab(this,'frozen')" data-t="cat_frozen">🧊 A Frozen Food</button>
-    <button class="tab" onclick="switchTab(this,'noodle')" data-t="cat_noodle">🍜 B Noodles</button>
-    <button class="tab" onclick="switchTab(this,'sauce')" data-t="cat_sauce">🥫 C Sauces</button>
-    <button class="tab" onclick="switchTab(this,'other')" data-t="cat_other">🧃 D Drinks & More</button>
-    <button class="tab" onclick="switchTab(this,'essentials')" data-t="cat_essentials">🧴 E Daily Essentials</button>
-    <button class="tab" onclick="switchTab(this,'veggie')" data-t="cat_veggie" style="display:none;">🥬 F 농산물</button>
+    <!-- 탭 버튼은 Firebase catOrder 기준으로 동적 생성 -->
   </div>
 </div>
 
@@ -743,7 +738,6 @@ const i18n = {
     hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
     best_title: 'Best Products',
     cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
-    cat_sauce: '🥫 C Sauces', cat_other: '🧃 D Drinks & More',
     cat_essentials: '🧴 E Daily Essentials',
     cat_veggie: '🥬 F Vegetables & Produce',
     total_label: 'Total', select_items: 'Please select items',
@@ -787,7 +781,6 @@ const i18n = {
     hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
     best_title: 'สินค้าขายดี',
     cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
-    cat_sauce: '🥫 C ซอสต่างๆ', cat_other: '🧃 D เครื่องดื่ม & อื่นๆ',
     cat_essentials: '🧴 E สินค้าอุปโภค',
     cat_veggie: '🥬 F ผักและผลไม้',
     total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
@@ -831,7 +824,6 @@ const i18n = {
     hero_desc: '수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!',
     best_title: '베스트 상품',
     cat_frozen: '🧊 A 냉동음식', cat_noodle: '🍜 B 면 종류',
-    cat_sauce: '🥫 C 각종 소스', cat_other: '🧃 D 음료 및 기타',
     cat_essentials: '🧴 E 생활용품',
     cat_veggie: '🥬 F 농산물/채소',
     total_label: '합계 금액', select_items: '상품을 선택해 주세요',
@@ -875,7 +867,6 @@ const i18n = {
     hero_desc: 'ເລືອກຈຳນວນເພື່ອຄຳນວນລາຄາທັນທີ ສ່ວນຫຼຸດອັດຕະໂນມັດເມື່ອຊື້ 3 ຊິ້ນຂຶ້ນໄປ!',
     best_title: 'ສິນຄ້າຂາຍດີ',
     cat_frozen: '🧊 A ອາຫານແຊ່ແຂງ', cat_noodle: '🍜 B ເສັ້ນກ໋ວຍເຕັ້ຍວ',
-    cat_sauce: '🥫 C ຊອດຕ່າງໆ', cat_other: '🧃 D ເຄື່ອງດື່ມ ແລະ ອື່ນໆ',
     cat_essentials: '🧴 E ສິນຄ້າໃຊ້ສອຍ',
     cat_veggie: '🥬 F ຜັກ ແລະ ຜົນໄມ້',
     total_label: 'ລວມ', select_items: 'ກະລຸນາເລືອກສິນຄ້າ',
@@ -1021,7 +1012,7 @@ function getCatLabel(cat, catKey, lang) {
   } else {
     label = catKey;
   }
-  return label;
+  return label.replace(/^[A-Z]\s+/, '');
 }
 
 /* =====================================================
@@ -2218,7 +2209,7 @@ async function loadCatalogFromFirebase() {
       // 카테고리 탭 동적 생성 (visible:false 제외)
       const catOrderSnap = await get(ref(db, 'catOrder'));
       const savedOrder = catOrderSnap.val() || [];
-      const fixedOrder = ['frozen','noodle','sauce','other','essentials','veggie'];
+      const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
       const allKeys = Object.keys(catalog);
       let orderedKeys;
       if (savedOrder.length > 0) {
