@@ -3438,6 +3438,11 @@ function selectSnsProduct(id, name) {
     Object.values(data).forEach(cat => {
       (cat.items || []).forEach(item => { if (item.id === id) _snsItem = item; });
     });
+    // 현재 가격을 원래 가격 입력란에 자동 입력
+    if (_snsItem && _snsItem.price1) {
+      const origInput = document.getElementById('sns-original-price');
+      if (origInput) origInput.value = _snsItem.price1;
+    }
     loadSnsImage();
   });
 }
