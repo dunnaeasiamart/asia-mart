@@ -944,8 +944,8 @@ function switchTab(tab, triggerEl) {
   const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
   if (tab === 'stock')    loadStock();
-  if (tab === 'disc')     loadDiscount();
-  if (tab === 'prod')     { loadCatalogForAdmin(); autoFillId(); }
+  if (tab === 'disc' || tab === 'discount') loadDiscount();
+  if (tab === 'prod' || tab === 'product')  { loadCatalogForAdmin(); autoFillId(); }
   if (tab === 'best')     loadBest();
   if (tab === 'new')      loadNew();
   if (tab === 'also')     loadAlso();
