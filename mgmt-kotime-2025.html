@@ -595,6 +595,19 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <div style="display:none;">
             <input type="text" id="sns-footer" value="" oninput="renderSnsCard()">
           </div>
+          <!-- 할인 설정 -->
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;">
+              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">원래 가격 (₩, 선택)</label>
+              <input type="number" id="sns-original-price" placeholder="예: 10000" oninput="renderSnsCard()"
+                style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">할인율 (%, 선택)</label>
+              <input type="number" id="sns-discount-rate" placeholder="예: 20" min="1" max="99" oninput="applySnsDiscount()"
+                style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3424,6 +3437,49 @@ function selectSnsProduct(id, name) {
   });
 }
 
+async function applySnsDiscount() {
+  renderSnsCard();
+  if (!_snsItem) return;
+
+  const discountRate = parseInt(document.getElementById('sns-discount-rate')?.value) || 0;
+  const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || _snsItem.price1 || 0;
+  if (!discountRate || !originalPrice) return;
+
+  const newPrice = Math.round(originalPrice * (1 - discountRate / 100));
+  if (newPrice <= 0 || newPrice === _snsItem.price1) return;
+
+  const confirmed = confirm(
+    `"${(_snsItem.name_ko||_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'')}"\n\n` +
+    `원래 가격: ₩${originalPrice.toLocaleString()}\n` +
+    `할인율: ${discountRate}%\n` +
+    `할인가: ₩${newPrice.toLocaleString()}\n\n` +
+    `Firebase price1을 ₩${newPrice.toLocaleString()}으로 업데이트할까요?`
+  );
+  if (!confirmed) return;
+
+  // Firebase에서 해당 상품 위치 찾아서 업데이트
+  const catSnap = await db.ref('catalog').get();
+  const catalog = catSnap.val() || {};
+  const updates = {};
+  Object.entries(catalog).forEach(([catKey, cat]) => {
+    (cat.items || []).forEach((item, idx) => {
+      if (item && item.id === _snsItem.id) {
+        updates[`catalog/${catKey}/items/${idx}/price1`] = newPrice;
+      }
+    });
+  });
+
+  if (Object.keys(updates).length === 0) {
+    showToast('❌ 상품을 Firebase에서 찾을 수 없습니다.');
+    return;
+  }
+
+  await db.ref().update(updates);
+  _snsItem.price1 = newPrice;
+  showToast(`✅ ₩${newPrice.toLocaleString()}으로 가격 업데이트 완료!`);
+  renderSnsCard();
+}
+
 function clearSnsProduct() {
   _snsItem = null; _snsImgObj = null;
   const selBox = document.getElementById('sns-selected');
@@ -3507,7 +3563,7 @@ function renderSnsCard() {
     ty = snsWrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
     tmpCtx.font = '24px Arial';
     ty = snsWrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
-    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 72 + 52 + 16;
+    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 72 + 52 + 80;
     BODY_H = ty - (HDR_H + IMG_H + SEP);
   }
 
@@ -3630,10 +3686,53 @@ function renderSnsCard() {
     ctx.lineTo(W - 24, enEndY + 24);
     ctx.stroke();
 
+    const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || 0;
+    const discountRate  = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
+
+    let priceY = enEndY + 72;
+
+    // 할인 배지 + 원래 가격 취소선
+    if (originalPrice > 0 || discountRate > 0) {
+      // 할인율 배지
+      if (discountRate > 0) {
+        const badgeText = discountRate + '% OFF';
+        ctx.font = 'bold 18px Arial';
+        const bw = ctx.measureText(badgeText).width + 24;
+        const bx = (W - bw) / 2;
+        const by = enEndY + 34;
+        ctx.fillStyle = ACCENT;
+        roundRect(ctx, bx, by, bw, 26, 6);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText(badgeText, W/2, by + 18);
+        priceY = by + 26 + 36;
+      }
+
+      // 원래 가격 취소선
+      if (originalPrice > 0) {
+        ctx.font = '22px Arial';
+        ctx.fillStyle = '#aaa';
+        ctx.textAlign = 'center';
+        const origText = '₩' + originalPrice.toLocaleString();
+        const origW = ctx.measureText(origText).width;
+        const origX = W / 2;
+        const origY = priceY - 30;
+        ctx.fillText(origText, origX, origY);
+        // 취소선
+        ctx.strokeStyle = '#aaa';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(origX - origW/2, origY - 7);
+        ctx.lineTo(origX + origW/2, origY - 7);
+        ctx.stroke();
+        priceY = origY + 46;
+      }
+    }
+
     ctx.fillStyle = ACCENT;
     ctx.font = 'bold 52px Arial';
     ctx.textAlign = 'center';
-    const priceY = enEndY + 72;
     ctx.fillText('₩' + price.toLocaleString(), W/2, priceY);
 
     curY += (priceY - curY) + 16;
