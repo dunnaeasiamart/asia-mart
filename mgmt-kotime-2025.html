@@ -3452,6 +3452,24 @@ function loadSnsImage() {
   img.src = imgSrc;
 }
 
+function snsWrapText(c, text, x, y, maxW, lineH) {
+  const words = (text || '').split(' ');
+  let line = '';
+  let ty = y;
+  for (let n = 0; n < words.length; n++) {
+    const test = line + (line ? ' ' : '') + words[n];
+    if (c.measureText(test).width > maxW && line) {
+      c.fillText(line, x, ty);
+      line = words[n];
+      ty += lineH;
+    } else {
+      line = test;
+    }
+  }
+  if (line) c.fillText(line, x, ty);
+  return ty;
+}
+
 function renderSnsCard() {
   const canvas = document.getElementById('sns-canvas');
   if (!canvas) return;
@@ -3486,10 +3504,10 @@ function renderSnsCard() {
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     let ty = HDR_H + IMG_H + SEP + 36;
     tmpCtx.font = 'bold 26px Arial'; tmpCtx.textAlign = 'center';
-    ty = wrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
+    ty = snsWrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
     tmpCtx.font = '24px Arial';
-    ty = wrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
-    ty = wrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 44 + 52 + 16;
+    ty = snsWrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
+    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 44 + 52 + 16;
     BODY_H = ty - (HDR_H + IMG_H + SEP);
   }
 
@@ -3586,25 +3604,7 @@ function renderSnsCard() {
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const price   = _snsItem.price1 || 0;
 
-    // ── 줄바꿈 헬퍼 ──
-    function wrapText(c, text, x, y, maxW, lineH) {
-      // 단어 단위로 자르되, 단어 자체가 너무 길면 글자 단위로 자름
-      const words = text.split(' ');
-      let line = '';
-      let ty = y;
-      for (let n = 0; n < words.length; n++) {
-        const test = line + (line ? ' ' : '') + words[n];
-        if (c.measureText(test).width > maxW && line) {
-          c.fillText(line, x, ty);
-          line = words[n];
-          ty += lineH;
-        } else {
-          line = test;
-        }
-      }
-      if (line) c.fillText(line, x, ty);
-      return ty; // 마지막 줄 y 반환
-    }
+    // ── 줄바꿈: 외부 snsWrapText 사용 ──
 
     const maxTxtW = W - 48;
 
@@ -3612,14 +3612,14 @@ function renderSnsCard() {
     ctx.fillStyle = '#1a1814';
     ctx.font = 'bold 26px Arial';
     ctx.textAlign = 'center';
-    const thEndY = wrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 32);
+    const thEndY = snsWrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 32);
 
     // 라오/영문
     ctx.fillStyle = '#1a1814';
     ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    const loEndY = wrapText(ctx, nameLo || nameEn, W/2, thEndY + 28, maxTxtW, 30);
-    const enEndY = wrapText(ctx, nameEn, W/2, loEndY + 28, maxTxtW, 30);
+    const loEndY = snsWrapText(ctx, nameLo || nameEn, W/2, thEndY + 28, maxTxtW, 30);
+    const enEndY = snsWrapText(ctx, nameEn, W/2, loEndY + 28, maxTxtW, 30);
 
     // 가격
     ctx.fillStyle = ACCENT;
