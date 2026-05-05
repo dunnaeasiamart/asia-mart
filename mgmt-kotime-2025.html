@@ -3507,7 +3507,7 @@ function renderSnsCard() {
     ty = snsWrapText(tmpCtx, nameTh || nameEn, W/2, ty, maxTxtW, 32) + 28;
     tmpCtx.font = '24px Arial';
     ty = snsWrapText(tmpCtx, nameLo || nameEn, W/2, ty, maxTxtW, 30) + 28;
-    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 44 + 52 + 16;
+    ty = snsWrapText(tmpCtx, nameEn, W/2, ty, maxTxtW, 30) + 72 + 52 + 16;
     BODY_H = ty - (HDR_H + IMG_H + SEP);
   }
 
@@ -3622,10 +3622,18 @@ function renderSnsCard() {
     const enEndY = snsWrapText(ctx, nameEn, W/2, loEndY + 28, maxTxtW, 30);
 
     // 가격
+    // 구분선
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(24, enEndY + 24);
+    ctx.lineTo(W - 24, enEndY + 24);
+    ctx.stroke();
+
     ctx.fillStyle = ACCENT;
     ctx.font = 'bold 52px Arial';
     ctx.textAlign = 'center';
-    const priceY = enEndY + 44;
+    const priceY = enEndY + 72;
     ctx.fillText('₩' + price.toLocaleString(), W/2, priceY);
 
     curY += (priceY - curY) + 16;
