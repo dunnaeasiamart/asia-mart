@@ -3737,19 +3737,22 @@ function renderSnsCard() {
 
     // 2. 원래 가격 취소선
     if (originalPrice > 0) {
-      ctx.font = '22px Arial';
+      nextY += 28;
+      ctx.font = 'bold 24px Arial';
       ctx.fillStyle = '#aaa';
       ctx.textAlign = 'center';
       const origText = '₩' + originalPrice.toLocaleString();
       const origW = ctx.measureText(origText).width;
-      nextY += 22;
       ctx.fillText(origText, W/2, nextY);
+      // 취소선
+      ctx.save();
       ctx.strokeStyle = '#aaa';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(W/2 - origW/2, nextY - 8);
-      ctx.lineTo(W/2 + origW/2, nextY - 8);
+      ctx.moveTo(W/2 - origW/2, nextY - 9);
+      ctx.lineTo(W/2 + origW/2, nextY - 9);
       ctx.stroke();
+      ctx.restore();
       nextY += 16;
     }
 
