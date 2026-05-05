@@ -3591,14 +3591,14 @@ function renderSnsCard() {
 
     // 상품명 (태국어)
     ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold 13px Arial';
     ctx.textAlign = 'left';
-    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 28, maxTxtW, 30);
+    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 28, maxTxtW, 18);
 
     // 라오/영문 소형
     ctx.fillStyle = '#888';
     ctx.font = '13px Arial';
-    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 18, maxTxtW, 18);
+    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 14, maxTxtW, 18);
     const enEndY = wrapText(ctx, nameEn, 24, loEndY + 14, maxTxtW, 18);
 
     // 가격
