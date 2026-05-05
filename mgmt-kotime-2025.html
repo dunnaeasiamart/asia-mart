@@ -3213,7 +3213,7 @@ async function downloadTitleCards() {
   ctx1.fillRect(0, 960-28, W, 28);
   ctx1.fillStyle = '#fff';
   ctx1.font = 'bold 14px Arial';
-  ctx1.fillText("DUNNAE ASIA MART", W/2, 960-9);
+  
 
   zip.file('01_opening_new_arrivals.jpg', c1.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
 
@@ -3260,7 +3260,7 @@ async function downloadTitleCards() {
   ctx2.fillRect(0, 960-28, W, 28);
   ctx2.fillStyle = '#fff';
   ctx2.font = 'bold 14px Arial';
-  ctx2.fillText("DUNNAE ASIA MART", W/2, 960-9);
+  
 
   zip.file('02_transition_best_sellers.jpg', c2.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
 
@@ -3329,7 +3329,7 @@ async function downloadTitleCards() {
   ctx3.fillRect(0, 960-28, W, 28);
   ctx3.fillStyle = '#fff';
   ctx3.font = 'bold 14px Arial';
-  ctx3.fillText("DUNNAE ASIA MART", W/2, 960-9);
+  
 
   zip.file('03_closing_order_now.jpg', c3.toDataURL('image/jpeg', 0.92).split(',')[1], { base64: true });
 
@@ -3637,10 +3637,6 @@ function renderSnsCard() {
   // ── 푸터 ──
   ctx.fillStyle = DARK;
   ctx.fillRect(0, curY, W, FTR_H);
-  ctx.fillStyle = '#fff';
-  ctx.font = '13px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('DUNNAE ASIA MART', W/2, curY + FTR_H/2 + 5);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
