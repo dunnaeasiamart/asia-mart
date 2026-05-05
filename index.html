@@ -1012,7 +1012,7 @@ function getCatLabel(cat, catKey, lang) {
   } else {
     label = catKey;
   }
-  return label.replace(/^[A-Z]\s+/, '');
+  return label.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s*/u, '').replace(/^[A-Z]\s+/, '');
 }
 
 /* =====================================================
