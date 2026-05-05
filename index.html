@@ -971,48 +971,41 @@ function setLang(lang) {
 
 // 카테고리명 다국어 매핑
 const CAT_LABELS = {
-  frozen:                { en: 'A Frozen & Refrigerated', th: 'A อาหารแช่แข็ง/แช่เย็น',  lo: 'A ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: 'A 냉동 및 냉장' },
-  noodle:                { en: 'B Noodles',               th: 'B เส้นก๋วยเตี๋ยว',         lo: 'B ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: 'B 면' },
-  sauce:                 { en: 'C Sauces & Seasonings',   th: 'C ซอสและเครื่องปรุง',      lo: 'C ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: 'C 소스 및 조미료' },
-  sauce_liquid:          { en: 'C Sauces & Seasonings',   th: 'C ซอสและเครื่องปรุง',      lo: 'C ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: 'C 소스 및 조미료' },
-  spice:                 { en: 'D Spices & Dried Goods',  th: 'D เครื่องเทศและของแห้ง',   lo: 'D ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: 'D 향신료 및 건조식품' },
-  other:                 { en: 'D Spices & Dried Goods',  th: 'D เครื่องเทศและของแห้ง',   lo: 'D ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: 'D 향신료 및 건조식품' },
-  veggie:                { en: 'E Produce & Processed',   th: 'E ผักและผลิตภัณฑ์',        lo: 'E ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: 'E 농산물 및 가공품' },
-  produce:               { en: 'E Produce & Processed',   th: 'E ผักและผลิตภัณฑ์',        lo: 'E ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: 'E 농산물 및 가공품' },
-  drinks:                { en: 'F Drinks & Snacks',       th: 'F เครื่องดื่มและขนม',      lo: 'F ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: 'F 음료 및 스넥' },
-  drinks_snacks:         { en: 'F Drinks & Snacks',       th: 'F เครื่องดื่มและขนม',      lo: 'F ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: 'F 음료 및 스넥' },
-  essentials:            { en: 'G Daily Essentials',      th: 'G สินค้าอุปโภค',           lo: 'G ສິນຄ້າໃຊ້ສອຍ',           ko: 'G 생활용품' },
-  shoes:                 { en: 'H Shoes & Electronics',   th: 'H รองเท้าและอิเล็กทรอนิกส์', lo: 'H ເກີບ ແລະ ອີເລັກໂທຣນິກ', ko: 'H 신발 및 소형가전' },
-  'cigarettes&lighters': { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
-  cigarettes_lighters:   { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
-  tobacco:               { en: 'I Cigarettes & Lighters', th: 'I บุหรี่และไฟแช็ก',        lo: 'I ຢາສູບ ແລະ ໄຟຈູດ',        ko: 'I 담배 및 라이터' },
+  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: '냉동 및 냉장' },
+  noodle:                { en: 'Noodles',               th: 'เส้นก๋วยเตี๋ยว',         lo: 'ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: '면 종류' },
+  sauce:                 { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
+  sauce_liquid:          { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
+  spice:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
+  other:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
+  veggie:                { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
+  produce:               { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
+  drinks:                { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
+  drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
+  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품 및 충전기' },
+  shoes:                 { en: 'Shoes & Electronics',   th: 'รองเท้าและอิเล็กทรอนิกส์', lo: 'ເກີບ ແລະ ອີເລັກໂທຣນິກ', ko: '운동화 및 의류' },
+  'cigarettes&lighters': { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
+  cigarettes_lighters:   { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
+  tobacco:               { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
 };
 
 function getCatLabel(cat, catKey, lang) {
-  // 1순위: i18n 테이블에 'cat_KEY' 형식으로 번역이 있으면 바로 사용
-  const i18nKey = 'cat_' + catKey;
-  if (i18n[lang] && typeof i18n[lang][i18nKey] === 'string') {
-    return i18n[lang][i18nKey].replace(/^[🧊🍜🥫🧃🧴🥬]\s*[A-Z]\s+/, '').replace(/^[A-Z]\s+/, '');
+  // 1순위: Firebase cat.label (어드민이 기준)
+  if (cat && typeof cat.label === 'string' && cat.label) {
+    return cat.label;
+  }
+  if (cat && typeof cat.label === 'object' && cat.label !== null) {
+    return cat.label[lang] || cat.label.ko || cat.label.en || catKey;
   }
 
-  // 2순위: CAT_LABELS 내장 다국어 테이블
+  // 2순위: CAT_LABELS 내장 다국어 테이블 (Firebase에 label 없을 때 fallback)
   if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
     return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
   }
-  if (CAT_LABELS[catKey] && CAT_LABELS[catKey].en) {
-    return CAT_LABELS[catKey].en.replace(/^[A-Z]\s+/, '');
+  if (CAT_LABELS[catKey] && CAT_LABELS[catKey].ko) {
+    return CAT_LABELS[catKey].ko.replace(/^[A-Z]\s+/, '');
   }
 
-  // 3순위: Firebase cat.label 객체
-  let label = '';
-  if (typeof cat.label === 'object' && cat.label !== null) {
-    label = cat.label[lang] || cat.label.en || cat.label.ko || catKey;
-  } else if (typeof cat.label === 'string' && cat.label) {
-    label = cat.label;
-  } else {
-    label = catKey;
-  }
-  return label.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s*/u, '').replace(/^[A-Z]\s+/, '');
+  return catKey;
 }
 
 /* =====================================================
