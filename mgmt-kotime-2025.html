@@ -3591,22 +3591,23 @@ function renderSnsCard() {
 
     // 상품명 (태국어)
     ctx.fillStyle = '#1a1814';
-    ctx.font = 'bold 17px Arial';
-    ctx.textAlign = 'left';
-    const thEndY = wrapText(ctx, nameTh || nameEn, 24, curY + 36, maxTxtW, 22);
+    ctx.font = 'bold 22px Arial';
+    ctx.textAlign = 'center';
+    const thEndY = wrapText(ctx, nameTh || nameEn, W/2, curY + 36, maxTxtW, 28);
 
-    // 라오/영문 소형
+    // 라오/영문
     ctx.fillStyle = '#888';
-    ctx.font = '17px Arial';
-    const loEndY = wrapText(ctx, nameLo || nameEn, 24, thEndY + 20, maxTxtW, 22);
-    const enEndY = wrapText(ctx, nameEn, 24, loEndY + 20, maxTxtW, 22);
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    const loEndY = wrapText(ctx, nameLo || nameEn, W/2, thEndY + 24, maxTxtW, 26);
+    const enEndY = wrapText(ctx, nameEn, W/2, loEndY + 24, maxTxtW, 26);
 
     // 가격
     ctx.fillStyle = ACCENT;
     ctx.font = 'bold 40px Arial';
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     const priceY = enEndY + 44;
-    ctx.fillText('₩' + price.toLocaleString(), 24, priceY);
+    ctx.fillText('₩' + price.toLocaleString(), W/2, priceY);
 
     curY += (priceY - curY) + 16;
 
