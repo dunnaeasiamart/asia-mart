@@ -609,7 +609,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
                 <option value="rate">% 할인율</option>
                 <option value="amount">₩ 할인금액</option>
               </select>
-              <input type="number" id="sns-discount-rate" placeholder="예: 20" min="0" oninput="applySnsDiscount()"
+              <input type="number" id="sns-discount-rate" placeholder="예: 20" min="0" onchange="applySnsDiscount()" oninput="renderSnsCard()"
                 style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
             </div>
           </div>
@@ -3465,8 +3465,6 @@ async function applySnsDiscount() {
     `Firebase price1을 ₩${newPrice.toLocaleString()}으로 업데이트할까요?`
   );
   if (!confirmed) return;
-
-  // Firebase에서 해당 상품 위치 찾아서 업데이트
   const catSnap = await db.ref('catalog').get();
   const catalog = catSnap.val() || {};
   const updates = {};
@@ -3718,53 +3716,50 @@ function renderSnsCard() {
     const discountVal   = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
     const discountType  = document.getElementById('sns-discount-type')?.value || 'rate';
 
-    let priceY = enEndY + 72;
+    let nextY = enEndY + 32;
 
-    // 할인 배지 + 원래 가격 취소선
-    if (originalPrice > 0 || discountVal > 0) {
-      // 할인 배지
-      if (discountVal > 0) {
-        const badgeText = discountType === 'rate'
-          ? discountVal + '% OFF'
-          : '₩' + discountVal.toLocaleString() + ' OFF';
-        ctx.font = 'bold 18px Arial';
-        const bw = ctx.measureText(badgeText).width + 24;
-        const bx = (W - bw) / 2;
-        const by = enEndY + 34;
-        ctx.fillStyle = ACCENT;
-        roundRect(ctx, bx, by, bw, 26, 6);
-        ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.textAlign = 'center';
-        ctx.fillText(badgeText, W/2, by + 18);
-        priceY = by + 26 + 36;
-      }
-
-      // 원래 가격 취소선
-      if (originalPrice > 0) {
-        ctx.font = '22px Arial';
-        ctx.fillStyle = '#aaa';
-        ctx.textAlign = 'center';
-        const origText = '₩' + originalPrice.toLocaleString();
-        const origW = ctx.measureText(origText).width;
-        const origX = W / 2;
-        const origY = priceY - 30;
-        ctx.fillText(origText, origX, origY);
-        // 취소선
-        ctx.strokeStyle = '#aaa';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(origX - origW/2, origY - 7);
-        ctx.lineTo(origX + origW/2, origY - 7);
-        ctx.stroke();
-        priceY = origY + 46;
-      }
+    // 1. 할인 배지
+    if (discountVal > 0) {
+      const badgeText = discountType === 'rate'
+        ? discountVal + '% OFF'
+        : '₩' + discountVal.toLocaleString() + ' OFF';
+      ctx.font = 'bold 18px Arial';
+      const bw = ctx.measureText(badgeText).width + 24;
+      const bx = (W - bw) / 2;
+      ctx.fillStyle = ACCENT;
+      roundRect(ctx, bx, nextY, bw, 28, 6);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(badgeText, W/2, nextY + 19);
+      nextY += 28 + 16;
     }
 
+    // 2. 원래 가격 취소선
+    if (originalPrice > 0) {
+      ctx.font = '22px Arial';
+      ctx.fillStyle = '#aaa';
+      ctx.textAlign = 'center';
+      const origText = '₩' + originalPrice.toLocaleString();
+      const origW = ctx.measureText(origText).width;
+      nextY += 22;
+      ctx.fillText(origText, W/2, nextY);
+      ctx.strokeStyle = '#aaa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(W/2 - origW/2, nextY - 8);
+      ctx.lineTo(W/2 + origW/2, nextY - 8);
+      ctx.stroke();
+      nextY += 16;
+    }
+
+    // 3. 할인가
+    nextY += 16;
     ctx.fillStyle = ACCENT;
     ctx.font = 'bold 52px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('₩' + price.toLocaleString(), W/2, priceY);
+    ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 52);
+    const priceY = nextY + 52;
 
     curY += (priceY - curY) + 16;
 
