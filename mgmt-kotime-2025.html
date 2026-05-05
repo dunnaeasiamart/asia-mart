@@ -3723,8 +3723,10 @@ function renderSnsCard() {
 
     let nextY = enEndY + 32;
 
-    // 1. 할인 배지
     if (discountVal > 0) {
+      // ── 할인 적용: 배지 + 취소선 + 할인가 ──
+
+      // 1. 배지
       const badgeText = discountType === 'rate'
         ? discountVal + '% OFF'
         : '₩' + discountVal.toLocaleString() + ' OFF';
@@ -3738,37 +3740,44 @@ function renderSnsCard() {
       ctx.textAlign = 'center';
       ctx.fillText(badgeText, W/2, nextY + 19);
       nextY += 28 + 16;
-    }
 
-    // 2. 원래 가격 취소선
-    if (originalPrice > 0) {
-      nextY += 28;
-      ctx.font = 'bold 24px Arial';
-      ctx.fillStyle = '#aaa';
-      ctx.textAlign = 'center';
-      const origText = '₩' + originalPrice.toLocaleString();
-      const origW = ctx.measureText(origText).width;
-      ctx.fillText(origText, W/2, nextY);
-      // 취소선
-      ctx.save();
-      ctx.strokeStyle = '#aaa';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(W/2 - origW/2, nextY - 9);
-      ctx.lineTo(W/2 + origW/2, nextY - 9);
-      ctx.stroke();
-      ctx.restore();
+      // 2. 원래 가격 취소선
+      if (originalPrice > 0) {
+        nextY += 28;
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#aaa';
+        ctx.textAlign = 'center';
+        const origText = '₩' + originalPrice.toLocaleString();
+        const origW = ctx.measureText(origText).width;
+        ctx.fillText(origText, W/2, nextY);
+        ctx.save();
+        ctx.strokeStyle = '#aaa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(W/2 - origW/2, nextY - 9);
+        ctx.lineTo(W/2 + origW/2, nextY - 9);
+        ctx.stroke();
+        ctx.restore();
+        nextY += 16;
+      }
+
+      // 3. 할인가
       nextY += 16;
+      ctx.fillStyle = ACCENT;
+      ctx.font = 'bold 52px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 52);
+
+    } else {
+      // ── 할인 없음: 가격만 크게 ──
+      nextY += 20;
+      ctx.fillStyle = ACCENT;
+      ctx.font = 'bold 60px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 60);
     }
 
-    // 3. 할인가
-    nextY += 16;
-    ctx.fillStyle = ACCENT;
-    ctx.font = 'bold 52px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 52);
     const priceY = nextY + 52;
-
     curY += (priceY - curY) + 16;
 
   } else {
