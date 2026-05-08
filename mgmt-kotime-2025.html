@@ -1634,17 +1634,24 @@ function addEditImgUrl() {
 }
 
 async function loadAll() {
-  await buildAllOptions();
-  // catalog 캐시 저장 (SNS 카드용)
-  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
-  await loadCatSelect();
+  // catalog를 1번만 읽어서 모든 함수에 공유
+  const snap = await db.ref('catalog').get();
+  const catalog = snap.val() || {};
+  window._catalogCache = catalog;
+
+  buildAllOptionsFromData(catalog);
+  loadCatSelectFromData(catalog);
+
   // 탭별 로드는 switchTab에서 처리 — 초기에는 현재 탭만 로드
   await loadStock();
 }
 
 async function loadCatSelect() {
   const snap = await db.ref('catalog').get();
-  const data = snap.val() || {};
+  loadCatSelectFromData(snap.val() || {});
+}
+
+function loadCatSelectFromData(data) {
   const sel = document.getElementById('new-cat');
   if (!sel) return;
   sel.innerHTML = '';
@@ -2666,7 +2673,10 @@ let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
 async function buildAllOptions() {
   const snap = await db.ref('catalog').get();
-  const catalog = snap.val() || {};
+  buildAllOptionsFromData(snap.val() || {});
+}
+
+function buildAllOptionsFromData(catalog) {
   const fixedOrder3 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
   ALL_OPTIONS = '';
