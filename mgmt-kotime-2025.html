@@ -176,7 +176,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <div class="header">
     <div class="header-title">🛒 Asia Mart 관리자</div>
     <div class="header-btns">
-      <button class="btn btn-secondary" onclick="loadAll()">🔄 새로고침</button>
+      <button class="btn btn-secondary" onclick="window._tabLoaded={}; loadAll();">🔄 새로고침</button>
       <button class="btn btn-primary" onclick="saveAll()">💾 저장</button>
     </div>
   </div>
@@ -943,6 +943,12 @@ function switchTab(tab, triggerEl) {
   document.getElementById('tab-' + tab).classList.add('active');
   const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
+
+  if (!window._tabLoaded) window._tabLoaded = {};
+  // 이미 로딩된 탭은 다시 불러오지 않음 (새로고침 버튼으로만 갱신)
+  if (window._tabLoaded[tab]) return;
+  window._tabLoaded[tab] = true;
+
   if (tab === 'stock')    loadStock();
   if (tab === 'disc' || tab === 'discount') loadDiscount();
   if (tab === 'prod' || tab === 'product')  { loadCatalogForAdmin(); autoFillId(); }
@@ -1634,16 +1640,15 @@ function addEditImgUrl() {
 }
 
 async function loadAll() {
-  // catalog를 1번만 읽어서 모든 함수에 공유
+  // catalog를 1번만 읽어서 캐시에 저장
   const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
   window._catalogCache = catalog;
+  window._tabLoaded = {}; // 탭별 로딩 여부 초기화
 
   buildAllOptionsFromData(catalog);
   loadCatSelectFromData(catalog);
-
-  // 탭별 로드는 switchTab에서 처리 — 초기에는 현재 탭만 로드
-  await loadStock();
+  // 탭 데이터는 switchTab에서 필요할 때만 로드
 }
 
 async function loadCatSelect() {
