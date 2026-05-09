@@ -1725,6 +1725,9 @@ async function loadCatalogForAdmin() {
     window._catalogCache = snap.val() || {};
   }
   const data = window._catalogCache;
+  // 카테고리 드롭다운 업데이트
+  loadCatSelectFromData(data);
+  buildAllOptionsFromData(data);
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -2782,6 +2785,7 @@ function updateBestBadge(i, val) {
 }
 
 async function loadBest() {
+  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('best').get(),
     db.ref('bestHistory').get()
@@ -2876,6 +2880,7 @@ function updateNewBadge(i, val) {
 }
 
 async function loadNew() {
+  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('newItems').get(),
     db.ref('newHistory').get()
