@@ -1497,6 +1497,7 @@ function changeQty(id, delta, e) {
     return;
   }
   quantities[id] = Math.min(10, Math.max(0, current + delta));
+  saveCartToStorage();
   if (delta > 0 && quantities[id] > 0) {
     playDing();
     const priceEl = document.getElementById('prices-' + id);
@@ -1520,6 +1521,22 @@ function setQty(id, val) {
   quantities[id] = Math.min(10, Math.max(0, parseInt(val) || 0));
   updateCard(id);
   updateSummary();
+  saveCartToStorage();
+}
+
+function saveCartToStorage() {
+  const active = {};
+  Object.keys(quantities).forEach(k => { if (quantities[k] > 0) active[k] = quantities[k]; });
+  try { localStorage.setItem('cart_quantities', JSON.stringify(active)); } catch(e) {}
+}
+
+function loadCartFromStorage() {
+  try {
+    const saved = localStorage.getItem('cart_quantities');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    Object.keys(parsed).forEach(k => { quantities[k] = parsed[k]; });
+  } catch(e) {}
 }
 
 function switchTab(el, tab) {
@@ -1907,6 +1924,7 @@ async function confirmOrder() {
 
   // 수량 초기화
   Object.keys(quantities).forEach(id => quantities[id] = 0);
+  try { localStorage.removeItem('cart_quantities'); } catch(e) {}
   updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
@@ -2046,6 +2064,9 @@ function updateBestCard(id) {
   const qtyDiv = document.getElementById('best-qty-' + id);
   if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
 }
+
+// 저장된 장바구니 복원
+loadCartFromStorage();
 
 renderBest();
 

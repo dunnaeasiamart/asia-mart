@@ -861,7 +861,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_PW = "asia1234";
+const ADMIN_PW_HASH = "da129aa7093a05c64721fa76fdcd15d13f1be06a451f4cde6c788583f96cab1d";
 const GOOGLE_TRANSLATE_KEY = 'AIzaSyATvGXEnesW4fCsEyals7qipskznXJvn6Q';
 
 async function googleTranslate(text, targetLang) {
@@ -874,9 +874,13 @@ async function googleTranslate(text, targetLang) {
   if (data.error) throw new Error(data.error.message);
   return data.data.translations[0].translatedText;
 }
-function doLogin() {
+async function doLogin() {
   const pw = document.getElementById('pw-input').value;
-  if (pw === ADMIN_PW) {
+  const msgBuffer = new TextEncoder().encode(pw);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (hashHex === ADMIN_PW_HASH) {
     localStorage.setItem('admin_logged_in', 'true');
     showMainPage();
   } else {
@@ -1640,15 +1644,9 @@ function addEditImgUrl() {
 }
 
 async function loadAll() {
-  // catalog를 1번만 읽어서 캐시에 저장
-  const snap = await db.ref('catalog').get();
-  const catalog = snap.val() || {};
-  window._catalogCache = catalog;
   window._tabLoaded = {}; // 탭별 로딩 여부 초기화
-
-  buildAllOptionsFromData(catalog);
-  loadCatSelectFromData(catalog);
-  // 탭 데이터는 switchTab에서 필요할 때만 로드
+  window._catalogCache = null;
+  // 탭 데이터는 switchTab에서 클릭할 때만 로드
 }
 
 async function loadCatSelect() {
@@ -1722,8 +1720,11 @@ function filterProducts(query) {
 }
 
 async function loadCatalogForAdmin() {
-  const snap = await db.ref('catalog').get();
-  const data = snap.val() || {};
+  if (!window._catalogCache) {
+    const snap = await db.ref('catalog').get();
+    window._catalogCache = snap.val() || {};
+  }
+  const data = window._catalogCache;
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -1762,10 +1763,11 @@ async function loadCatalogForAdmin() {
 
 async function loadStock() {
   const [catalogSnap, stockSnap] = await Promise.all([
-    db.ref('catalog').get(),
+    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
     db.ref('stock').get()
   ]);
-  const catalog = catalogSnap.val() || {};
+  const catalog = window._catalogCache || catalogSnap.val() || {};
+  if (!window._catalogCache) window._catalogCache = catalog;
   const stock = stockSnap.val() || {};
 
   const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -1799,10 +1801,11 @@ async function loadStock() {
 
 async function loadDiscount() {
   const [catalogSnap, discSnap] = await Promise.all([
-    db.ref('catalog').get(),
+    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
     db.ref('discount').get()
   ]);
-  const catalog = catalogSnap.val() || {};
+  const catalog = window._catalogCache || catalogSnap.val() || {};
+  if (!window._catalogCache) window._catalogCache = catalog;
   const disc = discSnap.val() || {};
 
   const fixedOrder2 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -2340,10 +2343,11 @@ function initCatDrag() {
 
 async function loadCategories() {
   const [snap, orderSnap] = await Promise.all([
-    db.ref('catalog').get(),
+    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
     db.ref('catOrder').get()
   ]);
-  const data = snap.val() || {};
+  const data = window._catalogCache || snap.val() || {};
+  if (!window._catalogCache) window._catalogCache = data;
   const savedOrder = orderSnap.val() || [];
   const tbody = document.getElementById('category-tbody');
   if (!tbody) return;
@@ -2677,8 +2681,11 @@ function newSearchSelect(val) {
 let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
 async function buildAllOptions() {
-  const snap = await db.ref('catalog').get();
-  buildAllOptionsFromData(snap.val() || {});
+  if (!window._catalogCache) {
+    const snap = await db.ref('catalog').get();
+    window._catalogCache = snap.val() || {};
+  }
+  buildAllOptionsFromData(window._catalogCache);
 }
 
 function buildAllOptionsFromData(catalog) {
