@@ -983,6 +983,10 @@ const CAT_LABELS = {
   drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
   essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품 및 충전기' },
   shoes:                 { en: 'Shoes & Electronics',   th: 'รองเท้าและอิเล็กทรอนิกส์', lo: 'ເກີບ ແລະ ອີເລັກໂທຣນິກ', ko: '운동화 및 의류' },
+  clothing:              { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  clothes:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  apparel:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  fashion:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
   'cigarettes&lighters': { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
   cigarettes_lighters:   { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
   tobacco:               { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
@@ -1006,6 +1010,7 @@ function getCatLabel(cat, catKey, lang) {
 
   // 4순위: Firebase cat.label string (한글만 있는 경우)
   if (cat && typeof cat.label === 'string' && cat.label) {
+    if (lang !== 'ko') console.warn('[CAT_LABELS 미등록 키]', catKey, '→ label:', cat.label);
     return cat.label;
   }
 
