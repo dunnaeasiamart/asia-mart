@@ -989,20 +989,24 @@ const CAT_LABELS = {
 };
 
 function getCatLabel(cat, catKey, lang) {
-  // 1순위: Firebase cat.label (어드민이 기준)
-  if (cat && typeof cat.label === 'string' && cat.label) {
-    return cat.label;
+  // 1순위: CAT_LABELS 내장 다국어 테이블 (언어 전환 지원)
+  if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
+    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
   }
+
+  // 2순위: Firebase cat.label이 객체인 경우 (다국어 구조)
   if (cat && typeof cat.label === 'object' && cat.label !== null) {
     return cat.label[lang] || cat.label.ko || cat.label.en || catKey;
   }
 
-  // 2순위: CAT_LABELS 내장 다국어 테이블 (Firebase에 label 없을 때 fallback)
-  if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
-    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
-  }
+  // 3순위: CAT_LABELS 한글 fallback
   if (CAT_LABELS[catKey] && CAT_LABELS[catKey].ko) {
     return CAT_LABELS[catKey].ko.replace(/^[A-Z]\s+/, '');
+  }
+
+  // 4순위: Firebase cat.label string (한글만 있는 경우)
+  if (cat && typeof cat.label === 'string' && cat.label) {
+    return cat.label;
   }
 
   return catKey;
