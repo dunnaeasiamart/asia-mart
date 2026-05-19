@@ -1646,7 +1646,14 @@ function addEditImgUrl() {
 async function loadAll() {
   window._tabLoaded = {}; // 탭별 로딩 여부 초기화
   window._catalogCache = null;
-  // 탭 데이터는 switchTab에서 클릭할 때만 로드
+  // 현재 활성 탭 자동 로드
+  const activeTab = document.querySelector('.tab-content.active');
+  if (activeTab) {
+    const tabId = activeTab.id.replace('tab-', '');
+    switchTab(tabId);
+  } else {
+    switchTab('stock'); // 기본 탭
+  }
 }
 
 async function loadCatSelect() {
