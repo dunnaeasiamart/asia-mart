@@ -192,6 +192,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
     <button class="tab-btn" onclick="switchTab('also',this)">🛍️ 이런것도</button>
     <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
+    <button class="tab-btn" onclick="switchTab('cover',this)">🖼️ 커버 이미지</button>
     <button class="tab-btn" onclick="switchTab('chart',this)">📈 판매 그래프</button>
   </div>
 
@@ -635,6 +636,54 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+
+  <!-- 커버 이미지 메이커 -->
+  <div id="tab-cover" class="tab-content">
+    <div style="max-width:600px;margin:24px auto;padding:0 12px;">
+      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🖼️ 커버 이미지 만들기</h3>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">상품 사진 선택 (최대 4장)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div onclick="document.getElementById('cover-file-0').click()" id="cover-slot-0" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
+              <span style="font-size:24px;">📷</span>
+              <input type="file" id="cover-file-0" accept="image/*" style="display:none;" onchange="onCoverImgSelect(0,this)">
+            </div>
+            <div onclick="document.getElementById('cover-file-1').click()" id="cover-slot-1" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
+              <span style="font-size:24px;">📷</span>
+              <input type="file" id="cover-file-1" accept="image/*" style="display:none;" onchange="onCoverImgSelect(1,this)">
+            </div>
+            <div onclick="document.getElementById('cover-file-2').click()" id="cover-slot-2" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
+              <span style="font-size:24px;">📷</span>
+              <input type="file" id="cover-file-2" accept="image/*" style="display:none;" onchange="onCoverImgSelect(2,this)">
+            </div>
+            <div onclick="document.getElementById('cover-file-3').click()" id="cover-slot-3" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
+              <span style="font-size:24px;">📷</span>
+              <input type="file" id="cover-file-3" accept="image/*" style="display:none;" onchange="onCoverImgSelect(3,this)">
+            </div>
+          </div>
+          <button onclick="clearCoverImgs()" style="margin-top:8px;background:none;border:1px solid #ddd;padding:5px 12px;border-radius:6px;font-size:12px;color:#888;cursor:pointer;">🗑️ 사진 초기화</button>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">중앙 글귀 (3줄 — 상품 위에 표시)</label>
+          <input type="text" id="cover-text1" placeholder="줄 1 (태국어)" value="สินค้าขายดี" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:6px;outline:none;box-sizing:border-box;">
+          <input type="text" id="cover-text2" placeholder="줄 2 (라오어)" value="ສິນຄ້າຂາຍດີ" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:6px;outline:none;box-sizing:border-box;">
+          <input type="text" id="cover-text3" placeholder="줄 3 (영어)" value="BEST PRODUCTS" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">하단 문구</label>
+          <input type="text" id="cover-bottom" value="บะหมี่เพิ่งเห้งบิฮอนสีทดัม สิมถ้า ภธบ" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div style="font-size:12px;color:#888;margin-bottom:12px;">미리보기</div>
+        <div style="display:flex;justify-content:center;">
+          <canvas id="cover-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadCoverCard()">⬇️ 커버 이미지 저장</button>
+    </div>
+  </div>
 
   <!-- 판매 그래프 탭 -->
   <div id="tab-chart" class="tab-content">
@@ -4526,6 +4575,240 @@ function downloadSnsCard() {
     if(canvas){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
   }
 
+</script>
+
+</script>
+
+<script>
+// ===== 커버 이미지 메이커 =====
+const _coverImgs = [null, null, null, null];
+
+function onCoverImgSelect(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      _coverImgs[idx] = img;
+      const slot = document.getElementById('cover-slot-' + idx);
+      slot.style.backgroundImage = 'url(' + e.target.result + ')';
+      slot.style.backgroundSize = 'cover';
+      slot.style.backgroundPosition = 'center';
+      slot.innerHTML = '<input type="file" id="cover-file-' + idx + '" accept="image/*" style="display:none;" onchange="onCoverImgSelect(' + idx + ',this)">';
+      renderCoverCard();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearCoverImgs() {
+  for (let i = 0; i < 4; i++) {
+    _coverImgs[i] = null;
+    const slot = document.getElementById('cover-slot-' + i);
+    if (slot) {
+      slot.style.backgroundImage = '';
+      slot.innerHTML = '<span style="font-size:24px;">📷</span><input type="file" id="cover-file-' + i + '" accept="image/*" style="display:none;" onchange="onCoverImgSelect(' + i + ',this)">';
+    }
+  }
+  renderCoverCard();
+}
+
+function renderCoverCard() {
+  const canvas = document.getElementById('cover-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 960;
+  ctx.clearRect(0, 0, W, H);
+
+  // 배경 — 짙은 다크 레드/브라운 그라디언트
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#3a0a00');
+  bg.addColorStop(0.5, '#1a0500');
+  bg.addColorStop(1, '#0d0200');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // 금색 테두리
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(14, 14, W - 28, H - 28);
+  ctx.strokeStyle = 'rgba(200,151,58,0.4)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(22, 22, W - 44, H - 44);
+
+  // 헤더 영역
+  const HEADER_H = 140;
+
+  // 헤더 배경
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(0, 0, W, HEADER_H);
+
+  // 로고 텍스트
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 32px Arial';
+  ctx.fillText('DUNNAE ASIA MART', W / 2, 45);
+  ctx.font = '18px Arial';
+  ctx.fillStyle = '#c8973a';
+  ctx.fillText('문내아시아마트', W / 2, 72);
+
+  // 국기 이모지
+  ctx.font = '22px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('🇹🇭 🇱🇦 🇵🇭 🇲🇲 🇰🇭 🇻🇳', W / 2, 110);
+
+  // 구분선
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(40, HEADER_H - 10);
+  ctx.lineTo(W - 40, HEADER_H - 10);
+  ctx.stroke();
+
+  // 4분할 이미지 영역 (헤더 아래 ~ 하단 텍스트 위)
+  const IMG_TOP = HEADER_H;
+  const FOOTER_H = 120;
+  const IMG_BOTTOM = H - FOOTER_H;
+  const IMG_H = IMG_BOTTOM - IMG_TOP;
+  const HALF_W = W / 2;
+  const HALF_H = IMG_H / 2;
+
+  const slots = [
+    [0, IMG_TOP, HALF_W, HALF_H],
+    [HALF_W, IMG_TOP, HALF_W, HALF_H],
+    [0, IMG_TOP + HALF_H, HALF_W, HALF_H],
+    [HALF_W, IMG_TOP + HALF_H, HALF_W, HALF_H],
+  ];
+
+  const GAP = 3;
+  slots.forEach(([x, y, sw, sh], i) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
+    ctx.clip();
+    if (_coverImgs[i]) {
+      // 이미지 cover fit
+      const img = _coverImgs[i];
+      const scale = Math.max((sw - GAP * 2) / img.width, (sh - GAP * 2) / img.height);
+      const dw = img.width * scale;
+      const dh = img.height * scale;
+      const dx = x + GAP + ((sw - GAP * 2) - dw) / 2;
+      const dy = y + GAP + ((sh - GAP * 2) - dh) / 2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+    } else {
+      ctx.fillStyle = '#2a0a00';
+      ctx.fillRect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.font = '40px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('📷', x + sw / 2, y + sh / 2 + 14);
+    }
+    ctx.restore();
+  });
+
+  // 중앙 글귀 — 이미지 위에 오버레이, 상품 안 가리게 위쪽에 배치
+  const t1 = document.getElementById('cover-text1') ? document.getElementById('cover-text1').value : '';
+  const t2 = document.getElementById('cover-text2') ? document.getElementById('cover-text2').value : '';
+  const t3 = document.getElementById('cover-text3') ? document.getElementById('cover-text3').value : '';
+
+  // 중앙 글귀 박스 — 이미지 영역 세로 중앙
+  const TEXT_CX = W / 2;
+  const TEXT_CY = IMG_TOP + IMG_H / 2;
+  const BOX_W = 340, BOX_H = 130;
+  const BOX_X = TEXT_CX - BOX_W / 2;
+  const BOX_Y = TEXT_CY - BOX_H / 2;
+
+  // 반투명 배경
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  ctx.fillStyle = '#5c1200';
+  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 14);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 2;
+  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 14);
+  ctx.stroke();
+  ctx.restore();
+
+  // 글귀 1 (태국어/큰)
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 36px Arial';
+  ctx.fillText(t1, TEXT_CX, BOX_Y + 42);
+
+  // 글귀 2 (라오어/큰)
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 36px Arial';
+  ctx.fillText(t2, TEXT_CX, BOX_Y + 82);
+
+  // 글귀 3 (영어/골드)
+  ctx.fillStyle = '#c8973a';
+  ctx.font = 'bold 22px Arial';
+  ctx.fillText(t3, TEXT_CX, BOX_Y + 115);
+
+  // 하단 영역
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0, H - FOOTER_H, W, FOOTER_H);
+
+  // 하단 구분선
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(40, H - FOOTER_H + 8);
+  ctx.lineTo(W - 40, H - FOOTER_H + 8);
+  ctx.stroke();
+
+  // 하단 국기
+  ctx.font = '20px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText('🇹🇭 🇱🇦 🇵🇭 🇲🇲 🇰🇭 🇻🇳', W / 2, H - FOOTER_H + 38);
+
+  // 하단 문구
+  const bottomTxt = document.getElementById('cover-bottom') ? document.getElementById('cover-bottom').value : '';
+  ctx.font = '15px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText(bottomTxt, W / 2, H - FOOTER_H + 65);
+
+  // DUNNAE'S PREMIUM PICK
+  ctx.font = 'bold 14px Arial';
+  ctx.fillStyle = '#c8973a';
+  ctx.fillText("DUNNAE'S PREMIUM PICK! 🛒", W / 2, H - FOOTER_H + 90);
+}
+
+function roundRectCover(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadCoverCard() {
+  renderCoverCard();
+  const canvas = document.getElementById('cover-canvas');
+  const a = document.createElement('a');
+  a.download = 'dunnae_cover.jpg';
+  a.href = canvas.toDataURL('image/jpeg', 0.93);
+  a.click();
+  showToast('📸 커버 이미지 저장 완료!');
+}
+
+// 탭 전환 시 커버 초기 렌더
+const _origSwitchTab = window.switchTab;
+window.switchTab = function(tab, btn) {
+  if (_origSwitchTab) _origSwitchTab(tab, btn);
+  if (tab === 'cover') setTimeout(renderCoverCard, 100);
+};
 </script>
 
 <style>
