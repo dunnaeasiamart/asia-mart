@@ -671,8 +671,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="text" id="cover-text3" placeholder="줄 3 (영어)" value="BEST PRODUCTS" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
         </div>
         <div>
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">하단 문구</label>
-          <input type="text" id="cover-bottom" value="บะหมี่เพิ่งเห้งบิฮอนสีทดัม สิมถ้า ภธบ" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">하단 문구 (3줄)</label>
+          <input type="text" id="cover-bottom1" placeholder="줄 1 (태국어)" value="สินค้าไทย ลาว ฟิลิปปินส์ครบ!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;outline:none;box-sizing:border-box;">
+          <input type="text" id="cover-bottom2" placeholder="줄 2 (라오어)" value="ສິນຄ້າໄທ ລາວ ຟິລິບປິນ ຄົບ!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;outline:none;box-sizing:border-box;">
+          <input type="text" id="cover-bottom3" placeholder="줄 3 (따갈로그어)" value="May produktong Thai, Lao, at Pilipino!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
         </div>
       </div>
       <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
@@ -4622,58 +4624,128 @@ function renderCoverCard() {
   const W = 540, H = 960;
   ctx.clearRect(0, 0, W, H);
 
-  // 배경 — 짙은 다크 레드/브라운 그라디언트
+  // ── 배경 ──
   const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#3a0a00');
-  bg.addColorStop(0.5, '#1a0500');
-  bg.addColorStop(1, '#0d0200');
+  bg.addColorStop(0,   '#4a0e00');
+  bg.addColorStop(0.4, '#2a0600');
+  bg.addColorStop(0.7, '#1a0400');
+  bg.addColorStop(1,   '#0d0200');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  // 금색 테두리
+  // ── 금색 이중 테두리 ──
   ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 6;
-  ctx.strokeRect(14, 14, W - 28, H - 28);
-  ctx.strokeStyle = 'rgba(200,151,58,0.4)';
+  ctx.lineWidth = 7;
+  ctx.strokeRect(12, 12, W - 24, H - 24);
+  ctx.strokeStyle = '#e8c060';
   ctx.lineWidth = 2;
-  ctx.strokeRect(22, 22, W - 44, H - 44);
+  ctx.strokeRect(20, 20, W - 40, H - 40);
+  ctx.strokeStyle = 'rgba(200,151,58,0.35)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(28, 28, W - 56, H - 56);
 
-  // 헤더 영역
-  const HEADER_H = 140;
+  // ── 코너 장식 (금색 다이아몬드) ──
+  function drawCornerDiamond(cx, cy) {
+    ctx.save();
+    ctx.fillStyle = '#c8973a';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 10);
+    ctx.lineTo(cx + 10, cy);
+    ctx.lineTo(cx, cy + 10);
+    ctx.lineTo(cx - 10, cy);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#e8d080';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  drawCornerDiamond(12, 12);
+  drawCornerDiamond(W - 12, 12);
+  drawCornerDiamond(12, H - 12);
+  drawCornerDiamond(W - 12, H - 12);
 
-  // 헤더 배경
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  // ── 금색 덩굴 장식 함수 ──
+  function drawVineRow(y, flip) {
+    ctx.save();
+    ctx.strokeStyle = '#c8973a';
+    ctx.lineWidth = 1.8;
+    ctx.globalAlpha = 0.85;
+    if (flip) { ctx.translate(0, y * 2); ctx.scale(1, -1); }
+    const step = 36;
+    for (let x = 32; x < W - 32; x += step) {
+      // 메인 줄기
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + 8, y - 14, x + 28, y - 14, x + step, y);
+      ctx.stroke();
+      // 작은 컬 장식
+      ctx.beginPath();
+      ctx.arc(x + step / 2, y - 10, 5, 0, Math.PI * 1.5);
+      ctx.stroke();
+      // 잎사귀 점
+      ctx.fillStyle = '#e8c060';
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.ellipse(x + step / 2, y - 17, 4, 2.5, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.85;
+    }
+    ctx.restore();
+  }
+
+  // ── 헤더 높이 ──
+  const HEADER_H = 160;
+  const FOOTER_H = 155;
+
+  // ── 헤더 배경 ──
+  const hGrad = ctx.createLinearGradient(0, 0, 0, HEADER_H);
+  hGrad.addColorStop(0, 'rgba(90,20,0,0.95)');
+  hGrad.addColorStop(1, 'rgba(40,8,0,0.7)');
+  ctx.fillStyle = hGrad;
   ctx.fillRect(0, 0, W, HEADER_H);
 
-  // 로고 텍스트
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 32px Arial';
-  ctx.fillText('DUNNAE ASIA MART', W / 2, 45);
-  ctx.font = '18px Arial';
-  ctx.fillStyle = '#c8973a';
-  ctx.fillText('문내아시아마트', W / 2, 72);
+  // ── 헤더 상단 덩굴 장식 ──
+  drawVineRow(38, false);
 
-  // 국기 이모지
-  ctx.font = '22px Arial';
-  ctx.fillStyle = '#fff';
-  ctx.fillText('🇹🇭 🇱🇦 🇵🇭 🇲🇲 🇰🇭 🇻🇳', W / 2, 110);
-
-  // 구분선
+  // ── 헤더 구분선 ──
   ctx.strokeStyle = '#c8973a';
   ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(40, HEADER_H - 10);
-  ctx.lineTo(W - 40, HEADER_H - 10);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(32, 48); ctx.lineTo(W - 32, 48); ctx.stroke();
 
-  // 4분할 이미지 영역 (헤더 아래 ~ 하단 텍스트 위)
-  const IMG_TOP = HEADER_H;
-  const FOOTER_H = 120;
-  const IMG_BOTTOM = H - FOOTER_H;
+  // ── 로고 텍스트 ──
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 34px Arial';
+  ctx.fillText('DUNNAE ASIA MART', W / 2, 90);
+  ctx.font = '17px Arial';
+  ctx.fillStyle = '#e8c060';
+  ctx.fillText('문내아시아마트', W / 2, 116);
+  ctx.shadowBlur = 0;
+
+  // 국기
+  ctx.font = '20px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇲🇲  🇰🇭  🇻🇳', W / 2, 145);
+
+  // ── 헤더 하단 덩굴 장식 ──
+  drawVineRow(HEADER_H - 8, true);
+
+  // ── 헤더/푸터 구분선 ──
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(32, HEADER_H); ctx.lineTo(W - 32, HEADER_H); ctx.stroke();
+
+  // ── 4분할 이미지 영역 ──
+  const IMG_TOP = HEADER_H + 4;
+  const IMG_BOTTOM = H - FOOTER_H - 4;
   const IMG_H = IMG_BOTTOM - IMG_TOP;
   const HALF_W = W / 2;
   const HALF_H = IMG_H / 2;
+  const GAP = 3;
 
   const slots = [
     [0, IMG_TOP, HALF_W, HALF_H],
@@ -4682,101 +4754,130 @@ function renderCoverCard() {
     [HALF_W, IMG_TOP + HALF_H, HALF_W, HALF_H],
   ];
 
-  const GAP = 3;
   slots.forEach(([x, y, sw, sh], i) => {
     ctx.save();
     ctx.beginPath();
     ctx.rect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
     ctx.clip();
     if (_coverImgs[i]) {
-      // 이미지 cover fit
       const img = _coverImgs[i];
       const scale = Math.max((sw - GAP * 2) / img.width, (sh - GAP * 2) / img.height);
-      const dw = img.width * scale;
-      const dh = img.height * scale;
+      const dw = img.width * scale, dh = img.height * scale;
       const dx = x + GAP + ((sw - GAP * 2) - dw) / 2;
       const dy = y + GAP + ((sh - GAP * 2) - dh) / 2;
       ctx.drawImage(img, dx, dy, dw, dh);
     } else {
       ctx.fillStyle = '#2a0a00';
       ctx.fillRect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.font = '40px Arial';
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.font = '36px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('📷', x + sw / 2, y + sh / 2 + 14);
+      ctx.fillText('📷', x + sw / 2, y + sh / 2 + 12);
     }
     ctx.restore();
   });
 
-  // 중앙 글귀 — 이미지 위에 오버레이, 상품 안 가리게 위쪽에 배치
-  const t1 = document.getElementById('cover-text1') ? document.getElementById('cover-text1').value : '';
-  const t2 = document.getElementById('cover-text2') ? document.getElementById('cover-text2').value : '';
-  const t3 = document.getElementById('cover-text3') ? document.getElementById('cover-text3').value : '';
+  // ── 중앙 글귀 박스 ──
+  const t1 = (document.getElementById('cover-text1') || {}).value || '';
+  const t2 = (document.getElementById('cover-text2') || {}).value || '';
+  const t3 = (document.getElementById('cover-text3') || {}).value || '';
 
-  // 중앙 글귀 박스 — 이미지 영역 세로 중앙
   const TEXT_CX = W / 2;
   const TEXT_CY = IMG_TOP + IMG_H / 2;
-  const BOX_W = 340, BOX_H = 130;
+  const BOX_W = 360, BOX_H = 148;
   const BOX_X = TEXT_CX - BOX_W / 2;
   const BOX_Y = TEXT_CY - BOX_H / 2;
 
-  // 반투명 배경
+  // 박스 배경
   ctx.save();
-  ctx.globalAlpha = 0.82;
-  ctx.fillStyle = '#5c1200';
-  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 14);
+  ctx.globalAlpha = 0.88;
+  const bGrad = ctx.createLinearGradient(BOX_X, BOX_Y, BOX_X, BOX_Y + BOX_H);
+  bGrad.addColorStop(0, '#6a1800');
+  bGrad.addColorStop(1, '#3a0800');
+  ctx.fillStyle = bGrad;
+  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 16);
   ctx.fill();
   ctx.globalAlpha = 1;
+  // 금색 박스 테두리
   ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 2;
-  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 14);
+  ctx.lineWidth = 2.5;
+  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 16);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(232,192,96,0.4)';
+  ctx.lineWidth = 1;
+  roundRectCover(ctx, BOX_X + 6, BOX_Y + 6, BOX_W - 12, BOX_H - 12, 12);
   ctx.stroke();
   ctx.restore();
 
-  // 글귀 1 (태국어/큰)
+  // 글귀
   ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 6;
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 36px Arial';
-  ctx.fillText(t1, TEXT_CX, BOX_Y + 42);
-
-  // 글귀 2 (라오어/큰)
+  ctx.font = 'bold 38px Arial';
+  ctx.fillText(t1, TEXT_CX, BOX_Y + 46);
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 36px Arial';
-  ctx.fillText(t2, TEXT_CX, BOX_Y + 82);
+  ctx.font = 'bold 38px Arial';
+  ctx.fillText(t2, TEXT_CX, BOX_Y + 90);
+  ctx.fillStyle = '#e8c060';
+  ctx.font = 'bold 24px Arial';
+  ctx.fillText(t3, TEXT_CX, BOX_Y + 128);
+  ctx.shadowBlur = 0;
 
-  // 글귀 3 (영어/골드)
-  ctx.fillStyle = '#c8973a';
-  ctx.font = 'bold 22px Arial';
-  ctx.fillText(t3, TEXT_CX, BOX_Y + 115);
-
-  // 하단 영역
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  // ── 푸터 ──
+  const fGrad = ctx.createLinearGradient(0, H - FOOTER_H, 0, H);
+  fGrad.addColorStop(0, 'rgba(40,8,0,0.7)');
+  fGrad.addColorStop(1, 'rgba(90,20,0,0.95)');
+  ctx.fillStyle = fGrad;
   ctx.fillRect(0, H - FOOTER_H, W, FOOTER_H);
 
-  // 하단 구분선
+  // 푸터 상단 구분선
   ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(40, H - FOOTER_H + 8);
-  ctx.lineTo(W - 40, H - FOOTER_H + 8);
-  ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(32, H - FOOTER_H); ctx.lineTo(W - 32, H - FOOTER_H); ctx.stroke();
 
-  // 하단 국기
-  ctx.font = '20px Arial';
-  ctx.fillStyle = '#fff';
+  // ── 푸터 상단 덩굴 장식 ──
+  drawVineRow(H - FOOTER_H + 18, false);
+
+  // 푸터 구분선
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(32, H - FOOTER_H + 30); ctx.lineTo(W - 32, H - FOOTER_H + 30); ctx.stroke();
+
+  // 하단 문구 3줄
+  const b1 = (document.getElementById('cover-bottom1') || {}).value || '';
+  const b2 = (document.getElementById('cover-bottom2') || {}).value || '';
+  const b3 = (document.getElementById('cover-bottom3') || {}).value || '';
+
   ctx.textAlign = 'center';
-  ctx.fillText('🇹🇭 🇱🇦 🇵🇭 🇲🇲 🇰🇭 🇻🇳', W / 2, H - FOOTER_H + 38);
-
-  // 하단 문구
-  const bottomTxt = document.getElementById('cover-bottom') ? document.getElementById('cover-bottom').value : '';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 4;
+  ctx.fillStyle = '#fff';
   ctx.font = '15px Arial';
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText(bottomTxt, W / 2, H - FOOTER_H + 65);
+  ctx.fillText(b1, W / 2, H - FOOTER_H + 58);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText(b2, W / 2, H - FOOTER_H + 80);
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.fillText(b3, W / 2, H - FOOTER_H + 102);
+  ctx.shadowBlur = 0;
+
+  // 국기
+  ctx.font = '18px Arial';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇲🇲  🇰🇭  🇻🇳', W / 2, H - FOOTER_H + 126);
+
+  // 푸터 하단 덩굴 장식
+  drawVineRow(H - 34, true);
+
+  // 푸터 하단 구분선
+  ctx.strokeStyle = '#c8973a';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(32, H - 46); ctx.lineTo(W - 32, H - 46); ctx.stroke();
 
   // DUNNAE'S PREMIUM PICK
-  ctx.font = 'bold 14px Arial';
-  ctx.fillStyle = '#c8973a';
-  ctx.fillText("DUNNAE'S PREMIUM PICK! 🛒", W / 2, H - FOOTER_H + 90);
+  ctx.font = 'bold 13px Arial';
+  ctx.fillStyle = '#e8c060';
+  ctx.fillText("DUNNAE'S PREMIUM PICK! 🛒", W / 2, H - 30);
 }
 
 function roundRectCover(ctx, x, y, w, h, r) {
