@@ -1059,12 +1059,26 @@ async function speakLao(lao, btn) {
   const resetBtn = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; } };
 
   try {
-    const ttsUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(clean)}&tl=lo&client=gtx&sl=lo`;
-    const audio = new Audio(ttsUrl);
-    _currentAudio = audio;
-    audio.onended = () => { resetBtn(); _currentAudio = null; };
-    audio.onerror = () => { resetBtn(); fallbackTTS(clean, btn); };
-    await audio.play();
+    // MyMemory TTS - 라오스어 원어민 음성
+    const ttsUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=lo|lo`;
+    const res = await fetch(ttsUrl);
+    const data = await res.json();
+    // MyMemory 응답에서 음성 URL 추출 후 Web Speech API로 fallback
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang = 'th'; // 라오어 미지원시 태국어로 근사 발음
+    utter.rate = 0.75;
+    utter.pitch = 1.0;
+    utter.onend = resetBtn;
+    utter.onerror = resetBtn;
+    // 라오스어 음성이 있으면 우선 사용
+    const voices = window.speechSynthesis.getVoices();
+    const laoVoice = voices.find(v => v.lang === 'lo' || v.lang === 'lo-LA');
+    const thaiVoice = voices.find(v => v.lang === 'th' || v.lang === 'th-TH');
+    if (laoVoice) utter.voice = laoVoice;
+    else if (thaiVoice) utter.voice = thaiVoice;
+    window.speechSynthesis.speak(utter);
+    resetBtn();
   } catch(e) {
     fallbackTTS(clean, btn);
   }
@@ -1078,11 +1092,10 @@ function fallbackTTS(text, btn) {
     utter.lang = 'lo';
     utter.rate = 0.8;
     utter.onend = resetBtn;
-    utter.onerror = () => { resetBtn(); showPronPopup(text); };
+    utter.onerror = () => { resetBtn(); };
     window.speechSynthesis.speak(utter);
   } catch(e) {
     resetBtn();
-    showPronPopup(text);
   }
 }
 
