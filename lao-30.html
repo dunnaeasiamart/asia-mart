@@ -1053,12 +1053,27 @@ function showPronPopup(pron) {
 const ELEVEN_API_KEY = 'sk_1ad53dea6906e4c9ffe9bb1f128d6da0f1b9cf0dd73d344b';
 const ELEVEN_VOICE_ID = 'pNInz6obpgDQGcFmaJgB'; // Adam - Multilingual v2
 let _currentAudio = null;
+let _currentBtn = null;
+let _isSpeaking = false;
 
 async function speakLao(lao, btn) {
+  // 재생 중이면 중지
+  if (_isSpeaking) {
+    if (_currentAudio) { _currentAudio.pause(); _currentAudio.src = ''; _currentAudio = null; }
+    if (_currentBtn) { _currentBtn.classList.remove('playing'); _currentBtn.textContent = '▶ 발음 듣기'; }
+    _isSpeaking = false;
+    if (_currentBtn === btn) return; // 같은 버튼이면 중지만
+  }
+
   const clean = lao.replace(/\/[^\s]*/g, '').trim();
-  if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+  _currentBtn = btn;
+  _isSpeaking = true;
   if (btn) { btn.classList.add('playing'); btn.textContent = '⏸ 읽는 중...'; }
-  const resetBtn = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; } };
+  const resetBtn = () => {
+    if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; }
+    _isSpeaking = false;
+    _currentBtn = null;
+  };
 
   try {
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`, {
@@ -1070,10 +1085,10 @@ async function speakLao(lao, btn) {
       body: JSON.stringify({
         text: clean,
         model_id: 'eleven_multilingual_v2',
-        voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: 0.85 }
+        voice_settings: { stability: 0.75, similarity_boost: 0.75, speed: 0.85 }
       })
     });
-    if (!res.ok) { fallbackTTS(clean, btn); return; }
+    if (!res.ok) { resetBtn(); fallbackTTS(clean, btn); return; }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
@@ -1082,6 +1097,7 @@ async function speakLao(lao, btn) {
     audio.onerror = () => { resetBtn(); fallbackTTS(clean, btn); };
     await audio.play();
   } catch(e) {
+    resetBtn();
     fallbackTTS(clean, btn);
   }
 }
