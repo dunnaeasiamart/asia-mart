@@ -1049,8 +1049,7 @@ function showPronPopup(pron) {
   popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
 }
 
-// ===================== 발음 재생 (Google TTS - 태국어 원어민) =====================
-const GCP_TTS_KEY = 'AIzaSyAndOzle6i58ItvWgEJF8rz0s6LH9X0s_s';
+// ===================== 발음 재생 (Google Translate TTS - 라오스어) =====================
 let _currentAudio = null;
 
 async function speakLao(lao, btn) {
@@ -1060,25 +1059,12 @@ async function speakLao(lao, btn) {
   const resetBtn = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; } };
 
   try {
-    const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${GCP_TTS_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { text: clean },
-        voice: { languageCode: 'lo-LA', ssmlGender: 'FEMALE' },
-        audioConfig: { audioEncoding: 'MP3', speakingRate: 0.85 }
-      })
-    });
-    const data = await res.json();
-    if (data.audioContent) {
-      const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
-      _currentAudio = audio;
-      audio.onended = () => { resetBtn(); _currentAudio = null; };
-      audio.onerror = () => { resetBtn(); fallbackTTS(clean, btn); };
-      await audio.play();
-    } else {
-      fallbackTTS(clean, btn);
-    }
+    const ttsUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(clean)}&tl=lo&client=gtx&sl=lo`;
+    const audio = new Audio(ttsUrl);
+    _currentAudio = audio;
+    audio.onended = () => { resetBtn(); _currentAudio = null; };
+    audio.onerror = () => { resetBtn(); fallbackTTS(clean, btn); };
+    await audio.play();
   } catch(e) {
     fallbackTTS(clean, btn);
   }
