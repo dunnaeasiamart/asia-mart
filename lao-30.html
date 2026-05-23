@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마트 라오어 30일 완성</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto Sans Lao:wght@300;400;600&family=Noto Sans KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lao-red: #ce1126;
+    --lao-gold: #f5a623;
+    --lao-blue: #002868;
+    --lao-light: #fff8e1;
+    --lao-cream: #fdf6e3;
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #f39c12;
+    --green: #2ea043;
+    --border: #30363d;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 배경 패턴 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 10%, rgba(192,57,43,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(243,156,18,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 10%, rgba(26,35,126,0.1) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 20px; }
+
+  /* 헤더 */
+  .header {
+    text-align: center;
+    padding: 40px 20px 30px;
+    position: relative;
+  }
+  .header-flag {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 8px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .header h1 {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--lao-gold), #e74c3c, var(--lao-gold));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+    letter-spacing: -0.5px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  .header p { color: var(--text2); font-size: 14px; margin-top: 6px; }
+  .lao-subtitle {
+    font-family: 'Noto Sans Lao', sans-serif;
+    font-size: 18px;
+    color: var(--lao-gold);
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+
+  /* 진행 상태 */
+  .progress-bar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    height: 8px;
+    margin: 16px 0 6px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lao-red), var(--lao-gold));
+    border-radius: 50px;
+    transition: width 0.6s cubic-bezier(.4,2,.6,1);
+  }
+  .progress-label { color: var(--text2); font-size: 12px; text-align: center; }
+
+  /* 탭 */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin: 20px 0;
+    gap: 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, var(--lao-red), #e74c3c);
+    color: white;
+    box-shadow: 0 2px 8px rgba(192,57,43,0.4);
+  }
+  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+  /* 날짜 선택기 */
+  .day-selector {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .day-btn {
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .day-btn.locked {
+    background: var(--surface);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    cursor: not-allowed;
+  }
+  .day-btn.available {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .day-btn.available:hover {
+    border-color: var(--lao-gold);
+    color: var(--lao-gold);
+    transform: scale(1.05);
+  }
+  .day-btn.completed {
+    background: linear-gradient(135deg, #1a3a1a, #2ea043);
+    color: #7ee787;
+    border: 1px solid #2ea043;
+  }
+  .day-btn.current {
+    background: linear-gradient(135deg, var(--lao-red), #e74c3c);
+    color: white;
+    border: 1px solid var(--lao-gold);
+    box-shadow: 0 0 12px rgba(192,57,43,0.5);
+    animation: pulse 2s infinite;
+  }
+  .day-btn.review-day {
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: #90caf9;
+    border: 1px solid #3f51b5;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(192,57,43,0.5); }
+    50% { box-shadow: 0 0 20px rgba(192,57,43,0.8); }
+  }
+  .day-btn.completed::after {
+    content: '✓';
+    position: absolute;
+    top: 1px; right: 3px;
+    font-size: 8px;
+  }
+
+  /* 오늘의 학습 카드 */
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* 문장 카드 */
+  .sentence-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 10px;
+    transition: all 0.25s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .sentence-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--lao-red), var(--lao-gold));
+    border-radius: 3px 0 0 3px;
+  }
+  .sentence-card:hover {
+    border-color: rgba(243,156,18,0.4);
+    transform: translateX(3px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .sentence-card.learned {
+    border-color: rgba(46,160,67,0.4);
+    background: rgba(46,160,67,0.05);
+  }
+  .sentence-card.learned::before {
+    background: linear-gradient(180deg, #2ea043, #7ee787);
+  }
+  .card-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--lao-gold);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .lao-text {
+    font-family: 'Noto Sans Lao', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #f8e4a0;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .pronunciation {
+    font-size: 13px;
+    color: #90caf9;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .korean {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .speak-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speak-btn:hover {
+    border-color: var(--lao-gold);
+    color: var(--lao-gold);
+    background: rgba(243,156,18,0.1);
+  }
+  .speak-btn.playing {
+    border-color: var(--lao-red);
+    color: var(--lao-red);
+    background: rgba(192,57,43,0.1);
+  }
+  .learn-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 50px;
+    background: rgba(46,160,67,0.15);
+    color: #7ee787;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    border: 1px solid rgba(46,160,67,0.3);
+    transition: all 0.2s;
+  }
+  .learn-btn:hover { background: rgba(46,160,67,0.25); }
+  .learn-btn.done {
+    background: rgba(46,160,67,0.3);
+    border-color: #2ea043;
+  }
+
+  /* 학습 완료 버튼 */
+  .complete-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 16px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--lao-red), #e74c3c, var(--lao-gold));
+    background-size: 200% auto;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+  }
+  .complete-btn:hover {
+    background-position: right center;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(192,57,43,0.4);
+  }
+  .complete-btn:disabled {
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* 복습 섹션 */
+  .review-banner {
+    background: linear-gradient(135deg, rgba(26,35,126,0.5), rgba(40,53,147,0.3));
+    border: 1px solid rgba(63,81,181,0.5);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .review-banner .icon { font-size: 28px; }
+  .review-banner h3 { font-size: 15px; font-weight: 700; color: #90caf9; }
+  .review-banner p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* 퀴즈 모드 */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .quiz-question {
+    font-family: 'Noto Sans Lao', sans-serif;
+    font-size: 32px;
+    color: #f8e4a0;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .quiz-hint { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .quiz-option {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .quiz-option:hover { border-color: var(--lao-gold); color: var(--lao-gold); }
+  .quiz-option.correct { background: rgba(46,160,67,0.2); border-color: #2ea043; color: #7ee787; }
+  .quiz-option.wrong { background: rgba(192,57,43,0.2); border-color: var(--lao-red); color: #ff7b6b; }
+
+  /* 통계 */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--lao-gold), var(--lao-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* 알림 토스트 */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface2);
+    border: 1px solid var(--lao-gold);
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--lao-gold);
+    transition: transform 0.3s cubic-bezier(.4,2,.6,1);
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* 오늘 날짜 정보 */
+  .day-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .day-info-left h2 { font-size: 18px; font-weight: 700; }
+  .day-info-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .day-badge {
+    background: linear-gradient(135deg, var(--lao-red), var(--lao-gold));
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 50px;
+  }
+
+  .hidden { display: none; }
+
+  /* 반응형 */
+  @media (max-width: 480px) {
+    .day-selector { grid-template-columns: repeat(6, 1fr); }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .quiz-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <span class="header-flag">🇱🇦</span>
+    <h1>마트 라오어 30일 완성</h1>
+    <div class="lao-subtitle">ພາສາລາວสำหรับซูเปอร์มาร์เก็ต</div>
+    <p>하루 10문장 · 마트 실용 회화 · 발음 듣기 포함</p>
+    <div class="progress-bar-wrap" style="margin-top:16px">
+      <div class="progress-bar" id="mainProgress" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="mainProgressLabel">0 / 30일 완료</div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('learn')">📚 학습</button>
+    <button class="tab" onclick="showTab('quiz')">🎯 퀴즈</button>
+    <button class="tab" onclick="showTab('translate')">🔤 번역</button>
+    <button class="tab" onclick="showTab('stats')">📊 통계</button>
+  </div>
+
+  <!-- 학습 탭 -->
+  <div id="tab-learn">
+    <!-- 날짜 선택 -->
+    <div class="section-title">📅 30일 커리큘럼</div>
+    <div class="day-selector" id="daySelector"></div>
+
+    <!-- 오늘 학습 영역 -->
+    <div id="learningArea"></div>
+  </div>
+
+  <!-- 퀴즈 탭 -->
+  <div id="tab-quiz" class="hidden">
+    <div class="section-title">🎯 퀴즈</div>
+    <div id="quizArea">
+      <div class="quiz-card" style="padding:40px; color: var(--text2);">
+        <div style="font-size:40px; margin-bottom:12px">🎮</div>
+        <p>학습한 날의 문장으로 퀴즈를 풀어보세요.<br>날짜를 먼저 완료하면 퀴즈가 활성화됩니다.</p>
+        <button class="complete-btn" style="max-width:200px; margin:20px auto 0;" onclick="startQuiz()">퀴즈 시작</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 번역 탭 -->
+  <div id="tab-translate" class="hidden">
+    <div class="section-title">🔤 한국어 → 라오어 번역</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">단어나 문장을 입력하면 라오어로 번역해드려요.</p>
+
+      <textarea id="translateInput" placeholder="예) 이 상품 얼마예요? / 냉동 생선 / 감사합니다..."
+        style="width:100%;height:90px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+               color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;padding:12px;
+               resize:none;outline:none;line-height:1.6;"
+        oninput="clearTranslateResult()"></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="doTranslate()"
+          style="flex:1;padding:12px;background:linear-gradient(135deg,var(--lao-red),#e74c3c);
+                 border:none;border-radius:8px;color:white;font-size:14px;font-weight:700;
+                 font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+          🔤 번역하기
+        </button>
+        <button onclick="document.getElementById('translateInput').value='';clearTranslateResult();"
+          style="padding:12px 16px;background:var(--surface2);border:1px solid var(--border);
+                 border-radius:8px;color:var(--text2);font-size:13px;cursor:pointer;">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- 결과 -->
+    <div id="translateResult" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+      <div style="font-size:11px;color:var(--text2);letter-spacing:2px;margin-bottom:10px;">번역 결과</div>
+      <div id="translateLao" style="font-family:'Noto Sans Lao',sans-serif;font-size:26px;color:#f8e4a0;font-weight:600;line-height:1.5;margin-bottom:8px;"></div>
+      <div id="translatePron" style="font-size:13px;color:#90caf9;margin-bottom:16px;"></div>
+      <button id="translateSpeakBtn" onclick="speakTranslate()"
+        style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;
+               border:1px solid var(--border);border-radius:50px;background:var(--surface2);
+               color:var(--text);font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        ▶ 발음 듣기
+      </button>
+    </div>
+
+    <!-- 자주 쓰는 말 -->
+    <div class="section-title" style="margin-top:24px;">⭐ 자주 쓰는 말 바로 번역</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button onclick="quickTranslate('얼마예요?')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        얼마예요?
+      </button>
+      <button onclick="quickTranslate('감사합니다')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        감사합니다
+      </button>
+      <button onclick="quickTranslate('잠깐만요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        잠깐만요
+      </button>
+      <button onclick="quickTranslate('품절됐어요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        품절됐어요
+      </button>
+      <button onclick="quickTranslate('봉투 드릴까요?')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        봉투 드릴까요?
+      </button>
+      <button onclick="quickTranslate('카드 되나요?')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        카드 되나요?
+      </button>
+      <button onclick="quickTranslate('영수증 드릴게요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        영수증 드릴게요
+      </button>
+      <button onclick="quickTranslate('이거 뭐예요?')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        이거 뭐예요?
+      </button>
+      <button onclick="quickTranslate('어서 오세요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        어서 오세요
+      </button>
+      <button onclick="quickTranslate('또 오세요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        또 오세요
+      </button>
+      <button onclick="quickTranslate('할인 되나요?')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        할인 되나요?
+      </button>
+      <button onclick="quickTranslate('신선식품이에요')"
+        style="padding:7px 14px;background:var(--surface2);border:1px solid var(--border);
+               border-radius:50px;color:var(--text);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;">
+        신선식품이에요
+      </button>
+    </div>
+  </div>
+
+  <!-- 통계 탭 -->
+  <div id="tab-stats" class="hidden">
+    <div class="section-title">📊 나의 학습 현황</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="statDays">0</div>
+        <div class="stat-label">완료한 날</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statSentences">0</div>
+        <div class="stat-label">배운 문장</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statStreak">0</div>
+        <div class="stat-label">연속 학습일</div>
+      </div>
+    </div>
+    <div class="section-title">🏆 진행 현황</div>
+    <div id="statsDetail"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== 데이터 =====================
+const curriculum = [
+  { title: "인사 & 기본 응대", theme: "🙏 인사", sentences: [
+    { lao: "ສະບາຍດີ", pron: "사바이디", kr: "안녕하세요" },
+    { lao: "ຍິນດີຕ້ອນຮັບ", pron: "인디 떤합", kr: "어서 오세요" },
+    { lao: "ຂອບໃຈ", pron: "컵짜이", kr: "감사합니다" },
+    { lao: "ບໍ່ເປັນຫຍັງ", pron: "버 뻰 냥", kr: "괜찮아요" },
+    { lao: "ແມ່ນແລ້ວ", pron: "맨 래우", kr: "네, 맞아요" },
+    { lao: "ບໍ່ແມ່ນ", pron: "버 맨", kr: "아니요" },
+    { lao: "ໄດ້ເລີຍ", pron: "다이 러이", kr: "알겠습니다" },
+    { lao: "ຂໍໂທດ", pron: "커 톳", kr: "죄송합니다" },
+    { lao: "ຖ້າແດ່", pron: "타 대", kr: "잠깐만요" },
+    { lao: "ມາໃໝ່ນະ", pron: "마 마이 나", kr: "또 오세요" },
+  ]},
+  { title: "계산 & 가격", theme: "💰 계산", sentences: [
+    { lao: "ຈັກໂດ?", pron: "짝 도", kr: "얼마예요?" },
+    { lao: "ທັງໝົດ...ກີບ", pron: "탕못 ...낍", kr: "총 ...낍입니다" },
+    { lao: "ຊຳລະເງິນທີ່ນີ້", pron: "쌈라 응은 티니", kr: "여기서 계산하세요" },
+    { lao: "ຈ່າຍດ້ວຍບັດໄດ້ບໍ?", pron: "짜이 두아이 밧 다이 버", kr: "카드 결제 되나요?" },
+    { lao: "ຈ່າຍເງິນສົດໄດ້", pron: "짜이 응은 솟 다이", kr: "현금으로 내세요" },
+    { lao: "ມີເງິນທອນບໍ?", pron: "미 응은 턴 버", kr: "잔돈 있으세요?" },
+    { lao: "ທອນເງິນໃຫ້", pron: "턴 응은 하이", kr: "잔돈 드릴게요" },
+    { lao: "ໃບຮັບເງິນ", pron: "바이 합 응은", kr: "영수증 드릴게요" },
+    { lao: "ລົດລາຄາໄດ້ບໍ?", pron: "롯 라카 다이 버", kr: "할인 되나요?" },
+    { lao: "ສິນຄ້ານີ້ລົດ 10%", pron: "씬카 니 롯 씹 뻐썬", kr: "이 상품은 10% 할인입니다" },
+  ]},
+  { title: "위치 & 매장 안내", theme: "🗺️ 위치", sentences: [
+    { lao: "ຢູ່ໃສ?", pron: "유 싸이", kr: "어디에 있어요?" },
+    { lao: "ຢູ່ຊັ້ນ...", pron: "유 찬 ...", kr: "...층에 있어요" },
+    { lao: "ໄປຊື່ໆ", pron: "빠이 쓰쓰", kr: "직진하세요" },
+    { lao: "ລ້ຽວຊ້າຍ", pron: "리아우 싸이", kr: "왼쪽으로 도세요" },
+    { lao: "ລ້ຽວຂວາ", pron: "리아우 쿠아", kr: "오른쪽으로 도세요" },
+    { lao: "ໃກ້ໆນີ້", pron: "끌라이끌라이 니", kr: "근처에 있어요" },
+    { lao: "ຫ້ອງນ້ຳຢູ່ໃສ?", pron: "헝 남 유 싸이", kr: "화장실은 어디예요?" },
+    { lao: "ລິຟຢູ່ທາງນີ້", pron: "립 유 탕 니", kr: "엘리베이터는 이쪽이에요" },
+    { lao: "ປ້າຍບອກທາງຢູ່ຕາມນັ້ນ", pron: "빠이 벅 탕 유 땀 난", kr: "표지판이 저기 있어요" },
+    { lao: "ຂໍໂທດ, ຊ່ວຍບອກທາງໄດ້ບໍ?", pron: "커 톳 추아이 벅 탕 다이 버", kr: "길 좀 알려주시겠어요?" },
+  ]},
+  { title: "상품 문의", theme: "🛒 상품", sentences: [
+    { lao: "ມີສິນຄ້ານີ້ບໍ?", pron: "미 씬카 니 버", kr: "이 상품 있나요?" },
+    { lao: "ໝົດແລ້ວ", pron: "못 래우", kr: "품절됐어요" },
+    { lao: "ມີອີກບໍ?", pron: "미 익 버", kr: "더 있나요?" },
+    { lao: "ມື້ໃດສິນຄ້າເຂົ້າ?", pron: "므 다이 씬카 카우", kr: "언제 입고돼요?" },
+    { lao: "ມີຂະໜາດອື່ນບໍ?", pron: "미 카낫 은 버", kr: "다른 사이즈 있나요?" },
+    { lao: "ມີສີອື່ນບໍ?", pron: "미 씨 은 버", kr: "다른 색 있나요?" },
+    { lao: "ອັນນີ້ແມ່ນຫຍັງ?", pron: "안 니 맨 냥", kr: "이거 뭐예요?" },
+    { lao: "ຂອງສົດ", pron: "컹 솟", kr: "신선식품이에요" },
+    { lao: "ວັນໝົດອາຍຸເມື່ອໃດ?", pron: "완 못 아유 므 다이", kr: "유통기한이 언제예요?" },
+    { lao: "ລາຄາຕໍ່ໜ່ວຍ", pron: "라카 떠 누아이", kr: "개당 가격이에요" },
+  ]},
+  { title: "봉투 & 포장", theme: "🛍️ 포장", sentences: [
+    { lao: "ເອົາຖົງໄດ້ບໍ?", pron: "아오 통 다이 버", kr: "봉투 드릴까요?" },
+    { lao: "ຕ້ອງການຖົງບໍ?", pron: "떵깐 통 버", kr: "봉투 필요하세요?" },
+    { lao: "ບໍ່ຕ້ອງການຖົງ", pron: "버 떵깐 통", kr: "봉투 필요 없어요" },
+    { lao: "ຫໍ່ຂອງຂວັນໄດ້ບໍ?", pron: "허 컹 쿠안 다이 버", kr: "선물 포장 해드릴까요?" },
+    { lao: "ໃສ່ກ່ອງໄດ້ບໍ?", pron: "싸이 껑 다이 버", kr: "박스에 넣어도 될까요?" },
+    { lao: "ແຍກຖົງໄດ້ບໍ?", pron: "얙 통 다이 버", kr: "따로 담아도 되나요?" },
+    { lao: "ຖົງນີ້ແຂງແຮງ", pron: "통 니 캥 행", kr: "이 봉투는 튼튼해요" },
+    { lao: "ຄ່າຖົງເພີ່ມ...ກີບ", pron: "카 통 프름 ...낍", kr: "봉투값 ...낍 추가돼요" },
+    { lao: "ຖົງເຢັນໄດ້ບໍ?", pron: "통 옌 다이 버", kr: "아이스백 드릴까요?" },
+    { lao: "ຜູກໃຫ້ດ້ວຍ", pron: "푸억 하이 두아이", kr: "묶어 드릴게요" },
+  ]},
+  { title: "환불 & 교환", theme: "🔄 교환", sentences: [
+    { lao: "ຄືນສິນຄ້າໄດ້ບໍ?", pron: "큰 씬카 다이 버", kr: "환불 되나요?" },
+    { lao: "ປ່ຽນສິນຄ້າໄດ້ບໍ?", pron: "뻰 씬카 다이 버", kr: "교환 되나요?" },
+    { lao: "ມີໃບຮັບເງິນບໍ?", pron: "미 바이 합 응은 버", kr: "영수증 있으세요?" },
+    { lao: "ສິນຄ້າເສຍຫາຍ", pron: "씬카 씨아 하이", kr: "상품이 파손됐어요" },
+    { lao: "ບໍ່ຕາມທີ່ສັ່ງ", pron: "버 땀 티 쌍", kr: "주문한 것과 달라요" },
+    { lao: "ຄືນເງິນພາຍໃນ...ວັນ", pron: "큰 응은 파이나이 ...완", kr: "...일 이내 환불해 드려요" },
+    { lao: "ແຜນກບໍລິການລູກຄ້າຢູ່ໃສ?", pron: "파낵 버리깐 룩카 유 싸이", kr: "고객서비스 코너가 어디예요?" },
+    { lao: "ຂໍເບິ່ງສິນຄ້າທີ່ເສຍຫາຍ", pron: "커 브 씬카 티 씨아 하이", kr: "파손된 상품 보여주시겠어요?" },
+    { lao: "ຈະປ່ຽນໃຫ້ທັນທີ", pron: "짜 뻰 하이 탄티", kr: "바로 교환해 드릴게요" },
+    { lao: "ຂໍໂທດທີ່ທຳໃຫ້ບໍ່ສະດວກ", pron: "커 톳 티 탐 하이 버 싸두악", kr: "불편을 드려 죄송합니다" },
+  ]},
+  { title: "식품 & 신선식품", theme: "🥬 식품", sentences: [
+    { lao: "ຜັກສົດຢູ່ໃສ?", pron: "팍 솟 유 싸이", kr: "신선 채소는 어디 있어요?" },
+    { lao: "ໝາກໄມ້ສົດມີຫຍັງ?", pron: "막 마이 솟 미 냥", kr: "신선과일은 뭐가 있나요?" },
+    { lao: "ຊີ້ນສົດມີບໍ?", pron: "씬 솟 미 버", kr: "신선한 고기 있나요?" },
+    { lao: "ອາຫານທະເລຢູ່ຕາມນັ້ນ", pron: "아한 탈레 유 땀 난", kr: "신선한 해산물은 저기 있어요" },
+    { lao: "ນົມສົດຢູ່ແຖວນີ້", pron: "놈 솟 유 태우 니", kr: "신선 우유는 이 코너에 있어요" },
+    { lao: "ຂະໜົມປັງອົບໃໝ່", pron: "카놈 빵 옵 마이", kr: "빵은 갓 구웠어요" },
+    { lao: "ອາຫານອໍແກນິກຢູ່ທີ່ນີ້", pron: "아한 오개닉 유 티니", kr: "유기농 식품은 여기 있어요" },
+    { lao: "ສິນຄ້າແຊ່ແຂງຢູ່ຕາມນັ້ນ", pron: "씬카 채 캥 유 땀 난", kr: "냉동식품은 저 쪽에 있어요" },
+    { lao: "ບໍ່ມີສານເຄມີ", pron: "버 미 싼 케미", kr: "무농약이에요" },
+    { lao: "ສິນຄ້ານຳເຂົ້າຈາກຕ່າງປະເທດ", pron: "씬카 남카오 짝 땅 쁘라텟", kr: "해외 수입 상품이에요" },
+  ]},
+  { title: "도움 요청 & 응대", theme: "🤝 도움", sentences: [
+    { lao: "ຊ່ວຍໄດ້ບໍ?", pron: "추아이 다이 버", kr: "도와드릴까요?" },
+    { lao: "ຕ້ອງການຄວາມຊ່ວຍເຫຼືອບໍ?", pron: "떵깐 콰암 추아이 르아 버", kr: "도움이 필요하신가요?" },
+    { lao: "ຂໍຄວາມຊ່ວຍເຫຼືອໜ້ອຍ", pron: "커 콰암 추아이 르아 너이", kr: "좀 도와주시겠어요?" },
+    { lao: "ຫາສິນຄ້າຫຍັງຢູ່?", pron: "하 씬카 냥 유", kr: "어떤 상품 찾으세요?" },
+    { lao: "ຕາມມາເລີຍ", pron: "땀 마 러이", kr: "따라오세요" },
+    { lao: "ຈະຖາມພະນັກງານໃຫ້", pron: "짜 탐 파낙 응안 하이", kr: "직원한테 여쭤볼게요" },
+    { lao: "ບໍ່ເຂົ້າໃຈ", pron: "버 카오짜이", kr: "이해 못했어요" },
+    { lao: "ເວົ້າຊ້າໆໄດ້ບໍ?", pron: "워 싸싸 다이 버", kr: "천천히 말씀해 주시겠어요?" },
+    { lao: "ຂຽນໃຫ້ເບິ່ງໄດ້ບໍ?", pron: "키안 하이 브 다이 버", kr: "써 보여 주시겠어요?" },
+    { lao: "ມີນາຍພາສາຊ່ວຍໄດ້ບໍ?", pron: "미 나이 파사 추아이 다이 버", kr: "통역사 있나요?" },
+  ]},
+  { title: "숫자 & 수량 표현", theme: "🔢 수량", sentences: [
+    { lao: "ໜຶ່ງອັນ", pron: "능 안", kr: "1개요" },
+    { lao: "ສອງອັນ", pron: "썽 안", kr: "2개요" },
+    { lao: "ສາມອັນ", pron: "쌈 안", kr: "3개요" },
+    { lao: "ຈັກອັນ?", pron: "짝 안", kr: "몇 개요?" },
+    { lao: "ເຄິ່ງກິໂລ", pron: "킁 낄로", kr: "반 킬로요" },
+    { lao: "ໜຶ່ງກິໂລ", pron: "능 낄로", kr: "1킬로요" },
+    { lao: "ສອງກິໂລ", pron: "썽 낄로", kr: "2킬로요" },
+    { lao: "ຈັກໂດຕໍ່ກິໂລ?", pron: "짝 도 떠 낄로", kr: "킬로당 얼마예요?" },
+    { lao: "ຊື້ສອງແຖມໜຶ່ງ", pron: "쓰 썽 탬 능", kr: "2개 사면 1개 무료예요" },
+    { lao: "ຊື້ຂັ້ນຕໍ່າ...ກີບ", pron: "쓰 칸 땀 ...낍", kr: "최소 ...낍 이상 구매해야 해요" },
+  ]},
+  { title: "멤버십 & 포인트", theme: "💳 멤버십", sentences: [
+    { lao: "ມີບັດສະມາຊິກບໍ?", pron: "미 밧 싸마칙 버", kr: "회원카드 있으세요?" },
+    { lao: "ສະໝັກສະມາຊິກໄດ້ທີ່ນີ້", pron: "싸막 싸마칙 다이 티니", kr: "여기서 회원 가입 하세요" },
+    { lao: "ສະແກນບັດດ້ວຍ", pron: "쌘 밧 두아이", kr: "카드 스캔해 주세요" },
+    { lao: "ສະສົມແຕ້ມໄດ້", pron: "싸솜 땜 다이", kr: "포인트 적립 됩니다" },
+    { lao: "ມີແຕ້ມ...ຄະແນນ", pron: "미 땜 ...카낸", kr: "포인트 ...점 있어요" },
+    { lao: "ໃຊ້ແຕ້ມແທນເງິນໄດ້", pron: "차이 땜 탠 응은 다이", kr: "포인트로 결제 되어요" },
+    { lao: "ສະມາຊິກໄດ້ສ່ວນຫຼຸດ", pron: "싸마칙 다이 쑤안 훗", kr: "회원은 할인 받아요" },
+    { lao: "ວັນເກີດຮັບສ່ວນຫຼຸດພິເສດ", pron: "완 끗 합 쑤안 훗 피쎗", kr: "생일에 특별 할인 받아요" },
+    { lao: "ດາວໂຫລດແອັບໄດ້ຟຣີ", pron: "다운롯 앱 다이 프리", kr: "앱 무료로 다운받으세요" },
+    { lao: "ແຕ້ມໝົດອາຍຸໃນ...ເດືອນ", pron: "땜 못 아유 나이 ...드안", kr: "포인트 ...달 후 소멸돼요" },
+  ]},
+  { title: "음료 코너", theme: "🧃 음료", sentences: [
+    { lao: "ເຄື່ອງດື່ມຢູ່ແຖວນີ້", pron: "크르앙 듬 유 태우 니", kr: "음료수는 이 줄에 있어요" },
+    { lao: "ນ້ຳດື່ມຢູ່ໃສ?", pron: "남 듬 유 싸이", kr: "생수는 어디 있어요?" },
+    { lao: "ເບຍຕ້ອງອາຍຸ 18 ປີ", pron: "비아 떵 아유 씹빼 삐", kr: "맥주는 만 18세 이상이어야 해요" },
+    { lao: "ເຄື່ອງດື່ມບໍ່ມີນ້ຳຕານ", pron: "크르앙 듬 버 미 남 딴", kr: "무설탕 음료 있어요" },
+    { lao: "ກາເຟສົດມີບໍ?", pron: "까페 솟 미 버", kr: "커피 원두 있나요?" },
+    { lao: "ຊາຫຼາຍຊະນິດ", pron: "싸 라이 싸닛", kr: "차 종류 많이 있어요" },
+    { lao: "ນ້ຳໝາກໄມ້ສົດຢູ່ທີ່ນີ້", pron: "남 막 마이 솟 유 티니", kr: "생과일 주스는 여기 있어요" },
+    { lao: "ເກັບໃນຕູ້ເຢັນດ້ວຍ", pron: "껩 나이 뚜 옌 두아이", kr: "냉장 보관하세요" },
+    { lao: "ດື່ມໄດ້ກ່ອນວັນທີ...", pron: "듬 다이 껀 완 티 ...", kr: "...일 전에 마시세요" },
+    { lao: "ແພັກປະຢັດມີ", pron: "팩 쁘라얏 미", kr: "절약 패키지 있어요" },
+  ]},
+  { title: "세제 & 생활용품", theme: "🧴 생활", sentences: [
+    { lao: "ຂອງໃຊ້ໃນເຮືອນຢູ່ຊັ້ນ...", pron: "컹 차이 나이 흐안 유 찬 ...", kr: "생활용품은 ...층에 있어요" },
+    { lao: "ຜົງຊັກຟອກຢູ່ແຖວນີ້", pron: "퐁 삭 뻑 유 태우 니", kr: "세탁세제는 이 줄에 있어요" },
+    { lao: "ເຈ້ຍຊຳລະຢູ່ຕາມນັ້ນ", pron: "쩨 쌈라 유 땀 난", kr: "화장지는 저기 있어요" },
+    { lao: "ສະບູຫຼາຍຍີ່ຫໍ້", pron: "싸부 라이 이허", kr: "비누 여러 브랜드 있어요" },
+    { lao: "ຢາສີຟັນຢູ່ທີ່ນີ້", pron: "야 씨 판 유 티니", kr: "치약은 여기 있어요" },
+    { lao: "ນ້ຳຢາລ້າງຈານຢູ່ຕາມນັ້ນ", pron: "남 야 랑 짠 유 땀 난", kr: "주방세제는 저 줄에 있어요" },
+    { lao: "ນ້ຳຍາປັບຜ້ານຸ້ມ", pron: "남 야 빱 파 놈", kr: "섬유유연제는 여기 있어요" },
+    { lao: "ຢາຂ້າແມງໄມ້ຢູ່ທາງນັ້ນ", pron: "야 카 맹 마이 유 탕 난", kr: "살충제는 저쪽에 있어요" },
+    { lao: "ຖົງຂີ້ເຫຍື້ອຫຼາຍຂະໜາດ", pron: "통 키 흐아 라이 카낫", kr: "쓰레기봉투 여러 사이즈 있어요" },
+    { lao: "ສິນຄ້າປະຢັດໄຟ", pron: "씬카 쁘라얏 파이", kr: "에너지 절약 상품이에요" },
+  ]},
+  { title: "약국 & 건강식품", theme: "💊 건강", sentences: [
+    { lao: "ຢາທົ່ວໄປຢູ່ໃສ?", pron: "야 투아 빠이 유 싸이", kr: "일반의약품은 어디 있어요?" },
+    { lao: "ຢາແກ້ປວດຫົວ", pron: "야 깨 뿌앗 후아", kr: "두통약 있어요" },
+    { lao: "ຢາແກ້ທ້ອງເສຍ", pron: "야 깨 텅 씨아", kr: "설사약 있어요" },
+    { lao: "ວິຕາມິນຢູ່ທີ່ນີ້", pron: "위타민 유 티니", kr: "비타민은 여기 있어요" },
+    { lao: "ພາສະໂຕ", pron: "파스 아 토", kr: "파스 있어요" },
+    { lao: "ອາຫານສຸຂະພາບ", pron: "아한 쑥카팝", kr: "건강식품이에요" },
+    { lao: "ຢາຕ້ອງມີໃບສັ່ງຢາ", pron: "야 떵 미 바이 쌍 야", kr: "처방전이 필요한 약이에요" },
+    { lao: "ຢາທ້ອງ", pron: "야 텅", kr: "위장약 있어요" },
+    { lao: "ຢາໄອ", pron: "야 아이", kr: "기침약 있어요" },
+    { lao: "ປຶກສາເຈົ້າໜ້າທີ່ໄດ້", pron: "뻑싸 쩌 나 티 다이", kr: "약사에게 상담하세요" },
+  ]},
+  { title: "불만 & 사과", theme: "😔 불만", sentences: [
+    { lao: "ຂໍໂທດທີ່ລໍຖ້ານານ", pron: "커 톳 티 러 타 난", kr: "오래 기다리게 해서 죄송해요" },
+    { lao: "ຈະຮີບດຳເນີນການໃຫ້", pron: "짜 힙 담 는인 깐 하이", kr: "빨리 처리해 드릴게요" },
+    { lao: "ຜູ້ຈັດການຈະມາດູແລ", pron: "푸 쩻깐 짜 마 두래", kr: "매니저가 와서 처리해 드릴게요" },
+    { lao: "ຈະກວດສອບທັນທີ", pron: "짜 꾸앗 썹 탄티", kr: "바로 확인해 드릴게요" },
+    { lao: "ຈະແກ້ໄຂໃຫ້", pron: "짜 깨 카이 하이", kr: "이 문제 해결해 드릴게요" },
+    { lao: "ບໍ່ຄວນເກີດຂຶ້ນ", pron: "버 쿠안 끗 큰", kr: "이런 일이 없었어야 했어요" },
+    { lao: "ຈະປັບປຸງໃຫ້ດີຂຶ້ນ", pron: "짜 빱 뿌 하이 디 큰", kr: "개선하도록 하겠습니다" },
+    { lao: "ຊ່ວຍຫຍັງໄດ້ອີກ?", pron: "추아이 냥 다이 익", kr: "더 도와드릴 게 있나요?" },
+    { lao: "ຄວາມພໍໃຈລູກຄ້າສຳຄັນ", pron: "콰암 퍼 짜이 룩카 쌈칸", kr: "고객 만족이 가장 중요해요" },
+    { lao: "ຂອບໃຈທີ່ແຈ້ງໃຫ້ຮູ້", pron: "컵짜이 티 쩽 하이 루", kr: "알려주셔서 감사합니다" },
+  ]},
+  { title: "긴급상황 & 안전", theme: "🚨 안전", sentences: [
+    { lao: "ລະວັງ!", pron: "라왕", kr: "조심하세요!" },
+    { lao: "ພື້ນລື່ນ", pron: "픈 른", kr: "바닥이 미끄러워요" },
+    { lao: "ຕ້ອງການຄວາມຊ່ວຍເຫຼືອດ່ວນ", pron: "떵깐 콰암 추아이 르아 두안", kr: "긴급 도움 필요해요" },
+    { lao: "ໂທຫານາຍແພດດ່ວນ", pron: "토 하 나이 패 두안", kr: "구급대원 불러주세요" },
+    { lao: "ທາງອອກສຸກເສີນຢູ່ຕາມນັ້ນ", pron: "탕 억 숙쓴 유 땀 난", kr: "비상구는 저기에 있어요" },
+    { lao: "ກະລຸນາອອກຈາກອາຄານ", pron: "까루나 억 짝 아칸", kr: "건물에서 나가주세요" },
+    { lao: "ຢ່າຕື່ນຕົກໃຈ", pron: "야 뜬 똑짜이", kr: "당황하지 마세요" },
+    { lao: "ຕາມທາງອອກສຸກເສີນ", pron: "땀 탕 억 숙쓴", kr: "비상구 표시를 따라가세요" },
+    { lao: "ໂທສຸກເສີນ 1623", pron: "토 숙쓴 능 혹 썽 쌈", kr: "긴급전화 1623이에요" },
+    { lao: "ຢູ່ນິ່ງໆ ຄວາມຊ່ວຍເຫຼືອຈະມາ", pron: "유 닝닝 콰암 추아이 르아 짜 마", kr: "가만히 계세요, 도움이 올 거예요" },
+  ]},
+  { title: "식당 & 푸드코트", theme: "🍜 식당", sentences: [
+    { lao: "ຮ້ານອາຫານຢູ່ຊັ້ນ...", pron: "란 아한 유 찬 ...", kr: "식당은 ...층이에요" },
+    { lao: "ມີໂຕ໊ະວ່າງບໍ?", pron: "미 또 왕 버", kr: "빈 자리 있나요?" },
+    { lao: "ສັ່ງອາຫານທີ່ເຄົ້າເຕີ", pron: "쌍 아한 티 카오 떠", kr: "카운터에서 주문하세요" },
+    { lao: "ອາຫານພ້ອມແລ້ວ", pron: "아한 프럼 래우", kr: "음식이 준비됐어요" },
+    { lao: "ກິນໄດ້ເລີຍ", pron: "낀 다이 러이", kr: "드세요" },
+    { lao: "ເຜັດບໍ?", pron: "펫 버", kr: "매운가요?" },
+    { lao: "ບໍ່ເຜັດໄດ້ບໍ?", pron: "버 펫 다이 버", kr: "안 맵게 해주세요" },
+    { lao: "ມີອາຫານຜັກບໍ?", pron: "미 아한 팍 버", kr: "채식 메뉴 있나요?" },
+    { lao: "ນ້ຳຟຣີຢູ່ຕາມນັ້ນ", pron: "남 프리 유 땀 난", kr: "무료 물은 저기 있어요" },
+    { lao: "ສົ່ງຖາດຄືນທີ່ນີ້", pron: "쏭 탓 큰 티니", kr: "식판은 여기에 반납하세요" },
+  ]},
+  { title: "마감 & 영업시간", theme: "⏰ 시간", sentences: [
+    { lao: "ຮ້ານເປີດຈັກໂມງ?", pron: "란 쁫 짝 몽", kr: "가게는 몇 시에 열어요?" },
+    { lao: "ຮ້ານປິດຈັກໂມງ?", pron: "란 삣 짝 몽", kr: "가게는 몇 시에 닫아요?" },
+    { lao: "ເປີດທຸກວັນ", pron: "쁫 툭 완", kr: "매일 열어요" },
+    { lao: "ໃກ້ເວລາປິດຮ້ານ", pron: "끌라이 웰라 삣 란", kr: "곧 마감 시간이에요" },
+    { lao: "ກະລຸນາຊຳລະດ່ວນ", pron: "까루나 쌈라 두안", kr: "빨리 계산해 주세요" },
+    { lao: "ເປີດ 24 ຊົ່ວໂມງ", pron: "쁫 이씹씨 추아 몽", kr: "24시간 영업이에요" },
+    { lao: "ວັນພັກກໍ່ເປີດ", pron: "완 팍 꺼 쁫", kr: "공휴일에도 열어요" },
+    { lao: "ຊັ້ນນີ້ປິດກ່ອນ", pron: "찬 니 삣 껀", kr: "이 층은 먼저 닫아요" },
+    { lao: "ເວລາທຳການ 8 ໂມງ ຫາ 22 ໂມງ", pron: "웰라 탐 깐 빼 몽 하 이씹썽 몽", kr: "영업시간 오전 8시~밤 10시예요" },
+    { lao: "ຂອບໃຈທີ່ມາໃຊ້ບໍລິການ", pron: "컵짜이 티 마 차이 버리깐", kr: "이용해 주셔서 감사합니다" },
+  ]},
+  { title: "결제 기술 & 앱", theme: "📲 앱결제", sentences: [
+    { lao: "ສະແກນ QR Code ໄດ້", pron: "쌘 큐아르 코드 다이", kr: "QR코드 스캔하세요" },
+    { lao: "ຈ່າຍຜ່ານແອັບໄດ້", pron: "짜이 판 앱 다이", kr: "앱으로 결제 되어요" },
+    { lao: "ໂອນເງິນໄດ້", pron: "온 응은 다이", kr: "계좌이체 됩니다" },
+    { lao: "ແຕະບັດທີ່ເຄື່ອງອ່ານ", pron: "땨 밧 티 크르앙 안", kr: "카드 리더기에 탭하세요" },
+    { lao: "ໃສ່ລະຫັດ PIN", pron: "싸이 라핫 핀", kr: "PIN 번호 입력하세요" },
+    { lao: "ໃບຮັບເງິນທາງອີເມລ", pron: "바이 합 응은 탕 이 멜", kr: "전자영수증 이메일로 보내드려요" },
+    { lao: "ເຄື່ອງຮູດບັດຂັດຂ້ອງ", pron: "크르앙 훗 밧 캇 컹", kr: "카드단말기 오류가 났어요" },
+    { lao: "ລອງໃໝ່ໄດ້ບໍ?", pron: "렁 마이 다이 버", kr: "다시 한 번 해보시겠어요?" },
+    { lao: "ບັດຖືກປະຕິເສດ", pron: "밧 툭 빠띠쎗", kr: "카드가 거절됐어요" },
+    { lao: "ຕິດຕໍ່ທະນາຄານຂອງທ່ານ", pron: "띳떵 타나칸 컹 탄", kr: "거래 은행에 연락해 보세요" },
+  ]},
+  { title: "종합 복습 & 실전", theme: "🏆 실전", sentences: [
+    { lao: "ສະບາຍດີ, ມື້ນີ້ຊ່ວຍຫຍັງໄດ້?", pron: "사바이디 므니 추아이 냥 다이", kr: "안녕하세요, 오늘 무엇을 도와드릴까요?" },
+    { lao: "ຍິນດີຕ້ອນຮັບສູ່ຮ້ານຂອງພວກເຮົາ", pron: "인디 떤합 쑤 란 컹 푸악 라오", kr: "저희 매장에 오신 것을 환영합니다" },
+    { lao: "ມີຄຳຖາມຫຍັງບໍ?", pron: "미 캄 탐 냥 버", kr: "궁금한 점 있으신가요?" },
+    { lao: "ຂອບໃຈທີ່ໃຊ້ບໍລິການ", pron: "컵짜이 티 차이 버리깐", kr: "이용해 주셔서 감사합니다" },
+    { lao: "ກັບມາໃໝ່ນະ", pron: "깝 마 마이 나", kr: "또 오세요" },
+    { lao: "ຊື້ເຄື່ອງໃຫ້ມ່ວນ", pron: "쓰 크르앙 하이 무안", kr: "즐거운 쇼핑 하세요" },
+    { lao: "ຖ້າມີບັນຫາບອກໄດ້ເລີຍ", pron: "타 미 반하 벅 다이 러이", kr: "문제 있으면 말씀하세요" },
+    { lao: "ບໍລິການດີທີ່ສຸດ", pron: "버리깐 디 티 쑷", kr: "최선의 서비스를 제공하겠습니다" },
+    { lao: "ຂໍໃຫ້ມີຄວາມສຸກ", pron: "커 하이 미 콰암 숙", kr: "행복한 하루 되세요" },
+    { lao: "ພົບກັນໃໝ່", pron: "폽 깐 마이", kr: "다음에 또 만나요" },
+  ]},
+];
+
+// ===================== 상태 =====================
+let state = JSON.parse(localStorage.getItem('laoLearning') || '{}');
+// state.completed = [1,2,...] (완료한 날짜)
+// state.learned = { day: [0,1,...] } (각 날의 학습한 문장 인덱스)
+if (!state.completed) state.completed = [];
+if (!state.learned) state.learned = {};
+
+let currentDay = null;
+let currentTab = 'learn';
+
+// 퀴즈 상태
+let quizState = { questions: [], currentQ: 0, score: 0, answered: false };
+
+function save() {
+  localStorage.setItem('laoLearning', JSON.stringify(state));
+}
+
+// ===================== 날짜 셀렉터 렌더링 =====================
+function renderDaySelector() {
+  const container = document.getElementById('daySelector');
+  container.innerHTML = '';
+  for (let d = 1; d <= 30; d++) {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn';
+    btn.textContent = d + '일';
+    
+    const isCompleted = state.completed.includes(d);
+    const isAvailable = d === 1 || state.completed.includes(d - 1) || isCompleted;
+    const isCurrent = !isCompleted && isAvailable;
+    
+    if (isCompleted) btn.classList.add('completed');
+    else if (isCurrent) btn.classList.add('current');
+    else if (isAvailable) btn.classList.add('available');
+    else btn.classList.add('locked');
+    
+    if (isAvailable || isCompleted) {
+      btn.onclick = () => selectDay(d);
+    }
+    container.appendChild(btn);
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = (state.completed.length / 30) * 100;
+  document.getElementById('mainProgress').style.width = pct + '%';
+  document.getElementById('mainProgressLabel').textContent = `${state.completed.length} / 30일 완료 (${Math.round(pct)}%)`;
+}
+
+// ===================== 날짜 선택 =====================
+function selectDay(day) {
+  currentDay = day;
+  renderLearningArea(day);
+}
+
+function renderLearningArea(day) {
+  const area = document.getElementById('learningArea');
+  const dayData = curriculum[day - 1];
+  const isCompleted = state.completed.includes(day);
+  const prevDay = day - 1;
+  const hasPrev = prevDay >= 1 && state.completed.includes(prevDay);
+  const learnedToday = state.learned[day] || [];
+  
+  let html = '';
+
+  // 날짜 정보
+  html += `<div class="day-info">
+    <div class="day-info-left">
+      <h2>${dayData.theme} ${dayData.title}</h2>
+      <p>${day}일차 · 10문장 · 마트 실전 회화</p>
+    </div>
+    <div class="day-badge">${isCompleted ? '✓ 완료' : day + '일차'}</div>
+  </div>`;
+
+  // 복습 섹션 (전날 완료했을 때)
+  if (hasPrev && day > 1) {
+    const prevData = curriculum[prevDay - 1];
+    html += `<div class="review-banner">
+      <div class="icon">🔄</div>
+      <div>
+        <h3>${prevDay}일차 복습: ${prevData.title}</h3>
+        <p>어제 배운 문장을 먼저 복습해요!</p>
+      </div>
+    </div>`;
+    html += `<div class="section-title">📖 복습 (${prevDay}일차)</div>`;
+    prevData.sentences.forEach((s, i) => {
+      html += renderSentenceCard(s, i, `prev-${prevDay}`, true);
+    });
+    html += `<div style="margin: 20px 0"></div>`;
+  }
+
+  // 오늘 학습
+  html += `<div class="section-title">✏️ 오늘 학습 (${day}일차)</div>`;
+  dayData.sentences.forEach((s, i) => {
+    const isLearned = learnedToday.includes(i);
+    html += renderSentenceCard(s, i, `today-${day}`, false, isLearned);
+  });
+
+  const allLearned = dayData.sentences.every((_, i) => learnedToday.includes(i));
+  
+  if (!isCompleted) {
+    html += `<button class="complete-btn" id="completeBtn" ${allLearned ? '' : 'disabled'} onclick="completeDay(${day})">
+      ${allLearned ? '✅ 오늘 학습 완료하기!' : `📝 문장을 모두 학습하세요 (${learnedToday.length}/10)`}
+    </button>`;
+  } else {
+    html += `<div style="text-align:center; padding:20px; color: #7ee787; font-size:14px;">🎉 ${day}일차 완료! 다음 날로 이동하세요.</div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+function renderSentenceCard(s, i, group, isReview, isLearned = false) {
+  const cardId = `card-${group}-${i}`;
+  const btnId = `learn-${group}-${i}`;
+  const speakId = `speak-${group}-${i}`;
+  const pronEncoded = encodeURIComponent(s.pron);
+  return `<div class="sentence-card ${isLearned ? 'learned' : ''}" id="${cardId}">
+    <div class="card-num">${isReview ? '복습' : '학습'} ${i + 1}</div>
+    <div class="lao-text">${s.lao}</div>
+    <div class="pronunciation">🔊 ${s.pron}</div>
+    <div class="korean">🇰🇷 ${s.kr}</div>
+    <div class="card-actions">
+      <button class="speak-btn" id="${speakId}" data-lao="${s.lao}" onclick="speakFromBtn(this)">▶ 발음 듣기</button>
+      ${!isReview ? `<button class="learn-btn ${isLearned ? 'done' : ''}" id="${btnId}" onclick="markLearned(${currentDay}, ${i})">
+        ${isLearned ? '✓ 학습완료' : '학습했어요'}
+      </button>` : ''}
+    </div>
+  </div>`;
+}
+
+const hasTTS = (typeof window !== 'undefined') && ('speechSynthesis' in window) && (typeof SpeechSynthesisUtterance !== 'undefined');
+
+function speakFromBtn(btn) {
+  const thai = btn.getAttribute('data-lao');
+  if (!hasTTS) {
+    showPronPopup(thai);
+    return;
+  }
+  speakLao(thai, btn);
+}
+
+// TTS 미지원 기기: 발음 팝업으로 표시
+function showPronPopup(pron) {
+  let popup = document.getElementById('pronPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'pronPopup';
+    popup.style.cssText = `
+      position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:40px;
+    `;
+    popup.innerHTML = `
+      <div style="background:#21262d; border:1px solid #f39c12; border-radius:16px; padding:36px 28px; text-align:center; width:100%; max-width:340px;">
+        <div style="font-size:13px; color:#8b949e; margin-bottom:16px; letter-spacing:2px;">🔊 한국어 발음</div>
+        <div id="pronText" style="font-size:28px; font-weight:700; color:#f8e4a0; line-height:1.5; word-break:keep-all;"></div>
+        <div style="margin-top:8px; font-size:12px; color:#8b949e;">크롬 브라우저에서 음성 재생 가능</div>
+        <button onclick="document.getElementById('pronPopup').remove()"
+          style="margin-top:24px; padding:12px 32px; background:#c0392b; border:none; border-radius:50px; color:white; font-size:15px; font-family:'Noto Sans KR',sans-serif; font-weight:700; cursor:pointer;">
+          닫기
+        </button>
+      </div>`;
+    document.body.appendChild(popup);
+  }
+  document.getElementById('pronText').textContent = pron;
+  popup.style.display = 'flex';
+  popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
+}
+
+// ===================== 발음 재생 (Google TTS - 태국어 원어민) =====================
+const GCP_TTS_KEY = 'AIzaSyAndOzle6i58ItvWgEJF8rz';
+let _currentAudio = null;
+
+async function speakLao(lao, btn) {
+  const clean = lao.replace(/\/[^\s]*/g, '').trim();
+  if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+  if (btn) { btn.classList.add('playing'); btn.textContent = '⏸ 읽는 중...'; }
+  const resetBtn = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; } };
+
+  try {
+    const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${GCP_TTS_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { text: clean },
+        voice: { languageCode: 'th-TH', ssmlGender: 'FEMALE' },
+        audioConfig: { audioEncoding: 'MP3', speakingRate: 0.85 }
+      })
+    });
+    const data = await res.json();
+    if (data.audioContent) {
+      const audio = new Audio('data:audio/mp3;base64,' + data.audioContent);
+      _currentAudio = audio;
+      audio.onended = () => { resetBtn(); _currentAudio = null; };
+      audio.onerror = () => { resetBtn(); fallbackTTS(clean, btn); };
+      await audio.play();
+    } else {
+      fallbackTTS(clean, btn);
+    }
+  } catch(e) {
+    fallbackTTS(clean, btn);
+  }
+}
+
+function fallbackTTS(text, btn) {
+  const resetBtn = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '▶ 발음 듣기'; } };
+  try {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'lo';
+    utter.rate = 0.8;
+    utter.onend = resetBtn;
+    utter.onerror = () => { resetBtn(); showPronPopup(text); };
+    window.speechSynthesis.speak(utter);
+  } catch(e) {
+    resetBtn();
+    showPronPopup(text);
+  }
+}
+
+// ===================== 학습 완료 마킹 =====================
+function markLearned(day, sentenceIdx) {
+  if (!state.learned[day]) state.learned[day] = [];
+  if (!state.learned[day].includes(sentenceIdx)) {
+    state.learned[day].push(sentenceIdx);
+    save();
+  }
+  renderLearningArea(day);
+}
+
+function completeDay(day) {
+  const learnedToday = state.learned[day] || [];
+  if (learnedToday.length < 10) {
+    showToast('📝 모든 문장을 학습해 주세요!');
+    return;
+  }
+  if (!state.completed.includes(day)) {
+    state.completed.push(day);
+    save();
+  }
+  renderDaySelector();
+  renderLearningArea(day);
+  showToast(`🎉 ${day}일차 완료! 대단해요!`);
+  updateStats();
+}
+
+// ===================== 탭 전환 =====================
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['learn', 'quiz', 'translate', 'stats'][i] === tab);
+  });
+  document.getElementById('tab-learn').classList.toggle('hidden', tab !== 'learn');
+  document.getElementById('tab-quiz').classList.toggle('hidden', tab !== 'quiz');
+  document.getElementById('tab-translate').classList.toggle('hidden', tab !== 'translate');
+  document.getElementById('tab-stats').classList.toggle('hidden', tab !== 'stats');
+  if (tab === 'stats') updateStats();
+}
+
+// ===================== 번역 탭 =====================
+let _translateLao = '';
+
+function clearTranslateResult() {
+  document.getElementById('translateResult').style.display = 'none';
+  _translateLao = '';
+}
+
+async function doTranslate(text) {
+  const input = text || document.getElementById('translateInput').value.trim();
+  if (!input) { showToast('번역할 내용을 입력해주세요!'); return; }
+  if (!text) document.getElementById('translateInput').value = input;
+
+  const resultBox = document.getElementById('translateResult');
+  const thaiEl = document.getElementById('translateLao');
+  const pronEl = document.getElementById('translatePron');
+  thaiEl.textContent = '번역 중...';
+  pronEl.innerHTML = '<span style="color:var(--text2);font-size:12px;">발음 가져오는 중...</span>';
+  resultBox.style.display = 'block';
+
+  try {
+    // 1단계: 한국어 → 라오어 번역
+    const url1 = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=lo&dt=t&q=${encodeURIComponent(input)}`;
+    const res1 = await fetch(url1);
+    const data1 = await res1.json();
+    const thaiText = data1[0].map(x => x[0]).join('');
+
+    _translateLao = thaiText;
+    thaiEl.textContent = thaiText;
+
+    // 2단계: 태국어 자체를 한글 발음으로 변환 (로마자 없이 직접 변환)
+    try {
+      const korPron = thaiToKorean(thaiText);
+      // 로마자도 참고용으로 시도
+      let romaji = '';
+      try {
+        const url2 = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=th&tl=en&dt=t&dt=rm&q=${encodeURIComponent(thaiText)}`;
+        const res2 = await fetch(url2);
+        const data2 = await res2.json();
+        if (data2[0] && data2[0][0] && data2[0][0][3]) {
+          romaji = data2[0].map(x => (x[3] || '')).join('').trim();
+        }
+      } catch(e) {}
+
+      pronEl.innerHTML =
+        `<span style="color:#90caf9;font-size:15px;font-weight:600;line-height:1.8;">🔊 ${korPron}</span>`
+        + (romaji ? `<br><span style="color:var(--text2);font-size:11px;">${romaji}</span>` : '');
+    } catch(e2) {
+      pronEl.innerHTML = '<span style="color:var(--text2);font-size:12px;">발음 표시 실패</span>';
+    }
+
+  } catch(e) {
+    thaiEl.textContent = '번역 실패 — 인터넷 연결을 확인해주세요';
+    pronEl.innerHTML = '';
+  }
+}
+
+
+// ===================== 태국어 문자 → 한글 발음 직접 변환 =====================
+function thaiToKorean(thai) {
+  if (!thai) return '';
+
+  // 태국어 자음 → 초성/종성 한글 소리
+  const initCon = {
+    'ก':'ก→끄','ข':'크','ค':'크','ง':'응','จ':'짜','ฉ':'차','ช':'ช→차','ซ':'싸',
+    'ญ':'야','ด':'다','ต':'따','ถ':'타','ท':'ท→타','ธ':'타','น':'나','บ':'바',
+    'ป':'빠','ผ':'파','ฝ':'파','พ':'파','ฟ':'파','ภ':'파','ม':'마','ย':'야',
+    'ร':'라','ล':'라','ว':'와','ศ':'싸','ษ':'싸','ส':'싸','ห':'하','ฬ':'라',
+    'อ':'','ฮ':'하',
+  };
+  const finalCon = {
+    'ก':'ก','ข':'크','ค':'크','ง':'응','น':'น','บ':'บ','ป':'ป','พ':'파',
+    'ฟ':'파','ภ':'파','ม':'ม','ย':'이','ว':'우','ร':'ร','ล':'ล',
+  };
+
+  // 태국어 모음 패턴 → 한글 소리 (간략 변환)
+  // 태국어는 자모 조합이 복잡하므로 음절 단위 직접 사전 사용
+  const syllableMap = {
+    // 일상 단어
+    'สวัสดี':'사왓디','ครับ':'크랍','ค่ะ':'카','คะ':'카',
+    'ขอบคุณ':'컵쿤','ไม่เป็นไร':'마이뻰라이','ใช่':'차이','ไม่ใช่':'마이차이',
+    'โอเค':'오케이','ขอโทษ':'커톳','รอสักครู่':'러삭크루',
+    'แล้วพบกัน':'래우폽깐','ใหม่':'마이','ยินดีต้อนรับ':'인디떤랍',
+    'เท่าไหร่':'타오라이','ทั้งหมด':'탕못','บาท':'밧',
+    'ชำระเงิน':'참라응은','ที่นี่':'티니','จ่าย':'짜이',
+    'ด้วย':'두아이','บัตร':'밧','ได้':'다이','ไหม':'마이',
+    'เงินสด':'응은솟','เงินทอน':'응은턴','ทอน':'턴',
+    'ใบเสร็จ':'바이쎗','ลด':'롯','ราคา':'라카','สินค้า':'씬카',
+    'นี้':'니','สิบ':'씹','เปอร์เซ็น':'퍼썬',
+    'อยู่':'유','ที่ไหน':'티나이','ชั้น':'찬','ตรงไป':'뜨롱빠이',
+    'เลี้ยว':'리아우','ซ้าย':'싸이','ขวา':'콰','ใกล้ๆ':'끌라이끌라이',
+    'ห้องน้ำ':'헝남','ลิฟต์':'립','ทางนี้':'탕니',
+    'ป้าย':'빠이','บอกทาง':'벅탕','ตรงนั้น':'뜨롱난',
+    'ช่วย':'추아이','มี':'미','หมด':'못','แล้ว':'래우',
+    'อีก':'익','วันไหน':'완나이','เข้า':'카우','ขนาด':'카낫',
+    'อื่น':'은','สี':'씨','อันนี้':'안니','อะไร':'아라이',
+    'ของสด':'컹쏫','วันหมดอายุ':'완못아유','เมื่อไหร่':'므아라이',
+    'ต่อชิ้น':'떠친','ถุง':'퉁','เอา':'아오','ห่อ':'허',
+    'ใส่':'싸이','กล่อง':'끌롱','ถุงร้อน':'퉁런','หนัก':'낙',
+    'ช่วย':'추아이','ยก':'욕','ใส่':'싸이',
+    // 일반 단어
+    'แมว':'매우','หมา':'마','แมว':'매우','ปลา':'쁠라',
+    'ข้าว':'카오','น้ำ':'남','กิน':'낀','อร่อย':'아로이',
+    'ร้าน':'란','ซื้อ':'쓰','ขาย':'카이','ราคา':'라카',
+    'ถูก':'툭','แพง':'팽','ดี':'디','ไม่ดี':'마이디',
+    'มาก':'막','น้อย':'노이','พอ':'퍼','เต็ม':'뗌',
+    'เปิด':'쁘엇','ปิด':'삣','วัน':'완','เวลา':'웰라',
+    'เช้า':'차오','เย็น':'옌','คืน':'큰','กลาง':'끌랑',
+    'ใหญ่':'야이','เล็ก':'렉','หนัก':'낙','เบา':'바오',
+    'ร้อน':'런','เย็น':'옌','อุ่น':'운',
+    'ขอ':'커','ต้องการ':'떵깐','อยาก':'약',
+    'ทำ':'탐','ไป':'빠이','มา':'마','กลับ':'끌랍',
+    'รู้':'루','เข้าใจ':'카오짜이','พูด':'풋','ฟัง':'팡',
+    'หนึ่ง':'능','สอง':'쏭','สาม':'쌈','สี่':'씨',
+    'ห้า':'하','หก':'혹','เจ็ด':'쩻','แปด':'빼ต',
+    'เก้า':'까오','สิบ':'씹',
+  };
+
+  // 1. 전체 문자열 직접 매핑 시도
+  if (syllableMap[thai]) return syllableMap[thai];
+
+  // 2. 슬래시 처리 후 앞부분만
+  const cleanThai = thai.replace(/\/.*$/, '').trim();
+  if (syllableMap[cleanThai]) return syllableMap[cleanThai];
+
+  // 3. 공백으로 분리된 단어별 매핑
+  const words = cleanThai.split(/\s+/);
+  const parts = words.map(w => syllableMap[w] || thaiWordFallback(w));
+  return parts.join(' ');
+}
+
+function thaiWordFallback(word) {
+  // 모르는 단어는 음절 사전에서 최대 매칭
+  const syllableMap = {
+    'สวัสดี':'사왓디','ครับ':'크랍','ค่ะ':'카','คะ':'카',
+    'ขอบคุณ':'컵쿤','ใช่':'차이','ไม่':'마이','โอเค':'오케이',
+    'ขอโทษ':'커톳','ยินดี':'인디','ต้อนรับ':'떤랍',
+    'เท่าไหร่':'타오라이','ทั้งหมด':'탕못','บาท':'밧',
+    'ชำระ':'참라','เงิน':'응은','ที่นี่':'티니',
+    'จ่าย':'짜이','ด้วย':'두아이','บัตร':'밧','ได้':'다이',
+    'ไหม':'마이','เงินสด':'응은솟','ทอน':'턴',
+    'ใบเสร็จ':'바이쎗','ลด':'롯','ราคา':'라카','สินค้า':'씬카',
+    'นี้':'니','สิบ':'씹','เปอร์เซ็น':'퍼썬',
+    'อยู่':'유','ที่ไหน':'티나이','ชั้น':'찬',
+    'เลี้ยว':'리아우','ซ้าย':'싸이','ขวา':'콰',
+    'ห้องน้ำ':'헝남','ลิฟต์':'립','มี':'미','หมด':'못',
+    'แมว':'매우','ปลา':'쁠라','ข้าว':'카오','น้ำ':'남',
+    'ร้าน':'란','ขาย':'카이','ถูก':'툭','แพง':'팽',
+    'ดี':'디','มาก':'막','น้อย':'노이','เปิด':'쁘엇',
+    'ปิด':'삣','วัน':'완','ใหญ่':'야이','เล็ก':'렉',
+    'ร้อน':'런','เย็น':'옌','ขอ':'커','ไป':'빠이',
+    'มา':'마','หนึ่ง':'능','สอง':'쏭','สาม':'쌈',
+    'ห้า':'하','หก':'혹','เก้า':'까오',
+    'ถุง':'퉁','เอา':'아오','กล่อง':'끌롱',
+    'อร่อย':'아로이','กิน':'낀','ซื้อ':'쓰',
+  };
+
+  // 부분 매칭
+  let result = '';
+  let i = 0;
+  while (i < word.length) {
+    let matched = false;
+    for (let len = Math.min(10, word.length - i); len >= 1; len--) {
+      const chunk = word.substring(i, i + len);
+      if (syllableMap[chunk]) {
+        result += syllableMap[chunk];
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) { i++; } // 모르는 자모는 스킵
+  }
+  return result || '?';
+}
+
+// 로마자(태국어 romanization) → 한글 발음 변환
+function romajiToKorean(romaji) {
+  if (!romaji) return '';
+  // 공백/하이픈 기준으로 음절 분리 후 각각 변환
+  return romaji.split(/\s+/).map(word => convertWord(word)).join(' ');
+}
+
+function convertWord(w) {
+  w = w.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return '';
+
+  // 태국어 로마자 → 한글 변환 규칙 (길이순 우선)
+  const rules = [
+    // 자음 클러스터 (3자)
+    ['ngh','응'],['thr','트'],['phr','프'],['khr','크'],
+    // 자음 클러스터 (2자)
+    ['th','ท'],['ph','프'],['kh','크'],['ng','응'],['ch','ช'],
+    ['tr','뜨'],['pr','쁘'],['kr','끄'],['pl','쁠'],['kl','끌'],
+    ['wh','우'],
+    // 이중모음 (2자)
+    ['ae','แอ'],['ao','อาว'],['ai','อาย'],['ay','อาย'],
+    ['oe','เออ'],['oo','อู'],['ua','อัว'],['ia','เอีย'],
+    ['eu','เอ'],['aw','ออ'],['ue','อือ'],['oi','ออย'],['ui','อุ้ย'],
+    // 단자음
+    ['p','ป'],['b','บ'],['t','ต'],['d','ด'],['k','ก'],['g','ก'],
+    ['m','ม'],['n','น'],['l','ล'],['r','ร'],['w','ว'],['y','ย'],
+    ['h','ห'],['f','ฝ'],['s','ส'],['v','ว'],['j','จ'],['c','ค'],
+    // 단모음
+    ['a','า'],['i','ิ'],['u','ุ'],['e','เ'],['o','โ'],
+  ];
+
+  // 태국 문자 → 한글 소리
+  const sound = {
+    'ป':'ป→빠','บ':'บ→바','ต':'ต→따','ด':'ด→다','ก':'ก→까','ม':'ม→마',
+    'น':'น→나','ล':'ล→라','ร':'ร→라','ว':'ว→와','ย':'ย→야','ห':'ห→하',
+    'ฝ':'ฝ→파','ส':'ส→싸','จ':'จ→짜','ค':'ค→카','ช':'ช→차',
+    'ท':'ท→타','า':'아','ิ':'이','ุ':'우','เ':'에','โ':'오',
+    'แอ':'แอ→แอ','อาว':'อาว→아오','อาย':'อาย→아이','เออ':'เออ→เออ',
+    'อู':'อู→우','อัว':'อัว→우아','เอีย':'เอีย→이아','เอ':'เอ→에',
+    'ออ':'ออ→오','อือ':'อือ→으','ออย':'ออย→오이','อุ้ย':'อุ้ย→우이',
+    '응':'응','뜨':'뜨','쁘':'쁘','끄':'끄','쁠':'쁠','끌':'끌','우':'우','프':'프','크':'크',
+  };
+
+  // 직접 음절 한글 발음 사전 (가장 자주 나오는 태국어 음절)
+  const directSyllable = {
+    'sa':'싸','si':'씨','se':'세','so':'쏘','su':'쑤',
+    'ka':'까','ki':'끼','ke':'께','ko':'꼬','ku':'꾸',
+    'kha':'카','khi':'키','khe':'케','kho':'코','khu':'쿠',
+    'ta':'따','ti':'띠','te':'떼','to':'또','tu':'뚜',
+    'tha':'타','thi':'티','the':'테','tho':'토','thu':'투',
+    'pa':'빠','pi':'삐','pe':'뻬','po':'뽀','pu':'뿌',
+    'pha':'파','phi':'피','phe':'페','pho':'포','phu':'푸',
+    'ba':'바','bi':'비','be':'베','bo':'보','bu':'부',
+    'da':'다','di':'디','de':'데','do':'도','du':'두',
+    'ma':'마','mi':'미','me':'메','mo':'모','mu':'무',
+    'na':'나','ni':'니','ne':'네','no':'노','nu':'누',
+    'la':'라','li':'리','le':'레','lo':'로','lu':'루',
+    'ra':'라','ri':'리','re':'레','ro':'로','ru':'루',
+    'wa':'와','wi':'위','we':'웨','wo':'워',
+    'ya':'야','yi':'이','ye':'예','yo':'요','yu':'유',
+    'ha':'하','hi':'히','he':'헤','ho':'호','hu':'후',
+    'fa':'파','fi':'피','fe':'페','fo':'포','fu':'푸',
+    'ja':'짜','ji':'찌','je':'쩨','jo':'쪼','ju':'쭈',
+    'cha':'차','chi':'치','che':'체','cho':'초','chu':'추',
+    'nga':'응아','ngi':'응이','nge':'응에','ngo':'응오','ngu':'응우',
+    'nai':'나이','mai':'마이','rai':'라이','pai':'빠이','sai':'싸이',
+    'kan':'깐','man':'만','nan':'난','lan':'란','tan':'딴',
+    'ang':'앙','eng':'엥','ing':'잉','ong':'옹','ung':'웅',
+    'an':'안','en':'엔','in':'인','on':'온','un':'운',
+    'am':'암','em':'엠','im':'임','om':'옴','um':'움',
+    'at':'앗','it':'잇','ot':'옷','ut':'웃','et':'엣',
+    'ak':'악','ik':'익','ok':'옥','uk':'욱','ek':'엑',
+    'ap':'압','ip':'입','op':'옵','up':'웁','ep':'엡',
+    'ao':'아오','ai':'아이','ae':'แอ','aw':'오','oe':'เอ',
+    'krap':'크랍','khrap':'크랍','kha':'카','khop':'컵','khun':'쿤',
+    'mai':'마이','chai':'차이','pen':'뻰','dai':'다이',
+    'tao':'타오','rai':'라이','tang':'탕','mot':'못',
+    'ngan':'응안','sot':'쏫','ton':'떤','bai':'바이',
+    'set':'쎗','rot':'롯','sip':'씹','lod':'롯',
+    'yu':'유','nai':'나이','chan':'찬','nit':'닛',
+    'nueng':'능','song':'쏭','sam':'쌈',
+    'ha':'하','hok':'혹','jet':'쩻','kao':'까오',
+    'di':'디','dee':'디','mai':'마이',
+    'wat':'왓','rat':'랏','bat':'밧',
+    'phon':'폰','khong':'컹','khon':'콘',
+    'rap':'랍','cap':'짭',
+    'rian':'리안','phasa':'파사',
+    'sawat':'사왓','wat':'왓',
+    'yin':'인','dee':'디','ton':'떤',
+    'khob':'컵','khun':'쿤',
+    'laew':'래우','phop':'폽',
+  };
+
+  // 먼저 직접 매핑 시도
+  if (directSyllable[w]) return directSyllable[w];
+
+  // 없으면 규칙 기반 변환
+  let result = '';
+  let i = 0;
+  while (i < w.length) {
+    let matched = false;
+    for (let len = Math.min(4, w.length - i); len >= 1; len--) {
+      const chunk = w.substring(i, i + len);
+      const rule = rules.find(r => r[0] === chunk);
+      if (rule) {
+        const mapped = rule[1];
+        // 태국 문자가 있으면 소리 변환
+        result += sound[mapped] ? sound[mapped].split('→')[1] : mapped;
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) { result += w[i]; i++; }
+  }
+  return result || w;
+}
+
+function quickTranslate(phrase) {
+  document.getElementById('translateInput').value = phrase;
+  doTranslate(phrase);
+}
+
+function speakTranslate() {
+  if (!_translateLao) return;
+  const btn = document.getElementById('translateSpeakBtn');
+  speakLao(_translateLao, btn);
+}
+
+// ===================== 퀴즈 =====================
+function startQuiz() {
+  if (state.completed.length === 0) {
+    showToast('📚 먼저 학습을 완료해 주세요!');
+    return;
+  }
+  
+  // 완료한 날들에서 랜덤 문장 10개
+  let pool = [];
+  state.completed.forEach(d => {
+    curriculum[d-1].sentences.forEach(s => pool.push({...s, day: d}));
+  });
+  
+  pool = pool.sort(() => Math.random() - 0.5).slice(0, Math.min(10, pool.length));
+  quizState = { questions: pool, currentQ: 0, score: 0, answered: false };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const area = document.getElementById('quizArea');
+  if (quizState.currentQ >= quizState.questions.length) {
+    area.innerHTML = `<div class="quiz-card">
+      <div style="font-size:60px; margin-bottom:16px">🏆</div>
+      <h2 style="font-size:24px; margin-bottom:8px; font-family: 'Noto Sans KR', sans-serif;">${quizState.score} / ${quizState.questions.length}</h2>
+      <p style="color: var(--text2); margin-bottom:24px;">
+        ${quizState.score >= 8 ? '완벽해요! 🎉' : quizState.score >= 5 ? '잘 했어요! 👍' : '계속 연습해요! 💪'}
+      </p>
+      <button class="complete-btn" style="max-width:200px; margin: 0 auto;" onclick="startQuiz()">다시 풀기</button>
+    </div>`;
+    return;
+  }
+  
+  const q = quizState.questions[quizState.currentQ];
+  const wrongPool = curriculum.flatMap(d => d.sentences).filter(s => s.lao !== q.thai);
+  const wrongs = wrongPool.sort(() => Math.random() - 0.5).slice(0, 3);
+  const opts = [...wrongs, q].sort(() => Math.random() - 0.5);
+  
+  area.innerHTML = `<div class="quiz-card">
+    <div style="font-size:12px; color: var(--text2); margin-bottom:12px">${quizState.currentQ + 1} / ${quizState.questions.length}</div>
+    <div class="quiz-question">${q.lao}</div>
+    <div class="quiz-hint">이 라오어의 뜻은?</div>
+    <div class="quiz-options">
+      ${opts.map((o, i) => `<button class="quiz-option" onclick="answerQuiz(${i}, '${o.kr}', '${q.kr}')">${o.kr}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function answerQuiz(idx, selected, correct) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+  
+  const buttons = document.querySelectorAll('.quiz-option');
+  buttons.forEach(b => {
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b.textContent === selected && selected !== correct) b.classList.add('wrong');
+    b.onclick = null;
+  });
+  
+  if (selected === correct) quizState.score++;
+  
+  setTimeout(() => {
+    quizState.currentQ++;
+    quizState.answered = false;
+    renderQuiz();
+  }, 1200);
+}
+
+// ===================== 통계 =====================
+function updateStats() {
+  const totalSentences = state.completed.length * 10;
+  document.getElementById('statDays').textContent = state.completed.length;
+  document.getElementById('statSentences').textContent = totalSentences;
+  
+  // 연속 학습일 계산
+  let streak = 0;
+  let sorted = [...state.completed].sort((a,b) => b-a);
+  for (let i = 0; i < sorted.length; i++) {
+    if (i === 0 || sorted[i-1] - sorted[i] === 1) streak++;
+    else break;
+  }
+  document.getElementById('statStreak').textContent = streak;
+  
+  // 상세 현황
+  const detail = document.getElementById('statsDetail');
+  let dHtml = '';
+  for (let w = 0; w < 6; w++) {
+    dHtml += `<div style="display:flex; gap:6px; margin-bottom:8px;">`;
+    for (let d = 1; d <= 5; d++) {
+      const day = w * 5 + d;
+      if (day > 30) break;
+      const done = state.completed.includes(day);
+      const avail = day === 1 || state.completed.includes(day-1);
+      dHtml += `<div style="flex:1; background:${done ? 'rgba(46,160,67,0.2)' : avail ? 'var(--surface2)' : 'var(--surface)'}; border:1px solid ${done ? '#2ea043' : 'var(--border)'}; border-radius:8px; padding:8px 4px; text-align:center; font-size:11px; color:${done ? '#7ee787' : 'var(--text2)'};">
+        <div>${day}일</div>
+        <div>${done ? '✓' : avail ? '→' : '🔒'}</div>
+      </div>`;
+    }
+    dHtml += `</div>`;
+  }
+  detail.innerHTML = dHtml;
+}
+
+// ===================== 토스트 =====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===================== 초기화 =====================
+renderDaySelector();
+// 첫날 자동 선택
+const firstAvailable = state.completed.length + 1 <= 30 ? state.completed.length + 1 : 30;
+selectDay(firstAvailable);
+updateStats();
+</script>
+</body>
+</html>
