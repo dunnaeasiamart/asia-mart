@@ -1050,7 +1050,7 @@ function showPronPopup(pron) {
 }
 
 // ===================== 발음 재생 (Google TTS - 태국어 원어민) =====================
-const GCP_TTS_KEY = 'AIzaSyAndOzle6i58ItvWgEJF8rz';
+const GCP_TTS_KEY = 'AIzaSyAndOzle6i58ItvWgEJF8rz0s6LH9X0s_s';
 let _currentAudio = null;
 
 async function speakLao(lao, btn) {
@@ -1065,7 +1065,7 @@ async function speakLao(lao, btn) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         input: { text: clean },
-        voice: { languageCode: 'th-TH', ssmlGender: 'FEMALE' },
+        voice: { languageCode: 'lo-LA', ssmlGender: 'FEMALE' },
         audioConfig: { audioEncoding: 'MP3', speakingRate: 0.85 }
       })
     });
