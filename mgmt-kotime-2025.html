@@ -1696,6 +1696,7 @@ function addEditImgUrl() {
 async function loadAll() {
   window._tabLoaded = {}; // 탭별 로딩 여부 초기화
   window._catalogCache = null;
+  localStorage.removeItem('_catalog_cache'); // 강제 새로고침 시 캐시 무효화
   // 현재 활성 탭 자동 로드
   const activeTab = document.querySelector('.tab-content.active');
   if (activeTab) {
@@ -1829,8 +1830,19 @@ async function checkDuplicateIds() {
 
 async function loadCatalogForAdmin() {
   if (!window._catalogCache) {
+    // localStorage 캐시 먼저 확인 → 즉시 렌더 후 백그라운드에서 최신화
+    const cached = localStorage.getItem('_catalog_cache');
+    if (cached) {
+      try {
+        window._catalogCache = JSON.parse(cached);
+        renderCatalogAdmin(window._catalogCache); // 즉시 렌더
+      } catch(e) {}
+    }
+    // Firebase에서 최신 데이터 fetch (캐시 유무 관계없이)
     const snap = await db.ref('catalog').get();
-    window._catalogCache = snap.val() || {};
+    const fresh = snap.val() || {};
+    window._catalogCache = fresh;
+    localStorage.setItem('_catalog_cache', JSON.stringify(fresh));
   }
   const data = window._catalogCache;
   // 카테고리 드롭다운 업데이트
@@ -1850,15 +1862,17 @@ async function loadCatalogForAdmin() {
   const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
 
+  const rows = [];
   ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, catKey);
-    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
-    cat.items.forEach((item, idx) => {
+    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
+    cat.items.forEach(item => {
+      if (!item) return;
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr id="prod-row-${item.id}">
+      rows.push(`<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
@@ -1867,18 +1881,56 @@ async function loadCatalogForAdmin() {
           <button onclick="openEditModal('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
           <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
-      </tr>`;
+      </tr>`);
     });
   });
+  tbody.innerHTML = rows.join('');
+}
+
+function renderCatalogAdmin(data) {
+  loadCatSelectFromData(data);
+  buildAllOptionsFromData(data);
+  const tbody = document.getElementById('product-tbody');
+  if (!tbody) return;
+  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
+  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
+  const rows = [];
+  ordered.forEach(catKey => {
+    const cat = data[catKey];
+    if (!cat || !cat.items) return;
+    const label = getLabel(cat, catKey);
+    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
+    cat.items.forEach(item => {
+      if (!item) return;
+      const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+      const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+      rows.push(`<tr id="prod-row-${item.id}">
+        <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
+        <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
+        <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
+        <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
+        <td style="padding:8px 6px;display:flex;gap:4px;">
+          <button onclick="openEditModal('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
+          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
+        </td>
+      </tr>`);
+    });
+  });
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadStock() {
+  // catalog: 메모리 캐시 → localStorage 캐시 → Firebase 순으로 사용
+  if (!window._catalogCache) {
+    const cached = localStorage.getItem('_catalog_cache');
+    if (cached) { try { window._catalogCache = JSON.parse(cached); } catch(e) {} }
+  }
   const [catalogSnap, stockSnap] = await Promise.all([
     window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
     db.ref('stock').get()
   ]);
   const catalog = window._catalogCache || catalogSnap.val() || {};
-  if (!window._catalogCache) window._catalogCache = catalog;
+  if (!window._catalogCache) { window._catalogCache = catalog; localStorage.setItem('_catalog_cache', JSON.stringify(catalog)); }
   const stock = stockSnap.val() || {};
 
   const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -1886,18 +1938,18 @@ async function loadStock() {
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '';
-
+  const rows = [];
   ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
+    rows.push(`<tr><td colspan="4" class="cat-header">${label}</td></tr>`);
     cat.items.forEach(item => {
+      if (!item) return;
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr>
+      rows.push(`<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -1905,9 +1957,10 @@ async function loadStock() {
           <input type="number" min="-1" value="${stockVal}" id="stock_${item.id}" onchange="markChanged('${item.id}','stock')">
           <span class="changed-badge" id="badge_stock_${item.id}" style="display:none;">●</span>
         </td>
-      </tr>`;
+      </tr>`);
     });
   });
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadDiscount() {
@@ -2322,8 +2375,8 @@ async function submitEditProduct() {
 
   closeEditModal();
   showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
-  // SNS 카드 캐시 갱신 (가격 수정이 카드에 즉시 반영되도록)
-  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
+  // 캐시 갱신 (가격/상품 수정이 즉시 반영되도록)
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; localStorage.setItem('_catalog_cache', JSON.stringify(window._catalogCache)); });
   await loadCatalogForAdmin();
   autoFillId();
 }
