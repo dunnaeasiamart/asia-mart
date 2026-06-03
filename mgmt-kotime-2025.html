@@ -193,6 +193,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('also',this)">🛍️ 이런것도</button>
     <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
     <button class="tab-btn" onclick="switchTab('cover',this)">🖼️ 커버 이미지</button>
+    <button class="tab-btn" onclick="switchTab('reels',this)">📱 릴스 커버</button>
     <button class="tab-btn" onclick="switchTab('chart',this)">📈 판매 그래프</button>
   </div>
 
@@ -686,6 +687,47 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         </div>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadCoverCard()">⬇️ 커버 이미지 저장</button>
+    </div>
+  </div>
+
+  <!-- 릴스 커버 메이커 -->
+  <div id="tab-reels" class="tab-content">
+    <div style="max-width:600px;margin:24px auto;padding:0 12px;">
+      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📱 릴스 커버 만들기 (9:16)</h3>
+
+        <!-- 사진 4장 -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px;color:#888;margin-bottom:8px;">📷 사진 4장 (2×2 그리드)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div onclick="document.getElementById('reels-file-0').click()" id="reels-slot-0" style="height:110px;border:2px dashed #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;font-size:12px;color:#aaa;">📷 사진 1</div>
+            <input type="file" id="reels-file-0" accept="image/*" style="display:none;" onchange="onReelsImgSelect(0,this)">
+            <div onclick="document.getElementById('reels-file-1').click()" id="reels-slot-1" style="height:110px;border:2px dashed #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;font-size:12px;color:#aaa;">📷 사진 2</div>
+            <input type="file" id="reels-file-1" accept="image/*" style="display:none;" onchange="onReelsImgSelect(1,this)">
+            <div onclick="document.getElementById('reels-file-2').click()" id="reels-slot-2" style="height:110px;border:2px dashed #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;font-size:12px;color:#aaa;">📷 사진 3</div>
+            <input type="file" id="reels-file-2" accept="image/*" style="display:none;" onchange="onReelsImgSelect(2,this)">
+            <div onclick="document.getElementById('reels-file-3').click()" id="reels-slot-3" style="height:110px;border:2px dashed #ddd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;font-size:12px;color:#aaa;">📷 사진 4</div>
+            <input type="file" id="reels-file-3" accept="image/*" style="display:none;" onchange="onReelsImgSelect(3,this)">
+          </div>
+          <button onclick="clearReelsImgs()" style="margin-top:8px;background:none;border:1px solid #ddd;padding:5px 12px;border-radius:6px;font-size:12px;color:#888;cursor:pointer;">🗑️ 사진 초기화</button>
+        </div>
+
+        <!-- 중앙 텍스트 -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">🇹🇭 태국어 (큰 글씨)</div>
+          <input type="text" id="reels-text1" placeholder="예: เครื่องใช้ในบ้าน" value="เครื่องใช้ในบ้าน" oninput="renderReelsCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:6px;">
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">🇱🇦 라오어 (작은 글씨)</div>
+          <input type="text" id="reels-text2" placeholder="예: ເຄື່ອງໃຊ້ໃນເຮືອນ" value="ເຄື່ອງໃຊ້ໃນເຮືອນ" oninput="renderReelsCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:6px;">
+          <div style="font-size:12px;color:#888;margin-bottom:6px;">🇺🇸 영어 (골드)</div>
+          <input type="text" id="reels-text3" placeholder="예: NEW: HOUSEHOLD ITEMS" value="NEW: HOUSEHOLD ITEMS" oninput="renderReelsCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+
+      <!-- 미리보기 -->
+      <div style="text-align:center;margin-bottom:16px;">
+        <canvas id="reels-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadReelsCard()">⬇️ 릴스 커버 저장</button>
     </div>
   </div>
 
@@ -5032,7 +5074,224 @@ const _origSwitchTab = window.switchTab;
 window.switchTab = function(tab, btn) {
   if (_origSwitchTab) _origSwitchTab(tab, btn);
   if (tab === 'cover') setTimeout(renderCoverCard, 100);
+  if (tab === 'reels') setTimeout(renderReelsCard, 100);
 };
+
+// ── 릴스 커버 메이커 ──
+const _reelsImgs = [null, null, null, null];
+
+function onReelsImgSelect(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      _reelsImgs[idx] = img;
+      const slot = document.getElementById('reels-slot-' + idx);
+      if (slot) {
+        slot.style.backgroundImage = 'url(' + e.target.result + ')';
+        slot.style.backgroundSize = 'cover';
+        slot.style.backgroundPosition = 'center';
+        slot.textContent = '';
+      }
+      renderReelsCard();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearReelsImgs() {
+  for (let i = 0; i < 4; i++) {
+    _reelsImgs[i] = null;
+    const slot = document.getElementById('reels-slot-' + i);
+    if (slot) {
+      slot.style.backgroundImage = '';
+      slot.textContent = '📷 사진 ' + (i+1);
+    }
+  }
+  renderReelsCard();
+}
+
+function renderReelsCard() {
+  const canvas = document.getElementById('reels-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 960;
+  ctx.clearRect(0, 0, W, H);
+
+  // ── 헤더 (크림 배경, 다크와인 라인) ──
+  const DARK  = '#1a0a0a';
+  const GOLD  = '#c8a050';
+  const CREAM = '#faf6f0';
+  const HDR_H = 200;
+
+  ctx.fillStyle = CREAM;
+  ctx.fillRect(0, 0, W, HDR_H);
+
+  // 상단 다크 바
+  ctx.fillStyle = DARK;
+  ctx.fillRect(0, 0, W, 7);
+  // 하단 다크 바
+  ctx.fillStyle = DARK;
+  ctx.fillRect(0, HDR_H - 7, W, 7);
+
+  // DUNNAE ASIA MART
+  ctx.fillStyle = DARK;
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 56px Georgia, serif';
+  ctx.fillText('DUNNAE', W/2, 68);
+  ctx.fillText('ASIA MART', W/2, 124);
+
+  // 둔내아시아마트
+  ctx.font = '17px Arial';
+  ctx.fillStyle = '#c84b2f';
+  ctx.fillText('둔내아시아마트', W/2, 148);
+
+  // 국기 SVG
+  const flagOrder = ['TH','LA','PH','MM','KH','VN'];
+  const flagW = 42, flagH = 26, flagGap = 10;
+  const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
+  let fx = (W - totalFlagW) / 2;
+  const fy = 162;
+  flagOrder.forEach(code => {
+    const fi = window._snsFlags && window._snsFlags[code];
+    if (fi && fi.complete && fi.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(fx, fy, flagW, flagH);
+      ctx.clip();
+      ctx.drawImage(fi, fx, fy, flagW, flagH);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(fx, fy, flagW, flagH);
+    } else {
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(fx, fy, flagW, flagH);
+    }
+    fx += flagW + flagGap;
+  });
+
+  // ── 2×2 사진 그리드 ──
+  const IMG_TOP = HDR_H;
+  const IMG_H   = H - HDR_H;
+  const HW = W / 2, HH = IMG_H / 2;
+  const GAP = 3;
+
+  const slots = [
+    [0,   IMG_TOP,       HW, HH],
+    [HW,  IMG_TOP,       HW, HH],
+    [0,   IMG_TOP + HH,  HW, HH],
+    [HW,  IMG_TOP + HH,  HW, HH],
+  ];
+
+  slots.forEach(([x, y, sw, sh], i) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x + GAP, y + GAP, sw - GAP*2, sh - GAP*2);
+    ctx.clip();
+    if (_reelsImgs[i]) {
+      const img = _reelsImgs[i];
+      const scale = Math.max((sw - GAP*2) / img.width, (sh - GAP*2) / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      ctx.drawImage(img, x + GAP + ((sw - GAP*2) - dw)/2, y + GAP + ((sh - GAP*2) - dh)/2, dw, dh);
+    } else {
+      ctx.fillStyle = '#e8e4dc';
+      ctx.fillRect(x + GAP, y + GAP, sw - GAP*2, sh - GAP*2);
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.font = '40px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('📷', x + sw/2, y + sh/2 + 14);
+    }
+    ctx.restore();
+  });
+
+  // ── 중앙 반투명 텍스트 박스 ──
+  const t1 = (document.getElementById('reels-text1')||{}).value || '';
+  const t2 = (document.getElementById('reels-text2')||{}).value || '';
+  const t3 = (document.getElementById('reels-text3')||{}).value || '';
+
+  const CX = W / 2;
+  const CY = IMG_TOP + IMG_H / 2;
+
+  // 박스 크기 동적 계산
+  ctx.font = 'bold 44px Arial';
+  const t1w = ctx.measureText(t1).width;
+  ctx.font = 'bold 36px Arial';
+  const t2w = ctx.measureText(t2).width;
+  ctx.font = 'bold 28px Arial';
+  const t3w = ctx.measureText(t3).width;
+  const BOX_W = Math.min(Math.max(t1w, t2w, t3w) + 60, W - 40);
+  const BOX_H = 178;
+  const BX = CX - BOX_W/2;
+  const BY = CY - BOX_H/2;
+
+  // 반투명 다크와인 박스
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  ctx.fillStyle = '#5a1008';
+  ctx.beginPath();
+  ctx.roundRect(BX, BY, BOX_W, BOX_H, 12);
+  ctx.fill();
+  ctx.restore();
+
+  // 국기 + 태국어
+  const flagTH = window._snsFlags && window._snsFlags['TH'];
+  if (flagTH && flagTH.complete && flagTH.naturalWidth > 0) {
+    const fw = 36, fh = 22;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(BX + 14, BY + 18, fw, fh);
+    ctx.clip();
+    ctx.drawImage(flagTH, BX + 14, BY + 18, fw, fh);
+    ctx.restore();
+  }
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 6;
+  ctx.font = 'bold 44px Arial';
+
+  // 태국어 텍스트 길이 맞게 축소
+  let thSize = 44;
+  while (ctx.measureText(t1).width > BOX_W - 30 && thSize > 20) {
+    thSize -= 1;
+    ctx.font = 'bold ' + thSize + 'px Arial';
+  }
+  ctx.fillText(t1, CX, BY + 68);
+
+  // 라오어
+  let loSize = 36;
+  ctx.font = 'bold ' + loSize + 'px Arial';
+  while (ctx.measureText(t2).width > BOX_W - 30 && loSize > 16) {
+    loSize -= 1;
+    ctx.font = 'bold ' + loSize + 'px Arial';
+  }
+  ctx.fillText(t2, CX, BY + 68 + thSize + 8);
+
+  // 영어 (골드)
+  ctx.fillStyle = '#f0c040';
+  let enSize = 28;
+  ctx.font = 'bold ' + enSize + 'px Arial';
+  while (ctx.measureText(t3).width > BOX_W - 30 && enSize > 14) {
+    enSize -= 1;
+    ctx.font = 'bold ' + enSize + 'px Arial';
+  }
+  ctx.fillText(t3, CX, BY + 68 + thSize + 8 + loSize + 10);
+  ctx.shadowBlur = 0;
+}
+
+function downloadReelsCard() {
+  renderReelsCard();
+  const canvas = document.getElementById('reels-canvas');
+  const a = document.createElement('a');
+  a.download = 'dunnae_reels_cover.jpg';
+  a.href = canvas.toDataURL('image/jpeg', 0.93);
+  a.click();
+  showToast('📱 릴스 커버 저장 완료!');
+}
 </script>
 
 <style>
