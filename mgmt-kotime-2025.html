@@ -3233,36 +3233,47 @@ async function downloadTitleCards() {
 
   // 헤더 그리기 공통 함수
   function drawHeader(ctx, H) {
-    ctx.fillStyle = CREAM;
+    const BG_DARK = '#1a0a0a';
+    const GOLD    = '#c8a050';
+    const GOLD_LT = '#e8c878';
+    ctx.fillStyle = BG_DARK;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = DARK;
-    ctx.fillRect(0, 0, W, 7);
-    ctx.fillRect(0, H - 7, W, 7);
-    ctx.fillStyle = DARK;
+    ctx.fillStyle = GOLD;
+    ctx.fillRect(0, 0, W, 4);
+    ctx.fillStyle = GOLD;
+    ctx.fillRect(0, H - 4, W, 4);
+    ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
-    ctx.font = 'bold 52px Georgia, serif';
-    ctx.fillText('DUNNAE', W/2, 54);
-    ctx.fillText('ASIA MART', W/2, 104);
-    ctx.font = '16px Arial';
-    ctx.fillStyle = ACCENT;
-    ctx.fillText('둔내아시아마트', W/2, 124);
+    ctx.font = 'bold 48px Georgia, serif';
+    ctx.fillText('DUNNAE', W/2, 58);
+    ctx.fillText('ASIA MART', W/2, 106);
+    ctx.font = '15px Arial';
+    ctx.fillStyle = GOLD_LT;
+    ctx.fillText('둔내아시아마트', W/2, 128);
+    ctx.strokeStyle = GOLD + '55';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(60, 138); ctx.lineTo(W-60, 138); ctx.stroke();
     // 국기
     const flagOrder = ['TH','LA','PH','MM','KH','VN'];
-    const flagW = 36, flagH = 22, flagGap = 10;
+    const flagW = 38, flagH = 24, flagGap = 10;
     const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
     let fx = (W - totalFlagW) / 2;
-    const fy = 136;
+    const fy = 148;
     flagOrder.forEach(code => {
       const fi = window._snsFlags && window._snsFlags[code];
       if (fi && fi.complete && fi.naturalWidth > 0) {
         ctx.save();
-        roundRect(ctx, fx, fy, flagW, flagH, 3);
+        roundRect(ctx, fx, fy, flagW, flagH, 4);
         ctx.clip();
         ctx.drawImage(fi, fx, fy, flagW, flagH);
         ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 0.8;
+        roundRect(ctx, fx, fy, flagW, flagH, 4);
+        ctx.stroke();
       } else {
-        ctx.fillStyle = '#ddd';
-        roundRect(ctx, fx, fy, flagW, flagH, 3);
+        ctx.fillStyle = '#333';
+        roundRect(ctx, fx, fy, flagW, flagH, 4);
         ctx.fill();
       }
       fx += flagW + flagGap;
@@ -3642,254 +3653,239 @@ function renderSnsCard() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  const badge    = document.getElementById('sns-badge')?.value || '';
-  const footer   = document.getElementById('sns-footer')?.value || '';
-  const DARK     = '#7a1a1a';
-  const ACCENT   = '#c84b2f';
-  const CREAM    = '#faf6f0';
-  const BORDER   = '#c8a882';
+  // ── 컬러 팔레트 (프리미엄 다크 와인 + 골드) ──
+  const BG_DARK  = '#1a0a0a';   // 헤더 배경 (딥 와인블랙)
+  const GOLD     = '#c8a050';   // 골드 포인트
+  const GOLD_LT  = '#e8c878';   // 밝은 골드 (서브텍스트)
+  const ACCENT   = '#c84b2f';   // 가격 강조 (레드)
+  const BODY_BG  = '#fdfaf6';   // 바디 배경 (아이보리)
+  const TEXT_DARK= '#1a1814';
+  const TEXT_MID = '#555';
+  const TEXT_SUB = '#999';
 
-  // ── 전체 캔버스 크기를 내용에 맞게 동적 계산 ──
-  const W       = 540;
-  const HDR_H   = 170;   // 헤더
-  const BADGE_H = 0;     // 배지 없음
-  const IMG_H   = 428;   // 상품 이미지 영역
-  const SEP     = 16;    // 구분선 영역
-  const DEL_H   = 0;     // 무료배송 박스 제거
-  const FTR_H   = 7;     // 푸터
-  const PAD     = 12;    // 상하 여백
-
-  // 텍스트 높이를 먼저 측정해서 캔버스 높이 결정
-  let BODY_H = 60;
-  if (_snsItem) {
-    const tmpC = document.createElement('canvas');
-    tmpC.width = W; tmpC.height = 2000;
-    const tmpCtx = tmpC.getContext('2d');
-    const maxTxtW = W - 48;
-    const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-    const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-    const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-    let ty = HDR_H + IMG_H + SEP + 36;
-    tmpCtx.font = 'bold 26px Arial'; tmpCtx.textAlign = 'center';
-    ty += 36 + 26 + 12; // 태국어 한 줄
-    ty += 24 + 12;       // 라오 한 줄
-    ty += 24 + 12;       // 영어 한 줄
-    ty += 72 + 52 + 80;  // 구분선 + 할인 + 가격
-    BODY_H = ty - (HDR_H + IMG_H + SEP);
-  }
-
-  const H = HDR_H + BADGE_H + IMG_H + SEP + BODY_H + PAD + FTR_H;
+  const W      = 540;
+  const HDR_H  = 180;
+  const IMG_H  = 430;
+  const INFO_H = 220;  // 고정 정보 영역 높이
+  const FTR_H  = 48;
+  const H      = HDR_H + IMG_H + INFO_H + FTR_H;
 
   canvas.width  = W;
   canvas.height = H;
 
-  // ── 배경 ──
-  ctx.fillStyle = '#fff';
+  // ── 헬퍼: 폰트 크기 자동 축소 ──
+  function fitOneLine(c, text, maxW, maxSize, minSize, weight) {
+    let size = maxSize;
+    while (size >= minSize) {
+      c.font = (weight||'') + size + 'px Arial';
+      if (c.measureText(text).width <= maxW) break;
+      size -= 1;
+    }
+    return size;
+  }
+
+  // ── 1. 전체 배경 ──
+  ctx.fillStyle = BODY_BG;
   ctx.fillRect(0, 0, W, H);
 
-  // ── 헤더 (코드로 재현) ──
-  // 크림 배경
-  ctx.fillStyle = CREAM;
+  // ── 2. 헤더 ──
+  ctx.fillStyle = BG_DARK;
   ctx.fillRect(0, 0, W, HDR_H);
-  // 위아래 붉은 테두리선만 (내부 선 제거)
-  ctx.fillStyle = DARK;
-  ctx.fillRect(0, 0, W, 7);
-  ctx.fillRect(0, HDR_H - 7, W, 7);
 
-  // DUNNAE 큰 글씨 (위로 올림)
-  ctx.fillStyle = DARK;
+  // 골드 상단 라인
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, 0, W, 4);
+
+  // 골드 하단 라인
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, HDR_H - 4, W, 4);
+
+  // DUNNAE ASIA MART
+  ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
-  ctx.font = 'bold 52px Georgia, serif';
-  ctx.fillText('DUNNAE', W/2, 54);
-  ctx.fillText('ASIA MART', W/2, 104);
+  ctx.font = 'bold 48px Georgia, serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('DUNNAE', W/2, 58);
+  ctx.fillText('ASIA MART', W/2, 106);
+  ctx.letterSpacing = '0px';
 
-  // 한글 부제
-  ctx.font = '16px Arial';
-  ctx.fillStyle = ACCENT;
-  ctx.fillText('둔내아시아마트', W/2, 124);
+  // 골드 서브라인: 둔내아시아마트
+  ctx.font = '15px Arial';
+  ctx.fillStyle = GOLD_LT;
+  ctx.letterSpacing = '2px';
+  ctx.fillText('둔내아시아마트', W/2, 128);
+  ctx.letterSpacing = '0px';
 
-  // 국기 이미지 (SVG) — 하단바에 닿지 않게 여백 확보
+  // 가는 골드 구분선
+  ctx.strokeStyle = GOLD + '55';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(60, 138); ctx.lineTo(W-60, 138); ctx.stroke();
+
+  // 국기
   const flagOrder = ['TH','LA','PH','MM','KH','VN'];
-  const flagW = 36, flagH = 22, flagGap = 10;
+  const flagW = 38, flagH = 24, flagGap = 10;
   const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
   let fx = (W - totalFlagW) / 2;
-  const fy = 136;   // 국기 Y — 하단바(HDR_H-7=163)와 여유 gap 확보
+  const fy = 148;
   flagOrder.forEach(code => {
     const fi = window._snsFlags && window._snsFlags[code];
     if (fi && fi.complete && fi.naturalWidth > 0) {
       ctx.save();
-      roundRect(ctx, fx, fy, flagW, flagH, 3);
+      roundRect(ctx, fx, fy, flagW, flagH, 4);
       ctx.clip();
       ctx.drawImage(fi, fx, fy, flagW, flagH);
       ctx.restore();
+      // 국기 테두리
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 0.8;
+      roundRect(ctx, fx, fy, flagW, flagH, 4);
+      ctx.stroke();
     } else {
-      ctx.fillStyle = '#ddd';
-      roundRect(ctx, fx, fy, flagW, flagH, 3);
+      ctx.fillStyle = '#333';
+      roundRect(ctx, fx, fy, flagW, flagH, 4);
       ctx.fill();
     }
     fx += flagW + flagGap;
   });
 
-  // ── 상품 이미지 영역 ──
-  let curY = HDR_H;
-  const imgY = curY + 8;
-  ctx.fillStyle = CREAM;
-  roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
-  ctx.fill();
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1;
-  roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
-  ctx.stroke();
+  // ── 3. 상품 이미지 (풀 블리드, 테두리 없음) ──
+  const imgY = HDR_H;
+  ctx.fillStyle = '#e8e4dc';
+  ctx.fillRect(0, imgY, W, IMG_H);
 
   if (_snsImgObj) {
     ctx.save();
-    roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
+    ctx.rect(0, imgY, W, IMG_H);
     ctx.clip();
     const iw = _snsImgObj.width, ih = _snsImgObj.height;
-    const scale = Math.min((W-32)/iw, IMG_H/ih);
+    const scale = Math.max(W/iw, IMG_H/ih); // cover (꽉 채우기)
     const dw = iw*scale, dh = ih*scale;
     ctx.drawImage(_snsImgObj, (W-dw)/2, imgY+(IMG_H-dh)/2, dw, dh);
     ctx.restore();
   } else {
     ctx.fillStyle = '#ccc';
-    ctx.font = '40px Arial';
+    ctx.font = '48px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('🖼️', W/2, imgY + IMG_H/2 + 14);
+    ctx.fillText('🖼️', W/2, imgY + IMG_H/2 + 16);
   }
-  curY = imgY + IMG_H;
 
-  // ── 구분선 ──
-  ctx.strokeStyle = ACCENT;
-  ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.moveTo(24, curY+10); ctx.lineTo(W-24, curY+10); ctx.stroke();
-  curY += SEP + 8;
+  // ── 4. 정보 영역 ──
+  const infoY = HDR_H + IMG_H;
+  ctx.fillStyle = BODY_BG;
+  ctx.fillRect(0, infoY, W, INFO_H);
 
-  // ── 상품 정보 ──
+  // 상단 골드 강조선
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, infoY, W, 3);
+
   if (_snsItem) {
     const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-    const price   = _snsItem.price1 || 0;
+    const price  = _snsItem.price1 || 0;
+    const maxW   = W - 48;
 
-    // ── 줄바꿈: 외부 snsWrapText 사용 ──
-
-    const maxTxtW = W - 48;
-
-    // 폰트 크기를 줄여가며 한 줄에 맞추는 헬퍼
-    function fitOneLine(c, text, maxW, maxSize, minSize) {
-      let size = maxSize;
-      while (size >= minSize) {
-        c.font = (size === maxSize ? 'bold ' : '') + size + 'px Arial';
-        if (c.measureText(text).width <= maxW) break;
-        size -= 1;
-      }
-      return size;
-    }
-
-    // 상품명 (태국어) - 한 줄
-    ctx.fillStyle = '#1a1814';
+    // 태국어 (메인 - 가장 크게)
+    ctx.fillStyle = TEXT_DARK;
     ctx.textAlign = 'center';
-    const thSize = fitOneLine(ctx, nameTh || nameEn, maxTxtW, 26, 12);
+    const thSize = fitOneLine(ctx, nameTh || nameEn, maxW, 28, 14, 'bold ');
     ctx.font = 'bold ' + thSize + 'px Arial';
-    const thEndY = curY + 36;
-    ctx.fillText(nameTh || nameEn, W/2, thEndY);
+    ctx.fillText(nameTh || nameEn, W/2, infoY + 36);
 
-    // 라오 - 한 줄
-    ctx.fillStyle = '#1a1814';
-    const loSize = fitOneLine(ctx, nameLo || nameEn, maxTxtW, 24, 12);
+    // 라오 + 영어 (서브 - 같은 줄 or 두 줄)
+    const loSize = fitOneLine(ctx, nameLo || nameEn, maxW, 20, 12, '');
     ctx.font = loSize + 'px Arial';
-    const loEndY = thEndY + loSize + 12;
-    ctx.fillText(nameLo || nameEn, W/2, loEndY);
+    ctx.fillStyle = TEXT_MID;
+    ctx.fillText(nameLo || nameEn, W/2, infoY + 36 + thSize + 8);
 
-    // 영문 - 한 줄
-    const enSize = fitOneLine(ctx, nameEn, maxTxtW, 24, 12);
+    const enSize = fitOneLine(ctx, nameEn, maxW, 20, 12, '');
     ctx.font = enSize + 'px Arial';
-    const enEndY = loEndY + enSize + 12;
-    ctx.fillText(nameEn, W/2, enEndY);
+    ctx.fillStyle = TEXT_SUB;
+    ctx.fillText(nameEn, W/2, infoY + 36 + thSize + 8 + loSize + 6);
 
-    // 가격
-    // 구분선
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(24, enEndY + 24);
-    ctx.lineTo(W - 24, enEndY + 24);
-    ctx.stroke();
+    // 가는 구분선
+    const sepY = infoY + 36 + thSize + 8 + loSize + 6 + enSize + 16;
+    ctx.strokeStyle = '#d4cdc2';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(40, sepY); ctx.lineTo(W-40, sepY); ctx.stroke();
 
     const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || 0;
     const discountVal   = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
     const discountType  = document.getElementById('sns-discount-type')?.value || 'rate';
 
-    let nextY = enEndY + 32;
+    let priceY2 = sepY + 18;
 
     if (discountVal > 0) {
-      // ── 할인 적용: 배지 + 취소선 + 할인가 ──
-
-      // 1. 배지
+      // 할인 배지 (작은 pill)
       const badgeText = discountType === 'rate'
         ? discountVal + '% OFF'
         : '₩' + discountVal.toLocaleString() + ' OFF';
-      ctx.font = 'bold 18px Arial';
-      const bw = ctx.measureText(badgeText).width + 24;
+      ctx.font = 'bold 14px Arial';
+      const bw = ctx.measureText(badgeText).width + 20;
       const bx = (W - bw) / 2;
       ctx.fillStyle = ACCENT;
-      roundRect(ctx, bx, nextY, bw, 28, 6);
+      roundRect(ctx, bx, priceY2, bw, 24, 12);
       ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'center';
-      ctx.fillText(badgeText, W/2, nextY + 19);
-      nextY += 28 + 16;
+      ctx.fillText(badgeText, W/2, priceY2 + 16);
+      priceY2 += 34;
 
-      // 2. 원래 가격 취소선
+      // 원래 가격 취소선
       if (originalPrice > 0) {
-        nextY += 28;
-        ctx.font = 'bold 24px Arial';
-        ctx.fillStyle = '#aaa';
+        ctx.font = '22px Arial';
+        ctx.fillStyle = '#bbb';
         ctx.textAlign = 'center';
         const origText = '₩' + originalPrice.toLocaleString();
         const origW = ctx.measureText(origText).width;
-        ctx.fillText(origText, W/2, nextY);
+        ctx.fillText(origText, W/2, priceY2 + 22);
         ctx.save();
-        ctx.strokeStyle = '#aaa';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#bbb';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(W/2 - origW/2, nextY - 9);
-        ctx.lineTo(W/2 + origW/2, nextY - 9);
+        ctx.moveTo(W/2 - origW/2, priceY2 + 14);
+        ctx.lineTo(W/2 + origW/2, priceY2 + 14);
         ctx.stroke();
         ctx.restore();
-        nextY += 16;
+        priceY2 += 32;
       }
 
-      // 3. 할인가
-      nextY += 16;
+      // 할인가
       ctx.fillStyle = ACCENT;
-      ctx.font = 'bold 52px Arial';
+      ctx.font = 'bold 54px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 52);
-
+      ctx.fillText('₩' + price.toLocaleString(), W/2, priceY2 + 54);
     } else {
-      // ── 할인 없음: 가격만 크게 ──
-      nextY += 20;
+      // 할인 없음 — 가격 크게 + 골드 언더라인
       ctx.fillStyle = ACCENT;
-      ctx.font = 'bold 60px Arial';
+      ctx.font = 'bold 62px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 60);
+      ctx.fillText('₩' + price.toLocaleString(), W/2, priceY2 + 62);
     }
 
-    const priceY = nextY + 52;
-    curY += (priceY - curY) + 16;
-
   } else {
-    ctx.fillStyle = '#bbb';
+    ctx.fillStyle = TEXT_SUB;
     ctx.font = '15px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('상품을 선택하세요', W/2, curY + 30);
-    curY += BODY_H + DEL_H + PAD;
+    ctx.fillText('상품을 선택하세요', W/2, infoY + 80);
   }
 
-  // ── 푸터 ──
-  ctx.fillStyle = DARK;
-  ctx.fillRect(0, curY, W, FTR_H);
+  // ── 5. 푸터 ──
+  const ftrY = HDR_H + IMG_H + INFO_H;
+  ctx.fillStyle = BG_DARK;
+  ctx.fillRect(0, ftrY, W, FTR_H);
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, ftrY, W, 2);
+
+  // 푸터: 좌측 브랜드 / 우측 URL
+  ctx.font = 'bold 13px Arial';
+  ctx.fillStyle = GOLD;
+  ctx.textAlign = 'left';
+  ctx.fillText('DUNNAE ASIA MART', 20, ftrY + 30);
+  ctx.font = '12px Arial';
+  ctx.fillStyle = '#888';
+  ctx.textAlign = 'right';
+  ctx.fillText('dunnaeasiamart.github.io/asia-mart', W-20, ftrY + 30);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
