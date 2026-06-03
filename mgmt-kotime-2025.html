@@ -3075,6 +3075,7 @@ function updateAlsoBadge(i, val) {
 }
 
 async function loadAlso() {
+  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('alsoItems').get(),
     db.ref('alsoHistory').get()
@@ -3584,8 +3585,11 @@ function clearSnsProduct() {
   renderSnsCard();
 }
 
+let _snsImgToken = 0; // race condition 방지용 토큰
+
 function loadSnsImage() {
   if (!_snsItem) { renderSnsCard(); return; }
+  const token = ++_snsImgToken;
   let imgSrc = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
   if (!imgSrc) { _snsImgObj = null; renderSnsCard(); return; }
   // Cloudinary URL이면 CORS 허용 파라미터 추가
@@ -3594,12 +3598,22 @@ function loadSnsImage() {
   }
   const img = new Image();
   img.crossOrigin = 'anonymous'; // src 설정 전에 먼저 지정해야 함
-  img.onload = () => { _snsImgObj = img; renderSnsCard(); };
+  img.onload = () => {
+    if (token !== _snsImgToken) return; // 더 최신 요청이 있으면 무시
+    _snsImgObj = img; renderSnsCard();
+  };
   img.onerror = () => {
+    if (token !== _snsImgToken) return;
     // CORS 실패 시 crossOrigin 없이 재시도 (다운로드는 안 되지만 미리보기는 됨)
     const img2 = new Image();
-    img2.onload = () => { _snsImgObj = img2; renderSnsCard(); };
-    img2.onerror = () => { _snsImgObj = null; renderSnsCard(); };
+    img2.onload = () => {
+      if (token !== _snsImgToken) return;
+      _snsImgObj = img2; renderSnsCard();
+    };
+    img2.onerror = () => {
+      if (token !== _snsImgToken) return;
+      _snsImgObj = null; renderSnsCard();
+    };
     img2.src = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
   };
   img.src = imgSrc;
