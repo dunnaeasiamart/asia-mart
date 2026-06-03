@@ -1818,7 +1818,7 @@ async function checkDuplicateIds() {
     list.forEach(item => {
       html += '<span style="display:inline-block;margin-right:8px;color:#555;">[' + item.label + '] ' + item.name_ko + '</span>';
     });
-    html += '<button onclick="document.getElementById('product-search').value='' + id + '';filterProducts('' + id + '');" '
+    html += '<button onclick="document.getElementById(&quot;product-search&quot;).value=&quot;' + id + '&quot;;filterProducts(&quot;' + id + '&quot;);" '
           + 'style="float:right;background:#dc2626;border:none;color:#fff;padding:3px 10px;border-radius:4px;font-size:12px;cursor:pointer;">목록에서 보기</button>';
     html += '</div>';
   });
