@@ -5074,11 +5074,41 @@ const _origSwitchTab = window.switchTab;
 window.switchTab = function(tab, btn) {
   if (_origSwitchTab) _origSwitchTab(tab, btn);
   if (tab === 'cover') setTimeout(renderCoverCard, 100);
-  if (tab === 'reels') setTimeout(() => { initReelsSlots(); renderReelsCard(); }, 100);
+  if (tab === 'reels') setTimeout(() => { initReelsSlots(); ensureReelsFlags(renderReelsCard); }, 100);
 };
 
 // ── 릴스 커버 메이커 ──
 const _reelsImgs = [null, null, null, null];
+
+// 릴스용 국기 프리로드 (SNS 탭 방문 여부와 무관하게 사용 가능)
+function ensureReelsFlags(callback) {
+  const needed = ['TH','LA','PH','VN'];
+  // 이미 로드됐으면 바로 콜백
+  if (window._snsFlags && needed.every(c => window._snsFlags[c] && window._snsFlags[c].complete && window._snsFlags[c].naturalWidth > 0)) {
+    if (callback) callback();
+    return;
+  }
+  if (!window._snsFlags) window._snsFlags = {};
+  const srcs = {
+    'TH': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjQTUxOTMxIi8+PHJlY3QgeT0iMy4zMyIgd2lkdGg9IjMwIiBoZWlnaHQ9IjEzLjM0IiBmaWxsPSIjRjRGNUY4Ii8+PHJlY3QgeT0iNi42NyIgd2lkdGg9IjMwIiBoZWlnaHQ9IjYuNjYiIGZpbGw9IiMyRDJBNEEiLz48L3N2Zz4=',
+    'LA': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjQ0UxMTI2Ii8+PHJlY3QgeT0iNSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMDAyODY4Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSIxMCIgcj0iMy41IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
+    'PH': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMDAzOEE4Ii8+PHJlY3QgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0NFMTEyNiIvPjxwb2x5Z29uIHBvaW50cz0iMCwwIDEzLDEwIDAsMjAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNCIgY3k9IjUiIHI9IjEuMyIgZmlsbD0iI0ZDRDExNiIvPjxjaXJjbGUgY3g9IjQiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSIjRkNEMTE2Ii8+PGNpcmNsZSBjeD0iOC41IiBjeT0iMTAiIHI9IjEuMyIgZmlsbD0iI0ZDRDExNiIvPjwvc3ZnPg==',
+    'VN': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjREEyNTFEIi8+PHBvbHlnb24gcG9pbnRzPSIxNSw0IDE2LjgsOS41IDIyLjUsOS41IDE3LjksMTIuOSAxOS43LDE4LjUgMTUsMTUgMTAuMywxOC41IDEyLjEsMTIuOSA3LjUsOS41IDEzLjIsOS41IiBmaWxsPSIjRkZGRjAwIi8+PC9zdmc+'
+  };
+  let loaded = 0;
+  needed.forEach(code => {
+    if (window._snsFlags[code] && window._snsFlags[code].complete && window._snsFlags[code].naturalWidth > 0) {
+      loaded++;
+      if (loaded === needed.length && callback) callback();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => { loaded++; if (loaded === needed.length && callback) callback(); };
+    img.onerror = () => { loaded++; if (loaded === needed.length && callback) callback(); };
+    img.src = srcs[code];
+    window._snsFlags[code] = img;
+  });
+}
 const _reelsSearchResults = [[], [], [], []];
 
 // 슬롯 UI 초기화
@@ -5275,11 +5305,30 @@ function renderReelsCard() {
   ctx.fillStyle = '#c84b2f';
   ctx.fillText('둔내아시아마트', W/2, 148);
 
-  // 국기 이모지 (태국, 라오스, 필리핀, 베트남)
-  ctx.font = '28px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#000';
-  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇻🇳', W/2, 190);
+  // 국기 이미지 (태국, 라오스, 필리핀, 베트남)
+  const reelsFlagCodes = ['TH','LA','PH','VN'];
+  const rfW = 46, rfH = 28, rfGap = 12;
+  const rfTotal = reelsFlagCodes.length * rfW + (reelsFlagCodes.length-1) * rfGap;
+  let rfx = (W - rfTotal) / 2;
+  const rfy = 163;
+  reelsFlagCodes.forEach(code => {
+    const fi = window._snsFlags && window._snsFlags[code];
+    if (fi && fi.complete && fi.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(rfx, rfy, rfW, rfH);
+      ctx.clip();
+      ctx.drawImage(fi, rfx, rfy, rfW, rfH);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(rfx, rfy, rfW, rfH);
+    } else {
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(rfx, rfy, rfW, rfH);
+    }
+    rfx += rfW + rfGap;
+  });
 
   // ── 2×2 그리드 ──
   const IMG_TOP = HDR_H;
