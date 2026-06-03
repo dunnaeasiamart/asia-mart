@@ -1864,7 +1864,7 @@ async function loadCatalogForAdmin() {
         <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
         <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
         <td style="padding:8px 6px;display:flex;gap:4px;">
-          <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
+          <button onclick="openEditModal('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
           <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
       </tr>`;
@@ -2193,12 +2193,14 @@ async function autoFillId() {
 // ── 상품 수정 모달 ──
 let _editMeta = {}; // { catKey, oldId, idx }
 
-async function openEditModal(catKey, itemId, idx) {
-  const snap = await db.ref('catalog/' + catKey + '/items/' + idx).get();
-  const item = snap.val();
+async function openEditModal(catKey, itemId) {
+  // idx 대신 item.id로 직접 찾기 (필터/삭제로 인한 인덱스 어긋남 방지)
+  const catSnap0 = await db.ref('catalog/' + catKey + '/items').get();
+  const items0 = catSnap0.val() || [];
+  const item = (Array.isArray(items0) ? items0 : Object.values(items0)).find(i => i && i.id === itemId);
   if (!item) { showToast('상품 정보를 불러올 수 없습니다.'); return; }
 
-  _editMeta = { catKey, oldId: itemId, idx };
+  _editMeta = { catKey, oldId: itemId };
 
   // 카테고리 select 옵션 동적 생성 (A→B→C 순서)
   const catSnap = await db.ref('catalog').get();
@@ -2253,7 +2255,7 @@ async function submitEditProduct() {
   if (!ko)    { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
 
-  const { catKey: oldCatKey, oldId, idx } = _editMeta;
+  const { catKey: oldCatKey, oldId } = _editMeta;
   const catChanged = newCatKey !== oldCatKey;
 
   // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
@@ -2287,9 +2289,9 @@ async function submitEditProduct() {
   };
 
   if (catChanged || idChanged) {
-    // 기존 카테고리에서 제거
+    // 기존 카테고리에서 제거 (idx 대신 id로 찾기)
     const oldSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
-    const oldItems = (oldSnap.val() || []).filter((_, i) => i !== idx);
+    const oldItems = (oldSnap.val() || []).filter(i => i && i.id !== oldId);
     await db.ref('catalog/' + oldCatKey + '/items').set(oldItems);
 
     // 새 카테고리에 추가
@@ -2306,13 +2308,16 @@ async function submitEditProduct() {
       await db.ref('discount/' + oldId).remove();
     }
   } else {
-    // 같은 카테고리, 같은 ID → 필드만 업데이트
-    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items/' + idx).get();
-    const existing = oldSnap.val() || {};
+    // 같은 카테고리, 같은 ID → 필드만 업데이트 (id로 실제 인덱스 찾기)
+    const allItemsSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
+    const allItems = allItemsSnap.val() || [];
+    const realIdx = allItems.findIndex(i => i && i.id === oldId);
+    if (realIdx === -1) { showToast('❌ 상품을 찾을 수 없습니다.'); return; }
+    const existing = allItems[realIdx] || {};
     updatedItem.emoji  = existing.emoji || '';
     updatedItem.price2 = existing.price2 || 0;
     updatedItem.price3 = existing.price3 || 0;
-    await db.ref('catalog/' + oldCatKey + '/items/' + idx).set(updatedItem);
+    await db.ref('catalog/' + oldCatKey + '/items/' + realIdx).set(updatedItem);
   }
 
   closeEditModal();
