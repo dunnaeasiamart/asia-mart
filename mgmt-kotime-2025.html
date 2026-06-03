@@ -5257,7 +5257,7 @@ function renderReelsCard() {
 
   const DARK  = '#1a0a0a';
   const CREAM = '#faf6f0';
-  const HDR_H = 200;
+  const HDR_H = 210;
 
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, 0, W, HDR_H);
@@ -5275,29 +5275,11 @@ function renderReelsCard() {
   ctx.fillStyle = '#c84b2f';
   ctx.fillText('둔내아시아마트', W/2, 148);
 
-  const flagOrder = ['TH','LA','PH','MM','KH','VN'];
-  const flagW = 42, flagH = 26, flagGap = 10;
-  const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
-  let fx = (W - totalFlagW) / 2;
-  const fy = 162;
-  flagOrder.forEach(code => {
-    const fi = window._snsFlags && window._snsFlags[code];
-    if (fi && fi.complete && fi.naturalWidth > 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(fx, fy, flagW, flagH);
-      ctx.clip();
-      ctx.drawImage(fi, fx, fy, flagW, flagH);
-      ctx.restore();
-      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-      ctx.lineWidth = 0.5;
-      ctx.strokeRect(fx, fy, flagW, flagH);
-    } else {
-      ctx.fillStyle = '#ddd';
-      ctx.fillRect(fx, fy, flagW, flagH);
-    }
-    fx += flagW + flagGap;
-  });
+  // 국기 이모지 (태국, 라오스, 필리핀, 베트남)
+  ctx.font = '28px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#000';
+  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇻🇳', W/2, 190);
 
   // ── 2×2 그리드 ──
   const IMG_TOP = HDR_H;
