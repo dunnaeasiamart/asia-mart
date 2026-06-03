@@ -1451,11 +1451,8 @@ const storage = firebase.storage();
 
 // 로그인 상태면 loadAll 실행
 if (localStorage.getItem('admin_logged_in') === 'true') {
-  window.addEventListener('load', function() {
-    if (window.loadAll) window.loadAll();
-    setTimeout(autoFillId, 2000);
-    restoreProductForm();
-  });
+  // window.load 시점에 loadAll이 미정의일 수 있으므로 defer로 안전하게 호출
+  window._pendingInit = true;
 }
 
 // ── 이미지 업로드 (여러 장) ──
@@ -1707,6 +1704,14 @@ async function loadAll() {
   } else {
     switchTab('stock'); // 기본 탭
   }
+}
+
+// loadAll 정의 완료 후 — 로그인 상태 초기화 실행
+if (window._pendingInit) {
+  window._pendingInit = false;
+  loadAll();
+  setTimeout(autoFillId, 2000);
+  restoreProductForm();
 }
 
 async function loadCatSelect() {
