@@ -342,6 +342,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div style="display:flex;gap:8px;">
           <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="saveCatOrder()">💾 순서 저장</button>
           <button class="btn btn-secondary" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc02;" onclick="migrateClothing()">👕 "중고" 상품 → 의류로 이동</button>
+          <button class="btn btn-secondary" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;" onclick="translateAllCatLabels()">🌐 전체 다국어 일괄 적용</button>
           <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
         </div>
       </div>
@@ -2514,6 +2515,34 @@ function buildEmojiPicker(currentEmoji) {
     };
     picker.appendChild(btn);
   });
+}
+
+async function translateAllCatLabels() {
+  const snap = await db.ref('catalog').get();
+  const catalog = snap.val() || {};
+  const keys = Object.keys(catalog);
+  const toTranslate = keys.filter(k => {
+    const c = catalog[k];
+    const label = typeof c.label === 'string' ? c.label : '';
+    return label && (!c.label_th || !c.label_lo || !c.label_en);
+  });
+  if (!toTranslate.length) { showToast('✅ 모든 카테고리에 다국어가 이미 적용되어 있습니다.'); return; }
+  showToast(`🌐 ${toTranslate.length}개 카테고리 번역 중...`);
+  let done = 0;
+  for (const key of toTranslate) {
+    const label = catalog[key].label;
+    try {
+      const [th, lo, en] = await Promise.all([
+        googleTranslate(label, 'th'),
+        googleTranslate(label, 'lo'),
+        googleTranslate(label, 'en')
+      ]);
+      await db.ref('catalog/' + key).update({ label_ko: label, label_th: th, label_lo: lo, label_en: en });
+      done++;
+    } catch(e) { console.warn('번역 실패:', key, e); }
+  }
+  showToast(`✅ ${done}개 카테고리 다국어 적용 완료!`);
+  loadCategories();
 }
 
 async function saveCatOrder() {
