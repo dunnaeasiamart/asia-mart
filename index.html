@@ -971,7 +971,7 @@ function setLang(lang) {
 
 // 카테고리명 다국어 매핑
 const CAT_LABELS = {
-  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: '냉동 및 냉장' },
+  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: '냉동, 냉장 음식' },
   noodle:                { en: 'Noodles',               th: 'เส้นก๋วยเตี๋ยว',         lo: 'ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: '면 종류' },
   sauce:                 { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
   sauce_liquid:          { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
@@ -981,8 +981,8 @@ const CAT_LABELS = {
   produce:               { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
   drinks:                { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
   drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
-  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품 및 충전기' },
-  shoes:                 { en: 'Shoes & Electronics',   th: 'รองเท้าและอิเล็กทรอนิกส์', lo: 'ເກີບ ແລະ ອີເລັກໂທຣນິກ', ko: '운동화 및 의류' },
+  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품' },
+  shoes:                 { en: 'Shoes',                 th: 'รองเท้า',                   lo: 'ເກີບ',                    ko: '신발' },
   clothing:              { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
   clothes:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
   apparel:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
@@ -993,9 +993,10 @@ const CAT_LABELS = {
 };
 
 function getCatLabel(cat, catKey, lang) {
-  // 1순위: CAT_LABELS 내장 다국어 테이블 (언어 전환 지원)
-  if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
-    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
+  // 1순위: Firebase label_xx 다국어 필드 (관리자에서 저장한 값 우선)
+  if (cat) {
+    const fbLabel = cat['label_' + lang] || cat['label_ko'];
+    if (fbLabel) return fbLabel;
   }
 
   // 2순위: Firebase cat.label이 객체인 경우 (다국어 구조)
@@ -1003,14 +1004,24 @@ function getCatLabel(cat, catKey, lang) {
     return cat.label[lang] || cat.label.ko || cat.label.en || catKey;
   }
 
-  // 3순위: CAT_LABELS 한글 fallback
+  // 3순위: Firebase cat.label 단순 문자열
+  if (cat && typeof cat.label === 'string' && cat.label) {
+    // 언어가 ko이거나 다국어 번역 없을 때 그대로 사용
+    if (lang === 'ko') return cat.label;
+  }
+
+  // 4순위: CAT_LABELS 내장 다국어 테이블 (fallback)
+  if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
+    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
+  }
+
+  // 5순위: CAT_LABELS 한글 fallback
   if (CAT_LABELS[catKey] && CAT_LABELS[catKey].ko) {
     return CAT_LABELS[catKey].ko.replace(/^[A-Z]\s+/, '');
   }
 
-  // 4순위: Firebase cat.label string (한글만 있는 경우)
+  // 6순위: Firebase label 문자열 (비한국어)
   if (cat && typeof cat.label === 'string' && cat.label) {
-    if (lang !== 'ko') console.warn('[CAT_LABELS 미등록 키]', catKey, '→ label:', cat.label);
     return cat.label;
   }
 
