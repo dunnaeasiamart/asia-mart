@@ -2701,33 +2701,33 @@ async function submitCatEdit() {
 
   const showPriceTags = document.getElementById('cat-show-price').value !== 'false';
 
-  // 한글 이름 → 태국어/라오어/영어 자동 번역해서 label_xx 필드로 저장
-  showToast('🌐 다국어 번역 중...');
-  let label_th = '', label_lo = '', label_en = '';
-  try {
-    const [th, lo, en] = await Promise.all([
-      googleTranslate(label, 'th'),
-      googleTranslate(label, 'lo'),
-      googleTranslate(label, 'en')
-    ]);
-    label_th = th; label_lo = lo; label_en = en;
-  } catch(e) {}
-
-  const catData = { label, label_ko: label, label_th, label_lo, label_en, emoji, showPriceTags };
+  // 1단계: 한글만 즉시 저장 → 모달 닫기
+  const catData = { label, label_ko: label, emoji, showPriceTags };
+  let targetKey = _catEditKey;
 
   if (_catEditKey) {
     await db.ref('catalog/' + _catEditKey).update(catData);
-    showToast('✅ 카테고리 수정 완료! (다국어 자동 적용)');
+    showToast('✅ 저장 완료! 다국어 번역 중...');
   } else {
     const key = document.getElementById('cat-key').value.trim().toLowerCase().replace(/\s/g,'');
     if (!key) { alert('키를 입력해주세요.'); return; }
     const exists = await db.ref('catalog/' + key).get();
     if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
     await db.ref('catalog/' + key).set({ ...catData, items: [] });
-    showToast('✅ 카테고리 추가 완료! (다국어 자동 적용)');
+    targetKey = key;
+    showToast('✅ 추가 완료! 다국어 번역 중...');
   }
   closeCatModal();
   loadCategories();
+
+  // 2단계: 백그라운드에서 번역 후 조용히 업데이트
+  Promise.all([
+    googleTranslate(label, 'th'),
+    googleTranslate(label, 'lo'),
+    googleTranslate(label, 'en')
+  ]).then(([th, lo, en]) => {
+    db.ref('catalog/' + targetKey).update({ label_th: th, label_lo: lo, label_en: en });
+  }).catch(e => console.warn('다국어 번역 실패:', e));
 }
 
 async function deleteProduct(catKey, itemId) {
