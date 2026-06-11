@@ -995,36 +995,31 @@ const CAT_LABELS = {
 };
 
 function getCatLabel(cat, catKey, lang) {
-  // 1순위: Firebase label_xx 다국어 필드 (관리자에서 저장한 값 우선)
+  // 1순위: Firebase label_xx 다국어 필드 — 빈 문자열은 무시
   if (cat) {
-    const fbLabel = cat['label_' + lang] || cat['label_ko'];
-    if (fbLabel) return fbLabel;
+    const specific = cat['label_' + lang];
+    if (specific && specific.trim()) return specific.trim();
   }
 
-  // 2순위: Firebase cat.label이 객체인 경우 (다국어 구조)
+  // 2순위: CAT_LABELS 내장 다국어 테이블 (언어별 번역 있으면 우선)
+  if (lang !== 'ko' && CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
+    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
+  }
+
+  // 3순위: Firebase label_ko (한글)
+  if (cat) {
+    const ko = cat['label_ko'] || (typeof cat.label === 'string' ? cat.label : '');
+    if (ko && ko.trim()) return ko.trim();
+  }
+
+  // 4순위: Firebase cat.label 객체
   if (cat && typeof cat.label === 'object' && cat.label !== null) {
     return cat.label[lang] || cat.label.ko || cat.label.en || catKey;
-  }
-
-  // 3순위: Firebase cat.label 단순 문자열
-  if (cat && typeof cat.label === 'string' && cat.label) {
-    // 언어가 ko이거나 다국어 번역 없을 때 그대로 사용
-    if (lang === 'ko') return cat.label;
-  }
-
-  // 4순위: CAT_LABELS 내장 다국어 테이블 (fallback)
-  if (CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
-    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
   }
 
   // 5순위: CAT_LABELS 한글 fallback
   if (CAT_LABELS[catKey] && CAT_LABELS[catKey].ko) {
     return CAT_LABELS[catKey].ko.replace(/^[A-Z]\s+/, '');
-  }
-
-  // 6순위: Firebase label 문자열 (비한국어)
-  if (cat && typeof cat.label === 'string' && cat.label) {
-    return cat.label;
   }
 
   return catKey;
@@ -2189,7 +2184,7 @@ updateSummary();
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
@@ -2214,12 +2209,10 @@ async function loadStock() {
   }
 }
 
-async function loadCatalogFromFirebase() {
-  try {
-    const [catalogSnap, discSnap] = await Promise.all([
-      get(ref(db, 'catalog')),
-      get(ref(db, 'discount'))
-    ]);
+function loadCatalogFromFirebase() {
+  // catalog 실시간 리스너 — 관리자에서 수정하면 즉시 반영
+  onValue(ref(db, 'catalog'), async (catalogSnap) => {
+    const discSnap = await get(ref(db, 'discount'));
     const data = catalogSnap.val();
     const disc = discSnap.val() || {};
     if (data) {
@@ -2235,7 +2228,11 @@ async function loadCatalogFromFirebase() {
           return item;
         });
         catalog[catKey] = {
-          label: cat.label,
+          label:    cat.label,
+          label_ko: cat.label_ko || cat.label,
+          label_th: cat.label_th || '',
+          label_lo: cat.label_lo || '',
+          label_en: cat.label_en || '',
           emoji: cat.emoji,
           showPriceTags: cat.showPriceTags !== false,
           items
@@ -2281,12 +2278,11 @@ async function loadCatalogFromFirebase() {
       updateSummary();
       console.log('✅ 카탈로그 로드 완료:', Object.keys(catalog).length, '개 카테고리');
     }
-  } catch(e) {
+  }, (e) => {
     console.log('카탈로그 로드 실패:', e);
-    // 실패 시 빈 화면 안내
     var main = document.getElementById('main-content');
     if (main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#c84b2f;"><div style="font-size:32px;margin-bottom:12px;">⚠️</div><div>상품을 불러오지 못했습니다. 새로고침 해주세요.</div></div>';
-  }
+  });
 }
 
 // 재고 적용 함수

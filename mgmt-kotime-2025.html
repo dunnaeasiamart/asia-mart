@@ -2726,7 +2726,12 @@ async function submitCatEdit() {
     googleTranslate(label, 'lo'),
     googleTranslate(label, 'en')
   ]).then(([th, lo, en]) => {
-    db.ref('catalog/' + targetKey).update({ label_th: th, label_lo: lo, label_en: en });
+    // 번역 결과가 있을 때만 저장 (빈 문자열 방지)
+    const updates = {};
+    if (th && th.trim()) updates.label_th = th.trim();
+    if (lo && lo.trim()) updates.label_lo = lo.trim();
+    if (en && en.trim()) updates.label_en = en.trim();
+    if (Object.keys(updates).length) db.ref('catalog/' + targetKey).update(updates);
   }).catch(e => console.warn('다국어 번역 실패:', e));
 }
 
