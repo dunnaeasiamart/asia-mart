@@ -1989,6 +1989,8 @@ function clearCart() {
 
   updateSummary();
   renderTab(currentTab);
+  renderBest();
+  renderNew();
   document.getElementById('modal').classList.remove('open');
 }
 
@@ -2033,7 +2035,8 @@ window.newIds = newIds;
 
 // 상품 카테고리로 이동 + 스크롤
 function goToItem(id) {
-  const entry = Object.entries(catalog).find(([k,v]) => v.items.some(p => p.id === id));
+  id = String(id);
+  const entry = Object.entries(catalog).find(([k,v]) => v.items.some(p => String(p.id) === id));
   if (!entry) return;
   const catKey = entry[0];
   const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
@@ -2067,7 +2070,8 @@ function renderNew() {
   container.innerHTML = '';
   const allItems = Object.values(catalog).flatMap(c => c.items);
   ids.forEach(id => {
-    const item = allItems.find(p => p.id === id);
+    id = String(id);
+    const item = allItems.find(p => String(p.id) === id);
     if (!item) return;
     const qty = quantities[id] || 0;
     const card = document.createElement('div');
@@ -2086,10 +2090,12 @@ function renderNew() {
           <button class="best-qty-btn" onclick="changeNewQty('${id}',1,event)">+</button>
         </div>
       </div>`;
-    card.addEventListener('click', (e) => {
-      if (e.target.classList.contains('best-qty-btn')) return;
-      goToItem(id);
-    });
+    (function(itemId) {
+      card.onclick = (e) => {
+        if (e.target.classList.contains('best-qty-btn')) return;
+        goToItem(itemId);
+      };
+    })(id);
     container.appendChild(card);
   });
 }
@@ -2113,7 +2119,8 @@ function renderBest() {
   const ids = window.bestIds || bestIds;
 
   ids.forEach(id => {
-    const item = allItems.find(p => p.id === id);
+    id = String(id);
+    const item = allItems.find(p => String(p.id) === id);
     if (!item) return;
     const qty = quantities[id] || 0;
     const card = document.createElement('div');
@@ -2137,11 +2144,12 @@ function renderBest() {
         </div>
       </div>`;
 
-    // 클릭하면 해당 카테고리 탭으로 이동
-    card.addEventListener('click', (e) => {
-      if (e.target.classList.contains('best-qty-btn')) return;
-      goToItem(id);
-    });
+    (function(itemId) {
+      card.onclick = (e) => {
+        if (e.target.classList.contains('best-qty-btn')) return;
+        goToItem(itemId);
+      };
+    })(id);
 
     container.appendChild(card);
   });
@@ -2298,7 +2306,7 @@ function loadCatalogFromFirebase() {
     const disc = discSnap.val() || {};
     if (data) {
       Object.entries(data).forEach(([catKey, cat]) => {
-        const items = (cat.items || []).map(item => {
+        const items = (cat.items || []).filter(Boolean).map(item => {
           const d = disc[item.id];
           if (d) {
             const p1 = item.price1 || 0;
