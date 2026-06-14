@@ -2038,7 +2038,7 @@ function goToItem(id) {
   id = String(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
-  if (!item) { alert('상품을 찾을 수 없음: ' + id + '\n전체 ID 목록:\n' + allItems.slice(0,10).map(p=>p.id).join(', ')); return; }
+  if (!item) return;
   const catKey = item._catKey;
   if (!catKey) return;
   const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
@@ -2084,21 +2084,18 @@ function renderNew() {
     const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
     card.innerHTML = `
-      ${imgHtml}${emojiHtml}
+      <div onclick="goToItem('${id}')" style="cursor:pointer;">
+        ${imgHtml}${emojiHtml}
+      </div>
       <div class="best-card-body">
-        <div class="best-card-name">${getItemName(item)}</div>
-        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-name" onclick="goToItem('${id}')" style="cursor:pointer;">${getItemName(item)}</div>
+        <div class="best-card-price" onclick="goToItem('${id}')" style="cursor:pointer;">${fmt(item.price1)}</div>
         <div class="best-card-qty" id="new-qty-${id}">
           <button class="best-qty-btn" onclick="changeNewQty('${id}',-1,event)">−</button>
           <span class="best-qty-val">${qty}</span>
           <button class="best-qty-btn" onclick="changeNewQty('${id}',1,event)">+</button>
         </div>
       </div>`;
-    card.onclick = (e) => {
-      if (e.target.classList.contains('best-qty-btn')) return;
-      const itemId = e.currentTarget.getAttribute('data-id');
-      goToItem(itemId);
-    };
     container.appendChild(card);
   });
 }
@@ -2137,22 +2134,18 @@ function renderBest() {
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
 
     card.innerHTML = `
-      ${imgHtml}${emojiHtml}
+      <div onclick="goToItem('${id}')" style="cursor:pointer;">
+        ${imgHtml}${emojiHtml}
+      </div>
       <div class="best-card-body">
-        <div class="best-card-name">${getItemName(item)}</div>
-        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-name" onclick="goToItem('${id}')" style="cursor:pointer;">${getItemName(item)}</div>
+        <div class="best-card-price" onclick="goToItem('${id}')" style="cursor:pointer;">${fmt(item.price1)}</div>
         <div class="best-card-qty" id="best-qty-${id}">
           <button class="best-qty-btn" onclick="changeBestQty('${id}',-1,event)">−</button>
           <span class="best-qty-val">${qty}</span>
           <button class="best-qty-btn" onclick="changeBestQty('${id}',1,event)">+</button>
         </div>
       </div>`;
-
-    card.onclick = (e) => {
-      if (e.target.classList.contains('best-qty-btn')) return;
-      const itemId = e.currentTarget.getAttribute('data-id');
-      goToItem(itemId);
-    };
 
     container.appendChild(card);
   });
