@@ -712,7 +712,10 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" data-t="order_confirm">Order Summary</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="clearCart()" style="background:#fff3f3;border:1px solid #c84b2f;color:#c84b2f;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;" id="clear-cart-btn">🗑️ <span data-t="clear_cart">비우기</span></button>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
     </div>
     <div id="modal-body"></div>
   </div>
@@ -744,6 +747,7 @@ const i18n = {
     order_btn: 'Order Now →', order_confirm: 'Order Summary',
     items_selected: (n) => `${n} item(s) selected`,
     empty_cart: 'Your cart is empty.<br>Please select items.',
+    clear_cart: 'Clear',
     field_name: 'Name', field_phone: 'Phone', field_note: 'Note (optional)',
     field_facebook: 'Facebook Name', ph_facebook: 'Your name on Facebook (e.g. Maria Santos)', optional: 'Optional',
     ph_name: 'Your name', ph_phone: '010-0000-0000', ph_note: 'Delivery requests, etc.',
@@ -787,6 +791,7 @@ const i18n = {
     order_btn: 'สั่งซื้อเลย →', order_confirm: 'สรุปคำสั่งซื้อ',
     items_selected: (n) => `เลือก ${n} รายการ`,
     empty_cart: 'ตะกร้าว่างเปล่า<br>กรุณาเลือกสินค้า',
+    clear_cart: 'ล้างตะกร้า',
     field_name: 'ชื่อ', field_phone: 'เบอร์โทร', field_note: 'หมายเหตุ (ถ้ามี)',
     field_facebook: 'ชื่อ Facebook', ph_facebook: 'ชื่อที่แสดงใน Facebook ของคุณ', optional: 'ไม่บังคับ',
     ph_name: 'ชื่อของคุณ', ph_phone: '010-0000-0000', ph_note: 'คำขอจัดส่ง ฯลฯ',
@@ -830,6 +835,7 @@ const i18n = {
     order_btn: '주문하기 →', order_confirm: '주문 확인',
     items_selected: (n) => `${n}종류 선택됨`,
     empty_cart: '장바구니가 비어있어요.<br>상품을 선택해 주세요.',
+    clear_cart: '비우기',
     field_name: '이름', field_phone: '연락처', field_note: '메모 (선택)',
     field_facebook: '페이스북 이름', ph_facebook: '페이스북에 표시된 이름 (예: Maria Santos)', optional: '선택',
     ph_name: '홍길동', ph_phone: '010-0000-0000', ph_note: '배달 요청사항 등',
@@ -873,6 +879,7 @@ const i18n = {
     order_btn: 'ສັ່ງຊື້ເລີຍ →', order_confirm: 'ສະຫຼຸບຄຳສັ່ງຊື້',
     items_selected: (n) => `ເລືອກ ${n} ລາຍການ`,
     empty_cart: 'ກະຕ່າຫວ່າງເປົ່າ<br>ກະລຸນາເລືອກສິນຄ້າ',
+    clear_cart: 'ລ້າງກະຕ່າ',
     field_name: 'ຊື່', field_phone: 'ເບີໂທ', field_note: 'ໝາຍເຫດ (ຖ້າມີ)',
     field_facebook: 'ຊື່ Facebook', ph_facebook: 'ຊື່ທີ່ສະແດງໃນ Facebook ຂອງທ່ານ', optional: 'ບໍ່ບັງຄັບ',
     ph_name: 'ຊື່ຂອງທ່ານ', ph_phone: '010-0000-0000', ph_note: 'ຄຳຂໍການສົ່ງ ໆລໆ',
@@ -1942,6 +1949,15 @@ async function confirmOrder() {
   // 수량 초기화
   Object.keys(quantities).forEach(id => quantities[id] = 0);
   try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+
+function clearCart() {
+  if (!confirm('장바구니를 비울까요? / Clear cart?')) return;
+  Object.keys(quantities).forEach(k => { quantities[k] = 0; });
+  try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+  updateAllQtyUI();
+  updateSummary();
+  openModal(); // 모달 새로고침
+}
   updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
