@@ -1976,16 +1976,15 @@ function modalQty(id, delta) {
   const newQty = delta === 0 ? 0 : Math.max(0, current + delta);
   quantities[id] = newQty;
   saveCartToStorage();
-  updateAllQtyUI();
-  updateSummary();
+  updateCard(id);      // 상품 카드 UI 동기화
+  updateSummary();     // 하단 요약 동기화
 
   if (newQty === 0) {
-    // 항목 제거 후 모달 다시 렌더링
-    openModal();
+    openModal();       // 항목 제거 → 모달 전체 다시 렌더
     return;
   }
 
-  // 수량/가격만 부분 업데이트
+  // 수량/가격 부분 업데이트
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(i => i.id === id);
   if (!item) return;
@@ -1997,16 +1996,13 @@ function modalQty(id, delta) {
   if (priceEl) priceEl.textContent = fmt(price);
 
   // 합계 업데이트
-  const allItemsFull = Object.values(catalog).flatMap(c => c.items);
   let grand = 0;
-  allItemsFull.forEach(it => {
+  Object.values(catalog).flatMap(c => c.items).forEach(it => {
     const q = quantities[it.id] || 0;
     if (q > 0) grand += getPrice(it, q);
   });
   const totalEl = document.getElementById('modal-grand-total');
   if (totalEl) totalEl.textContent = fmt(grand);
-}
-  updateSummary();
 }
 // 베스트 상품 ID 목록 - Firebase에서 불러옴
 let bestIds = ['A01','B25','C15','C19','D16','A06','C14','B01','D01','E01']; // 기본값 10개
