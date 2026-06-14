@@ -1394,7 +1394,7 @@ function renderTab(tab) {
   const catLabel = getCatLabel(cat, tab, currentLang);
   section.innerHTML = `<div class="section-title">${cat.emoji} ${catLabel}</div>`;
 
-  cat.items.forEach(item => {
+  cat.items.filter(Boolean).forEach(item => {
     const qty = quantities[item.id] || 0;
     const subtotal = getPrice(item, qty);
     const displayName = getItemName(item);
@@ -2051,15 +2051,16 @@ function goToItem(id) {
   else { currentTab = catKey; renderTab(catKey); }
 
   // 해당 상품으로 스크롤
-  setTimeout(() => {
+  function scrollToCard() {
     const card = document.getElementById('card-' + id);
     if (card) {
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // 잠깐 하이라이트
       card.style.outline = '3px solid var(--accent)';
       setTimeout(() => card.style.outline = '', 1500);
     }
-  }, 300);
+  }
+  setTimeout(scrollToCard, 400);
+  setTimeout(scrollToCard, 900); // 렌더 지연 대비 재시도
 }
 
 function renderNew() {
@@ -2150,6 +2151,7 @@ function renderBest() {
     card.onclick = (e) => {
       if (e.target.classList.contains('best-qty-btn')) return;
       const itemId = e.currentTarget.getAttribute('data-id');
+      console.log('[BEST] clicked card data-id:', itemId, 'card.id:', e.currentTarget.id);
       goToItem(itemId);
     };
 
@@ -2308,7 +2310,8 @@ function loadCatalogFromFirebase() {
     const disc = discSnap.val() || {};
     if (data) {
       Object.entries(data).forEach(([catKey, cat]) => {
-        const items = (cat.items || []).filter(Boolean).map(item => {
+        const rawItems = Array.isArray(cat.items) ? cat.items : Object.values(cat.items || {});
+        const items = rawItems.filter(Boolean).map(item => {
           const d = disc[item.id];
           if (d) {
             const p1 = item.price1 || 0;
