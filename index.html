@@ -2079,6 +2079,7 @@ function renderNew() {
     const card = document.createElement('div');
     card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
     card.id = 'new-card-' + id;
+    card.setAttribute('data-id', id);
     const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
     const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
     card.innerHTML = `
@@ -2092,12 +2093,11 @@ function renderNew() {
           <button class="best-qty-btn" onclick="changeNewQty('${id}',1,event)">+</button>
         </div>
       </div>`;
-    (function(itemId) {
-      card.onclick = (e) => {
-        if (e.target.classList.contains('best-qty-btn')) return;
-        goToItem(itemId);
-      };
-    })(id);
+    card.onclick = (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      const itemId = e.currentTarget.getAttribute('data-id');
+      goToItem(itemId);
+    };
     container.appendChild(card);
   });
 }
@@ -2128,6 +2128,7 @@ function renderBest() {
     const card = document.createElement('div');
     card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
     card.id = 'best-card-' + id;
+    card.setAttribute('data-id', id);
 
     const imgHtml = item.image
       ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
@@ -2146,12 +2147,11 @@ function renderBest() {
         </div>
       </div>`;
 
-    (function(itemId) {
-      card.onclick = (e) => {
-        if (e.target.classList.contains('best-qty-btn')) return;
-        goToItem(itemId);
-      };
-    })(id);
+    card.onclick = (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      const itemId = e.currentTarget.getAttribute('data-id');
+      goToItem(itemId);
+    };
 
     container.appendChild(card);
   });
@@ -2454,7 +2454,7 @@ async function loadBestFromFirebase() {
     const snapshot = await get(ref(db, 'best'));
     const data = snapshot.val();
     if (data && data.length > 0) {
-      window.bestIds = data;
+      window.bestIds = data.filter(Boolean).map(String);
       if (typeof window.renderBest === 'function') window.renderBest();
     }
   } catch(e) {
@@ -2467,7 +2467,7 @@ async function loadNewFromFirebase() {
     const snapshot = await get(ref(db, 'newItems'));
     const data = snapshot.val();
     if (data && data.length > 0) {
-      window.newIds = data;
+      window.newIds = data.filter(Boolean).map(String);
       if (typeof window.renderNew === 'function') {
         window.renderNew();
         // 섹션이 보인 후 슬라이드 시작
