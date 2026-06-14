@@ -2151,7 +2151,8 @@ function renderBest() {
     card.onclick = (e) => {
       if (e.target.classList.contains('best-qty-btn')) return;
       const itemId = e.currentTarget.getAttribute('data-id');
-      console.log('[BEST] clicked card data-id:', itemId, 'card.id:', e.currentTarget.id);
+      const cardId = e.currentTarget.id;
+      alert('data-id: ' + itemId + '\ncard.id: ' + cardId);
       goToItem(itemId);
     };
 
