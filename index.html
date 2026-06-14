@@ -2038,6 +2038,7 @@ function goToItem(id) {
   id = String(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
+  alert('goToItem 받은 id: ' + id + '\n찾은 상품: ' + (item ? (item.name_ko || item.name) : '없음'));
   if (!item) return;
   const catKey = item._catKey;
   if (!catKey) return;
