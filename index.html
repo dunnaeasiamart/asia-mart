@@ -2038,6 +2038,7 @@ function goToItem(id) {
   id = String(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
+  alert('goToItem id:' + id + '\nitem found:' + (item ? item.name_ko || item.name : 'NOT FOUND') + '\n_catKey:' + (item ? item._catKey : 'N/A'));
   if (!item) return;
   const catKey = item._catKey;
   if (!catKey) return;
@@ -2152,7 +2153,7 @@ function renderBest() {
       if (e.target.classList.contains('best-qty-btn')) return;
       const itemId = e.currentTarget.getAttribute('data-id');
       const cardId = e.currentTarget.id;
-      alert('data-id: ' + itemId + '\ncard.id: ' + cardId);
+      alert('data-id: ' + itemId + '\ncard.id: ' + cardId + '\nbestIds: ' + JSON.stringify(window.bestIds));
       goToItem(itemId);
     };
 
