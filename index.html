@@ -2038,8 +2038,7 @@ function goToItem(id) {
   id = String(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
-  alert('goToItem id:' + id + '\nitem found:' + (item ? item.name_ko || item.name : 'NOT FOUND') + '\n_catKey:' + (item ? item._catKey : 'N/A'));
-  if (!item) return;
+  if (!item) { alert('상품을 찾을 수 없음: ' + id + '\n전체 ID 목록:\n' + allItems.slice(0,10).map(p=>p.id).join(', ')); return; }
   const catKey = item._catKey;
   if (!catKey) return;
   const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
@@ -2152,8 +2151,6 @@ function renderBest() {
     card.onclick = (e) => {
       if (e.target.classList.contains('best-qty-btn')) return;
       const itemId = e.currentTarget.getAttribute('data-id');
-      const cardId = e.currentTarget.id;
-      alert('data-id: ' + itemId + '\ncard.id: ' + cardId + '\nbestIds: ' + JSON.stringify(window.bestIds));
       goToItem(itemId);
     };
 
