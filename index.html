@@ -2038,7 +2038,6 @@ function goToItem(id) {
   id = String(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
-  alert('goToItem 받은 id: ' + id + '\n찾은 상품: ' + (item ? (item.name_ko || item.name) : '없음'));
   if (!item) return;
   const catKey = item._catKey;
   if (!catKey) return;
@@ -2051,17 +2050,19 @@ function goToItem(id) {
   if (tabBtn) switchTab(tabBtn, catKey);
   else { currentTab = catKey; renderTab(catKey); }
 
-  // 해당 상품으로 스크롤
-  function scrollToCard() {
+  // 렌더 완료 후 스크롤 - requestAnimationFrame으로 DOM 업데이트 보장
+  function scrollToCard(attempts) {
     const card = document.getElementById('card-' + id);
     if (card) {
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       card.style.outline = '3px solid var(--accent)';
-      setTimeout(() => card.style.outline = '', 1500);
+      setTimeout(() => { if(card) card.style.outline = ''; }, 1500);
+    } else if (attempts > 0) {
+      setTimeout(() => scrollToCard(attempts - 1), 200);
     }
   }
-  setTimeout(scrollToCard, 400);
-  setTimeout(scrollToCard, 900); // 렌더 지연 대비 재시도
+  // renderTab이 동기적으로 완료된 후 다음 프레임에 스크롤
+  requestAnimationFrame(() => requestAnimationFrame(() => scrollToCard(10)));
 }
 
 function renderNew() {
