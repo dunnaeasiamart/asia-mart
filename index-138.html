@@ -1,0 +1,2666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F2JXFW97QD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F2JXFW97QD');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#1a1814">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AsiaMart">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="https://em-content.zobj.net/source/apple/391/shopping-cart_1f6d2.png">
+<title>Asia Mart — Online Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Sans+Lao:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --border: #e8e4dc;
+    --text: #1a1814;
+    --muted: #7a7570;
+    --accent: #c84b2f;
+    --accent-light: #fdf0ed;
+    --success: #2d7a4f;
+    --success-light: #edf7f2;
+    --gold: #b8860b;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', 'Noto Sans Thai', 'Noto Sans Lao', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* LANG SWITCHER */
+  .lang-switcher {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .lang-btn {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 4px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .lang-btn.active { background: #fff; color: var(--text); }
+  .lang-btn:hover:not(.active) { background: rgba(255,255,255,0.25); }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  /* 검색 */
+  .search-bar {
+    background: var(--text);
+    padding: 0 16px;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, padding 0.3s;
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .search-bar.open { max-height: 64px; padding: 10px 16px; }
+  .search-input-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 100px;
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  .search-input-wrap input {
+    background: none;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 15px;
+    flex: 1;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .search-input-wrap input::placeholder { color: rgba(255,255,255,0.5); }
+  .search-clear { background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;padding:0; }
+  .search-btn { background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px; }
+
+  /* 검색 결과 */
+  #search-results { padding: 0 0 16px; }
+  .search-result-count { font-size:13px;color:var(--muted);padding:12px 0 8px;font-weight:600; }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+  .logo span { color: #e8a87c; }
+  .header-cart {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .header-cart:hover { opacity: 0.85; }
+  .cart-count {
+    background: #fff;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 11px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--text);
+    color: #fff;
+    padding: 40px 24px 48px;
+    text-align: center;
+  }
+  .hero-sub { font-size: 12px; letter-spacing: 0.12em; color: #e8a87c; text-transform: uppercase; margin-bottom: 12px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 44px); line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 14px; color: #aaa; max-width: 400px; margin: 0 auto; }
+
+  /* BEST PRODUCTS */
+  .best-section {
+    background: var(--surface);
+    padding: 16px 0 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .best-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+  .best-title {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .best-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 16px;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    cursor: grab;
+    align-items: stretch;
+  }
+  .best-scroll::-webkit-scrollbar { display: none; }
+  .best-scroll.dragging { cursor: grabbing; scroll-behavior: auto; }
+  .best-card {
+    flex-shrink: 0;
+    width: 130px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .best-card:active { transform: scale(0.97); }
+  .best-card.has-qty {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .best-card-img {
+    width: 100%;
+    height: 100px;
+    object-fit: contain;
+    background: #fff;
+    padding: 4px;
+  }
+  .best-card-img-emoji {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    background: #fff;
+  }
+  .best-card-body {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .best-card-name {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+  .best-card-price {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .best-card-qty {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+    margin-top: auto;
+  }
+  .best-qty-btn {
+    width: 30px;
+    height: 28px;
+    border: none;
+    background: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .best-qty-val {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    flex: 1;
+  }
+  .tabs-wrap {
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-wrap::-webkit-scrollbar { display: none; }
+  .tabs {
+    display: flex;
+    padding: 0 16px;
+    min-width: max-content;
+  }
+  .tab {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* MAIN */
+  main { max-width: 680px; margin: 0 auto; padding: 20px 16px 120px; }
+
+  .category-section { display: none; }
+  .category-section.active { display: block; }
+
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* PRODUCT CARD */
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .product-card.has-qty {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .product-thumb {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+  }
+  .product-body { flex: 1; min-width: 0; }
+  .product-name { font-size: 14px; font-weight: 500; margin-bottom: 5px; line-height: 1.3; }
+  .product-prices { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .price-tag {
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 2px 10px;
+    color: var(--muted);
+    transition: background 0.15s, transform 0.1s;
+    display: inline-block;
+  }
+  .price-tag:hover { background: var(--border); }
+  .price-tag:active { transform: scale(0.95); }
+  .price-tag.deal {
+    background: var(--success-light);
+    border-color: #b2dbc5;
+    color: var(--success);
+    font-weight: 500;
+  }
+  .price-tag.deal:hover { background: #d4eee0; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30,30,30,0.9);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    z-index: 999;
+    animation: toastIn 0.2s ease;
+    white-space: nowrap;
+  }
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.35) translateY(-4px); }
+    60%  { transform: scale(0.95) translateY(1px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  .price-tag.bounce { animation: tagBounce 0.3s ease; }
+  .deal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .qty-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .qty-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+  }
+  .qty-btn:hover { background: var(--border); }
+  .qty-input {
+    width: 40px;
+    height: 32px;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+    background: #fff;
+    color: var(--text);
+    -moz-appearance: textfield;
+  }
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .item-subtotal {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-left: auto;
+    min-width: 72px;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .item-subtotal.visible { opacity: 1; }
+
+  /* STICKY FOOTER */
+  .order-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 200;
+  }
+  .order-bar-info { flex: 1; }
+  .order-bar-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .order-bar-total { font-size: 22px; font-weight: 700; color: var(--text); }
+  .order-bar-items { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .order-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .order-btn:hover { opacity: 0.9; }
+  .order-btn:active { transform: scale(0.97); }
+  .order-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .order-btn:disabled:hover { opacity: 0.45; }
+
+  /* ORDER MODAL */
+  /* 이미지 슬라이드쇼 */
+  .thumb-slider { position:relative; width:120px; min-height:120px; overflow:hidden; border-radius:10px; flex-shrink:0; background:#fff; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
+  .thumb-slides { display:flex; transition:transform 0.3s; width:100%; }
+  .thumb-slide { min-width:120px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#fff; }
+  .thumb-slide img { width:120px; height:auto; max-height:160px; object-fit:contain; display:block; }
+  .thumb-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+  .thumb-nav.prev { left:2px; }
+  .thumb-nav.next { right:2px; }
+  .thumb-dots { position:absolute; bottom:3px; left:50%; transform:translateX(-50%); display:flex; gap:3px; }
+  .thumb-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.5); }
+  .thumb-dot.active { background:#fff; }
+
+  /* 라이트박스 */
+  .lightbox { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:999; display:none; align-items:center; justify-content:center; flex-direction:column; }
+  .lightbox.open { display:flex; }
+  .lightbox-img { max-width:90vw; max-height:80vh; object-fit:contain; border-radius:8px; }
+  .lightbox-close { position:absolute; top:16px; right:20px; color:#fff; font-size:28px; cursor:pointer; background:none; border:none; }
+  .lightbox-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.2); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .lightbox-nav.prev { left:12px; }
+  .lightbox-nav.next { right:12px; }
+  .lightbox-dots { display:flex; gap:6px; margin-top:16px; }
+  .lightbox-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer; }
+  .lightbox-dot.active { background:#fff; }
+  .lightbox-counter { color:rgba(255,255,255,0.6); font-size:13px; margin-top:8px; }
+
+  /* ORDER MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(40px);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  .modal-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; gap: 8px; }
+  .modal-item-name { color: var(--muted); flex: 1; min-width: 0; }
+  .modal-qty-ctrl { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .modal-qty-btn { width: 26px; height: 26px; border: 1.5px solid #c84b2f; border-radius: 6px; background: #fff; color: #c84b2f; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .modal-qty-btn:active { background: #fff0ee; }
+  .modal-qty-num { min-width: 22px; text-align: center; font-weight: 700; font-size: 14px; }
+  .modal-item-price { font-weight: 500; flex-shrink: 0; min-width: 60px; text-align: right; }
+  .modal-item-del { background: none; border: none; color: #bbb; font-size: 16px; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+  .modal-item-del:hover { color: #c84b2f; }
+  .modal-item:last-child { border-bottom: none; }
+  .modal-total { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--text); font-size: 18px; font-weight: 700; }
+  .confirm-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.15s;
+  }
+  .confirm-btn:hover { opacity: 0.9; }
+  .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .confirm-btn:disabled:hover { opacity: 0.45; }
+  .empty-cart { text-align: center; color: var(--muted); padding: 32px 0; font-size: 14px; }
+
+  /* Customer info */
+  .customer-form { margin-top: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Asia <span>Mart</span></div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('th')">TH</button>
+      <button class="lang-btn" onclick="setLang('lo')">LO</button>
+      <button class="lang-btn" onclick="setLang('ko')">KO</button>
+    </div>
+    <button id="pwa-add-btn" onclick="handlePWAInstall()" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;white-space:nowrap;">📱 홈에 추가</button>
+    <button class="search-btn" onclick="toggleSearch()" id="search-toggle-btn">🔍</button>
+    <button class="header-cart" onclick="openModal()">
+      🛒 <span data-t="cart">Cart</span>
+      <span class="cart-count" id="header-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- 검색창 -->
+<div class="search-bar" id="search-bar">
+  <div class="search-input-wrap">
+    <span>🔍</span>
+    <input type="text" id="search-input" placeholder="상품 검색..." oninput="doSearch(this.value)" autocomplete="off">
+    <button class="search-clear" onclick="clearSearch()">✕</button>
+  </div>
+</div>
+<div id="search-results" style="display:none;max-width:680px;margin:0 auto;padding:0 16px;"></div>
+
+<div class="hero">
+  <div class="hero-sub">Fresh from Southeast Asia</div>
+  <h1 data-t="hero_title">Authentic Asian<br>Online Order</h1>
+  <p data-t="hero_desc">Select quantity to calculate price instantly. Discount applied for 3+ items!</p>
+  <div style="margin-top:16px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:10px; padding:12px 16px; max-width:400px; margin-left:auto; margin-right:auto;">
+    <div style="font-size:13px; font-weight:700; color:#e8a87c; margin-bottom:4px;">💵 <span data-t="pay_title">Payment on Delivery Only</span></div>
+    <div style="font-size:12px; color:#ccc;" data-t="pay_desc">Cash & Card accepted · No online payment</div>
+  </div>
+  <div style="margin-top:10px; background:rgba(200,75,47,0.25); border:1px solid rgba(200,75,47,0.5); border-radius:10px; padding:10px 16px; max-width:400px; margin-left:auto; margin-right:auto; text-align:center;">
+    <div style="font-size:12px; font-weight:700; color:#e8a87c;" data-t="update_notice">✨ New products added regularly!</div>
+  </div>
+  <!-- 방문자 카운터 -->
+  <div style="margin-top:10px; display:flex; gap:8px; justify-content:center; max-width:400px; margin-left:auto; margin-right:auto;">
+    <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:5px 12px;">
+      <span style="font-size:11px; color:rgba(255,255,255,0.5);" id="vc-label-today">오늘</span>
+      <span style="font-size:13px; font-weight:700; color:#fff;" id="visitor-today">–</span>
+      <span style="font-size:11px; color:rgba(255,255,255,0.4);" id="vc-unit-today">명</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:5px 12px;">
+      <span style="font-size:11px; color:rgba(255,255,255,0.5);" id="vc-label-total">누적</span>
+      <span style="font-size:13px; font-weight:700; color:#e8a87c;" id="visitor-total">–</span>
+      <span style="font-size:11px; color:rgba(255,255,255,0.4);" id="vc-unit-total">명</span>
+    </div>
+  </div>
+</div>
+
+<div class="best-section" id="best-section">
+  <div class="best-header">
+    <div class="best-title">🔥 <span data-t="best_title">Best Products</span></div>
+  </div>
+  <div class="best-scroll" id="best-scroll"></div>
+</div>
+
+<div class="best-section" id="new-section" style="display:none;">
+  <div class="best-header">
+    <div class="best-title">✨ <span data-t="new_arrivals">New Arrivals</span></div>
+  </div>
+  <div class="best-scroll" id="new-scroll"></div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="cat-tabs">
+    <!-- 탭 버튼은 Firebase catOrder 기준으로 동적 생성 -->
+  </div>
+</div>
+
+<main id="main-content"></main>
+
+<div class="order-bar">
+  <div class="order-bar-info">
+    <div class="order-bar-label" data-t="total_label">Total</div>
+    <div class="order-bar-total" id="grand-total">₩0</div>
+    <div class="order-bar-items" id="item-summary" data-t="select_items">Please select items</div>
+    <div id="total-discount" style="font-size:12px;color:var(--success);font-weight:600;margin-top:2px;display:none;"></div>
+    <div id="min-order-notice" style="font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;"></div>
+  </div>
+  <button class="order-btn" id="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-t="order_confirm">Order Summary</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="clearCart()" style="background:#fff3f3;border:1px solid #c84b2f;color:#c84b2f;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;" id="clear-cart-btn">🗑️ <span data-t="clear_cart">비우기</span></button>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOnBg(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav prev" onclick="lightboxMove(-1)">‹</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  <button class="lightbox-nav next" onclick="lightboxMove(1)">›</button>
+  <div class="lightbox-dots" id="lightbox-dots"></div>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<script>
+/* ===================================================
+   🌐 LANGUAGE SYSTEM
+   =================================================== */
+const i18n = {
+  en: {
+    cart: 'Cart', hero_title: 'Authentic Asian<br>Online Order',
+    hero_desc: 'Select quantity to calculate price instantly. Discount applied for 3+ items!',
+    best_title: 'Best Products',
+    cat_frozen: '🧊 A Frozen Food', cat_noodle: '🍜 B Noodles',
+    cat_essentials: '🧴 E Daily Essentials',
+    cat_veggie: '🥬 F Vegetables & Produce',
+    total_label: 'Total', select_items: 'Please select items',
+    order_btn: 'Order Now →', order_confirm: 'Order Summary',
+    items_selected: (n) => `${n} item(s) selected`,
+    empty_cart: 'Your cart is empty.<br>Please select items.',
+    clear_cart: 'Clear',
+    field_name: 'Name', field_phone: 'Phone', field_note: 'Note (optional)',
+    field_facebook: 'Facebook Name', ph_facebook: 'Your name on Facebook (e.g. Maria Santos)', optional: 'Optional',
+    ph_name: 'Your name', ph_phone: '010-0000-0000', ph_note: 'Delivery requests, etc.',
+    confirm_btn: 'Place Order', grand_total: 'Total',
+    alert_fill: 'Please enter your name.',
+    alert_contact: 'Please enter at least your phone number or Facebook name.',
+    order_done_title: 'Order Placed!',
+    order_done_desc: 'We received your order. Please message us on Facebook to confirm.',
+    order_done_fb: '📘 Tap below to send us a message on Facebook Messenger',
+    alert_done: (name, phone) => `✅ Order placed!\n\nName: ${name}\nPhone: ${phone}\n\nWe will contact you soon. Thank you!`,
+    pay_title: 'Payment on Delivery Only',
+    pay_desc: 'Cash & Card accepted · No online payment',
+    pay_modal: '💵 Payment is made in person at delivery (Cash or Card)',
+    field_addr: 'Address Photo (Street Sign)',
+    ph_addr: 'Please upload a photo of your street sign',
+    btn_camera: 'Take Photo',
+    btn_gallery: 'Choose from Gallery',
+    addr_uploaded: 'Photo uploaded',
+    addr_example: 'Example',
+    max_qty: '⚠️ Maximum 10 items per product.',
+    discount: 'OFF!',
+    total_discount: (n) => `Total saved: -${n}`,
+    min_order: (n) => `⚠️ ₩${n} more for minimum order (₩50,000)`,
+    min_order_ok: '✅ Free delivery included!',
+    update_notice: '✨ New products added regularly!',
+    new_arrivals: '🆕 New Arrivals',
+    delivery_type: 'Delivery Method',
+    delivery_home: '🛵 Home Delivery (Pay on delivery)',
+    delivery_parcel: '📦 Parcel (Prepayment required)',
+    parcel_notice: '⚠️ Parcel orders require prepayment. We will contact you via Messenger with payment details.',
+    frozen_warning: '🧊 Your order includes frozen items. Additional ice pack & box fee applies.',
+  },
+  th: {
+    cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
+    hero_desc: 'เลือกจำนวนเพื่อคำนวณราคาทันที ส่วนลดอัตโนมัติเมื่อซื้อ 3 ชิ้นขึ้นไป!',
+    best_title: 'สินค้าขายดี',
+    cat_frozen: '🧊 A อาหารแช่แข็ง', cat_noodle: '🍜 B เส้นก๋วยเตี๋ยว',
+    cat_essentials: '🧴 E สินค้าอุปโภค',
+    cat_veggie: '🥬 F ผักและผลไม้',
+    total_label: 'ยอดรวม', select_items: 'กรุณาเลือกสินค้า',
+    order_btn: 'สั่งซื้อเลย →', order_confirm: 'สรุปคำสั่งซื้อ',
+    items_selected: (n) => `เลือก ${n} รายการ`,
+    empty_cart: 'ตะกร้าว่างเปล่า<br>กรุณาเลือกสินค้า',
+    clear_cart: 'ล้างตะกร้า',
+    field_name: 'ชื่อ', field_phone: 'เบอร์โทร', field_note: 'หมายเหตุ (ถ้ามี)',
+    field_facebook: 'ชื่อ Facebook', ph_facebook: 'ชื่อที่แสดงใน Facebook ของคุณ', optional: 'ไม่บังคับ',
+    ph_name: 'ชื่อของคุณ', ph_phone: '010-0000-0000', ph_note: 'คำขอจัดส่ง ฯลฯ',
+    confirm_btn: 'ยืนยันคำสั่งซื้อ', grand_total: 'ยอดรวม',
+    alert_fill: 'กรุณากรอกชื่อ',
+    alert_contact: 'กรุณากรอกเบอร์โทรหรือชื่อ Facebook อย่างน้อยหนึ่งอย่าง',
+    order_done_title: 'สั่งซื้อสำเร็จ!',
+    order_done_desc: 'เราได้รับคำสั่งซื้อของคุณแล้ว กรุณาส่งข้อความมาที่ Facebook เพื่อยืนยัน',
+    order_done_fb: '📘 แตะด้านล่างเพื่อส่งข้อความหาเราทาง Facebook Messenger',
+    alert_done: (name, phone) => `✅ สั่งซื้อสำเร็จ!\n\nชื่อ: ${name}\nเบอร์โทร: ${phone}\n\nเราจะติดต่อกลับเร็วๆ นี้ ขอบคุณ!`,
+    pay_title: 'ชำระเงินเมื่อรับสินค้าเท่านั้น',
+    pay_desc: 'รับเงินสดและบัตร · ไม่มีการชำระออนไลน์',
+    pay_modal: '💵 ชำระเงินเมื่อรับสินค้า (เงินสดหรือบัตร)',
+    field_addr: 'รูปภาพที่อยู่ (ป้ายถนน)',
+    ph_addr: 'กรุณาอัพโหลดรูปป้ายถนนของคุณ',
+    btn_camera: 'ถ่ายรูป',
+    btn_gallery: 'เลือกจากแกลเลอรี่',
+    addr_uploaded: 'อัพโหลดรูปแล้ว',
+    addr_example: 'ตัวอย่าง',
+    max_qty: '⚠️ สูงสุด 10 ชิ้นต่อสินค้า',
+    discount: 'ลด!',
+    total_discount: (n) => `ประหยัดรวม: -${n}`,
+    min_order: (n) => `⚠️ ต้องการอีก ₩${n} (ขั้นต่ำ ₩50,000)`,
+    min_order_ok: '✅ จัดส่งฟรี!',
+    update_notice: '✨ สินค้าใหม่เพิ่มเรื่อยๆ!',
+    new_arrivals: '🆕 สินค้าใหม่',
+    delivery_type: 'วิธีการจัดส่ง',
+    delivery_home: '🛵 จัดส่งถึงบ้าน (ชำระเมื่อได้รับ)',
+    delivery_parcel: '📦 ส่งพัสดุ (ชำระล่วงหน้า)',
+    parcel_notice: '⚠️ การสั่งพัสดุต้องชำระเงินล่วงหน้า เราจะติดต่อผ่าน Messenger พร้อมรายละเอียดการชำระ',
+    frozen_warning: '🧊 มีสินค้าแช่แข็งในคำสั่ง มีค่าใช้จ่ายเพิ่มเติมสำหรับกล่องน้ำแข็งและสารทำความเย็น',
+  },
+  ko: {
+    cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
+    hero_desc: '수량을 선택하면 금액이 바로 계산됩니다. 3개 이상 구매 시 할인 자동 적용!',
+    best_title: '베스트 상품',
+    cat_frozen: '🧊 A 냉동음식', cat_noodle: '🍜 B 면 종류',
+    cat_essentials: '🧴 E 생활용품',
+    cat_veggie: '🥬 F 농산물/채소',
+    total_label: '합계 금액', select_items: '상품을 선택해 주세요',
+    order_btn: '주문하기 →', order_confirm: '주문 확인',
+    items_selected: (n) => `${n}종류 선택됨`,
+    empty_cart: '장바구니가 비어있어요.<br>상품을 선택해 주세요.',
+    clear_cart: '비우기',
+    field_name: '이름', field_phone: '연락처', field_note: '메모 (선택)',
+    field_facebook: '페이스북 이름', ph_facebook: '페이스북에 표시된 이름 (예: Maria Santos)', optional: '선택',
+    ph_name: '홍길동', ph_phone: '010-0000-0000', ph_note: '배달 요청사항 등',
+    confirm_btn: '주문 완료하기', grand_total: '합계',
+    alert_fill: '이름을 입력해 주세요.',
+    alert_contact: '전화번호 또는 페이스북 중 하나는 입력해 주세요.',
+    order_done_title: '주문 완료!',
+    order_done_desc: '주문을 받았어요. 페이스북으로 메시지를 보내 확인해 주세요.',
+    order_done_fb: '📘 아래를 눌러 페이스북 메신저로 연락해 주세요',
+    alert_done: (name, phone) => `✅ 주문이 완료되었습니다!\n\n이름: ${name}\n연락처: ${phone}\n\n곧 연락드리겠습니다. 감사합니다!`,
+    pay_title: '현장결제 전용',
+    pay_desc: '현금 및 카드 가능 · 온라인 결제 불가',
+    pay_modal: '💵 결제는 배달 시 현장에서 진행됩니다 (현금 또는 카드)',
+    field_addr: '주소 사진 (도로명 표지판)',
+    ph_addr: '표지판 사진을 찍어서 올려주세요',
+    btn_camera: '사진 촬영',
+    btn_gallery: '갤러리에서 선택',
+    addr_uploaded: '사진 업로드 완료',
+    addr_example: '예시',
+    max_qty: '⚠️ 상품당 최대 10개까지 구매 가능합니다.',
+    discount: '할인!',
+    total_discount: (n) => `총 할인: -${n}`,
+    min_order: (n) => `⚠️ ${n} 더 담으면 주문 가능 (최소 ₩50,000)`,
+    min_order_ok: '✅ 무료배송 포함!',
+    update_notice: '✨ 새 상품 계속 업데이트 중!',
+    new_arrivals: '🆕 신상품',
+    delivery_type: '배달 방식',
+    delivery_home: '🛵 일반 배달 (현장결제)',
+    delivery_parcel: '📦 택배 (선입금 필요)',
+    parcel_notice: '⚠️ 택배 주문은 선입금이 필요합니다. 메신저로 입금 안내를 드릴게요.',
+    frozen_warning: '🧊 냉동 상품이 포함되어 있습니다. 아이스박스 및 보냉재 추가 비용이 발생합니다.',
+  },
+  lo: {
+    cart: 'ກະຕ່າ', hero_title: 'ອາຫານເອເຊຍແທ້<br>ສັ່ງຊື້ອອນໄລນ໌',
+    hero_desc: 'ເລືອກຈຳນວນເພື່ອຄຳນວນລາຄາທັນທີ ສ່ວນຫຼຸດອັດຕະໂນມັດເມື່ອຊື້ 3 ຊິ້ນຂຶ້ນໄປ!',
+    best_title: 'ສິນຄ້າຂາຍດີ',
+    cat_frozen: '🧊 A ອາຫານແຊ່ແຂງ', cat_noodle: '🍜 B ເສັ້ນກ໋ວຍເຕັ້ຍວ',
+    cat_essentials: '🧴 E ສິນຄ້າໃຊ້ສອຍ',
+    cat_veggie: '🥬 F ຜັກ ແລະ ຜົນໄມ້',
+    total_label: 'ລວມ', select_items: 'ກະລຸນາເລືອກສິນຄ້າ',
+    order_btn: 'ສັ່ງຊື້ເລີຍ →', order_confirm: 'ສະຫຼຸບຄຳສັ່ງຊື້',
+    items_selected: (n) => `ເລືອກ ${n} ລາຍການ`,
+    empty_cart: 'ກະຕ່າຫວ່າງເປົ່າ<br>ກະລຸນາເລືອກສິນຄ້າ',
+    clear_cart: 'ລ້າງກະຕ່າ',
+    field_name: 'ຊື່', field_phone: 'ເບີໂທ', field_note: 'ໝາຍເຫດ (ຖ້າມີ)',
+    field_facebook: 'ຊື່ Facebook', ph_facebook: 'ຊື່ທີ່ສະແດງໃນ Facebook ຂອງທ່ານ', optional: 'ບໍ່ບັງຄັບ',
+    ph_name: 'ຊື່ຂອງທ່ານ', ph_phone: '010-0000-0000', ph_note: 'ຄຳຂໍການສົ່ງ ໆລໆ',
+    confirm_btn: 'ຢືນຢັນຄຳສັ່ງຊື້', grand_total: 'ລວມ',
+    alert_fill: 'ກະລຸນາໃສ່ຊື່',
+    alert_contact: 'ກະລຸນາໃສ່ເບີໂທ ຫຼື ຊື່ Facebook ຢ່າງໜ້ອຍໜຶ່ງຢ່າງ',
+    order_done_title: 'ສັ່ງຊື້ສຳເລັດ!',
+    order_done_desc: 'ພວກເຮົາໄດ້ຮັບຄຳສັ່ງຊື້ຂອງທ່ານແລ້ວ ກະລຸນາສົ່ງຂໍ້ຄວາມ Facebook ເພື່ອຢືນຢັນ',
+    order_done_fb: '📘 ແຕະດ້ານລຸ່ມເພື່ອສົ່ງຂໍ້ຄວາມຫາພວກເຮົາທາງ Facebook Messenger',
+    alert_done: (name, phone) => `✅ ສັ່ງຊື້ສຳເລັດ!\n\nຊື່: ${name}\nເບີໂທ: ${phone}\n\nພວກເຮົາຈະຕິດຕໍ່ກັບໄວໆ ນີ້ ຂອບໃຈ!`,
+    pay_title: 'ຊຳລະເງິນເມື່ອຮັບສິນຄ້າເທົ່ານັ້ນ',
+    pay_desc: 'ຮັບເງິນສົດ ແລະ ບັດ · ບໍ່ມີການຊຳລະອອນໄລນ໌',
+    pay_modal: '💵 ຊຳລະເງິນເມື່ອຮັບສິນຄ້າ (ເງິນສົດ ຫຼື ບັດ)',
+    field_addr: 'ຮູບທີ່ຢູ່ (ປ້າຍຖະໜົນ)',
+    ph_addr: 'ກະລຸນາອັບໂຫລດຮູບປ້າຍຖະໜົນຂອງທ່ານ',
+    btn_camera: 'ຖ່າຍຮູບ',
+    btn_gallery: 'ເລືອກຈາກແກລເລີຣີ',
+    addr_uploaded: 'ອັບໂຫລດຮູບແລ້ວ',
+    addr_example: 'ຕົວຢ່າງ',
+    max_qty: '⚠️ ສູງສຸດ 10 ຊິ້ນຕໍ່ສິນຄ້າ',
+    discount: 'ຫຼຸດ!',
+    total_discount: (n) => `ປະຫຍັດລວມ: -${n}`,
+    min_order: (n) => `⚠️ ຕ້ອງການອີກ ₩${n} (ຂັ້ນຕ່ຳ ₩50,000)`,
+    min_order_ok: '✅ ສົ່ງຟຣີ!',
+    update_notice: '✨ ສິນຄ້າໃໝ່ກຳລັງເພີ່ມຂຶ້ນຕະຫຼອດ!',
+    new_arrivals: '🆕 ສິນຄ້າໃໝ່',
+    delivery_type: 'ວິທີການສົ່ງ',
+    delivery_home: '🛵 ສົ່ງເຖິງບ້ານ (ຊຳລະເມື່ອຮັບ)',
+    delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
+    parcel_notice: '⚠️ ການສັ່ງພັດສະດຸຕ້ອງຊຳລະລ່ວງໜ້າ. ພວກເຮົາຈະຕິດຕໍ່ທາງ Messenger ພ້ອມລາຍລະອຽດການຊຳລະ',
+    frozen_warning: '🧊 ມີສິນຄ້າແຊ່ແຂງໃນຄຳສັ່ງ. ມີຄ່າໃຊ້ຈ່າຍເພີ່ມສຳລັບກ່ອງນ້ຳກ້ອນ',
+  }
+};
+
+// 브라우저 언어 자동 감지
+function detectLang() {
+  const nav = navigator.language || navigator.userLanguage || 'en';
+  const lang = nav.toLowerCase().split('-')[0];
+  if (lang === 'lo') return 'lo';
+  if (lang === 'th') return 'th';
+  if (lang === 'ko') return 'ko';
+  return 'en';
+}
+let currentLang = detectLang();
+
+function setLang(lang) {
+  currentLang = lang;
+  const t = i18n[lang];
+
+  // Update all data-t elements
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.getAttribute('data-t');
+    if (t[key] && typeof t[key] === 'string') el.innerHTML = t[key];
+  });
+
+  // Update lang buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === lang.toUpperCase());
+  });
+
+  // 카테고리 탭 이름 업데이트 (Firebase에서 동적 생성된 탭 = data-catkey 사용)
+  const tabsEl = document.getElementById('cat-tabs');
+  if (tabsEl) {
+    Array.from(tabsEl.children).forEach(btn => {
+      const catKey = btn.getAttribute('data-catkey');
+      if (!catKey) return;
+      const cat = catalog[catKey];
+      const emoji = typeof cat?.emoji === 'string' ? cat.emoji : '';
+      btn.textContent = emoji + ' ' + getCatLabel(cat || {}, catKey, lang);
+    });
+  }
+
+  // Re-render current tab, best, new
+  renderTab(currentTab);
+  renderBest();
+  if (typeof window.renderNew === 'function') window.renderNew();
+  updateSummary();
+
+  // 방문자 카운터 라벨 언어 업데이트
+  const vcLabels = {
+    en: { today: 'Today', total: 'Total', unit: '' },
+    th: { today: 'วันนี้', total: 'รวม', unit: 'คน' },
+    lo: { today: 'ມື້ນີ້', total: 'ລວມ', unit: 'ຄົນ' },
+    ko: { today: '오늘', total: '누적', unit: '명' },
+  };
+  const vc = vcLabels[lang] || vcLabels.en;
+  const elLT = document.getElementById('vc-label-today');
+  const elLL = document.getElementById('vc-label-total');
+  const elUT = document.getElementById('vc-unit-today');
+  const elUL = document.getElementById('vc-unit-total');
+  if (elLT) elLT.textContent = vc.today;
+  if (elLL) elLL.textContent = vc.total;
+  if (elUT) elUT.textContent = vc.unit;
+  if (elUL) elUL.textContent = vc.unit;
+}
+
+// 카테고리명 다국어 매핑
+const CAT_LABELS = {
+  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: '냉동, 냉장 음식' },
+  noodle:                { en: 'Noodles',               th: 'เส้นก๋วยเตี๋ยว',         lo: 'ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: '면 종류' },
+  sauce:                 { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
+  sauce_liquid:          { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
+  spice:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
+  other:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
+  veggie:                { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
+  produce:               { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
+  drinks:                { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
+  drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
+  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품' },
+  shoes:                 { en: 'Shoes',                 th: 'รองเท้า',                   lo: 'ເກີບ',                    ko: '신발' },
+  clothing:              { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  clothes:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  apparel:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  fashion:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
+  'cigarettes&lighters': { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
+  cigarettes_lighters:   { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
+  tobacco:               { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
+  phone:                 { en: 'Electronics',            th: 'อุปกรณ์อิเล็กทรอนิกส์',  lo: 'ອຸປະກອນໄຟຟ້າ',            ko: '전자제품' },
+  electronics:           { en: 'Electronics',            th: 'อุปกรณ์อิเล็กทรอนิกส์',  lo: 'ອຸປະກອນໄຟຟ້າ',            ko: '전자제품' },
+};
+
+function getCatLabel(cat, catKey, lang) {
+  // 1순위: Firebase label_xx 다국어 필드 — 빈 문자열은 무시
+  if (cat) {
+    const specific = cat['label_' + lang];
+    if (specific && specific.trim()) return specific.trim();
+  }
+
+  // 2순위: CAT_LABELS 내장 다국어 테이블 (언어별 번역 있으면 우선)
+  if (lang !== 'ko' && CAT_LABELS[catKey] && CAT_LABELS[catKey][lang]) {
+    return CAT_LABELS[catKey][lang].replace(/^[A-Z]\s+/, '');
+  }
+
+  // 3순위: Firebase label_ko (한글)
+  if (cat) {
+    const ko = cat['label_ko'] || (typeof cat.label === 'string' ? cat.label : '');
+    if (ko && ko.trim()) return ko.trim();
+  }
+
+  // 4순위: Firebase cat.label 객체
+  if (cat && typeof cat.label === 'object' && cat.label !== null) {
+    return cat.label[lang] || cat.label.ko || cat.label.en || catKey;
+  }
+
+  // 5순위: CAT_LABELS 한글 fallback
+  if (CAT_LABELS[catKey] && CAT_LABELS[catKey].ko) {
+    return CAT_LABELS[catKey].ko.replace(/^[A-Z]\s+/, '');
+  }
+
+  return catKey;
+}
+
+/* =====================================================
+   📸 상품 이미지 넣는 방법
+   =====================================================
+   각 상품의 image:'' 안에 URL을 넣으면 됩니다.
+
+   ① GitHub에 이미지 올린 경우:
+      image: 'https://dunnaeasiamart.github.io/asia-mart/images/a1.jpg'
+
+   ② 외부 링크 (구글드라이브, 이미지호스팅 등):
+      image: 'https://drive.google.com/uc?id=파일ID'
+      image: 'https://i.imgur.com/xxxxx.jpg'
+
+   ③ 이미지 없으면 이모지가 자동으로 표시됩니다.
+   ===================================================== */
+let catalog = {}; // Firebase에서 로드;
+
+const quantities = {};
+let currentTab = 'frozen';
+
+function getPrice(item, qty) {
+  if (!qty || qty <= 0) return 0;
+  if (qty === 1) return item.price1;
+
+  const tiers = [];
+  if (item.price10) tiers.push({ qty: 10, price: item.price10 });
+  if (item.price5)  tiers.push({ qty: 5,  price: item.price5 });
+  if (item.price3)  tiers.push({ qty: 3,  price: item.price3 });
+  if (item.price2)  tiers.push({ qty: 2,  price: item.price2 });
+
+  // qty 이하의 가장 큰 묶음 1번만 적용
+  const applicableTier = tiers.find(t => qty >= t.qty);
+  if (!applicableTier) return qty * item.price1;
+
+  // 묶음 단가 100원 내림으로 고정
+  const unitPrice = Math.floor(applicableTier.price / applicableTier.qty / 100) * 100;
+  const remainder = qty - applicableTier.qty;
+
+  // 묶음 1번 + 나머지는 단가로 1개씩 추가
+  return applicableTier.price + remainder * unitPrice;
+}
+
+function getUnit(n) {
+  if (currentLang === 'ko') return `${n}개`;
+  if (currentLang === 'th') return `${n}ชิ้น`;
+  if (currentLang === 'lo') return `${n}ຊິ້ນ`;
+  return n === 1 ? `${n}pc` : `${n}pcs`;
+}
+
+function getPriceTags(item) {
+  // 카테고리에서 가격표 숨김 설정 확인
+  const cat = catalog[currentTab];
+  if (cat && cat.showPriceTags === false) return '';
+  const makeTag = (n, price, style) => {
+    return `<span class="price-tag" onclick="setQty('${item.id}',${n})" style="cursor:pointer;transition:all 0.15s;${style}">${getUnit(n)} ${fmt(price)}</span>`;
+  };
+  const tags = [makeTag(1, item.price1, 'background:#f0f0f0;border-color:#ccc;color:#666;')];
+  if (item.price2)  tags.push(makeTag(2, item.price2, 'background:#e8f0fe;border-color:#90b4f5;color:#1a56db;font-weight:500;'));
+  if (item.price3)  tags.push(makeTag(3, item.price3, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  if (item.price5)  tags.push(makeTag(5, item.price5, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  if (item.price10) tags.push(makeTag(10, item.price10, 'background:#fde8e8;border-color:#f5a0a0;color:#c81e1e;font-weight:500;'));
+  tags.push(`<span class="price-tag" onclick="resetQty('${item.id}')" style="cursor:pointer;background:#f5f5f5;color:#aaa;border-color:#ddd;">🔄</span>`);
+  return tags.join('');
+}
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx || audioCtx.state === 'closed') {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playDing() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1200, ctx.currentTime);
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.08);
+  } catch(e) {}
+}
+
+function playReset() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(400, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+function playFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784, 1047]; // C E G C 화음
+    notes.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.type = 'triangle';
+      const start = ctx.currentTime + i * 0.07;
+      o.frequency.setValueAtTime(freq, start);
+      g.gain.setValueAtTime(0.25, start);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+      o.start(start);
+      o.stop(start + 0.2);
+    });
+  } catch(e) {}
+}
+let toastTimer = null;
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  if (toastTimer) clearTimeout(toastTimer);
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  toastTimer = setTimeout(() => el.remove(), 2000);
+}
+
+document.addEventListener('touchstart', () => getAudioCtx(), { once: true });
+document.addEventListener('click', () => getAudioCtx(), { once: true });
+
+function getDiscount(item, qty) {
+  if (!qty || qty <= 0) return 0;
+  const fullPrice = qty * item.price1;
+  const discounted = getPrice(item, qty);
+  return fullPrice - discounted;
+}
+
+// ── 썸네일 슬라이더 ──
+const thumbIndexes = {};
+function thumbMove(e, id, dir) {
+  e.stopPropagation();
+  const slides = document.getElementById('slides-' + id);
+  const dots = document.getElementById('dots-' + id);
+  if (!slides) return;
+  const count = slides.children.length;
+  thumbIndexes[id] = ((thumbIndexes[id] || 0) + dir + count) % count;
+  slides.style.transform = `translateX(-${thumbIndexes[id] * 80}px)`;
+  if (dots) {
+    Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === thumbIndexes[id]));
+  }
+}
+
+// ── 라이트박스 ──
+let _lbImages = [];
+let _lbIdx = 0;
+
+function openLightbox(images, startIdx) {
+  _lbImages = Array.isArray(images) ? images : [];
+  _lbIdx = startIdx || 0;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderLightbox();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeLightboxOnBg(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+
+function lightboxMove(dir) {
+  _lbIdx = (_lbIdx + dir + _lbImages.length) % _lbImages.length;
+  renderLightbox();
+}
+
+function renderLightbox() {
+  document.getElementById('lightbox-img').src = _lbImages[_lbIdx];
+  document.getElementById('lightbox-counter').textContent = `${_lbIdx + 1} / ${_lbImages.length}`;
+  const dots = document.getElementById('lightbox-dots');
+  dots.innerHTML = _lbImages.map((_, i) =>
+    `<div class="lightbox-dot ${i === _lbIdx ? 'active' : ''}" onclick="lightboxGo(${i})"></div>`
+  ).join('');
+  document.querySelectorAll('.lightbox-nav').forEach(n => n.style.display = _lbImages.length > 1 ? '' : 'none');
+}
+
+function lightboxGo(idx) {
+  _lbIdx = idx;
+  renderLightbox();
+}
+
+// 라이트박스 터치 스와이프
+(function() {
+  let startX = 0, startY = 0;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      lightboxMove(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+})();
+
+// ── 검색 ──
+let _searchOpen = false;
+
+function toggleSearch() {
+  _searchOpen = !_searchOpen;
+  const bar = document.getElementById('search-bar');
+  const btn = document.getElementById('search-toggle-btn');
+  bar.classList.toggle('open', _searchOpen);
+  if (_searchOpen) {
+    setTimeout(() => document.getElementById('search-input').focus(), 300);
+    btn.textContent = '✕';
+  } else {
+    btn.textContent = '🔍';
+    clearSearch();
+  }
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').style.display = 'none';
+  document.getElementById('search-results').innerHTML = '';
+  document.querySelector('.tabs-wrap').style.display = '';
+  document.getElementById('main-content').style.display = '';
+  document.getElementById('best-section').style.display = '';
+  const newSec = document.getElementById('new-section');
+  if (newSec) newSec.style.display = '';
+}
+
+function doSearch(query) {
+  const q = query.trim().toLowerCase();
+  const resultsEl = document.getElementById('search-results');
+  const tabsWrap = document.querySelector('.tabs-wrap');
+  const mainContent = document.getElementById('main-content');
+  const bestSection = document.getElementById('best-section');
+  const newSection = document.getElementById('new-section');
+
+  if (!q) {
+    resultsEl.style.display = 'none';
+    resultsEl.innerHTML = '';
+    tabsWrap.style.display = '';
+    mainContent.style.display = '';
+    if (bestSection) bestSection.style.display = '';
+    if (newSection) newSection.style.display = '';
+    return;
+  }
+
+  // 카테고리/탭 숨기고 검색 결과만 표시
+  tabsWrap.style.display = 'none';
+  mainContent.style.display = 'none';
+  if (bestSection) bestSection.style.display = 'none';
+  if (newSection) newSection.style.display = 'none';
+  resultsEl.style.display = 'block';
+
+  // 전체 상품에서 검색
+  const allItems = Object.values(catalog).flatMap(cat => cat.items || []);
+  const matched = allItems.filter(item => {
+    const id = (item.id || '').toLowerCase();
+    const name = getItemName(item).toLowerCase();
+    return name.includes(q) || id.includes(q);
+  });
+
+  if (matched.length === 0) {
+    resultsEl.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px;">검색 결과가 없어요 😅</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = `<div class="search-result-count">🔍 "${query}" 검색 결과 ${matched.length}개</div>`;
+  const section = document.createElement('div');
+  matched.forEach(item => {
+    const qty = quantities[item.id] || 0;
+    const subtotal = getPrice(item, qty);
+    const displayName = getItemName(item);
+    const images = item.images || (item.image ? [item.image] : []);
+    const imgKey = 'imgs_' + item.id;
+    window[imgKey] = images;
+
+    const card = document.createElement('div');
+    card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'card-' + item.id;
+
+    const thumbHtml = images.length > 0 ? `
+      <div class="thumb-slider" onclick="openLightbox(window['${imgKey}'], 0)" style="cursor:pointer;">
+        <div class="thumb-slides">
+          <div class="thumb-slide"><img src="${images[0]}" alt="${displayName}" loading="lazy"></div>
+        </div>
+      </div>` : `
+      <div class="product-thumb">
+        <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:28px;">${item.emoji||'🛒'}</span>
+      </div>`;
+
+    card.innerHTML = `
+      ${thumbHtml}
+      <div class="product-body">
+        <div class="product-name">${displayName}</div>
+        <div class="product-prices" id="prices-${item.id}">${getPriceTags(item)}</div>
+        <div class="qty-area">
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty('${item.id}',-1,event)">−</button>
+            <input class="qty-input" type="number" min="0" max="99" value="${qty}" id="input-${item.id}" onchange="setQty('${item.id}',this.value)" />
+            <button class="qty-btn" onclick="changeQty('${item.id}',1,event)">+</button>
+          </div>
+          <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">
+            ${qty > 0 ? `<div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    section.appendChild(card);
+  });
+  resultsEl.appendChild(section);
+}
+
+function resetQty(id) {
+  quantities[id] = 0;
+  playReset();
+  updateCard(id);
+  updateSummary();
+}
+
+function getItemName(item) {
+  if (currentLang === 'ko') return (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'th') return (item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'lo') return (item.name_lo || item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  return (item.name_en || item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+}
+
+function fmt(n) { return '₩' + n.toLocaleString(); }
+
+function renderTab(tab) {
+  const container = document.getElementById('main-content');
+  container.innerHTML = '';
+
+  const cat = catalog[tab];
+  const section = document.createElement('div');
+  const catLabel = getCatLabel(cat, tab, currentLang);
+  section.innerHTML = `<div class="section-title">${cat.emoji} ${catLabel}</div>`;
+
+  cat.items.forEach(item => {
+    const qty = quantities[item.id] || 0;
+    const subtotal = getPrice(item, qty);
+    const displayName = getItemName(item);
+    const card = document.createElement('div');
+    card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'card-' + item.id;
+    const images = item.images || (item.image ? [item.image] : []);
+    const hasImages = images.length > 0;
+    const imgKey = 'imgs_' + item.id;
+    window[imgKey] = images;
+    const thumbHtml = hasImages ? `
+      <div class="thumb-slider" onclick="openLightbox(window['${imgKey}'], 0)" style="cursor:pointer;">
+        <div class="thumb-slides" id="slides-${item.id}">
+          ${images.map(src => `
+            <div class="thumb-slide">
+              <img src="${src}" alt="${displayName}" loading="lazy" onerror="this.style.display='none'">
+            </div>`).join('')}
+        </div>
+        ${images.length > 1 ? `
+          <button class="thumb-nav prev" onclick="thumbMove(event,'${item.id}',-1)">‹</button>
+          <button class="thumb-nav next" onclick="thumbMove(event,'${item.id}',1)">›</button>
+          <div class="thumb-dots" id="dots-${item.id}">
+            ${images.map((_, i) => `<div class="thumb-dot ${i===0?'active':''}"></div>`).join('')}
+          </div>` : ''}
+      </div>` : `
+      <div class="product-thumb">
+        <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:28px;">${item.emoji}</span>
+      </div>`;
+
+    card.innerHTML = `
+      ${thumbHtml}
+      <div class="product-body">
+        <div class="product-name">${displayName}</div>
+        <div class="product-prices" id="prices-${item.id}">
+          ${getPriceTags(item)}
+        </div>
+        <div class="qty-area">
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty('${item.id}',-1,event)">−</button>
+            <input class="qty-input" type="number" min="0" max="10" value="${qty}" id="input-${item.id}" onchange="setQty('${item.id}',this.value)" />
+            <button class="qty-btn" onclick="changeQty('${item.id}',1,event)">+</button>
+          </div>
+          <div class="item-subtotal ${qty > 0 ? 'visible' : ''}" id="sub-${item.id}">
+            ${qty > 0 ? `
+              <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
+              ${getDiscount(item, qty) > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(getDiscount(item, qty))} ${i18n[currentLang].discount}</div>` : ''}
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+    section.appendChild(card);
+  });
+  container.appendChild(section);
+}
+
+function updateCard(id) {
+  const qty = quantities[id] || 0;
+  const card = document.getElementById('card-' + id);
+  const subEl = document.getElementById('sub-' + id);
+  const inp = document.getElementById('input-' + id);
+  const priceEl = document.getElementById('prices-' + id);
+  if (!card) return;
+
+  const item = Object.values(catalog).flatMap(c => c.items).find(p => p.id === id);
+  const subtotal = getPrice(item, qty);
+
+  if (inp) inp.value = qty;
+  if (subEl) {
+    if (qty > 0) {
+      const discount = getDiscount(item, qty);
+      subEl.innerHTML = `
+        <div style="font-size:14px;font-weight:700;color:var(--accent);">${fmt(subtotal)}</div>
+        ${discount > 0 ? `<div style="font-size:11px;color:var(--success);font-weight:600;">-${fmt(discount)} ${i18n[currentLang].discount}</div>` : ''}
+      `;
+      subEl.className = 'item-subtotal visible';
+    } else {
+      subEl.innerHTML = '';
+      subEl.className = 'item-subtotal';
+    }
+  }
+  if (priceEl) priceEl.innerHTML = getPriceTags(item);
+  card.className = 'product-card' + (qty > 0 ? ' has-qty' : '');
+}
+
+function updateSummary() {
+  const t = i18n[currentLang];
+  let grand = 0, count = 0, totalDiscount = 0;
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  allItems.forEach(item => {
+    const qty = quantities[item.id] || 0;
+    if (qty > 0) {
+      grand += getPrice(item, qty);
+      totalDiscount += getDiscount(item, qty);
+      count++;
+    }
+  });
+  document.getElementById('grand-total').textContent = fmt(grand);
+  document.getElementById('item-summary').textContent = count > 0 ? t.items_selected(count) : t.select_items;
+  document.getElementById('header-count').textContent = count;
+  const discEl = document.getElementById('total-discount');
+  if (totalDiscount > 0) {
+    discEl.textContent = t.total_discount(fmt(totalDiscount));
+    discEl.style.display = 'block';
+  } else {
+    discEl.style.display = 'none';
+  }
+
+  const minOrderEl = document.getElementById('min-order-notice');
+  const orderBtn = document.querySelector('.order-btn');
+  const MIN_ORDER = 50000;
+  if (count > 0 && grand >= MIN_ORDER) {
+    if (minOrderEl) { minOrderEl.textContent = t.min_order_ok; minOrderEl.style.color = 'var(--success)'; }
+    if (orderBtn) { orderBtn.disabled = false; orderBtn.style.opacity = '1'; orderBtn.style.pointerEvents = 'auto'; }
+  } else if (count > 0 && grand < MIN_ORDER) {
+    const need = (MIN_ORDER - grand).toLocaleString();
+    if (minOrderEl) { minOrderEl.textContent = t.min_order(need); minOrderEl.style.color = 'var(--accent)'; }
+    if (orderBtn) { orderBtn.disabled = true; orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
+  } else {
+    if (minOrderEl) { minOrderEl.textContent = t.min_order('50,000'); minOrderEl.style.color = 'var(--muted)'; }
+    if (orderBtn) { orderBtn.disabled = true; orderBtn.style.opacity = '0.4'; orderBtn.style.pointerEvents = 'none'; }
+  }
+}
+
+function changeQty(id, delta, e) {
+  e && e.stopPropagation();
+  const current = quantities[id] || 0;
+  if (delta > 0 && current >= 10) {
+    showToast(i18n[currentLang].max_qty);
+    return;
+  }
+  quantities[id] = Math.min(10, Math.max(0, current + delta));
+  saveCartToStorage();
+  if (delta > 0 && quantities[id] > 0) {
+    playDing();
+    const priceEl = document.getElementById('prices-' + id);
+    if (priceEl) {
+      const firstTag = priceEl.querySelector('.price-tag');
+      if (firstTag) {
+        firstTag.classList.remove('bounce');
+        void firstTag.offsetWidth;
+        firstTag.classList.add('bounce');
+        setTimeout(() => firstTag.classList.remove('bounce'), 350);
+      }
+    }
+  } else if (delta < 0 && quantities[id] >= 0) {
+    playReset();
+  }
+  updateCard(id);
+  updateSummary();
+}
+
+function setQty(id, val) {
+  quantities[id] = Math.min(10, Math.max(0, parseInt(val) || 0));
+  updateCard(id);
+  updateSummary();
+  saveCartToStorage();
+}
+
+function saveCartToStorage() {
+  const active = {};
+  Object.keys(quantities).forEach(k => { if (quantities[k] > 0) active[k] = quantities[k]; });
+  try { localStorage.setItem('cart_quantities', JSON.stringify(active)); } catch(e) {}
+}
+
+function loadCartFromStorage() {
+  try {
+    const saved = localStorage.getItem('cart_quantities');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    Object.keys(parsed).forEach(k => { quantities[k] = parsed[k]; });
+  } catch(e) {}
+}
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  renderTab(tab);
+}
+
+function openModal() {
+  const t = i18n[currentLang];
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
+  const body = document.getElementById('modal-body');
+
+  if (selected.length === 0) {
+    body.innerHTML = `<div class="empty-cart">${t.empty_cart}</div>`;
+  } else {
+    let grand = 0;
+    const rows = selected.map(item => {
+      const qty = quantities[item.id];
+      const price = getPrice(item, qty);
+      grand += price;
+      return `<div class="modal-item" id="modal-row-${item.id}">
+        <span class="modal-item-name">${item.emoji} ${getItemName(item)}</span>
+        <div class="modal-qty-ctrl">
+          <button class="modal-qty-btn" onclick="modalQty('${item.id}',-1)">−</button>
+          <span class="modal-qty-num" id="modal-qty-${item.id}">${qty}</span>
+          <button class="modal-qty-btn" onclick="modalQty('${item.id}',1)">+</button>
+        </div>
+        <span class="modal-item-price" id="modal-price-${item.id}">${fmt(price)}</span>
+        <button class="modal-item-del" onclick="modalQty('${item.id}',0)" title="삭제">✕</button>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = `
+      ${rows}
+      <div class="modal-total"><span>${t.grand_total}</span><span id="modal-grand-total">${fmt(grand)}</span></div>
+      <div style="margin:16px 0; background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:10px 14px; font-size:13px; color:#7a6000;">
+        ${t.pay_modal}
+      </div>
+
+      <!-- 배달 방식 선택 (택배 준비중) -->
+      <div class="form-group" style="margin-bottom:16px;display:none;" id="delivery-type-section">
+        <label class="form-label">🚚 ${t.delivery_type}</label>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button type="button" id="btn-delivery" onclick="selectDelivery('home')"
+            style="flex:1;padding:12px 8px;border:2px solid #c84b2f;border-radius:10px;background:#c84b2f;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+            🛵 ${t.delivery_home}
+          </button>
+          <button type="button" id="btn-parcel" onclick="selectDelivery('parcel')"
+            style="flex:1;padding:12px 8px;border:2px solid #ddd;border-radius:10px;background:#fff;color:#666;font-size:13px;font-weight:700;cursor:pointer;">
+            📦 ${t.delivery_parcel}
+          </button>
+        </div>
+        <div id="parcel-notice" style="display:none;margin-top:10px;background:#fff8f0;border:1px solid #c84b2f;border-radius:8px;padding:10px 12px;font-size:12px;color:#c84b2f;line-height:1.6;">
+          ${t.parcel_notice}
+        </div>
+        <div id="frozen-notice" style="display:none;margin-top:8px;background:#e8f4fd;border:1px solid #90caf9;border-radius:8px;padding:10px 12px;font-size:12px;color:#1565c0;line-height:1.6;">
+          ${t.frozen_warning}
+        </div>
+      </div>
+
+      <div class="customer-form">
+        <div class="form-group">
+          <label class="form-label">${t.field_name}</label>
+          <input class="form-input" type="text" id="cust-name" placeholder="${t.ph_name}" oninput="saveCustField('cust_name',this.value);updateConfirmButtonState();" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t.field_phone} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
+          <input class="form-input" type="tel" id="cust-phone" placeholder="${t.ph_phone}" oninput="saveCustField('cust_phone',this.value);updateConfirmButtonState();" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📘 ${t.field_facebook} <span style="font-size:11px;color:var(--muted);">(${t.optional})</span></label>
+          <input class="form-input" type="text" id="cust-facebook" placeholder="${t.ph_facebook}" oninput="saveCustField('cust_facebook',this.value);updateConfirmButtonState();" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t.field_addr}</label>
+          <div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;">
+            <div style="flex-shrink:0;text-align:center;">
+              <img src="https://i.namu.wiki/i/m6zML1AJPjXWr2RZmCqfi-AUfmrE4qpXU13okVzP2RKJKNaryGJRTT4oPmia7MOUXveYHq7UJUCeLTtRIsZzqQ.webp" style="width:120px;border-radius:8px;border:1px solid var(--border);" />
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">${t.addr_example}</div>
+            </div>
+            <div style="flex:1;border:2px dashed var(--border);border-radius:8px;padding:12px;text-align:center;background:var(--bg);">
+              <div id="addr-preview" style="display:none;margin-bottom:12px;">
+                <img id="addr-img" style="max-width:100%;max-height:200px;border-radius:6px;" />
+                <div style="margin-top:8px;font-size:12px;color:var(--success);">✅ ${t.addr_uploaded}</div>
+              </div>
+              <div id="addr-placeholder" style="margin-bottom:12px;">
+                <div style="font-size:24px;margin-bottom:4px;">📸</div>
+                <div style="font-size:11px;color:var(--muted);">${t.ph_addr}</div>
+              </div>
+              <div style="display:flex;gap:6px;justify-content:center;">
+                <button type="button" onclick="document.getElementById('addr-camera').click()" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;">
+                  📷 ${t.btn_camera}
+                </button>
+                <button type="button" onclick="document.getElementById('addr-gallery').click()" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;">
+                  🖼️ ${t.btn_gallery}
+                </button>
+              </div>
+              <input type="file" id="addr-camera"  accept="image/*" capture="environment" style="display:none;" onchange="previewAddr(this)" />
+              <input type="file" id="addr-gallery" accept="image/*" style="display:none;" onchange="previewAddr(this)" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t.field_note}</label>
+          <input class="form-input" type="text" id="cust-note" placeholder="${t.ph_note}" />
+        </div>
+      </div>
+      <button class="confirm-btn" id="confirm-order-btn" onclick="confirmOrder()" disabled>${t.confirm_btn}</button>
+      <div id="confirm-help" style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">📸 ${t.ph_addr}</div>
+    `;
+  }
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  resetAddressInputs();
+  window._savedAddrFile = null;
+  updateConfirmButtonState();
+  if (typeof loadSavedCustomerInfo === 'function') loadSavedCustomerInfo();
+}
+
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeOnOverlay(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+const ORDER_EMAIL = 'dunnaeasiamart@proton.me';
+const ORDER_API_URL = `https://formsubmit.co/ajax/${ORDER_EMAIL}`;
+
+function saveCustField(key, value) {
+  try { localStorage.setItem(key, value); } catch(e) {}
+}
+
+let currentDelivery = 'home'; // 'home' or 'parcel'
+
+function selectDelivery(type) {
+  currentDelivery = type;
+  const btnHome = document.getElementById('btn-delivery');
+  const btnParcel = document.getElementById('btn-parcel');
+  const parcelNotice = document.getElementById('parcel-notice');
+  const frozenNotice = document.getElementById('frozen-notice');
+
+  if (type === 'home') {
+    btnHome.style.background = '#c84b2f'; btnHome.style.color = '#fff'; btnHome.style.borderColor = '#c84b2f';
+    btnParcel.style.background = '#fff'; btnParcel.style.color = '#666'; btnParcel.style.borderColor = '#ddd';
+    parcelNotice.style.display = 'none';
+    frozenNotice.style.display = 'none';
+  } else {
+    btnParcel.style.background = '#c84b2f'; btnParcel.style.color = '#fff'; btnParcel.style.borderColor = '#c84b2f';
+    btnHome.style.background = '#fff'; btnHome.style.color = '#666'; btnHome.style.borderColor = '#ddd';
+    parcelNotice.style.display = 'block';
+    // 냉동 상품 포함 여부 확인
+    const hasFrozen = Object.values(catalog).find(c => c.items.some(item => item.id.startsWith('a') && (quantities[item.id] || 0) > 0));
+    if (hasFrozen) frozenNotice.style.display = 'block';
+    else frozenNotice.style.display = 'none';
+  }
+}
+
+function updateConfirmButtonState() {
+  const btn = document.getElementById('confirm-order-btn');
+  const help = document.getElementById('confirm-help');
+  const name = document.getElementById('cust-name')?.value.trim();
+  const phone = document.getElementById('cust-phone')?.value.trim();
+  const facebook = document.getElementById('cust-facebook')?.value.trim();
+  const hasPhoto = !!(document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile);
+  const hasName = !!name;
+  const hasContact = !!(phone || facebook);
+  const canOrder = hasName && hasContact && hasPhoto;
+
+  if (btn) btn.disabled = !canOrder;
+  if (help) {
+    const t = i18n[currentLang];
+    if (!hasName) {
+      help.textContent = '✏️ ' + (t.alert_fill || 'Please enter your name');
+      help.style.color = 'var(--muted)';
+    } else if (!hasContact) {
+      help.textContent = '📱 ' + (t.alert_contact || 'Please enter phone or Facebook');
+      help.style.color = 'var(--muted)';
+    } else if (!hasPhoto) {
+      help.textContent = '📸 ' + (t.ph_addr || 'Please upload address photo');
+      help.style.color = 'var(--muted)';
+    } else {
+      help.textContent = '✅ ' + (t.addr_uploaded || 'Ready to order!');
+      help.style.color = 'var(--success)';
+    }
+  }
+}
+
+function previewAddr(input) {
+  const file = input.files[0];
+  if (!file) {
+    updateConfirmButtonState();
+    return;
+  }
+  const otherId = input.id === 'addr-camera' ? 'addr-gallery' : 'addr-camera';
+  document.getElementById(otherId).value = '';
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('addr-img').src = e.target.result;
+    document.getElementById('addr-preview').style.display = 'block';
+    document.getElementById('addr-placeholder').style.display = 'none';
+    updateConfirmButtonState();
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetAddressInputs() {
+  const cam = document.getElementById('addr-camera');
+  const gal = document.getElementById('addr-gallery');
+  const imgEl = document.getElementById('addr-img');
+  const preEl = document.getElementById('addr-preview');
+  const phEl = document.getElementById('addr-placeholder');
+  if (cam) cam.value = '';
+  if (gal) gal.value = '';
+  if (imgEl) imgEl.removeAttribute('src');
+  if (preEl) preEl.style.display = 'none';
+  if (phEl) phEl.style.display = 'block';
+  updateConfirmButtonState();
+}
+
+async function sendOrderByEmail(payload) {
+  const form = new FormData();
+  form.append('name', payload.name || 'Asia Mart Customer');
+  form.append('email', ORDER_EMAIL);
+  form.append('_subject', 'Asia Mart New Order');
+  form.append('_captcha', 'false');
+  form.append('_template', 'table');
+  form.append('message', payload.text);
+  if (payload.photoFile) {
+    form.append('attachment', payload.photoFile, payload.photoFile.name || 'address-photo.jpg');
+  }
+
+  const response = await fetch(ORDER_API_URL, {
+    method: 'POST',
+    body: form,
+    headers: { 'Accept': 'application/json' }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Email order failed: ${response.status}`);
+  }
+
+  return response.json().catch(() => ({}));
+}
+
+async function confirmOrder() {
+  const t = i18n[currentLang];
+  const name     = document.getElementById('cust-name')?.value.trim();
+  const phone    = document.getElementById('cust-phone')?.value.trim();
+  const facebook = document.getElementById('cust-facebook')?.value.trim();
+  const note     = document.getElementById('cust-note')?.value.trim();
+  const photoFile = document.getElementById('addr-camera')?.files[0] || document.getElementById('addr-gallery')?.files[0] || window._savedAddrFile || null;
+
+  if (!name) { alert(t.alert_fill); return; }
+  if (!phone && !facebook) { alert(t.alert_contact); return; }
+
+  // 로딩 애니메이션
+  const btn = document.getElementById('confirm-order-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" style="animation:spin 1s linear infinite;transform-origin:center;"/></svg> Sending...</span>';
+
+  // 스피너 CSS 추가
+  if (!document.getElementById('spin-style')) {
+    const style = document.createElement('style');
+    style.id = 'spin-style';
+    style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } #confirm-order-btn svg path { animation: spin 1s linear infinite; transform-origin: 12px 12px; }';
+    document.head.appendChild(style);
+  }
+
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const selected = allItems.filter(item => (quantities[item.id] || 0) > 0);
+  let grand = 0;
+  const lines = selected.map(item => {
+    const qty = quantities[item.id];
+    const price = getPrice(item, qty);
+    grand += price;
+    return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
+  }).join('\n');
+
+  const isParcel = currentDelivery === 'parcel';
+  const hasFrozen = selected.some(item => item.id.startsWith('a'));
+  const deliveryLabel = isParcel ? '📦 택배 (선입금)' : '🛵 일반 배달 (현장결제)';
+  const frozenLabel = isParcel && hasFrozen ? '\n🧊 냉동 상품 포함 - 아이스박스/보냉재 추가비용 발생' : '';
+
+  const msg = `🛒 새 주문!\n\n👤 이름: ${name}${phone ? '\n📞 연락처: ' + phone : ''}${facebook ? '\n📘 페이스북: ' + facebook : ''}${note ? '\n📝 메모: ' + note : ''}\n\n${lines}\n\n💰 합계: ${fmt(grand)}\n${deliveryLabel}${frozenLabel}${photoFile ? '\n📸 주소 사진 첨부' : '\n⚠️ 주소 사진 없음'}`;
+
+  const TG_TOKEN = '8407483229:AAFapLvbJybVGqtLyo55EVsLIRZCCbieKk0';
+  const TG_CHAT  = '8626199213';
+  const apiBase  = `https://api.telegram.org/bot${TG_TOKEN}`;
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz2mcxE0yUjsNXD0KkBA1_CvRV8SC_QMiwvod0g2gwrFN7QbrTuMSHwlpSb80zePazC3A/exec';
+
+  try {
+    // 1. 텔레그램 전송
+    if (photoFile) {
+      const form = new FormData();
+      form.append('chat_id', TG_CHAT);
+      form.append('photo', photoFile);
+      form.append('caption', msg);
+      await fetch(`${apiBase}/sendPhoto`, { method: 'POST', body: form });
+    } else {
+      await fetch(`${apiBase}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT, text: msg })
+      });
+    }
+
+    // 2. 구글 시트 기록
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        phone: phone || '',
+        facebook: facebook || '',
+        items: lines,
+        total: fmt(grand),
+        note: note || '',
+        deliveryType: isParcel ? '택배(선입금)' : '일반배달'
+      })
+    });
+  } catch(e) {
+    console.error('전송 오류:', e);
+  }
+
+  // 페이스북 메신저 연결 - 언어별 자동 메시지
+  const orderSummary = selected.slice(0,3).map(item => `${getItemName(item)} x${quantities[item.id]}`).join(', ') + (selected.length > 3 ? ` 외 ${selected.length-3}개` : '');
+
+  let fbMsgText;
+  if (currentLang === 'lo') {
+    fbMsgText = isParcel
+      ? `ສະບາຍດີ! ຂ້ອຍສັ່ງຊື້ແລ້ວ 😊\nຊື່: ${name}\nລາຍການ: ${orderSummary}\nລວມ: ${fmt(grand)}\nກະລຸນາແຈ້ງເລກບັນຊີໂອນເງິນດ້ວຍ\n📸 ຮູບທີ່ຢູ່ສົ່ງທາງ Telegram ແລ້ວ`
+      : `ສະບາຍດີ! ຂ້ອຍສັ່ງຊື້ແລ້ວ 😊\nຊື່: ${name}\nລາຍການ: ${orderSummary}\nລວມ: ${fmt(grand)}\nກະລຸນາຢືນຢັນຄຳສັ່ງຊື້ດ້ວຍ\n📸 ຮູບທີ່ຢູ່ສົ່ງທາງ Telegram ແລ້ວ`;
+  } else if (currentLang === 'th') {
+    fbMsgText = isParcel
+      ? `สวัสดีครับ/ค่ะ! สั่งซื้อแล้วนะครับ/ค่ะ 😊\nชื่อ: ${name}\nรายการ: ${orderSummary}\nรวม: ${fmt(grand)}\nกรุณาแจ้งเลขบัญชีสำหรับโอนเงินด้วยครับ/ค่ะ\n📸 ส่งรูปที่อยู่ทาง Telegram แล้ว`
+      : `สวัสดีครับ/ค่ะ! สั่งซื้อแล้วนะครับ/ค่ะ 😊\nชื่อ: ${name}\nรายการ: ${orderSummary}\nรวม: ${fmt(grand)}\nกรุณายืนยันคำสั่งซื้อด้วยครับ/ค่ะ\n📸 ส่งรูปที่อยู่ทาง Telegram แล้ว`;
+  } else if (currentLang === 'ko') {
+    fbMsgText = isParcel
+      ? `안녕하세요! 주문했어요 😊\n이름: ${name}\n주문: ${orderSummary}\n합계: ${fmt(grand)}\n입금 계좌 알려주세요!\n📸 주소 사진은 Telegram으로 전송됐어요`
+      : `안녕하세요! 주문했어요 😊\n이름: ${name}\n주문: ${orderSummary}\n합계: ${fmt(grand)}\n주문 확인 부탁드려요!\n📸 주소 사진은 Telegram으로 전송됐어요`;
+  } else {
+    fbMsgText = isParcel
+      ? `Hello! I placed an order 😊\nName: ${name}\nItems: ${orderSummary}\nTotal: ${fmt(grand)}\nPlease send me the payment account details.\n📸 Address photo sent via Telegram`
+      : `Hello! I placed an order 😊\nName: ${name}\nItems: ${orderSummary}\nTotal: ${fmt(grand)}\nPlease confirm my order!\n📸 Address photo sent via Telegram`;
+  }
+
+  const fbUrl = `https://m.me/korea.happy.store?text=${encodeURIComponent(fbMsgText)}`;
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div style="text-align:center;padding:32px 16px;">
+      <div style="font-size:48px;margin-bottom:16px;">${isParcel ? '📦' : '✅'}</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${t.order_done_title}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px;">${t.order_done_desc}</div>
+      ${isParcel ? `
+      <div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:#c84b2f;line-height:1.8;text-align:left;">
+        <div style="font-weight:700;margin-bottom:6px;">📦 택배 주문 안내</div>
+        <div>1. 아래 메신저로 연락해주세요</div>
+        <div>2. 배송지 주소 + 택배비 안내</div>
+        <div>3. 입금 확인 후 발송</div>
+        ${hasFrozen ? '<div style="margin-top:6px;color:#1565c0;">🧊 냉동 상품 포함 - 아이스박스/보냉재 비용 별도 안내</div>' : ''}
+      </div>` : ''}
+      <div style="background:#e8f0fe;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:13px;color:#1a1814;margin-bottom:12px;">${t.order_done_fb}</div>
+        <a href="${fbUrl}" target="_blank" onclick="
+          var notice = document.getElementById('fb-loading-notice');
+          if (notice) {
+            notice.style.display = 'block';
+            setTimeout(function(){ notice.style.display = 'none'; }, 4000);
+          }
+        " style="display:inline-block;background:#0084ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">📘 Facebook Messenger</a>
+        <div id="fb-loading-notice" style="display:none;margin-top:10px;font-size:12px;color:#0084ff;animation:pulse 1s ease-in-out infinite;">
+          📲 메신저 앱이 열립니다! 잠시만 기다려주세요 😊<br>
+          <span style="font-family:'Noto Sans Lao',sans-serif;font-size:11px;color:#888;">ກຳລັງເປີດ Messenger...</span><br>
+          <span style="font-family:'Noto Sans Thai',sans-serif;font-size:11px;color:#888;">กำลังเปิด Messenger...</span>
+        </div>
+      </div>
+      <button onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">닫기 / Close</button>
+    </div>
+  `;
+
+  // 수량 초기화
+  Object.keys(quantities).forEach(id => quantities[id] = 0);
+  try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+}
+
+function clearCart() {
+  const t = i18n[currentLang];
+  const confirmMsg = {
+    ko: '장바구니를 비울까요?',
+    th: 'ล้างตะกร้าสินค้า?',
+    lo: 'ລ້າງກະຕ່າສິນຄ້າ?',
+    en: 'Clear cart?'
+  };
+  if (!confirm(confirmMsg[currentLang] || confirmMsg.en)) return;
+
+  // 모든 수량 0으로
+  Object.keys(quantities).forEach(k => { quantities[k] = 0; });
+  try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+
+  // 모든 카드 UI 초기화
+  document.querySelectorAll('.product-card').forEach(card => {
+    const id = card.id.replace('card-', '');
+    const inp = document.getElementById('input-' + id);
+    const sub = document.getElementById('sub-' + id);
+    if (inp) inp.value = 0;
+    if (sub) { sub.innerHTML = ''; sub.className = 'item-subtotal'; }
+    card.className = 'product-card';
+  });
+
+  updateSummary();
+  renderTab(currentTab);
+  document.getElementById('modal').classList.remove('open');
+}
+
+function modalQty(id, delta) {
+  const current = quantities[id] || 0;
+  const newQty = delta === 0 ? 0 : Math.max(0, current + delta);
+  quantities[id] = newQty;
+  saveCartToStorage();
+  updateCard(id);      // 상품 카드 UI 동기화
+  updateSummary();     // 하단 요약 동기화
+
+  if (newQty === 0) {
+    openModal();       // 항목 제거 → 모달 전체 다시 렌더
+    return;
+  }
+
+  // 수량/가격 부분 업데이트
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  const price = getPrice(item, newQty);
+
+  const qtyEl = document.getElementById('modal-qty-' + id);
+  const priceEl = document.getElementById('modal-price-' + id);
+  if (qtyEl) qtyEl.textContent = newQty;
+  if (priceEl) priceEl.textContent = fmt(price);
+
+  // 합계 업데이트
+  let grand = 0;
+  Object.values(catalog).flatMap(c => c.items).forEach(it => {
+    const q = quantities[it.id] || 0;
+    if (q > 0) grand += getPrice(it, q);
+  });
+  const totalEl = document.getElementById('modal-grand-total');
+  if (totalEl) totalEl.textContent = fmt(grand);
+}
+// 베스트 상품 ID 목록 - Firebase에서 불러옴
+let bestIds = ['A01','B25','C15','C19','D16','A06','C14','B01','D01','E01']; // 기본값 10개
+window.bestIds = bestIds;
+let newIds = []; // 신상품 목록 - Firebase에서 불러옴
+window.newIds = newIds;
+
+// 상품 카테고리로 이동 + 스크롤
+function goToItem(id) {
+  const entry = Object.entries(catalog).find(([k,v]) => v.items.some(p => p.id === id));
+  if (!entry) return;
+  const catKey = entry[0];
+  const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
+
+  // 검색창 열려있으면 닫기
+  if (_searchOpen) toggleSearch();
+
+  // 탭 전환
+  if (tabBtn) switchTab(tabBtn, catKey);
+  else { currentTab = catKey; renderTab(catKey); }
+
+  // 해당 상품으로 스크롤
+  setTimeout(() => {
+    const card = document.getElementById('card-' + id);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // 잠깐 하이라이트
+      card.style.outline = '3px solid var(--accent)';
+      setTimeout(() => card.style.outline = '', 1500);
+    }
+  }, 300);
+}
+
+function renderNew() {
+  const container = document.getElementById('new-scroll');
+  const section = document.getElementById('new-section');
+  if (!container || !section) return;
+  const ids = window.newIds || newIds;
+  if (!ids || ids.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  ids.forEach(id => {
+    const item = allItems.find(p => p.id === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'new-card-' + id;
+    const imgHtml = item.image ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+    card.innerHTML = `
+      ${imgHtml}${emojiHtml}
+      <div class="best-card-body">
+        <div class="best-card-name">${getItemName(item)}</div>
+        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="new-qty-${id}">
+          <button class="best-qty-btn" onclick="changeNewQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changeNewQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      goToItem(id);
+    });
+    container.appendChild(card);
+  });
+}
+
+function changeNewQty(id, delta, e) {
+  e && e.stopPropagation();
+  changeQty(id, delta, e);
+  const qtyDiv = document.getElementById('new-qty-' + id);
+  const qty = quantities[id] || 0;
+  if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
+  const card = document.getElementById('new-card-' + id);
+  if (card) card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+}
+window.renderNew = renderNew;
+
+function renderBest() {
+  const container = document.getElementById('best-scroll');
+  if (!container) return;
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const ids = window.bestIds || bestIds;
+
+  ids.forEach(id => {
+    const item = allItems.find(p => p.id === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'best-card-' + id;
+
+    const imgHtml = item.image
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+
+    card.innerHTML = `
+      ${imgHtml}${emojiHtml}
+      <div class="best-card-body">
+        <div class="best-card-name">${getItemName(item)}</div>
+        <div class="best-card-price">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="best-qty-${id}">
+          <button class="best-qty-btn" onclick="changeBestQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changeBestQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+
+    // 클릭하면 해당 카테고리 탭으로 이동
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('best-qty-btn')) return;
+      goToItem(id);
+    });
+
+    container.appendChild(card);
+  });
+}
+window.renderBest = renderBest;
+
+function changeBestQty(id, delta, e) {
+  e && e.stopPropagation();
+  changeQty(id, delta, e);
+  updateBestCard(id);
+}
+
+function updateBestCard(id) {
+  const qty = quantities[id] || 0;
+  const card = document.getElementById('best-card-' + id);
+  if (!card) return;
+  card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+  const qtyDiv = document.getElementById('best-qty-' + id);
+  if (qtyDiv) qtyDiv.querySelector('.best-qty-val').textContent = qty;
+}
+
+// 저장된 장바구니 복원
+loadCartFromStorage();
+
+renderBest();
+
+// 베스트 상품 자동 슬라이드
+(function startBestAutoScroll() {
+  const el = document.getElementById('best-scroll');
+  if (!el) return;
+
+  let isPaused = false;
+  let rafId = null;
+  let direction = 1;
+  const speed = 0.8;
+
+  function tick() {
+    const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+    if (!isPaused && maxScroll > 0) {
+      let next = el.scrollLeft + speed * direction;
+      if (next >= maxScroll) { next = maxScroll; direction = -1; }
+      else if (next <= 0) { next = 0; direction = 1; }
+      el.scrollLeft = next;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function pause() { isPaused = true; }
+  function resumeLater() { setTimeout(() => { isPaused = false; }, 1200); }
+
+  el.addEventListener('touchstart', pause, { passive: true });
+  el.addEventListener('touchend', resumeLater);
+  el.addEventListener('mouseenter', pause);
+  el.addEventListener('mouseleave', () => { isPaused = false; });
+  el.addEventListener('pointerdown', pause);
+  el.addEventListener('pointerup', resumeLater);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+    else if (!rafId) { rafId = requestAnimationFrame(tick); }
+  });
+
+  setTimeout(() => { if (!rafId) rafId = requestAnimationFrame(tick); }, 800);
+})();
+
+// 신상품 자동 슬라이드 (베스트보다 느리게)
+function startNewAutoScroll() {
+  const el = document.getElementById('new-scroll');
+  if (!el) return;
+  // 이미 실행 중이면 중복 실행 방지
+  if (el._scrollStarted) return;
+  el._scrollStarted = true;
+
+  let isPaused = false;
+  let rafId = null;
+  let direction = 1;
+  const speed = 0.4;
+
+  function tick() {
+    const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+    if (!isPaused && maxScroll > 0) {
+      let next = el.scrollLeft + speed * direction;
+      if (next >= maxScroll) { next = maxScroll; direction = -1; }
+      else if (next <= 0) { next = 0; direction = 1; }
+      el.scrollLeft = next;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function pause() { isPaused = true; }
+  function resumeLater() { setTimeout(() => { isPaused = false; }, 1200); }
+
+  el.addEventListener('touchstart', pause, { passive: true });
+  el.addEventListener('touchend', resumeLater);
+  el.addEventListener('mouseenter', pause);
+  el.addEventListener('mouseleave', () => { isPaused = false; });
+  el.addEventListener('pointerdown', pause);
+  el.addEventListener('pointerup', resumeLater);
+
+  rafId = requestAnimationFrame(tick);
+}
+
+// 초기 시도 (이미 데이터 있는 경우)
+setTimeout(startNewAutoScroll, 3000);
+window.startNewAutoScroll = startNewAutoScroll;
+
+// ===== 초기화 =====
+setLang(currentLang);
+updateSummary();
+// Order Now 비활성화
+(function() {
+  var btn = document.querySelector('.order-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+})();
+// 카탈로그 로딩 중 표시
+(function() {
+  var main = document.getElementById('main-content');
+  if (main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#aaa;"><div style="font-size:32px;margin-bottom:12px;">⏳</div><div style="font-size:14px;">상품 불러오는 중...</div><div style="font-size:11px;margin-top:6px;font-family:\'Noto Sans Lao\',\'Noto Sans Thai\',sans-serif;">ກຳລັງໂຫລດ... / กำลังโหลด...</div></div>';
+})();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
+  authDomain: "asia-mart-a0292.firebaseapp.com",
+  databaseURL: "https://asia-mart-a0292-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "asia-mart-a0292",
+  storageBucket: "asia-mart-a0292.firebasestorage.app",
+  messagingSenderId: "6786874274",
+  appId: "1:6786874274:web:50f7bec4fb3668cb4c10fb"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+async function loadStock() {
+  try {
+    const snapshot = await get(ref(db, 'stock'));
+    window._stock = snapshot.val() || {};
+    renderTab(currentTab);
+  } catch(e) {
+    console.log('재고 로드 실패:', e);
+  }
+}
+
+function loadCatalogFromFirebase() {
+  // catalog 실시간 리스너 — 관리자에서 수정하면 즉시 반영
+  onValue(ref(db, 'catalog'), async (catalogSnap) => {
+    const discSnap = await get(ref(db, 'discount'));
+    const data = catalogSnap.val();
+    const disc = discSnap.val() || {};
+    if (data) {
+      Object.entries(data).forEach(([catKey, cat]) => {
+        const items = (cat.items || []).map(item => {
+          const d = disc[item.id];
+          if (d) {
+            const p1 = item.price1 || 0;
+            if (d.d2) item.price2 = Math.round(p1 * (1 - d.d2 / 100)) * 2;
+            if (d.d3) item.price3 = Math.round(p1 * (1 - d.d3 / 100)) * 3;
+          }
+          item._catKey = catKey; // 카테고리 판별용
+          return item;
+        });
+        catalog[catKey] = {
+          label:    cat.label,
+          label_ko: cat.label_ko || cat.label,
+          label_th: cat.label_th || '',
+          label_lo: cat.label_lo || '',
+          label_en: cat.label_en || '',
+          emoji: cat.emoji,
+          showPriceTags: cat.showPriceTags !== false,
+          items
+        };
+      });
+
+      // 카테고리 탭 동적 생성 (visible:false 제외)
+      const catOrderSnap = await get(ref(db, 'catOrder'));
+      const savedOrder = catOrderSnap.val() || [];
+      const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','cigarettes&lighters'];
+      const allKeys = Object.keys(catalog);
+      let orderedKeys;
+      if (savedOrder.length > 0) {
+        // 저장된 순서 우선, 없는 키는 뒤에 추가
+        orderedKeys = [...savedOrder.filter(k=>catalog[k]), ...allKeys.filter(k=>!savedOrder.includes(k))];
+      } else {
+        orderedKeys = [...fixedOrder.filter(k=>catalog[k]), ...allKeys.filter(k=>!fixedOrder.includes(k)).sort()];
+      }
+      const visibleKeys = orderedKeys.filter(k => catalog[k]?.visible !== false && catalog[k]?.items?.length > 0);
+      const tabsEl = document.getElementById('cat-tabs');
+      if (tabsEl) {
+        tabsEl.innerHTML = '';
+        visibleKeys.forEach((key, i) => {
+          const cat = catalog[key];
+          const emoji = typeof cat.emoji === 'string' ? cat.emoji : '';
+          const label = getCatLabel(cat, key, currentLang);
+          const btn = document.createElement('button');
+          btn.className = 'tab' + (i === 0 ? ' active' : '');
+          btn.setAttribute('data-catkey', key);
+          btn.onclick = function() { switchTab(this, key); };
+          btn.textContent = emoji + ' ' + label;
+          // 5개씩 2단 분리: 1~5번째 order=1, 6번째~ order=10
+          tabsEl.appendChild(btn);
+        });
+      }
+
+      // 첫 번째 보이는 카테고리 렌더링
+      const firstKey = visibleKeys[0] || 'frozen';
+      currentTab = firstKey;
+      renderTab(firstKey);
+      renderBest();
+      if (typeof window.renderNew === 'function') window.renderNew();
+      updateSummary();
+      console.log('✅ 카탈로그 로드 완료:', Object.keys(catalog).length, '개 카테고리');
+    }
+  }, (e) => {
+    console.log('카탈로그 로드 실패:', e);
+    var main = document.getElementById('main-content');
+    if (main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#c84b2f;"><div style="font-size:32px;margin-bottom:12px;">⚠️</div><div>상품을 불러오지 못했습니다. 새로고침 해주세요.</div></div>';
+  });
+}
+
+// 재고 적용 함수
+window.applyStock = function() {
+  const stock = window._stock || {};
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  allItems.forEach(item => {
+    const s = stock[item.id];
+    const card = document.getElementById('card-' + item.id);
+    if (!card) return;
+
+    // 기존 배지 제거
+    card.querySelectorAll('.sold-out-badge, .stock-badge').forEach(b => b.remove());
+
+    if (s === 0) {
+      // 품절 처리
+      card.style.opacity = '0.5';
+      card.style.pointerEvents = 'none';
+      card.style.position = 'relative';
+      const badge = document.createElement('div');
+      badge.className = 'sold-out-badge';
+      badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;';
+      badge.textContent = '품절 / Sold Out';
+      card.appendChild(badge);
+      // 수량 0으로
+      quantities[item.id] = 0;
+      const inp = document.getElementById('input-' + item.id);
+      if (inp) inp.value = 0;
+    } else {
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+
+      if (s > 0 && s !== undefined) {
+        // 재고 수량 표시
+        const badge = document.createElement('div');
+        badge.className = 'stock-badge';
+        badge.style.cssText = 'font-size:11px;color:var(--muted);margin-top:2px;';
+        badge.textContent = currentLang === 'ko' ? `재고: ${s}개` : currentLang === 'th' ? `คงเหลือ: ${s}` : `Stock: ${s}`;
+        const body = card.querySelector('.product-body');
+        if (body) body.appendChild(badge);
+
+        // 수량이 재고 초과하면 줄이기
+        if ((quantities[item.id] || 0) > s) {
+          quantities[item.id] = s;
+          const inp = document.getElementById('input-' + item.id);
+          if (inp) inp.value = s;
+        }
+
+        // + 버튼 재고 초과 방지
+        const plusBtn = card.querySelector('.qty-btn:last-child');
+        if (plusBtn) {
+          plusBtn.onclick = (e) => {
+            e && e.stopPropagation();
+            const cur = quantities[item.id] || 0;
+            if (cur >= s) {
+              showToast(currentLang === 'ko' ? `재고가 ${s}개뿐이에요!` : currentLang === 'th' ? `มีสินค้าเพียง ${s} ชิ้น!` : `Only ${s} in stock!`);
+              return;
+            }
+            changeQty(item.id, 1, e);
+          };
+        }
+      }
+    }
+  });
+  updateSummary();
+};
+
+// renderTab 후 재고 적용
+const _origRender = window.renderTab;
+window.renderTab = function(tab) {
+  _origRender(tab);
+  if (window._stock) applyStock();
+};
+
+// Firebase에서 베스트 상품 불러오기
+async function loadBestFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'best'));
+    const data = snapshot.val();
+    if (data && data.length > 0) {
+      window.bestIds = data;
+      if (typeof window.renderBest === 'function') window.renderBest();
+    }
+  } catch(e) {
+    console.log('베스트 상품 로드 실패:', e);
+  }
+}
+
+async function loadNewFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'newItems'));
+    const data = snapshot.val();
+    if (data && data.length > 0) {
+      window.newIds = data;
+      if (typeof window.renderNew === 'function') {
+        window.renderNew();
+        // 섹션이 보인 후 슬라이드 시작
+        setTimeout(startNewAutoScroll, 500);
+      }
+    }
+  } catch(e) {
+    console.log('신상품 로드 실패:', e);
+  }
+}
+
+// ===== 방문자 카운터 =====
+(function() {
+  const BASE_TOTAL = 12480;
+  const TODAY_BASE_MIN = 30;
+  const TODAY_BASE_MAX = 50;
+
+  function getTodayKey() {
+    const d = new Date();
+    return 'vc_' + d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
+  }
+
+  // 오늘의 카운트 반영 시작 시각 (매일 랜덤: 오후 3:30 ~ 5:30)
+  function getTodayTriggerMinutes() {
+    const triggerKey = 'vc_trigger_' + getTodayKey();
+    let saved = parseInt(localStorage.getItem(triggerKey) || '0');
+    if (!saved) {
+      // 210분(3:30) ~ 330분(5:30) 사이 랜덤
+      saved = 210 + Math.floor(Math.random() * 121);
+      localStorage.setItem(triggerKey, saved);
+    }
+    return saved; // 자정 이후 분 단위 (예: 270 = 오후 4:30)
+  }
+
+  function formatNum(n) {
+    return n.toLocaleString();
+  }
+
+  try {
+    const todayKey = getTodayKey();
+    const totalKey = 'vc_total';
+    const now = new Date();
+    const hour = now.getHours();
+
+    let total = parseInt(localStorage.getItem(totalKey) || '0');
+    if (!total || total < BASE_TOTAL) {
+      total = BASE_TOTAL + Math.floor(Math.random() * 300);
+      localStorage.setItem(totalKey, total);
+    }
+
+    let todayCount = parseInt(localStorage.getItem(todayKey) || '0');
+
+    // 오늘의 랜덤 트리거 시각 (분 단위, 예: 270 = 오후 4:30)
+    const triggerMinutes = getTodayTriggerMinutes();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if (nowMinutes >= triggerMinutes && todayCount < TODAY_BASE_MIN) {
+      const elapsed = nowMinutes - triggerMinutes;
+      const maxElapsed = 60 * 8; // 트리거 후 8시간에 걸쳐 자연스럽게 증가
+      const ratio = Math.min(elapsed / maxElapsed, 1);
+      const newTodayCount = TODAY_BASE_MIN + Math.floor(ratio * (TODAY_BASE_MAX - TODAY_BASE_MIN)) + Math.floor(Math.random() * 8);
+      const diff = newTodayCount - todayCount;
+      if (diff > 0) total += diff;
+      todayCount = newTodayCount;
+      localStorage.setItem(todayKey, todayCount);
+      localStorage.setItem(totalKey, total);
+    }
+
+    const sessionKey = 'vc_session_' + todayKey;
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1');
+      todayCount += 1;
+      total += 1;
+      localStorage.setItem(todayKey, todayCount);
+      localStorage.setItem(totalKey, total);
+    }
+
+    const elToday = document.getElementById('visitor-today');
+    const elTotal = document.getElementById('visitor-total');
+    if (elToday) elToday.textContent = formatNum(todayCount);
+    if (elTotal) elTotal.textContent = formatNum(total);
+
+    // 초기 언어 라벨 적용
+    const vcLabels = {
+      en: { today: 'Today', total: 'Total', unit: '' },
+      th: { today: 'วันนี้', total: 'รวม', unit: 'คน' },
+      lo: { today: 'ມື້ນີ້', total: 'ລວມ', unit: 'ຄົນ' },
+      ko: { today: '오늘', total: '누적', unit: '명' },
+    };
+    const vc = vcLabels[typeof currentLang !== 'undefined' ? currentLang : 'en'] || vcLabels.en;
+    const elLT = document.getElementById('vc-label-today');
+    const elLL = document.getElementById('vc-label-total');
+    const elUT = document.getElementById('vc-unit-today');
+    const elUL = document.getElementById('vc-unit-total');
+    if (elLT) elLT.textContent = vc.today;
+    if (elLL) elLL.textContent = vc.total;
+    if (elUT) elUT.textContent = vc.unit;
+    if (elUL) elUL.textContent = vc.unit;
+
+    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+    setTimeout(function() { localStorage.removeItem(todayKey); }, msToMidnight);
+
+  } catch(e) {}
+})();
+
+// Firebase 데이터 로드
+loadCatalogFromFirebase();
+loadStock();
+loadBestFromFirebase();
+loadNewFromFirebase();
+
+// ===== PWA =====
+// 서비스워커 등록 + 백그라운드에서 캐시 삭제
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/asia-mart/sw.js')
+      .then(reg => reg.update())
+      .catch(() => {});
+    // 백그라운드에서 조용히 캐시 삭제
+    if ('caches' in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+    }
+  });
+}
+
+// ===== 주문 폼 자동저장 =====
+document.addEventListener('input', function(e) {
+  try {
+    if (e.target.id === 'cust-name') localStorage.setItem('cf_name', e.target.value);
+    if (e.target.id === 'cust-phone') localStorage.setItem('cf_phone', e.target.value);
+    if (e.target.id === 'cust-facebook') localStorage.setItem('cf_facebook', e.target.value);
+  } catch(ex) {}
+});
+
+function loadSavedCustomerInfo() {
+  setTimeout(function() {
+    try {
+      var n = localStorage.getItem('cf_name');
+      var p = localStorage.getItem('cf_phone');
+      var f = localStorage.getItem('cf_facebook');
+      if (n) { var el = document.getElementById('cust-name'); if(el) el.value = n; }
+      if (p) { var el = document.getElementById('cust-phone'); if(el) el.value = p; }
+      if (f) { var el = document.getElementById('cust-facebook'); if(el) el.value = f; }
+      // 사진은 매번 새로 올려야 하므로 저장된 사진 불러오지 않음
+    } catch(e) {}
+  }, 200);
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('order-btn') || e.target.classList.contains('header-cart') || e.target.closest('.header-cart')) {
+    loadSavedCustomerInfo();
+  }
+});
+
+let deferredPrompt;
+
+// Android - 설치 버튼 표시
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var btn = document.getElementById('pwa-add-btn');
+  if (btn && !localStorage.getItem('pwa_installed')) btn.style.display = 'block';
+});
+
+// iOS - 항상 버튼 표시 (설치 안 된 경우)
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone && !localStorage.getItem('pwa_installed')) {
+  var btn = document.getElementById('pwa-add-btn');
+  if (btn) btn.style.display = 'block';
+}
+
+function handlePWAInstall() {
+  if (deferredPrompt) {
+    // Android Chrome
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        localStorage.setItem('pwa_installed', '1');
+        var btn = document.getElementById('pwa-add-btn');
+        if (btn) btn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+    // iOS Safari 안내 팝업
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:20px;padding:24px;max-width:320px;width:90%;text-align:center;">
+        <div style="font-size:36px;margin-bottom:10px;">📱</div>
+        <div style="font-size:16px;font-weight:700;color:#1a1814;margin-bottom:6px;">홈 화면에 추가</div>
+        <div style="font-size:13px;color:#c84b2f;font-weight:600;margin-bottom:4px;">ສ້າງທາງລັດໃສ່ໜ້າຈໍ</div>
+        <div style="font-size:13px;color:#c84b2f;font-weight:600;margin-bottom:12px;">สร้างทางลัดบนหน้าจอ</div>
+        <div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:#1a1814;line-height:1.8;text-align:left;">
+          1. 하단 <strong>공유버튼</strong> 📤 탭<br>
+          2. <strong>"홈 화면에 추가"</strong> 선택
+        </div>
+        <button onclick="this.closest('div').parentElement.remove();localStorage.setItem('pwa_installed','1');document.getElementById('pwa-add-btn').style.display='none';" 
+          style="width:100%;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">확인</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+}
+</script>
+</body>
+</html>
