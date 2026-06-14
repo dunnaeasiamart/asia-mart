@@ -1961,6 +1961,7 @@ async function confirmOrder() {
   // 수량 초기화
   Object.keys(quantities).forEach(id => quantities[id] = 0);
   try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+}
 
 function clearCart() {
   if (!confirm('장바구니를 비울까요? / Clear cart?')) return;
