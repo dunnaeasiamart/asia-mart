@@ -2036,9 +2036,11 @@ window.newIds = newIds;
 // 상품 카테고리로 이동 + 스크롤
 function goToItem(id) {
   id = String(id);
-  const entry = Object.entries(catalog).find(([k,v]) => v.items.some(p => String(p.id) === id));
-  if (!entry) return;
-  const catKey = entry[0];
+  const allItems = Object.values(catalog).flatMap(c => c.items);
+  const item = allItems.find(p => String(p.id) === id);
+  if (!item) return;
+  const catKey = item._catKey;
+  if (!catKey) return;
   const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
 
   // 검색창 열려있으면 닫기
