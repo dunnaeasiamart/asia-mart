@@ -527,7 +527,7 @@
   .thumb-slider { position:relative; width:120px; min-height:120px; overflow:hidden; border-radius:10px; flex-shrink:0; background:#fff; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
   .thumb-slides { display:flex; transition:transform 0.3s; width:100%; }
   .thumb-slide { min-width:120px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#fff; }
-  .thumb-slide img { width:120px; height:auto; max-height:160px; object-fit:contain; display:block; }
+  .thumb-slide img { width:120px; height:120px; max-height:160px; object-fit:contain; display:block; }
   .thumb-nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
   .thumb-nav.prev { left:2px; }
   .thumb-nav.next { right:2px; }
@@ -2050,19 +2050,14 @@ function goToItem(id) {
   if (tabBtn) switchTab(tabBtn, catKey);
   else { currentTab = catKey; renderTab(catKey); }
 
-  // 렌더 완료 후 스크롤 - requestAnimationFrame으로 DOM 업데이트 보장
-  function scrollToCard(attempts) {
+  // 탭 렌더 완료 후 해당 카드로 스크롤
+  setTimeout(() => {
     const card = document.getElementById('card-' + id);
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.style.outline = '3px solid var(--accent)';
-      setTimeout(() => { if(card) card.style.outline = ''; }, 1500);
-    } else if (attempts > 0) {
-      setTimeout(() => scrollToCard(attempts - 1), 200);
-    }
-  }
-  // renderTab이 동기적으로 완료된 후 다음 프레임에 스크롤
-  requestAnimationFrame(() => requestAnimationFrame(() => scrollToCard(10)));
+    if (!card) return;
+    card.style.outline = '3px solid var(--accent)';
+    setTimeout(() => { if (card) card.style.outline = ''; }, 1500);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
 }
 
 function renderNew() {
