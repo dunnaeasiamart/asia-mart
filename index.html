@@ -1964,12 +1964,32 @@ async function confirmOrder() {
 }
 
 function clearCart() {
-  if (!confirm('장바구니를 비울까요? / Clear cart?')) return;
+  const t = i18n[currentLang];
+  const confirmMsg = {
+    ko: '장바구니를 비울까요?',
+    th: 'ล้างตะกร้าสินค้า?',
+    lo: 'ລ້າງກະຕ່າສິນຄ້າ?',
+    en: 'Clear cart?'
+  };
+  if (!confirm(confirmMsg[currentLang] || confirmMsg.en)) return;
+
+  // 모든 수량 0으로
   Object.keys(quantities).forEach(k => { quantities[k] = 0; });
   try { localStorage.removeItem('cart_quantities'); } catch(e) {}
+
+  // 모든 카드 UI 초기화
+  document.querySelectorAll('.product-card').forEach(card => {
+    const id = card.id.replace('card-', '');
+    const inp = document.getElementById('input-' + id);
+    const sub = document.getElementById('sub-' + id);
+    if (inp) inp.value = 0;
+    if (sub) { sub.innerHTML = ''; sub.className = 'item-subtotal'; }
+    card.className = 'product-card';
+  });
+
   updateSummary();
-  renderTab(currentTab);  // 현재 탭 전체 다시 그리기
-  openModal();
+  // 모달 그냥 닫기
+  document.getElementById('modal').classList.remove('open');
 }
 
 function modalQty(id, delta) {
