@@ -139,6 +139,32 @@
     transition: opacity 0.15s;
   }
   .header-cart:hover { opacity: 0.85; }
+  .scroll-btns {
+    position: fixed;
+    right: 14px;
+    bottom: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 900;
+  }
+  .scroll-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(30,24,20,0.75);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.2s;
+  }
+  .scroll-btn:hover { opacity: 0.85; }
   .cart-count {
     background: #fff;
     color: var(--accent);
@@ -712,6 +738,11 @@
     <div id="min-order-notice" style="font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;"></div>
   </div>
   <button class="order-btn" id="order-btn" onclick="playFanfare();openModal()" data-t="order_btn">Order Now →</button>
+</div>
+
+<div class="scroll-btns">
+  <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로">▲</button>
+  <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="맨 아래로">▼</button>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
@@ -1991,7 +2022,7 @@ function clearCart() {
   renderTab(currentTab);
   renderBest();
   renderNew();
-  document.getElementById('modal').classList.remove('open');
+  closeModal();
 }
 
 function modalQty(id, delta) {
