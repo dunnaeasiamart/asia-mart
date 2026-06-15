@@ -726,9 +726,17 @@
   <div class="best-scroll" id="best-scroll"></div>
 </div>
 
+<div class="best-section" id="philippine-section" style="display:none;">
+  <div class="best-header" style="justify-content:space-between;align-items:center;">
+    <div class="best-title">🇵🇭 <span data-t="philippine_title">Philippine Products</span></div>
+    <a id="philippine-link-btn" href="#" target="_blank" style="display:none;font-size:12px;color:#c84b2f;font-weight:700;text-decoration:none;padding:5px 10px;border:1px solid #c84b2f;border-radius:8px;white-space:nowrap;" data-t-text="philippine_link">🔗 전체 보기 →</a>
+  </div>
+  <div class="best-scroll" id="philippine-scroll"></div>
+</div>
+
 <div class="best-section" id="preorder-section" style="display:none;">
   <div class="best-header">
-    <div class="best-title">🛒 <span data-t="preorder_title">Pre-Order</span></div>
+    <div class="best-title">💎 <span data-t="preorder_title">Pre-Order</span></div>
   </div>
   <div class="best-scroll" id="preorder-scroll"></div>
 </div>
@@ -830,7 +838,9 @@ const i18n = {
     min_order_ok: '✅ Free delivery included!',
     update_notice: '✨ New products added regularly!',
     new_arrivals: '🆕 New Arrivals',
-    preorder_title: '🛒 Pre-Order',
+    preorder_title: '💎 Pre-Order',
+    philippine_title: '🇵🇭 Philippine Products',
+    philippine_link: '🔗 View All Philippine Products →',
     delivery_type: 'Delivery Method',
     delivery_home: '🛵 Home Delivery (Pay on delivery)',
     delivery_parcel: '📦 Parcel (Prepayment required)',
@@ -875,7 +885,9 @@ const i18n = {
     min_order_ok: '✅ จัดส่งฟรี!',
     update_notice: '✨ สินค้าใหม่เพิ่มเรื่อยๆ!',
     new_arrivals: '🆕 สินค้าใหม่',
-    preorder_title: '🛒 พรีออเดอร์',
+    preorder_title: '💎 พรีออเดอร์',
+    philippine_title: '🇵🇭 สินค้าฟิลิปปินส์',
+    philippine_link: '🔗 ดูสินค้าฟิลิปปินส์ทั้งหมด →',
     delivery_type: 'วิธีการจัดส่ง',
     delivery_home: '🛵 จัดส่งถึงบ้าน (ชำระเมื่อได้รับ)',
     delivery_parcel: '📦 ส่งพัสดุ (ชำระล่วงหน้า)',
@@ -920,7 +932,9 @@ const i18n = {
     min_order_ok: '✅ 무료배송 포함!',
     update_notice: '✨ 새 상품 계속 업데이트 중!',
     new_arrivals: '🆕 신상품',
-    preorder_title: '🛒 프리오더',
+    preorder_title: '💎 프리오더',
+    philippine_title: '🇵🇭 필리핀 상품',
+    philippine_link: '🔗 전체 필리핀 상품 보기 →',
     delivery_type: '배달 방식',
     delivery_home: '🛵 일반 배달 (현장결제)',
     delivery_parcel: '📦 택배 (선입금 필요)',
@@ -965,7 +979,9 @@ const i18n = {
     min_order_ok: '✅ ສົ່ງຟຣີ!',
     update_notice: '✨ ສິນຄ້າໃໝ່ກຳລັງເພີ່ມຂຶ້ນຕະຫຼອດ!',
     new_arrivals: '🆕 ສິນຄ້າໃໝ່',
-    preorder_title: '🛒 ພຣີອໍເດີ',
+    preorder_title: '💎 ພຣີອໍເດີ',
+    philippine_title: '🇵🇭 ສິນຄ້າຟີລິປີນ',
+    philippine_link: '🔗 ເບິ່ງສິນຄ້າຟີລິປີນທັງໝົດ →',
     delivery_type: 'ວິທີການສົ່ງ',
     delivery_home: '🛵 ສົ່ງເຖິງບ້ານ (ຊຳລະເມື່ອຮັບ)',
     delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
@@ -2412,6 +2428,8 @@ function loadCatalogFromFirebase() {
       currentTab = firstKey;
       renderTab(firstKey);
       renderBest();
+      if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
+      if (typeof window.renderPreorder === 'function') window.renderPreorder();
       if (typeof window.renderNew === 'function') window.renderNew();
       updateSummary();
       console.log('✅ 카탈로그 로드 완료:', Object.keys(catalog).length, '개 카테고리');
@@ -2553,6 +2571,64 @@ function openNoticeLink() {
 // ===== 프리오더 =====
 let preorderIds = [];
 window.preorderIds = preorderIds;
+
+async function loadPhilippineFromFirebase() {
+  try {
+    const [snap, linkSnap] = await Promise.all([
+      get(ref(db, 'philippine')),
+      get(ref(db, 'philippineLink'))
+    ]);
+    const data = snap.val();
+    const link = linkSnap.val() || '';
+    // 링크 버튼 설정
+    const linkBtn = document.getElementById('philippine-link-btn');
+    if (linkBtn && link) {
+      linkBtn.href = link;
+      linkBtn.style.display = 'block';
+    }
+    if (data && data.length > 0) {
+      window.philippineIds = data.filter(Boolean).map(String);
+      renderPhilippine();
+    }
+  } catch(e) { console.log('필리핀 상품 로드 실패:', e); }
+}
+
+function renderPhilippine() {
+  const ids = window.philippineIds || [];
+  const container = document.getElementById('philippine-scroll');
+  const section = document.getElementById('philippine-section');
+  if (!container || !ids.length) return;
+  if (section) section.style.display = 'block';
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items).filter(Boolean);
+  ids.forEach(id => {
+    id = String(id);
+    const item = allItems.find(p => String(p.id) === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'philippine-card-' + id;
+    card.setAttribute('data-id', id);
+    const imgHtml = item.image
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+    card.innerHTML = `
+      <div onclick="goToItem('${id}')" style="cursor:pointer;">${imgHtml}${emojiHtml}</div>
+      <div class="best-card-body">
+        <div class="best-card-name" onclick="goToItem('${id}')" style="cursor:pointer;">${getItemName(item)}</div>
+        <div class="best-card-price" onclick="goToItem('${id}')" style="cursor:pointer;">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="philippine-qty-${id}">
+          <button class="best-qty-btn" onclick="changeQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changeQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+window.renderPhilippine = renderPhilippine;
 
 async function loadPreorderFromFirebase() {
   try {
@@ -2736,6 +2812,7 @@ function trackClick(id) {
 loadCatalogFromFirebase();
 loadStock();
 loadBestFromFirebase();
+loadPhilippineFromFirebase();
 loadPreorderFromFirebase();
 loadNewFromFirebase();
 loadNoticeFromFirebase();

@@ -190,9 +190,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
     <button class="tab-btn" onclick="switchTab('notice',this)">📢 공지사항</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
-    <button class="tab-btn" onclick="switchTab('preorder',this)">🛒 프리오더</button>
+    <button class="tab-btn" onclick="switchTab('preorder',this)">💎 프리오더</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
     <button class="tab-btn" onclick="switchTab('clicks',this)">📊 클릭 통계</button>
+    <button class="tab-btn" onclick="switchTab('philippine',this)">🇵🇭 필리핀 상품</button>
     <button class="tab-btn" onclick="switchTab('also',this)">🛍️ 이런것도</button>
     <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
     <button class="tab-btn" onclick="switchTab('cover',this)">🖼️ 커버 이미지</button>
@@ -542,7 +543,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <!-- 프리오더 -->
   <div id="tab-preorder" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🛒 프리오더 상품 선택 (최대 10개)</h3>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">💎 프리오더 상품 선택 (최대 10개)</h3>
       <p style="font-size:13px;color:#888;margin-bottom:16px;">사전 주문 받을 상품을 선택하면 메인 페이지에 표시됩니다.</p>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
         <input type="text" id="preorder-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPreorderSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
@@ -780,6 +781,30 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <canvas id="reels-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadReelsCard()">⬇️ 릴스 커버 저장</button>
+    </div>
+  </div>
+
+  <!-- 필리핀 상품 -->
+  <div id="tab-philippine" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">🇵🇭 필리핀 상품 관리</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:12px;">메인 페이지에 표시할 필리핀 상품을 선택하세요. 개수 제한 없음.</p>
+      <div style="background:#fff8f0;border:1px solid #f0d0b0;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;color:#666;">전체 필리핀 상품 페이지 링크:</span>
+        <input type="text" id="philippine-link" placeholder="https://..." style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+        <button onclick="savePhilippineLink()" style="background:#c84b2f;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700;">저장</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input type="text" id="philippine-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPhilippineSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <button onclick="filterPhilippineSearch('');document.getElementById('philippine-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
+        <button onclick="addPhilippineSlot()" style="background:#2d7a4f;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700;">+ 슬롯 추가</button>
+      </div>
+      <div id="philippine-search-results" style="display:none;margin-bottom:12px;border:1px solid #f0f0f0;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
+      <div id="philippine-slots" style="display:flex;flex-direction:column;gap:10px;"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="btn btn-primary" onclick="savePhilippine()">💾 필리핀 상품 저장</button>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetPhilippine()">🗑️ 목록 초기화</button>
+      </div>
     </div>
   </div>
 
@@ -1132,6 +1157,7 @@ function switchTab(tab, triggerEl) {
   if (tab === 'preorder') loadPreorder();
   if (tab === 'new')      loadNew();
   if (tab === 'clicks')   loadClickStats();
+  if (tab === 'philippine') loadPhilippine();
   if (tab === 'also')     loadAlso();
   if (tab === 'customer') loadCustomers();
   if (tab === 'category') loadCategories();
@@ -3223,7 +3249,7 @@ async function savePreorder() {
   });
   await db.ref('preorder').set(ids);
   if (Object.keys(histUpdates).length) await db.ref().update(histUpdates);
-  showToast('🛒 프리오더 저장 완료!');
+  showToast('💎 프리오더 저장 완료!');
   setTimeout(() => switchTab('stock'), 1000);
 }
 
@@ -3304,6 +3330,100 @@ function renderClickStats() {
           </tr>`).join('')}
       </tbody>
     </table>`;
+}
+
+
+// ===== 필리핀 상품 =====
+let _philippineSlotCount = 0;
+
+async function loadPhilippine() {
+  if (!ALL_OPTIONS) await buildAllOptions();
+  const [snap, linkSnap] = await Promise.all([
+    db.ref('philippine').get(),
+    db.ref('philippineLink').get()
+  ]);
+  const data = snap.val() || [];
+  const link = linkSnap.val() || '';
+  document.getElementById('philippine-link').value = link;
+  _philippineSlotCount = 0;
+  document.getElementById('philippine-slots').innerHTML = '';
+  data.forEach(id => addPhilippineSlot(id));
+  if (!data.length) addPhilippineSlot();
+}
+
+async function savePhilippineLink() {
+  const link = document.getElementById('philippine-link').value.trim();
+  await db.ref('philippineLink').set(link);
+  showToast('🔗 링크 저장 완료!');
+}
+
+function addPhilippineSlot(val = '') {
+  const i = _philippineSlotCount++;
+  const container = document.getElementById('philippine-slots');
+  const row = document.createElement('div');
+  row.id = 'philippine-row-' + i;
+  row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+  row.innerHTML = `
+    <span style="font-size:12px;color:#aaa;width:24px;text-align:right;">${i+1}</span>
+    <select id="philippine-slot-${i}" style="flex:1;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+      <option value="">-- 상품 선택 --</option>
+      ${ALL_OPTIONS}
+    </select>
+    <button onclick="removePhilippineRow(${i})" style="background:#fee2e2;border:none;color:#c84b2f;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;" title="삭제">✕</button>`;
+  container.appendChild(row);
+  if (val) {
+    setTimeout(() => {
+      const sel = document.getElementById('philippine-slot-' + i);
+      if (sel) sel.value = val;
+    }, 50);
+  }
+}
+
+function removePhilippineRow(i) {
+  const row = document.getElementById('philippine-row-' + i);
+  if (row) row.remove();
+}
+
+function filterPhilippineSearch(q) {
+  const box = document.getElementById('philippine-search-results');
+  if (!q) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const items = Object.values(window._catalog || {}).flatMap(c => c.items || []).filter(Boolean);
+  const results = items.filter(p => (p.name_ko||p.name||'').includes(q)).slice(0, 20);
+  box.innerHTML = results.map(p =>
+    `<div onclick="addPhilippineSlotWithId('${p.id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f5f5f5;font-size:13px;" onmouseover="this.style.background='#fff8f0'" onmouseout="this.style.background=''">${p.emoji||''} ${p.name_ko||p.name} <span style="color:#aaa;font-size:11px;">${p.id}</span></div>`
+  ).join('') || '<div style="padding:12px;color:#aaa;font-size:13px;">검색 결과 없음</div>';
+}
+
+function addPhilippineSlotWithId(id) {
+  // 빈 슬롯 있으면 거기에 넣기, 없으면 새 슬롯 추가
+  const slots = document.querySelectorAll('[id^="philippine-slot-"]');
+  for (const sel of slots) {
+    if (!sel.value) { sel.value = id; break; }
+  }
+  document.getElementById('philippine-search-results').style.display = 'none';
+  document.getElementById('philippine-search').value = '';
+}
+
+async function resetPhilippine() {
+  if (!confirm('필리핀 상품 목록을 초기화하시겠습니까?')) return;
+  await db.ref('philippine').set([]);
+  _philippineSlotCount = 0;
+  document.getElementById('philippine-slots').innerHTML = '';
+  addPhilippineSlot();
+  showToast('🗑️ 필리핀 상품 목록 초기화 완료');
+}
+
+async function savePhilippine() {
+  const ids = [];
+  document.querySelectorAll('[id^="philippine-slot-"]').forEach(sel => {
+    if (sel.value) ids.push(sel.value);
+  });
+  if (new Set(ids).size !== ids.length) {
+    alert('❌ 중복된 상품이 있습니다. 확인 후 다시 저장해주세요.'); return;
+  }
+  await db.ref('philippine').set(ids);
+  showToast('🇵🇭 필리핀 상품 저장 완료!');
 }
 
 async function loadBest() {
