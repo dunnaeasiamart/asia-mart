@@ -2672,27 +2672,34 @@ function showInstallPrompt() {
   if (localStorage.getItem('pwa_prompt_dismissed')) return;
   if (document.getElementById('pwa-prompt-modal')) return;
 
+  var lang = currentLang || 'en';
+  var txt = {
+    title:  { ko:'홈 화면에 추가하기', th:'เพิ่มไปที่หน้าจอหลัก', lo:'ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ', en:'Add to Home Screen' },
+    later:  { ko:'나중에', th:'ภายหลัง', lo:'ຫຼັງ', en:'Later' },
+    add:    { ko:'📲 추가하기', th:'📲 เพิ่ม', lo:'📲 ເພີ່ມ', en:'📲 Add' },
+    step1:  { ko:'1. 하단 <strong>공유버튼</strong> 📤 탭', th:'1. แตะ <strong>แชร์</strong> 📤 ด้านล่าง', lo:'1. ແຕະ <strong>ແບ່ງປັນ</strong> 📤 ດ້ານລຸ່ມ', en:'1. Tap <strong>Share</strong> 📤 below' },
+    step2:  { ko:'2. <strong>"홈 화면에 추가"</strong> 선택', th:'2. เลือก <strong>"เพิ่มในหน้าจอโฮม"</strong>', lo:'2. ເລືອກ <strong>"ເພີ່ມໃນໜ້າຈໍຫຼັກ"</strong>', en:'2. Select <strong>"Add to Home Screen"</strong>' },
+  };
+
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var iosGuide = isIOS
+    ? '<div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:#1a1814;line-height:1.8;text-align:left;">'
+      + (txt.step1[lang]||txt.step1.en) + '<br>' + (txt.step2[lang]||txt.step2.en)
+      + '</div>'
+    : '';
+
   var overlay = document.createElement('div');
   overlay.id = 'pwa-prompt-modal';
   overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
 
-  var iosGuide = isIOS ? `
-    <div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:#1a1814;line-height:1.8;text-align:left;">
-      1. 하단 <strong>공유버튼</strong> 📤 탭<br>
-      2. <strong>"홈 화면에 추가"</strong> 선택
-    </div>` : '';
-
   overlay.innerHTML = [
     '<div style="background:#fff;border-radius:20px;padding:24px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3);">',
     '<div style="font-size:40px;margin-bottom:10px;">📱</div>',
-    '<div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:4px;">홈 화면에 추가하기</div>',
-    '<div style="font-size:13px;color:#888;margin-bottom:4px;">ສ້າງທາງລັດໃສ່ໜ້າຈໍ</div>',
-    '<div style="font-size:13px;color:#888;margin-bottom:16px;">สร้างทางลัดบนหน้าจอ</div>',
+    '<div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:16px;">' + (txt.title[lang]||txt.title.en) + '</div>',
     iosGuide,
     '<div style="display:flex;gap:10px;">',
-    '<button onclick="document.getElementById(\'pwa-prompt-modal\').remove();localStorage.setItem(\'pwa_prompt_dismissed\',\'1\');" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">나중에</button>',
-    '<button onclick="handlePWAInstall();document.getElementById(\'pwa-prompt-modal\').remove();" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">📲 추가하기</button>',
+    '<button onclick="document.getElementById(\'pwa-prompt-modal\').remove();localStorage.setItem(\'pwa_prompt_dismissed\',\'1\');" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.later[lang]||txt.later.en) + '</button>',
+    '<button onclick="handlePWAInstall();document.getElementById(\'pwa-prompt-modal\').remove();" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.add[lang]||txt.add.en) + '</button>',
     '</div></div>'
   ].join('');
   document.body.appendChild(overlay);
