@@ -2706,6 +2706,7 @@ function showInstallPrompt() {
 }
 
 function handlePWAInstall() {
+  alert('handlePWAInstall 호출됨! deferredPrompt: ' + (deferredPrompt ? 'YES' : 'NO'));
   var lang = currentLang || 'en';
   var txt = {
     title: { ko:'홈 화면에 추가', th:'เพิ่มไปที่หน้าจอหลัก', lo:'ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ', en:'Add to Home Screen' },
