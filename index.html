@@ -2699,7 +2699,7 @@ function showInstallPrompt() {
     iosGuide,
     '<div style="display:flex;gap:10px;">',
     '<button onclick="document.getElementById(\'pwa-prompt-modal\').remove();localStorage.setItem(\'pwa_prompt_dismissed\',\'1\');" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.later[lang]||txt.later.en) + '</button>',
-    '<button onclick="handlePWAInstall();document.getElementById(\'pwa-prompt-modal\').remove();" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.add[lang]||txt.add.en) + '</button>',
+    '<button onclick="var m=document.getElementById(\'pwa-prompt-modal\');if(m)m.remove();handlePWAInstall();" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.add[lang]||txt.add.en) + '</button>',
     '</div></div>'
   ].join('');
   document.body.appendChild(overlay);
