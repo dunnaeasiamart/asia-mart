@@ -741,8 +741,8 @@
 </div>
 
 <div class="scroll-btns">
-  <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로">▲</button>
-  <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="맨 아래로">▼</button>
+  <button class="scroll-btn" onclick="window.scrollBy({top:-window.innerHeight*0.8,behavior:'smooth'})" title="위로">▲</button>
+  <button class="scroll-btn" onclick="window.scrollBy({top:window.innerHeight*0.8,behavior:'smooth'})" title="아래로">▼</button>
 </div>
 
 <div class="modal-overlay" id="modal" onclick="closeOnOverlay(event)">
