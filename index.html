@@ -2725,7 +2725,10 @@ function handlePWAInstall() {
       }
       deferredPrompt = null;
     });
-  } else {
+    return;
+  }
+  // deferredPrompt 없음 (iOS / Samsung / 기타) - 안내 팝업
+  {
     // iOS / 기타 - 수동 안내 팝업 (언어 적용)
     var overlay = document.createElement('div');
     overlay.id = 'pwa-install-guide';
