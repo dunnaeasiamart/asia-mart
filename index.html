@@ -2682,21 +2682,18 @@ function showInstallPrompt() {
       2. <strong>"홈 화면에 추가"</strong> 선택
     </div>` : '';
 
-  overlay.innerHTML = \`
-    <div style="background:#fff;border-radius:20px;padding:24px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-      <div style="font-size:40px;margin-bottom:10px;">📱</div>
-      <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:4px;">홈 화면에 추가하기</div>
-      <div style="font-size:13px;color:#888;margin-bottom:4px;">ສ້າງທາງລັດໃສ່ໜ້າຈໍ</div>
-      <div style="font-size:13px;color:#888;margin-bottom:16px;">สร้างทางลัดบนหน้าจอ</div>
-      \${iosGuide}
-      <div style="display:flex;gap:10px;">
-        <button onclick="document.getElementById('pwa-prompt-modal').remove();localStorage.setItem('pwa_prompt_dismissed','1');"
-          style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">나중에</button>
-        <button onclick="handlePWAInstall();document.getElementById('pwa-prompt-modal').remove();"
-          style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">📲 추가하기</button>
-      </div>
-    </div>
-  \`;
+  overlay.innerHTML = [
+    '<div style="background:#fff;border-radius:20px;padding:24px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3);">',
+    '<div style="font-size:40px;margin-bottom:10px;">📱</div>',
+    '<div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:4px;">홈 화면에 추가하기</div>',
+    '<div style="font-size:13px;color:#888;margin-bottom:4px;">ສ້າງທາງລັດໃສ່ໜ້າຈໍ</div>',
+    '<div style="font-size:13px;color:#888;margin-bottom:16px;">สร้างทางลัดบนหน้าจอ</div>',
+    iosGuide,
+    '<div style="display:flex;gap:10px;">',
+    '<button onclick="document.getElementById(\'pwa-prompt-modal\').remove();localStorage.setItem(\'pwa_prompt_dismissed\',\'1\');" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">나중에</button>',
+    '<button onclick="handlePWAInstall();document.getElementById(\'pwa-prompt-modal\').remove();" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">📲 추가하기</button>',
+    '</div></div>'
+  ].join('');
   document.body.appendChild(overlay);
 }
 
