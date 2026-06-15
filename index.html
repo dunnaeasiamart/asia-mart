@@ -2647,24 +2647,25 @@ document.addEventListener('click', function(e) {
 
 let deferredPrompt;
 
-// Android - 설치 프롬프트 자동 표시
+// Android - 설치 프롬프트 저장
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredPrompt = e;
   var btn = document.getElementById('pwa-add-btn');
   if (btn && !localStorage.getItem('pwa_installed')) btn.style.display = 'block';
-  // 3초 후 자동으로 설치 안내 팝업
-  if (!localStorage.getItem('pwa_installed')) {
-    setTimeout(function() { showInstallPrompt(); }, 3000);
-  }
 });
 
-// iOS - 항상 버튼 표시 (설치 안 된 경우)
-if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone && !localStorage.getItem('pwa_installed')) {
-  var btn = document.getElementById('pwa-add-btn');
-  if (btn) btn.style.display = 'block';
-  setTimeout(function() { showInstallPrompt(); }, 3000);
+// iOS 홈에서 실행 중이면 설치된 것으로 처리
+if (window.navigator.standalone) {
+  localStorage.setItem('pwa_installed', '1');
 }
+
+// 매 접속마다 장바구니 + 팝업 초기화
+localStorage.removeItem('cart_quantities');
+localStorage.removeItem('pwa_prompt_dismissed');
+
+// 무조건 3초 후 팝업 (설치 안 됐을 때)
+setTimeout(function() { showInstallPrompt(); }, 3000);
 
 function showInstallPrompt() {
   if (localStorage.getItem('pwa_installed')) return;
