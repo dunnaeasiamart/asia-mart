@@ -707,11 +707,30 @@
   </div>
 </div>
 
+<!-- 공지사항 팝업 -->
+<div id="notice-popup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+    <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:12px;">📢 <span id="notice-popup-title">공지사항</span></div>
+    <div id="notice-popup-text" style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-wrap;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeNoticePopup()" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+      <button id="notice-popup-link-btn" onclick="openNoticeLink()" style="display:none;flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">🔗 자세히 보기</button>
+    </div>
+  </div>
+</div>
+
 <div class="best-section" id="best-section">
   <div class="best-header">
     <div class="best-title">🔥 <span data-t="best_title">Best Products</span></div>
   </div>
   <div class="best-scroll" id="best-scroll"></div>
+</div>
+
+<div class="best-section" id="preorder-section" style="display:none;">
+  <div class="best-header">
+    <div class="best-title">🛒 <span data-t="preorder_title">Pre-Order</span></div>
+  </div>
+  <div class="best-scroll" id="preorder-scroll"></div>
 </div>
 
 <div class="best-section" id="new-section" style="display:none;">
@@ -811,6 +830,7 @@ const i18n = {
     min_order_ok: '✅ Free delivery included!',
     update_notice: '✨ New products added regularly!',
     new_arrivals: '🆕 New Arrivals',
+    preorder_title: '🛒 Pre-Order',
     delivery_type: 'Delivery Method',
     delivery_home: '🛵 Home Delivery (Pay on delivery)',
     delivery_parcel: '📦 Parcel (Prepayment required)',
@@ -855,6 +875,7 @@ const i18n = {
     min_order_ok: '✅ จัดส่งฟรี!',
     update_notice: '✨ สินค้าใหม่เพิ่มเรื่อยๆ!',
     new_arrivals: '🆕 สินค้าใหม่',
+    preorder_title: '🛒 พรีออเดอร์',
     delivery_type: 'วิธีการจัดส่ง',
     delivery_home: '🛵 จัดส่งถึงบ้าน (ชำระเมื่อได้รับ)',
     delivery_parcel: '📦 ส่งพัสดุ (ชำระล่วงหน้า)',
@@ -899,6 +920,7 @@ const i18n = {
     min_order_ok: '✅ 무료배송 포함!',
     update_notice: '✨ 새 상품 계속 업데이트 중!',
     new_arrivals: '🆕 신상품',
+    preorder_title: '🛒 프리오더',
     delivery_type: '배달 방식',
     delivery_home: '🛵 일반 배달 (현장결제)',
     delivery_parcel: '📦 택배 (선입금 필요)',
@@ -943,6 +965,7 @@ const i18n = {
     min_order_ok: '✅ ສົ່ງຟຣີ!',
     update_notice: '✨ ສິນຄ້າໃໝ່ກຳລັງເພີ່ມຂຶ້ນຕະຫຼອດ!',
     new_arrivals: '🆕 ສິນຄ້າໃໝ່',
+    preorder_title: '🛒 ພຣີອໍເດີ',
     delivery_type: 'ວິທີການສົ່ງ',
     delivery_home: '🛵 ສົ່ງເຖິງບ້ານ (ຊຳລະເມື່ອຮັບ)',
     delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
@@ -2067,6 +2090,7 @@ window.newIds = newIds;
 // 상품 카테고리로 이동 + 스크롤
 function goToItem(id) {
   id = String(id);
+  trackClick(id);
   const allItems = Object.values(catalog).flatMap(c => c.items);
   const item = allItems.find(p => String(p.id) === id);
   if (!item) return;
@@ -2297,7 +2321,7 @@ updateSummary();
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7Wwwf75nQIY0C67sl1PdJSrofSMwCx-o",
@@ -2502,6 +2526,118 @@ async function loadNewFromFirebase() {
   }
 }
 
+// ===== 공지사항 =====
+let _noticeUrl = '';
+async function loadNoticeFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'notice'));
+    const data = snapshot.val();
+    if (data && data.active && data.text) {
+      _noticeUrl = data.url || '';
+      document.getElementById('notice-popup-text').textContent = data.text;
+      const linkBtn = document.getElementById('notice-popup-link-btn');
+      if (_noticeUrl) linkBtn.style.display = 'block';
+      else linkBtn.style.display = 'none';
+      document.getElementById('notice-popup').style.display = 'flex';
+    }
+  } catch(e) {}
+}
+function closeNoticePopup() {
+  document.getElementById('notice-popup').style.display = 'none';
+}
+function openNoticeLink() {
+  if (_noticeUrl) window.open(_noticeUrl, '_blank');
+  closeNoticePopup();
+}
+
+// ===== 프리오더 =====
+let preorderIds = [];
+window.preorderIds = preorderIds;
+
+async function loadPreorderFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'preorder'));
+    const data = snapshot.val();
+    if (data && data.length > 0) {
+      window.preorderIds = data.filter(Boolean).map(String);
+      if (typeof window.renderPreorder === 'function') {
+        window.renderPreorder();
+        setTimeout(startPreorderAutoScroll, 500);
+      }
+    }
+  } catch(e) {
+    console.log('프리오더 로드 실패:', e);
+  }
+}
+
+function renderPreorder() {
+  const ids = window.preorderIds || preorderIds;
+  const container = document.getElementById('preorder-scroll');
+  const section = document.getElementById('preorder-section');
+  if (!container || !ids.length) return;
+  if (section) section.style.display = 'block';
+  container.innerHTML = '';
+  const allItems = Object.values(catalog).flatMap(c => c.items).filter(Boolean);
+  ids.forEach(id => {
+    id = String(id);
+    const item = allItems.find(p => String(p.id) === id);
+    if (!item) return;
+    const qty = quantities[id] || 0;
+    const card = document.createElement('div');
+    card.className = 'best-card' + (qty > 0 ? ' has-qty' : '');
+    card.id = 'preorder-card-' + id;
+    card.setAttribute('data-id', id);
+    const imgHtml = item.image
+      ? `<img class="best-card-img" src="${item.image}" alt="${getItemName(item)}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      : '';
+    const emojiHtml = `<div class="best-card-img-emoji" style="display:${item.image ? 'none' : 'flex'}">${item.emoji}</div>`;
+    card.innerHTML = `
+      <div onclick="goToItem('${id}')" style="cursor:pointer;">
+        ${imgHtml}${emojiHtml}
+      </div>
+      <div class="best-card-body">
+        <div class="best-card-name" onclick="goToItem('${id}')" style="cursor:pointer;">${getItemName(item)}</div>
+        <div class="best-card-price" onclick="goToItem('${id}')" style="cursor:pointer;">${fmt(item.price1)}</div>
+        <div class="best-card-qty" id="preorder-qty-${id}">
+          <button class="best-qty-btn" onclick="changePreorderQty('${id}',-1,event)">−</button>
+          <span class="best-qty-val">${qty}</span>
+          <button class="best-qty-btn" onclick="changePreorderQty('${id}',1,event)">+</button>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+window.renderPreorder = renderPreorder;
+
+function changePreorderQty(id, delta, e) {
+  e && e.stopPropagation();
+  changeQty(id, delta, e);
+}
+
+function startPreorderAutoScroll() {
+  // 베스트와 동일한 자동 스크롤 방식
+  const el = document.getElementById('preorder-scroll');
+  if (!el) return;
+  let isPaused = false;
+  function resumeLater() { setTimeout(() => { isPaused = false; }, 1200); }
+  el.addEventListener('touchstart', () => { isPaused = true; }, {passive:true});
+  el.addEventListener('touchend', resumeLater, {passive:true});
+  el.addEventListener('mousedown', () => { isPaused = true; });
+  el.addEventListener('mouseup', resumeLater);
+}
+
+// ===== 상품 클릭 트래킹 =====
+function trackClick(id) {
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    const clickRef = ref(db, 'clicks/' + id + '/' + today);
+    get(clickRef).then(snap => {
+      const cur = snap.val() || 0;
+      set(clickRef, cur + 1).catch(()=>{});
+    }).catch(()=>{});
+  } catch(e) {}
+}
+
 // ===== 방문자 카운터 =====
 (function() {
   const BASE_TOTAL = 12480;
@@ -2600,7 +2736,9 @@ async function loadNewFromFirebase() {
 loadCatalogFromFirebase();
 loadStock();
 loadBestFromFirebase();
+loadPreorderFromFirebase();
 loadNewFromFirebase();
+loadNoticeFromFirebase();
 
 // ===== PWA =====
 // 서비스워커 등록 + 백그라운드에서 캐시 삭제

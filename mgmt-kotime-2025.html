@@ -188,8 +188,11 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('category',this)">📂 카테고리</button>
     <button class="tab-btn" onclick="switchTab('customer',this)">👥 고객 관리</button>
     <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
+    <button class="tab-btn" onclick="switchTab('notice',this)">📢 공지사항</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
+    <button class="tab-btn" onclick="switchTab('preorder',this)">🛒 프리오더</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
+    <button class="tab-btn" onclick="switchTab('clicks',this)">📊 클릭 통계</button>
     <button class="tab-btn" onclick="switchTab('also',this)">🛍️ 이런것도</button>
     <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
     <button class="tab-btn" onclick="switchTab('cover',this)">🖼️ 커버 이미지</button>
@@ -485,6 +488,31 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
+  <!-- 공지사항 -->
+  <div id="tab-notice" class="tab-content">
+    <div class="table-wrap" style="padding:24px;max-width:600px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📢 공지사항 팝업 관리</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">메인 페이지 접속 시 팝업으로 표시됩니다.</p>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">공지 내용</label>
+        <textarea id="notice-text" rows="5" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;resize:vertical;box-sizing:border-box;" placeholder="공지사항 내용을 입력하세요..."></textarea>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">링크 URL (선택)</label>
+        <input type="text" id="notice-url" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="https://...">
+        <p style="font-size:12px;color:#aaa;margin-top:4px;">링크 입력 시 공지 클릭하면 해당 URL로 이동합니다.</p>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">공지 활성화</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="notice-active" style="width:18px;height:18px;">
+          <span style="font-size:13px;">공지사항 팝업 표시</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" onclick="saveNotice()">💾 공지사항 저장</button>
+    </div>
+  </div>
+
   <!-- 베스트 상품 -->
   <div id="tab-best" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
@@ -507,6 +535,29 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="btn btn-primary" onclick="saveBest()">💾 베스트 상품 저장</button>
         <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetBest()">🗑️ 목록 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 프리오더 -->
+  <div id="tab-preorder" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🛒 프리오더 상품 선택 (최대 10개)</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:16px;">사전 주문 받을 상품을 선택하면 메인 페이지에 표시됩니다.</p>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
+        <input type="text" id="preorder-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPreorderSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
+        <button onclick="filterPreorderSearch('');document.getElementById('preorder-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
+      </div>
+      <div id="preorder-search-results" style="display:none;margin-bottom:16px;border:1px solid #f0f0f0;border-radius:8px;max-height:220px;overflow-y:auto;"></div>
+      <div id="preorder-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:12px;color:#888;">카드 선택:</span>
+        <button onclick="toggleAllChecks('preorder',true)" style="background:#f0f0f0;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✅ 전체</button>
+        <button onclick="toggleAllChecks('preorder',false)" style="background:#f0f0f0;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">⬜ 해제</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary" onclick="savePreorder()">💾 프리오더 저장</button>
+        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetPreorder()">🗑️ 목록 초기화</button>
       </div>
     </div>
   </div>
@@ -729,6 +780,30 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <canvas id="reels-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadReelsCard()">⬇️ 릴스 커버 저장</button>
+    </div>
+  </div>
+
+  <!-- 클릭 통계 -->
+  <div id="tab-clicks" class="tab-content">
+    <div class="table-wrap" style="padding:24px;">
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📊 상품 클릭 통계</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+        <select id="clicks-period" onchange="loadClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+          <option value="day">일간</option>
+          <option value="week">주간</option>
+          <option value="month" selected>월간</option>
+          <option value="year">연간</option>
+        </select>
+        <select id="clicks-sort" onchange="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+          <option value="desc">클릭 많은 순</option>
+          <option value="asc">클릭 적은 순</option>
+        </select>
+        <select id="clicks-cat" onchange="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+          <option value="">전체 카테고리</option>
+        </select>
+        <input type="text" id="clicks-search" placeholder="🔍 상품명 검색" oninput="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:160px;">
+      </div>
+      <div id="clicks-table" style="font-size:13px;"></div>
     </div>
   </div>
 
@@ -1052,8 +1127,11 @@ function switchTab(tab, triggerEl) {
   if (tab === 'stock')    loadStock();
   if (tab === 'disc' || tab === 'discount') loadDiscount();
   if (tab === 'prod' || tab === 'product')  { loadCatalogForAdmin(); autoFillId(); }
+  if (tab === 'notice')   loadNotice();
   if (tab === 'best')     loadBest();
+  if (tab === 'preorder') loadPreorder();
   if (tab === 'new')      loadNew();
+  if (tab === 'clicks')   loadClickStats();
   if (tab === 'also')     loadAlso();
   if (tab === 'customer') loadCustomers();
   if (tab === 'category') loadCategories();
@@ -3037,6 +3115,195 @@ function updateBestBadge(i, val) {
   if (!badge) return;
   const count = val ? (_bestHistory[val] || 0) : 0;
   badge.innerHTML = historyCountBox(count, '#c84b2f');
+}
+
+
+// ===== 공지사항 =====
+async function loadNotice() {
+  const snap = await db.ref('notice').get();
+  const data = snap.val() || {};
+  document.getElementById('notice-text').value = data.text || '';
+  document.getElementById('notice-url').value = data.url || '';
+  document.getElementById('notice-active').checked = data.active || false;
+}
+
+async function saveNotice() {
+  const text = document.getElementById('notice-text').value.trim();
+  const url = document.getElementById('notice-url').value.trim();
+  const active = document.getElementById('notice-active').checked;
+  await db.ref('notice').set({ text, url, active });
+  showToast('📢 공지사항 저장 완료!');
+}
+
+// ===== 프리오더 =====
+let _preorderHistory = {};
+
+function renderPreorderSlots(selectedIds = []) {
+  const container = document.getElementById('preorder-slots');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const val = selectedIds[i] || '';
+    const histCount = val ? (_preorderHistory[val] || 0) : 0;
+    const histLabel = val && histCount ? ` <span style="color:#888;font-size:11px;">(${histCount}회)</span>` : '';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    row.innerHTML = `
+      <span style="font-size:12px;color:#aaa;width:20px;text-align:right;">${i+1}</span>
+      <select id="preorder-slot-${i}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+        <option value="">-- 선택 안 함 --</option>
+        ${ALL_OPTIONS}
+      </select>
+      <label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;">
+        <input type="checkbox" id="preorder-chk-${i}"> 선택${histLabel}
+      </label>`;
+    container.appendChild(row);
+    if (val) { const sel = document.getElementById('preorder-slot-'+i); if(sel) sel.value = val; }
+  }
+}
+
+function filterPreorderSearch(q) {
+  const box = document.getElementById('preorder-search-results');
+  if (!q) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const items = Object.values(window._catalog || {}).flatMap(c => c.items || []).filter(Boolean);
+  const results = items.filter(p => (p.name_ko||p.name||'').includes(q)).slice(0, 20);
+  box.innerHTML = results.map(p =>
+    `<div onclick="addToPreorderSlot('${p.id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f5f5f5;font-size:13px;" onmouseover="this.style.background='#fff8f0'" onmouseout="this.style.background=''">${p.emoji||''} ${p.name_ko||p.name} <span style="color:#aaa;font-size:11px;">${p.id}</span></div>`
+  ).join('') || '<div style="padding:12px;color:#aaa;font-size:13px;">검색 결과 없음</div>';
+}
+
+function addToPreorderSlot(id) {
+  for (let i = 0; i < 10; i++) {
+    const sel = document.getElementById('preorder-slot-'+i);
+    if (sel && !sel.value) { sel.value = id; break; }
+  }
+  document.getElementById('preorder-search-results').style.display = 'none';
+  document.getElementById('preorder-search').value = '';
+}
+
+function toggleAllChecks(type, state) {
+  for (let i = 0; i < 10; i++) {
+    const chk = document.getElementById(type+'-chk-'+i);
+    if (chk) chk.checked = state;
+  }
+}
+
+async function loadPreorder() {
+  if (!ALL_OPTIONS) await buildAllOptions();
+  const [snap, histSnap] = await Promise.all([
+    db.ref('preorder').get(),
+    db.ref('preorderHistory').get()
+  ]);
+  _preorderHistory = histSnap.val() || {};
+  const data = snap.val() || [];
+  renderPreorderSlots(data);
+}
+
+async function resetPreorder() {
+  if (!confirm('프리오더 목록을 전체 초기화하시겠습니까?')) return;
+  await db.ref('preorder').set([]);
+  renderPreorderSlots([]);
+  showToast('🗑️ 프리오더 목록 초기화 완료');
+}
+
+async function savePreorder() {
+  const ids = [];
+  for (let i = 0; i < 10; i++) {
+    const sel = document.getElementById('preorder-slot-'+i);
+    if (sel && sel.value) ids.push(sel.value);
+  }
+  if (new Set(ids).size !== ids.length) {
+    alert('❌ 중복된 상품이 있습니다.'); return;
+  }
+  const histUpdates = {};
+  ids.forEach(id => {
+    _preorderHistory[id] = (_preorderHistory[id] || 0) + 1;
+    histUpdates['preorderHistory/' + id] = _preorderHistory[id];
+  });
+  await db.ref('preorder').set(ids);
+  if (Object.keys(histUpdates).length) await db.ref().update(histUpdates);
+  showToast('🛒 프리오더 저장 완료!');
+  setTimeout(() => switchTab('stock'), 1000);
+}
+
+// ===== 클릭 통계 =====
+let _clickData = {};
+
+async function loadClickStats() {
+  const period = document.getElementById('clicks-period').value;
+  const now = new Date();
+  let startKey = '';
+  if (period === 'day') {
+    startKey = now.toISOString().slice(0,10);
+  } else if (period === 'week') {
+    const d = new Date(now); d.setDate(d.getDate()-7);
+    startKey = d.toISOString().slice(0,10);
+  } else if (period === 'month') {
+    startKey = now.toISOString().slice(0,7);
+  } else {
+    startKey = String(now.getFullYear());
+  }
+
+  const snap = await db.ref('clicks').get();
+  const raw = snap.val() || {};
+  // 집계: clicks/{id}/{date} = count
+  _clickData = {};
+  Object.entries(raw).forEach(([id, dates]) => {
+    let total = 0;
+    Object.entries(dates).forEach(([date, cnt]) => {
+      if (date >= startKey) total += (cnt || 0);
+    });
+    if (total > 0) _clickData[id] = total;
+  });
+
+  // 카테고리 필터 옵션 채우기
+  const catSel = document.getElementById('clicks-cat');
+  const cats = Object.entries(window._catalog || {});
+  catSel.innerHTML = '<option value="">전체 카테고리</option>'
+    + cats.map(([k,v]) => `<option value="${k}">${v.label_ko||v.label||k}</option>`).join('');
+
+  renderClickStats();
+}
+
+function renderClickStats() {
+  const sort = document.getElementById('clicks-sort').value;
+  const cat = document.getElementById('clicks-cat').value;
+  const q = (document.getElementById('clicks-search').value||'').trim();
+
+  const allItems = Object.values(window._catalog || {}).flatMap(c => c.items||[]).filter(Boolean);
+  let rows = Object.entries(_clickData).map(([id, cnt]) => {
+    const item = allItems.find(p => String(p.id) === String(id));
+    return { id, cnt, name: item ? (item.name_ko||item.name||id) : id, catKey: item ? item._catKey : '', emoji: item ? (item.emoji||'') : '' };
+  });
+
+  if (cat) rows = rows.filter(r => r.catKey === cat);
+  if (q) rows = rows.filter(r => r.name.includes(q) || r.id.includes(q));
+  rows.sort((a,b) => sort === 'desc' ? b.cnt - a.cnt : a.cnt - b.cnt);
+
+  const container = document.getElementById('clicks-table');
+  if (!rows.length) { container.innerHTML = '<p style="color:#aaa;padding:20px 0;">데이터 없음</p>'; return; }
+
+  container.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f9f9f9;border-bottom:2px solid #eee;">
+          <th style="padding:10px 8px;text-align:left;font-size:12px;">순위</th>
+          <th style="padding:10px 8px;text-align:left;font-size:12px;">상품</th>
+          <th style="padding:10px 8px;text-align:left;font-size:12px;">ID</th>
+          <th style="padding:10px 8px;text-align:right;font-size:12px;">클릭수</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r,i) => `
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:9px 8px;font-size:13px;color:#aaa;">${i+1}</td>
+            <td style="padding:9px 8px;font-size:13px;">${r.emoji} ${r.name}</td>
+            <td style="padding:9px 8px;font-size:12px;color:#aaa;">${r.id}</td>
+            <td style="padding:9px 8px;font-size:14px;font-weight:700;color:#c84b2f;text-align:right;">${r.cnt.toLocaleString()}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 async function loadBest() {
