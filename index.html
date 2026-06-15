@@ -662,7 +662,7 @@
       <button class="lang-btn" onclick="setLang('lo')">LO</button>
       <button class="lang-btn" onclick="setLang('ko')">KO</button>
     </div>
-    <button id="pwa-add-btn" onclick="handlePWAInstall()" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;white-space:nowrap;">📱 홈에 추가</button>
+
     <button class="search-btn" onclick="toggleSearch()" id="search-toggle-btn">🔍</button>
     <button class="header-cart" onclick="openModal()">
       🛒 <span data-t="cart">Cart</span>
@@ -2645,121 +2645,9 @@ document.addEventListener('click', function(e) {
   }
 });
 
-let deferredPrompt;
-
-// Android - 설치 프롬프트 저장
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  var btn = document.getElementById('pwa-add-btn');
-  if (btn && !localStorage.getItem('pwa_installed')) btn.style.display = 'block';
-});
-
-// iOS 홈에서 실행 중이면 설치된 것으로 처리
-if (window.navigator.standalone) {
-  localStorage.setItem('pwa_installed', '1');
-}
-
-// 매 접속마다 장바구니 + 팝업 초기화
+// 매 접속마다 장바구니 초기화
 localStorage.removeItem('cart_quantities');
-localStorage.removeItem('pwa_prompt_dismissed');
 
-// 무조건 3초 후 팝업 (설치 안 됐을 때)
-setTimeout(function() { showInstallPrompt(); }, 3000);
-
-function showInstallPrompt() {
-  if (localStorage.getItem('pwa_installed')) return;
-  if (localStorage.getItem('pwa_prompt_dismissed')) return;
-  if (document.getElementById('pwa-prompt-modal')) return;
-
-  var lang = currentLang || 'en';
-  var txt = {
-    title:  { ko:'홈 화면에 추가하기', th:'เพิ่มไปที่หน้าจอหลัก', lo:'ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ', en:'Add to Home Screen' },
-    later:  { ko:'나중에', th:'ภายหลัง', lo:'ຫຼັງ', en:'Later' },
-    add:    { ko:'📲 추가하기', th:'📲 เพิ่ม', lo:'📲 ເພີ່ມ', en:'📲 Add' },
-    step1:  { ko:'1. 하단 <strong>공유버튼</strong> 📤 탭', th:'1. แตะ <strong>แชร์</strong> 📤 ด้านล่าง', lo:'1. ແຕະ <strong>ແບ່ງປັນ</strong> 📤 ດ້ານລຸ່ມ', en:'1. Tap <strong>Share</strong> 📤 below' },
-    step2:  { ko:'2. <strong>"홈 화면에 추가"</strong> 선택', th:'2. เลือก <strong>"เพิ่มในหน้าจอโฮม"</strong>', lo:'2. ເລືອກ <strong>"ເພີ່ມໃນໜ້າຈໍຫຼັກ"</strong>', en:'2. Select <strong>"Add to Home Screen"</strong>' },
-  };
-
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var iosGuide = isIOS
-    ? '<div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:#1a1814;line-height:1.8;text-align:left;">'
-      + (txt.step1[lang]||txt.step1.en) + '<br>' + (txt.step2[lang]||txt.step2.en)
-      + '</div>'
-    : '';
-
-  var overlay = document.createElement('div');
-  overlay.id = 'pwa-prompt-modal';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
-
-  overlay.innerHTML = [
-    '<div style="background:#fff;border-radius:20px;padding:24px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.3);">',
-    '<div style="font-size:40px;margin-bottom:10px;">📱</div>',
-    '<div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:16px;">' + (txt.title[lang]||txt.title.en) + '</div>',
-    iosGuide,
-    '<div style="display:flex;gap:10px;">',
-    '<button onclick="document.getElementById(\'pwa-prompt-modal\').remove();localStorage.setItem(\'pwa_prompt_dismissed\',\'1\');" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.later[lang]||txt.later.en) + '</button>',
-    '<button id="pwa-do-install-btn" style="flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">' + (txt.add[lang]||txt.add.en) + '</button>',
-    '</div></div>'
-  ].join('');
-  document.body.appendChild(overlay);
-  var installBtn = document.getElementById('pwa-do-install-btn');
-  if (installBtn) {
-    installBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var m = document.getElementById('pwa-prompt-modal');
-      if (m) m.remove();
-      handlePWAInstall();
-    });
-  }
-}
-
-function handlePWAInstall() {
-  var lang = currentLang || 'en';
-  var txt = {
-    title: { ko:'홈 화면에 추가', th:'เพิ่มไปที่หน้าจอหลัก', lo:'ເພີ່ມໃສ່ໜ້າຈໍຫຼັກ', en:'Add to Home Screen' },
-    step1: { ko:'1. 하단 <strong>공유버튼</strong> 📤 탭', th:'1. แตะ <strong>แชร์</strong> 📤 ด้านล่าง', lo:'1. ແຕະ <strong>ແບ່ງປັນ</strong> 📤 ດ້ານລຸ່ມ', en:'1. Tap <strong>Share</strong> 📤 below' },
-    step2: { ko:'2. <strong>"홈 화면에 추가"</strong> 선택', th:'2. เลือก <strong>"เพิ่มในหน้าจอโฮม"</strong>', lo:'2. ເລືອກ <strong>"ເພີ່ມໃນໜ້າຈໍຫຼັກ"</strong>', en:'2. Select <strong>"Add to Home Screen"</strong>' },
-    ok:    { ko:'확인', th:'ตกลง', lo:'ຕົກລົງ', en:'OK' },
-  };
-
-  if (deferredPrompt) {
-    // Android Chrome - 네이티브 프롬프트
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(result) {
-      if (result.outcome === 'accepted') {
-        localStorage.setItem('pwa_installed', '1');
-        var btn = document.getElementById('pwa-add-btn');
-        if (btn) btn.style.display = 'none';
-      }
-      deferredPrompt = null;
-    });
-    return;
-  }
-  // deferredPrompt 없음 (iOS / Samsung / 기타) - 안내 팝업
-  var existingGuide = document.getElementById('pwa-install-guide');
-  if (existingGuide) existingGuide.remove();
-  var guide = document.createElement('div');
-  guide.id = 'pwa-install-guide';
-  guide.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999999;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px;';
-  var okBtn = document.createElement('button');
-  okBtn.textContent = txt.ok[lang]||txt.ok.en;
-  okBtn.style.cssText = 'width:100%;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;';
-  okBtn.addEventListener('click', function() {
-    guide.remove();
-    localStorage.setItem('pwa_installed', '1');
-  });
-  var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:20px;padding:24px;max-width:320px;width:90%;text-align:center;';
-  box.innerHTML = '<div style="font-size:36px;margin-bottom:10px;">📱</div>'
-    + '<div style="font-size:16px;font-weight:700;color:#1a1814;margin-bottom:12px;">' + (txt.title[lang]||txt.title.en) + '</div>'
-    + '<div style="background:#fff8f0;border:1.5px solid #c84b2f;border-radius:12px;padding:12px;font-size:13px;color:#1a1814;line-height:1.8;text-align:left;">'
-    + (txt.step1[lang]||txt.step1.en) + '<br>' + (txt.step2[lang]||txt.step2.en) + '</div>';
-  box.appendChild(okBtn);
-  guide.appendChild(box);
-  document.body.appendChild(guide);
-}
 </script>
 </body>
 </html>
