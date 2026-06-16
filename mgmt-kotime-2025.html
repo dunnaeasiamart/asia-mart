@@ -3285,6 +3285,7 @@ async function savePreorder() {
 let _clickData = {};
 
 async function loadClickStats() {
+  if (!window._catalog) await buildAllOptions();
   const period = document.getElementById('clicks-period').value;
   const now = new Date();
   let startKey = '';
