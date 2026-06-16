@@ -708,7 +708,7 @@
 </div>
 
 <!-- 공지사항 팝업 -->
-<div id="notice-popup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+<div id="notice-popup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
     <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:12px;">📢 <span id="notice-popup-title">공지사항</span></div>
     <div id="notice-popup-text" style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-wrap;"></div>
@@ -2556,12 +2556,15 @@ async function loadNoticeFromFirebase() {
       const linkBtn = document.getElementById('notice-popup-link-btn');
       if (_noticeUrl) linkBtn.style.display = 'block';
       else linkBtn.style.display = 'none';
-      document.getElementById('notice-popup').style.display = 'flex';
+      var popup = document.getElementById('notice-popup');
+      popup.style.display = 'flex';
+      popup.style.pointerEvents = 'auto';
     }
   } catch(e) {}
 }
 function closeNoticePopup() {
-  document.getElementById('notice-popup').style.display = 'none';
+  var p = document.getElementById('notice-popup');
+  if (p) { p.style.display = 'none'; p.style.pointerEvents = 'none'; }
 }
 function openNoticeLink() {
   closeNoticePopup();
