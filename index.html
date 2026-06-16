@@ -2576,11 +2576,10 @@ function openNoticeLink() {
   if (!_noticeUrl) return;
   // 내부 카테고리 링크인지 확인 (예: "cat:philippine_corner")
   if (_noticeUrl.toLowerCase().startsWith('cat:')) {
-    const catKey = _noticeUrl.replace(/^cat:/i, '').trim();
-    const tabBtn = document.querySelector('[data-catkey="' + catKey + '"]');
-    if (tabBtn) {
-      switchTab(tabBtn, catKey);
-      window.scrollTo({ top: document.getElementById('cat-tabs').offsetTop - 60, behavior: 'smooth' });
+    // 필리핀 섹션으로 바로 스크롤
+    const section = document.getElementById('philippine-section');
+    if (section && section.style.display !== 'none') {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   } else {
     window.open(_noticeUrl, '_blank');
