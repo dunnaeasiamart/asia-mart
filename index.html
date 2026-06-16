@@ -2755,7 +2755,7 @@ function startPreorderAutoScroll() {
 }
 
 // ===== 상품 클릭 트래킹 =====
-window.trackClick = function trackClick(id) {
+function trackClick(id) {
   try {
     const today = new Date().toISOString().slice(0,10);
     const clickRef = ref(db, 'clicks/' + id + '/' + today);
@@ -2765,6 +2765,7 @@ window.trackClick = function trackClick(id) {
     }).catch(()=>{});
   } catch(e) {}
 }
+window.trackClick = trackClick;
 
 // ===== 방문자 카운터 =====
 (function() {
