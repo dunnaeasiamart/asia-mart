@@ -2117,14 +2117,10 @@ function goToItem(id) {
 
   // catalog에서 아이템과 카테고리 키 찾기
   let catKey = null;
-  let foundItem = null;
-  const catKeys = Object.keys(catalog);
-  alert('goToItem: ' + id + '\ncatalog 키 수: ' + catKeys.length + '\n첫번째 키: ' + catKeys[0]);
   for (const [key, cat] of Object.entries(catalog)) {
     const item = (cat.items || []).filter(Boolean).find(p => String(p.id) === id);
-    if (item) { catKey = key; foundItem = item; break; }
+    if (item) { catKey = key; break; }
   }
-  alert('찾은 catKey: ' + catKey);
   if (!catKey) return;
 
   // 검색창 열려있으면 닫기
@@ -2148,6 +2144,8 @@ function goToItem(id) {
   }
   setTimeout(() => tryScroll(5), 100);
 }
+
+window.goToItem = goToItem;
 
 function renderNew() {
   const container = document.getElementById('new-scroll');
