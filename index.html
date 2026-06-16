@@ -2113,7 +2113,8 @@ window.newIds = newIds;
 // 상품 카테고리로 이동 + 스크롤
 function goToItem(id) {
   id = String(id);
-  trackClick(id);
+  // trackClick은 module에서 window로 등록 후 호출
+  if (typeof window.trackClick === 'function') window.trackClick(id);
 
   // catalog에서 아이템과 카테고리 키 찾기
   let catKey = null;
@@ -2754,7 +2755,7 @@ function startPreorderAutoScroll() {
 }
 
 // ===== 상품 클릭 트래킹 =====
-function trackClick(id) {
+window.trackClick = function trackClick(id) {
   try {
     const today = new Date().toISOString().slice(0,10);
     const clickRef = ref(db, 'clicks/' + id + '/' + today);
