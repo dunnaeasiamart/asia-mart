@@ -2575,8 +2575,8 @@ function openNoticeLink() {
   closeNoticePopup();
   if (!_noticeUrl) return;
   // 내부 카테고리 링크인지 확인 (예: "cat:philippine_corner")
-  if (_noticeUrl.startsWith('cat:')) {
-    const catKey = _noticeUrl.replace('cat:', '').trim();
+  if (_noticeUrl.toLowerCase().startsWith('cat:')) {
+    const catKey = _noticeUrl.replace(/^cat:/i, '').trim();
     const tabBtn = document.querySelector('[data-catkey="' + catKey + '"]');
     if (tabBtn) {
       switchTab(tabBtn, catKey);
