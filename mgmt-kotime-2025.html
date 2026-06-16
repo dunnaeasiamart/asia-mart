@@ -3051,6 +3051,7 @@ async function buildAllOptions() {
     const snap = await db.ref('catalog').get();
     window._catalogCache = snap.val() || {};
   }
+  window._catalog = window._catalogCache;
   buildAllOptionsFromData(window._catalogCache);
 }
 
@@ -3327,7 +3328,9 @@ function renderClickStats() {
   const allItems = Object.values(window._catalog || {}).flatMap(c => c.items||[]).filter(Boolean);
   let rows = Object.entries(_clickData).map(([id, cnt]) => {
     const item = allItems.find(p => String(p.id) === String(id));
-    return { id, cnt, name: item ? (item.name_ko||item.name||id) : id, catKey: item ? item._catKey : '', emoji: item ? (item.emoji||'') : '' };
+    const catEntry = item ? Object.entries(window._catalog||{}).find(([k,v]) => (v.items||[]).some(p => String(p&&p.id) === String(id))) : null;
+    const catKey = catEntry ? catEntry[0] : '';
+    return { id, cnt, name: item ? (item.name_ko||item.name_en||id) : id, catKey, emoji: item ? (item.emoji||'') : '' };
   });
 
   if (cat) rows = rows.filter(r => r.catKey === cat);
