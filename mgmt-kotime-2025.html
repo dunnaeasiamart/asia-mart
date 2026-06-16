@@ -500,8 +500,12 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       </div>
       <div style="margin-bottom:16px;">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">링크 URL (선택)</label>
-        <input type="text" id="notice-url" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="https://...">
-        <p style="font-size:12px;color:#aaa;margin-top:4px;">링크 입력 시 공지 클릭하면 해당 URL로 이동합니다.</p>
+        <input type="text" id="notice-url" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="https:// 또는 cat:카테고리키">
+        <p style="font-size:12px;color:#aaa;margin-top:4px;">• 외부 링크: <b>https://...</b> 형식으로 입력 → 새 탭으로 열림</p>
+        <p style="font-size:12px;color:#c84b2f;margin-top:2px;">• 내부 카테고리: <b>cat:카테고리키</b> 형식 → 해당 카테고리로 바로 이동</p>
+        <div style="margin-top:8px;background:#f9f9f9;border-radius:8px;padding:8px 12px;font-size:12px;color:#666;" id="cat-key-list">
+          카테고리 키 목록 로딩 중...
+        </div>
       </div>
       <div style="margin-bottom:20px;">
         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">공지 활성화</label>
@@ -789,10 +793,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <div class="table-wrap" style="padding:24px;">
       <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">🇵🇭 필리핀 상품 관리</h3>
       <p style="font-size:13px;color:#888;margin-bottom:12px;">메인 페이지에 표시할 필리핀 상품을 선택하세요. 개수 제한 없음.</p>
-      <div style="background:#fff8f0;border:1px solid #f0d0b0;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span style="font-size:13px;color:#666;">전체 필리핀 상품 페이지 링크:</span>
-        <input type="text" id="philippine-link" placeholder="https://..." style="flex:1;min-width:200px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-        <button onclick="savePhilippineLink()" style="background:#c84b2f;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700;">저장</button>
+      <div style="background:#fff8f0;border:1px solid #f0d0b0;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+        <div style="font-size:13px;color:#666;margin-bottom:6px;">💡 공지사항에서 필리핀 카테고리로 바로가기 링크를 만들려면:</div>
+        <div style="font-size:13px;color:#c84b2f;font-weight:700;">공지사항 탭 → 링크 입력란에 <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #ddd;">cat:카테고리키</code> 형식으로 입력</div>
+        <div style="font-size:12px;color:#aaa;margin-top:6px;">예: 카테고리 키가 <b>philippine</b>이면 → <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #ddd;">cat:philippine</code></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
         <input type="text" id="philippine-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPhilippineSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
@@ -3151,6 +3155,17 @@ async function loadNotice() {
   document.getElementById('notice-text').value = data.text || '';
   document.getElementById('notice-url').value = data.url || '';
   document.getElementById('notice-active').checked = data.active || false;
+
+  // 카테고리 키 목록 표시
+  const catSnap = await db.ref('catalog').get();
+  const cats = catSnap.val() || {};
+  const list = document.getElementById('cat-key-list');
+  if (list) {
+    const items = Object.entries(cats).map(([k,v]) =>
+      `<span style="display:inline-block;background:#fff;border:1px solid #ddd;border-radius:6px;padding:2px 8px;margin:2px;cursor:pointer;font-size:12px;" onclick="document.getElementById('notice-url').value='cat:${k}'">${v.label_ko||v.label||k} → <b>cat:${k}</b></span>`
+    ).join('');
+    list.innerHTML = '클릭하면 자동입력: ' + items;
+  }
 }
 
 async function saveNotice() {
