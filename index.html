@@ -2114,28 +2114,39 @@ window.newIds = newIds;
 function goToItem(id) {
   id = String(id);
   trackClick(id);
-  const allItems = Object.values(catalog).flatMap(c => c.items);
-  const item = allItems.find(p => String(p.id) === id);
-  if (!item) return;
-  const catKey = item._catKey;
+
+  // catalog에서 아이템과 카테고리 키 찾기
+  let catKey = null;
+  let foundItem = null;
+  const catKeys = Object.keys(catalog);
+  alert('goToItem: ' + id + '\ncatalog 키 수: ' + catKeys.length + '\n첫번째 키: ' + catKeys[0]);
+  for (const [key, cat] of Object.entries(catalog)) {
+    const item = (cat.items || []).filter(Boolean).find(p => String(p.id) === id);
+    if (item) { catKey = key; foundItem = item; break; }
+  }
+  alert('찾은 catKey: ' + catKey);
   if (!catKey) return;
-  const tabBtn = document.querySelector(`[data-catkey="${catKey}"]`);
 
   // 검색창 열려있으면 닫기
   if (_searchOpen) toggleSearch();
 
   // 탭 전환
+  const tabBtn = document.querySelector('[data-catkey="' + catKey + '"]');
   if (tabBtn) switchTab(tabBtn, catKey);
   else { currentTab = catKey; renderTab(catKey); }
 
   // 탭 렌더 완료 후 해당 카드로 스크롤
-  setTimeout(() => {
+  function tryScroll(attempts) {
     const card = document.getElementById('card-' + id);
-    if (!card) return;
-    card.style.outline = '3px solid var(--accent)';
-    setTimeout(() => { if (card) card.style.outline = ''; }, 1500);
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 100);
+    if (card) {
+      card.style.outline = '3px solid var(--accent)';
+      setTimeout(() => { if (card) card.style.outline = ''; }, 1500);
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (attempts > 0) {
+      setTimeout(() => tryScroll(attempts - 1), 150);
+    }
+  }
+  setTimeout(() => tryScroll(5), 100);
 }
 
 function renderNew() {
