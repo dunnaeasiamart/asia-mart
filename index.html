@@ -713,8 +713,8 @@
     <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:12px;">📢 <span id="notice-popup-title">공지사항</span></div>
     <div id="notice-popup-text" style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-wrap;"></div>
     <div style="display:flex;gap:10px;">
-      <button onclick="closeNoticePopup()" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
-      <button id="notice-popup-link-btn" onclick="openNoticeLink()" style="display:none;flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">🔗 자세히 보기</button>
+      <button id="notice-close-btn" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+      <button id="notice-popup-link-btn" style="display:none;flex:2;background:#c84b2f;border:none;color:#fff;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">🔗 자세히 보기</button>
     </div>
   </div>
 </div>
@@ -2559,6 +2559,11 @@ async function loadNoticeFromFirebase() {
       var popup = document.getElementById('notice-popup');
       popup.style.display = 'flex';
       popup.style.pointerEvents = 'auto';
+      // 버튼 이벤트 직접 연결
+      var closeBtn = document.getElementById('notice-close-btn');
+      var linkBtn2 = document.getElementById('notice-popup-link-btn');
+      if (closeBtn) closeBtn.onclick = function() { closeNoticePopup(); };
+      if (linkBtn2) linkBtn2.onclick = function() { openNoticeLink(); };
     }
   } catch(e) {}
 }
