@@ -1028,9 +1028,11 @@ function setLang(lang) {
     });
   }
 
-  // Re-render current tab, best, new
+  // Re-render current tab, best, new, philippine, preorder
   renderTab(currentTab);
   renderBest();
+  if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
+  if (typeof window.renderPreorder === 'function') window.renderPreorder();
   if (typeof window.renderNew === 'function') window.renderNew();
   updateSummary();
 
@@ -2578,8 +2580,11 @@ function openNoticeLink() {
   if (_noticeUrl.toLowerCase().startsWith('cat:')) {
     // 필리핀 섹션으로 바로 스크롤
     const section = document.getElementById('philippine-section');
-    if (section && section.style.display !== 'none') {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (section) {
+      setTimeout(function() {
+        const top = section.getBoundingClientRect().top + window.scrollY - (window.innerHeight / 2) + (section.offsetHeight / 2);
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      }, 100);
     }
   } else {
     window.open(_noticeUrl, '_blank');
