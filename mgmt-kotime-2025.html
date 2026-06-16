@@ -3172,7 +3172,19 @@ async function saveNotice() {
   const text = document.getElementById('notice-text').value.trim();
   const url = document.getElementById('notice-url').value.trim();
   const active = document.getElementById('notice-active').checked;
-  await db.ref('notice').set({ text, url, active });
+  if (!text) { alert('내용을 입력해주세요.'); return; }
+
+  showToast('🌐 번역 중...');
+  let text_th = text, text_lo = text, text_en = text;
+  try {
+    [text_th, text_lo, text_en] = await Promise.all([
+      googleTranslate(text, 'th'),
+      googleTranslate(text, 'lo'),
+      googleTranslate(text, 'en'),
+    ]);
+  } catch(e) { console.log('번역 실패:', e); }
+
+  await db.ref('notice').set({ text, text_th, text_lo, text_en, url, active });
   showToast('📢 공지사항 저장 완료!');
 }
 

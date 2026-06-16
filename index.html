@@ -710,7 +710,7 @@
 <!-- 공지사항 팝업 -->
 <div id="notice-popup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-    <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:12px;">📢 <span id="notice-popup-title">공지사항</span></div>
+    <div style="font-size:17px;font-weight:700;color:#1a1814;margin-bottom:12px;">📢 <span id="notice-popup-title" data-t="notice_title">Notice</span></div>
     <div id="notice-popup-text" style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-wrap;"></div>
     <div style="display:flex;gap:10px;">
       <button id="notice-close-btn" style="flex:1;background:#f0f0f0;border:none;color:#666;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
@@ -840,6 +840,7 @@ const i18n = {
     new_arrivals: '🆕 New Arrivals',
     preorder_title: '💎 Pre-Order',
     philippine_title: '🇵🇭 Philippine Products',
+    notice_title: 'Notice',
     philippine_link: '🔗 View All Philippine Products →',
     delivery_type: 'Delivery Method',
     delivery_home: '🛵 Home Delivery (Pay on delivery)',
@@ -887,6 +888,7 @@ const i18n = {
     new_arrivals: '🆕 สินค้าใหม่',
     preorder_title: '💎 พรีออเดอร์',
     philippine_title: '🇵🇭 สินค้าฟิลิปปินส์',
+    notice_title: 'ประกาศ',
     philippine_link: '🔗 ดูสินค้าฟิลิปปินส์ทั้งหมด →',
     delivery_type: 'วิธีการจัดส่ง',
     delivery_home: '🛵 จัดส่งถึงบ้าน (ชำระเมื่อได้รับ)',
@@ -934,6 +936,7 @@ const i18n = {
     new_arrivals: '🆕 신상품',
     preorder_title: '💎 프리오더',
     philippine_title: '🇵🇭 필리핀 상품',
+    notice_title: '공지사항',
     philippine_link: '🔗 전체 필리핀 상품 보기 →',
     delivery_type: '배달 방식',
     delivery_home: '🛵 일반 배달 (현장결제)',
@@ -981,6 +984,7 @@ const i18n = {
     new_arrivals: '🆕 ສິນຄ້າໃໝ່',
     preorder_title: '💎 ພຣີອໍເດີ',
     philippine_title: '🇵🇭 ສິນຄ້າຟີລິປີນ',
+    notice_title: 'ແຈ້ງການ',
     philippine_link: '🔗 ເບິ່ງສິນຄ້າຟີລິປີນທັງໝົດ →',
     delivery_type: 'ວິທີການສົ່ງ',
     delivery_home: '🛵 ສົ່ງເຖິງບ້ານ (ຊຳລະເມື່ອຮັບ)',
@@ -1029,6 +1033,7 @@ function setLang(lang) {
   }
 
   // Re-render current tab, best, new, philippine, preorder
+  if (_noticeData) showNoticePopup();
   renderTab(currentTab);
   renderBest();
   if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
@@ -2548,24 +2553,38 @@ async function loadNewFromFirebase() {
 
 // ===== 공지사항 =====
 let _noticeUrl = '';
+let _noticeData = null;
+
+function showNoticePopup() {
+  if (!_noticeData) return;
+  const lang = currentLang || 'en';
+  const textMap = { ko: _noticeData.text, th: _noticeData.text_th, lo: _noticeData.text_lo, en: _noticeData.text_en };
+  const titleMap = { ko: '공지사항', th: 'ประกาศ', lo: 'ແຈ້ງການ', en: 'Notice' };
+  const linkMap = { ko: '🔗 자세히 보기', th: '🔗 ดูเพิ่มเติม', lo: '🔗 ເບິ່ງເພີ່ມ', en: '🔗 View More' };
+  document.getElementById('notice-popup-title').textContent = titleMap[lang] || titleMap.en;
+  document.getElementById('notice-popup-text').textContent = textMap[lang] || textMap.en || _noticeData.text;
+  const linkBtn = document.getElementById('notice-popup-link-btn');
+  if (_noticeUrl) { linkBtn.style.display = 'block'; linkBtn.textContent = linkMap[lang] || linkMap.en; }
+  else linkBtn.style.display = 'none';
+  var popup = document.getElementById('notice-popup');
+  popup.style.display = 'flex';
+  popup.style.pointerEvents = 'auto';
+  var closeBtn = document.getElementById('notice-close-btn');
+  var linkBtn2 = document.getElementById('notice-popup-link-btn');
+  if (closeBtn) closeBtn.onclick = function() { closeNoticePopup(); };
+  if (linkBtn2) linkBtn2.onclick = function() { openNoticeLink(); };
+  const closeLbl = { ko: '닫기', th: 'ปิด', lo: 'ປິດ', en: 'Close' };
+  if (closeBtn) closeBtn.textContent = closeLbl[lang] || closeLbl.en;
+}
+
 async function loadNoticeFromFirebase() {
   try {
     const snapshot = await get(ref(db, 'notice'));
     const data = snapshot.val();
     if (data && data.active && data.text) {
+      _noticeData = data;
       _noticeUrl = data.url || '';
-      document.getElementById('notice-popup-text').textContent = data.text;
-      const linkBtn = document.getElementById('notice-popup-link-btn');
-      if (_noticeUrl) linkBtn.style.display = 'block';
-      else linkBtn.style.display = 'none';
-      var popup = document.getElementById('notice-popup');
-      popup.style.display = 'flex';
-      popup.style.pointerEvents = 'auto';
-      // 버튼 이벤트 직접 연결
-      var closeBtn = document.getElementById('notice-close-btn');
-      var linkBtn2 = document.getElementById('notice-popup-link-btn');
-      if (closeBtn) closeBtn.onclick = function() { closeNoticePopup(); };
-      if (linkBtn2) linkBtn2.onclick = function() { openNoticeLink(); };
+      showNoticePopup();
     }
   } catch(e) {}
 }
