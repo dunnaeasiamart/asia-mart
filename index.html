@@ -1907,6 +1907,16 @@ async function confirmOrder() {
   if (!name) { alert(t.alert_fill); return; }
   if (!phone && !facebook) { alert(t.alert_contact); return; }
 
+  // 최소 주문 금액 체크 (50,000원)
+  const allItemsCheck = Object.values(catalog).flatMap(c => c.items).filter(Boolean);
+  let grandCheck = 0;
+  allItemsCheck.forEach(item => { grandCheck += getPrice(item, quantities[item.id] || 0); });
+  if (grandCheck < 50000) {
+    const need = (50000 - grandCheck).toLocaleString();
+    alert(t.min_order ? t.min_order(need) : '⚠️ 최소 주문 금액은 ₩50,000입니다. ₩' + need + ' 더 담아주세요.');
+    return;
+  }
+
   // 로딩 애니메이션
   const btn = document.getElementById('confirm-order-btn');
   const originalText = btn.textContent;
