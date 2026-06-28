@@ -1938,7 +1938,7 @@ async function confirmOrder() {
     const qty = quantities[item.id];
     const price = getPrice(item, qty);
     grand += price;
-    return `• ${item.name_en} × ${qty} = ${fmt(price)}`;
+    return `• ${item.name_ko || item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
   const isParcel = currentDelivery === 'parcel';
