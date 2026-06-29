@@ -1938,7 +1938,7 @@ async function confirmOrder() {
     const qty = quantities[item.id];
     const price = getPrice(item, qty);
     grand += price;
-    return `• ${item.name_ko || item.name_en} × ${qty} = ${fmt(price)}`;
+    return `• [${item.id}] ${item.name_ko || item.name_en} × ${qty} = ${fmt(price)}`;
   }).join('\n');
 
   const isParcel = currentDelivery === 'parcel';
@@ -1954,7 +1954,7 @@ async function confirmOrder() {
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbz2mcxE0yUjsNXD0KkBA1_CvRV8SC_QMiwvod0g2gwrFN7QbrTuMSHwlpSb80zePazC3A/exec';
 
   try {
-    // 1. 텔레그램 전송
+    // 1. 텔레그램 전송 - 주문 내역 텍스트
     if (photoFile) {
       const form = new FormData();
       form.append('chat_id', TG_CHAT);
@@ -1967,6 +1967,22 @@ async function confirmOrder() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: TG_CHAT, text: msg })
       });
+    }
+
+    // 2. 상품별 이미지 전송 (이미지 있는 상품만)
+    for (const item of selected) {
+      if (item.image) {
+        const qty = quantities[item.id];
+        const price = getPrice(item, qty);
+        const caption = `[${item.id}] ${item.name_ko || item.name_en} × ${qty} = ${fmt(price)}`;
+        try {
+          await fetch(`${apiBase}/sendPhoto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TG_CHAT, photo: item.image, caption: caption })
+          });
+        } catch(e2) { console.log('이미지 전송 실패:', item.id, e2); }
+      }
     }
 
     // 2. 구글 시트 기록
