@@ -1945,11 +1945,10 @@ async function checkDuplicateImages() {
   el.innerHTML = '<div style="padding:10px;font-size:13px;color:#888;">사진 URL 비교 중...</div>';
 
   const snap = await db.ref('catalog').get();
-  const catalog = snap.val() || {};
+  const catalogData = snap.val() || {};
 
-  // 이미지 URL별로 상품 목록 수집
-  const imageMap = {}; // url -> [{catKey, catLabel, id, name_ko, images}]
-  Object.entries(catalog).forEach(([catKey, cat]) => {
+  const imageMap = {};
+  Object.entries(catalogData).forEach(([catKey, cat]) => {
     const label = cat.label_ko || cat.label_en || catKey;
     (cat.items || []).forEach(item => {
       if (!item || !item.id) return;
@@ -1971,23 +1970,18 @@ async function checkDuplicateImages() {
 
   let html = '<div style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;">';
   html += '<div style="font-weight:700;color:#c2410c;margin-bottom:12px;">⚠️ 중복 사진 ' + dupes.length + '건 발견</div>';
-
   dupes.forEach(([url, list]) => {
     html += '<div style="margin-bottom:12px;padding:10px;background:#fff;border:1px solid #fee2e2;border-radius:8px;display:flex;gap:12px;align-items:flex-start;">';
-    // 썸네일
     html += '<img src="' + url + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">';
-    // 상품 목록
     html += '<div style="flex:1;">';
-    html += '<div style="font-size:12px;color:#888;margin-bottom:6px;word-break:break-all;">' + url.slice(0, 60) + '...</div>';
+    html += '<div style="font-size:12px;color:#888;margin-bottom:6px;word-break:break-all;">' + url.slice(0, 80) + '...</div>';
     list.forEach(item => {
       html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
       html += '<span style="font-weight:700;color:#0891b2;">' + item.id + '</span>';
       html += '<span style="color:#444;">' + item.name_ko + '</span>';
       html += '<span style="font-size:11px;color:#aaa;">[' + item.label + ']</span>';
-      html += '<button onclick="document.getElementById('product-search').value='' + item.id + '';filterProducts('' + item.id + '');" '
-            + 'style="margin-left:auto;background:#0891b2;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">보기</button>';
-      html += '<button onclick="confirmDeleteItem('' + item.catKey + '','' + item.id + '')" '
-            + 'style="background:#dc2626;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">삭제</button>';
+      html += '<button onclick="document.getElementById(&quot;product-search&quot;).value=&quot;' + item.id + '&quot;;filterProducts(&quot;' + item.id + '&quot;);" style="margin-left:auto;background:#0891b2;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">보기</button>';
+      html += '<button onclick="confirmDeleteDupItem(&quot;' + item.catKey + '&quot;,&quot;' + item.id + '&quot;)" style="background:#dc2626;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">삭제</button>';
       html += '</div>';
     });
     html += '</div></div>';
@@ -1996,15 +1990,15 @@ async function checkDuplicateImages() {
   el.innerHTML = html;
 }
 
-async function confirmDeleteItem(catKey, itemId) {
+async function confirmDeleteDupItem(catKey, itemId) {
   if (!confirm('[' + itemId + '] 상품을 삭제하시겠습니까?')) return;
   const snap = await db.ref('catalog/' + catKey + '/items').get();
   const items = snap.val() || [];
   const filtered = items.filter(item => item && item.id !== itemId);
   await db.ref('catalog/' + catKey + '/items').set(filtered);
   showToast('🗑️ [' + itemId + '] 삭제 완료!');
-  checkDuplicateImages(); // 결과 새로고침
-  if (typeof loadAll === 'function') loadAll(); // 상품목록 새로고침
+  checkDuplicateImages();
+  if (typeof loadCatalogForAdmin === 'function') loadCatalogForAdmin();
 }
 
 // ── 중복 ID 검사 ──
