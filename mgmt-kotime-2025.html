@@ -320,10 +320,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <input type="text" id="product-search" placeholder="🔍 상품명, ID 검색..." oninput="filterProducts(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
         <button onclick="filterProducts('');document.getElementById('product-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
         <button onclick="checkDuplicateIds()" style="background:#7c3aed;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;">🔍 중복 ID 검사</button>
-        <button onclick="checkDuplicateImages()" style="background:#0891b2;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;">🖼️ 중복 사진 검사</button>
       </div>
       <div id="duplicate-result" style="display:none;margin-bottom:12px;padding:0 16px;"></div>
-      <div id="duplicate-image-result" style="display:none;margin-bottom:12px;padding:0 16px;"></div>
       <table>
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;font-size:12px;color:#888;width:55px;">번호</th>
@@ -1936,69 +1934,6 @@ function filterProducts(query) {
       row.style.display = hasVisible ? '' : 'none';
     });
   }
-}
-
-// ── 중복 이미지 검사 ──
-async function checkDuplicateImages() {
-  const el = document.getElementById('duplicate-image-result');
-  el.style.display = 'block';
-  el.innerHTML = '<div style="padding:10px;font-size:13px;color:#888;">사진 URL 비교 중...</div>';
-
-  const snap = await db.ref('catalog').get();
-  const catalogData = snap.val() || {};
-
-  const imageMap = {};
-  Object.entries(catalogData).forEach(([catKey, cat]) => {
-    const label = cat.label_ko || cat.label_en || catKey;
-    (cat.items || []).forEach(item => {
-      if (!item || !item.id) return;
-      const images = Array.isArray(item.images) ? item.images : (item.image ? [item.image] : []);
-      images.forEach(url => {
-        if (!url) return;
-        if (!imageMap[url]) imageMap[url] = [];
-        imageMap[url].push({ catKey, label, id: item.id, name_ko: item.name_ko || item.name_en || '' });
-      });
-    });
-  });
-
-  const dupes = Object.entries(imageMap).filter(([url, list]) => list.length > 1);
-
-  if (!dupes.length) {
-    el.innerHTML = '<div style="padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;">✅ 중복 사진 없음 — 모든 상품 사진이 고유합니다.</div>';
-    return;
-  }
-
-  let html = '<div style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;">';
-  html += '<div style="font-weight:700;color:#c2410c;margin-bottom:12px;">⚠️ 중복 사진 ' + dupes.length + '건 발견</div>';
-  dupes.forEach(([url, list]) => {
-    html += '<div style="margin-bottom:12px;padding:10px;background:#fff;border:1px solid #fee2e2;border-radius:8px;display:flex;gap:12px;align-items:flex-start;">';
-    html += '<img src="' + url + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">';
-    html += '<div style="flex:1;">';
-    html += '<div style="font-size:12px;color:#888;margin-bottom:6px;word-break:break-all;">' + url.slice(0, 80) + '...</div>';
-    list.forEach(item => {
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
-      html += '<span style="font-weight:700;color:#0891b2;">' + item.id + '</span>';
-      html += '<span style="color:#444;">' + item.name_ko + '</span>';
-      html += '<span style="font-size:11px;color:#aaa;">[' + item.label + ']</span>';
-      html += '<button onclick="document.getElementById(&quot;product-search&quot;).value=&quot;' + item.id + '&quot;;filterProducts(&quot;' + item.id + '&quot;);" style="margin-left:auto;background:#0891b2;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">보기</button>';
-      html += '<button onclick="confirmDeleteDupItem(&quot;' + item.catKey + '&quot;,&quot;' + item.id + '&quot;)" style="background:#dc2626;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">삭제</button>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-async function confirmDeleteDupItem(catKey, itemId) {
-  if (!confirm('[' + itemId + '] 상품을 삭제하시겠습니까?')) return;
-  const snap = await db.ref('catalog/' + catKey + '/items').get();
-  const items = snap.val() || [];
-  const filtered = items.filter(item => item && item.id !== itemId);
-  await db.ref('catalog/' + catKey + '/items').set(filtered);
-  showToast('🗑️ [' + itemId + '] 삭제 완료!');
-  checkDuplicateImages();
-  if (typeof loadCatalogForAdmin === 'function') loadCatalogForAdmin();
 }
 
 // ── 중복 ID 검사 ──
