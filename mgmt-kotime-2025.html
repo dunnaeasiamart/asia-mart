@@ -176,7 +176,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
   <div class="header">
     <div class="header-title">🛒 Asia Mart 관리자</div>
     <div class="header-btns">
-      <button class="btn btn-secondary" onclick="window._tabLoaded={}; loadAll();">🔄 새로고침</button>
+      <button class="btn btn-secondary" onclick="loadAll()">🔄 새로고침</button>
       <button class="btn btn-primary" onclick="saveAll()">💾 저장</button>
     </div>
   </div>
@@ -188,16 +188,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     <button class="tab-btn" onclick="switchTab('category',this)">📂 카테고리</button>
     <button class="tab-btn" onclick="switchTab('customer',this)">👥 고객 관리</button>
     <button class="tab-btn" onclick="switchTab('excel',this)">📊 엑셀</button>
-    <button class="tab-btn" onclick="switchTab('notice',this)">📢 공지사항</button>
     <button class="tab-btn" onclick="switchTab('best',this)">🔥 베스트 상품</button>
-    <button class="tab-btn" onclick="switchTab('preorder',this)">💎 프리오더</button>
     <button class="tab-btn" onclick="switchTab('new',this)">🆕 신상품</button>
-    <button class="tab-btn" onclick="switchTab('clicks',this)">📊 클릭 통계</button>
-    <button class="tab-btn" onclick="switchTab('philippine',this)">🇵🇭 필리핀 상품</button>
     <button class="tab-btn" onclick="switchTab('also',this)">🛍️ 이런것도</button>
     <button class="tab-btn" onclick="switchTab('sns',this)">📸 SNS 카드</button>
-    <button class="tab-btn" onclick="switchTab('cover',this)">🖼️ 커버 이미지</button>
-    <button class="tab-btn" onclick="switchTab('reels',this)">📱 릴스 커버</button>
     <button class="tab-btn" onclick="switchTab('chart',this)">📈 판매 그래프</button>
   </div>
 
@@ -319,11 +313,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;">
         <input type="text" id="product-search" placeholder="🔍 상품명, ID 검색..." oninput="filterProducts(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
         <button onclick="filterProducts('');document.getElementById('product-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
-        <button onclick="checkDuplicateIds()" style="background:#7c3aed;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;">🔍 중복 ID 검사</button>
-        <button onclick="checkDuplicateImages()" style="background:#0891b2;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;">🖼️ 중복 사진 검사</button>
       </div>
-      <div id="duplicate-result" style="display:none;margin-bottom:12px;padding:0 16px;"></div>
-      <div id="duplicate-image-result" style="display:none;margin-bottom:12px;padding:0 16px;"></div>
       <table>
         <thead><tr style="background:#f5f5f5;">
           <th style="padding:10px 12px;font-size:12px;color:#888;width:55px;">번호</th>
@@ -348,7 +338,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <div style="display:flex;gap:8px;">
           <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="saveCatOrder()">💾 순서 저장</button>
           <button class="btn btn-secondary" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc02;" onclick="migrateClothing()">👕 "중고" 상품 → 의류로 이동</button>
-          <button class="btn btn-secondary" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;" onclick="translateAllCatLabels()">🌐 전체 다국어 일괄 적용</button>
           <button class="btn btn-primary" onclick="openAddCatModal()">➕ 카테고리 추가</button>
         </div>
       </div>
@@ -491,35 +480,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
-  <!-- 공지사항 -->
-  <div id="tab-notice" class="tab-content">
-    <div class="table-wrap" style="padding:24px;max-width:600px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">📢 공지사항 팝업 관리</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:20px;">메인 페이지 접속 시 팝업으로 표시됩니다.</p>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">공지 내용</label>
-        <textarea id="notice-text" rows="5" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;resize:vertical;box-sizing:border-box;" placeholder="공지사항 내용을 입력하세요..."></textarea>
-      </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">링크 URL (선택)</label>
-        <input type="text" id="notice-url" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="https:// 또는 cat:카테고리키">
-        <p style="font-size:12px;color:#aaa;margin-top:4px;">• 외부 링크: <b>https://...</b> 형식으로 입력 → 새 탭으로 열림</p>
-        <p style="font-size:12px;color:#c84b2f;margin-top:2px;">• 내부 카테고리: <b>cat:카테고리키</b> 형식 → 해당 카테고리로 바로 이동</p>
-        <div style="margin-top:8px;background:#f9f9f9;border-radius:8px;padding:8px 12px;font-size:12px;color:#666;" id="cat-key-list">
-          카테고리 키 목록 로딩 중...
-        </div>
-      </div>
-      <div style="margin-bottom:20px;">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">공지 활성화</label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" id="notice-active" style="width:18px;height:18px;">
-          <span style="font-size:13px;">공지사항 팝업 표시</span>
-        </label>
-      </div>
-      <button class="btn btn-primary" onclick="saveNotice()">💾 공지사항 저장</button>
-    </div>
-  </div>
-
   <!-- 베스트 상품 -->
   <div id="tab-best" class="tab-content">
     <div class="table-wrap" style="padding:24px;">
@@ -542,29 +502,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="btn btn-primary" onclick="saveBest()">💾 베스트 상품 저장</button>
         <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetBest()">🗑️ 목록 초기화</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 프리오더 -->
-  <div id="tab-preorder" class="tab-content">
-    <div class="table-wrap" style="padding:24px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">💎 프리오더 상품 선택 (최대 10개)</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:16px;">사전 주문 받을 상품을 선택하면 메인 페이지에 표시됩니다.</p>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
-        <input type="text" id="preorder-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPreorderSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-        <button onclick="filterPreorderSearch('');document.getElementById('preorder-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
-      </div>
-      <div id="preorder-search-results" style="display:none;margin-bottom:16px;border:1px solid #f0f0f0;border-radius:8px;max-height:220px;overflow-y:auto;"></div>
-      <div id="preorder-slots" style="display:flex;flex-direction:column;gap:12px;"></div>
-      <div style="display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:12px;color:#888;">카드 선택:</span>
-        <button onclick="toggleAllChecks('preorder',true)" style="background:#f0f0f0;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✅ 전체</button>
-        <button onclick="toggleAllChecks('preorder',false)" style="background:#f0f0f0;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">⬜ 해제</button>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-primary" onclick="savePreorder()">💾 프리오더 저장</button>
-        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetPreorder()">🗑️ 목록 초기화</button>
       </div>
     </div>
   </div>
@@ -698,145 +635,6 @@ td input[type="number"]:focus { border-color: #c84b2f; }
     </div>
   </div>
 
-
-  <!-- 커버 이미지 메이커 -->
-  <div id="tab-cover" class="tab-content">
-    <div style="max-width:600px;margin:24px auto;padding:0 12px;">
-      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
-        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">🖼️ 커버 이미지 만들기</h3>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">상품 사진 선택 (최대 4장)</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div onclick="document.getElementById('cover-file-0').click()" id="cover-slot-0" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
-              <span style="font-size:24px;">📷</span>
-              <input type="file" id="cover-file-0" accept="image/*" style="display:none;" onchange="onCoverImgSelect(0,this)">
-            </div>
-            <div onclick="document.getElementById('cover-file-1').click()" id="cover-slot-1" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
-              <span style="font-size:24px;">📷</span>
-              <input type="file" id="cover-file-1" accept="image/*" style="display:none;" onchange="onCoverImgSelect(1,this)">
-            </div>
-            <div onclick="document.getElementById('cover-file-2').click()" id="cover-slot-2" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
-              <span style="font-size:24px;">📷</span>
-              <input type="file" id="cover-file-2" accept="image/*" style="display:none;" onchange="onCoverImgSelect(2,this)">
-            </div>
-            <div onclick="document.getElementById('cover-file-3').click()" id="cover-slot-3" style="height:120px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f9f9f9;">
-              <span style="font-size:24px;">📷</span>
-              <input type="file" id="cover-file-3" accept="image/*" style="display:none;" onchange="onCoverImgSelect(3,this)">
-            </div>
-          </div>
-          <button onclick="clearCoverImgs()" style="margin-top:8px;background:none;border:1px solid #ddd;padding:5px 12px;border-radius:6px;font-size:12px;color:#888;cursor:pointer;">🗑️ 사진 초기화</button>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">중앙 글귀 (3줄 — 상품 위에 표시)</label>
-          <input type="text" id="cover-text1" placeholder="줄 1 (태국어)" value="สินค้าขายดี" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:6px;outline:none;box-sizing:border-box;">
-          <input type="text" id="cover-text2" placeholder="줄 2 (라오어)" value="ສິນຄ້າຂາຍດີ" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:6px;outline:none;box-sizing:border-box;">
-          <input type="text" id="cover-text3" placeholder="줄 3 (영어)" value="BEST PRODUCTS" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:8px;">하단 문구 (3줄)</label>
-          <input type="text" id="cover-bottom1" placeholder="줄 1 (태국어)" value="สินค้าไทย ลาว ฟิลิปปินส์ครบ!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;outline:none;box-sizing:border-box;">
-          <input type="text" id="cover-bottom2" placeholder="줄 2 (라오어)" value="ສິນຄ້າໄທ ລາວ ຟິລິບປິນ ຄົບ!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;outline:none;box-sizing:border-box;">
-          <input type="text" id="cover-bottom3" placeholder="줄 3 (따갈로그어)" value="May produktong Thai, Lao, at Pilipino!" oninput="renderCoverCard()" style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
-        </div>
-      </div>
-      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
-        <div style="font-size:12px;color:#888;margin-bottom:12px;">미리보기</div>
-        <div style="display:flex;justify-content:center;">
-          <canvas id="cover-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadCoverCard()">⬇️ 커버 이미지 저장</button>
-    </div>
-  </div>
-
-  <!-- 릴스 커버 메이커 -->
-  <div id="tab-reels" class="tab-content">
-    <div style="max-width:600px;margin:24px auto;padding:0 12px;">
-      <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:16px;">
-        <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📱 릴스 커버 만들기 (9:16)</h3>
-
-        <!-- 슬롯 4개: 각각 상품선택 or 직접업로드 -->
-        <div style="margin-bottom:16px;">
-          <div style="font-size:12px;color:#888;margin-bottom:8px;">📷 사진 4장 — 상품 검색으로 이미지 가져오기 또는 직접 업로드</div>
-          <div style="display:flex;flex-direction:column;gap:10px;" id="reels-slots-wrap">
-          </div>
-          <button onclick="clearReelsImgs()" style="margin-top:8px;background:none;border:1px solid #ddd;padding:5px 12px;border-radius:6px;font-size:12px;color:#888;cursor:pointer;">🗑️ 전체 초기화</button>
-        </div>
-
-        <!-- 한글 입력 → 자동 번역 -->
-        <div style="margin-bottom:6px;">
-          <div style="font-size:12px;color:#888;margin-bottom:6px;">✏️ 한글로 입력하면 자동 번역 (수동 수정 가능)</div>
-          <input type="text" id="reels-ko" placeholder="한글 입력 (예: 생활용품)" oninput="reelsAutoTranslate()" style="width:100%;padding:9px 12px;border:1px solid #e07b2f;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;">
-          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
-            <span style="font-size:12px;color:#888;width:24px;">🇹🇭</span>
-            <input type="text" id="reels-text1" placeholder="태국어" oninput="renderReelsCard()" style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
-            <span style="font-size:12px;color:#888;width:24px;">🇱🇦</span>
-            <input type="text" id="reels-text2" placeholder="라오어" oninput="renderReelsCard()" style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-size:12px;color:#888;width:24px;">🇺🇸</span>
-            <input type="text" id="reels-text3" placeholder="영어 (골드)" oninput="renderReelsCard()" style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-          </div>
-        </div>
-      </div>
-
-      <!-- 미리보기 -->
-      <div style="text-align:center;margin-bottom:16px;">
-        <canvas id="reels-canvas" width="540" height="960" style="max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"></canvas>
-      </div>
-      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="downloadReelsCard()">⬇️ 릴스 커버 저장</button>
-    </div>
-  </div>
-
-  <!-- 필리핀 상품 -->
-  <div id="tab-philippine" class="tab-content">
-    <div class="table-wrap" style="padding:24px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;">🇵🇭 필리핀 상품 관리</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:12px;">메인 페이지에 표시할 필리핀 상품을 선택하세요. 개수 제한 없음.</p>
-      <div style="background:#fff8f0;border:1px solid #f0d0b0;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-        <div style="font-size:13px;color:#666;margin-bottom:6px;">💡 공지사항에서 필리핀 카테고리로 바로가기 링크를 만들려면:</div>
-        <div style="font-size:13px;color:#c84b2f;font-weight:700;">공지사항 탭 → 링크 입력란에 <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #ddd;">cat:카테고리키</code> 형식으로 입력</div>
-        <div style="font-size:12px;color:#aaa;margin-top:6px;">예: 카테고리 키가 <b>philippine</b>이면 → <code style="background:#fff;padding:2px 6px;border-radius:4px;border:1px solid #ddd;">cat:philippine</code></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
-        <input type="text" id="philippine-search" placeholder="🔍 한글 상품명 검색..." oninput="filterPhilippineSearch(this.value)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-        <button onclick="filterPhilippineSearch('');document.getElementById('philippine-search').value='';" style="background:#f0f0f0;border:none;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>
-        <button onclick="addPhilippineSlot()" style="background:#2d7a4f;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700;">+ 슬롯 추가</button>
-      </div>
-      <div id="philippine-search-results" style="display:none;margin-bottom:12px;border:1px solid #f0f0f0;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
-      <div id="philippine-slots" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div style="display:flex;gap:8px;margin-top:16px;">
-        <button class="btn btn-primary" onclick="savePhilippine()">💾 필리핀 상품 저장</button>
-        <button class="btn btn-secondary" style="background:#f0f0f0;color:#333;" onclick="resetPhilippine()">🗑️ 목록 초기화</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 클릭 통계 -->
-  <div id="tab-clicks" class="tab-content">
-    <div class="table-wrap" style="padding:24px;">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">📊 상품 클릭 통계</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-        <select id="clicks-period" onchange="loadClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-          <option value="day">일간</option>
-          <option value="week">주간</option>
-          <option value="month" selected>월간</option>
-          <option value="year">연간</option>
-        </select>
-        <select id="clicks-sort" onchange="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-          <option value="desc">클릭 많은 순</option>
-          <option value="asc">클릭 적은 순</option>
-        </select>
-        <select id="clicks-cat" onchange="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-          <option value="">전체 카테고리</option>
-        </select>
-        <input type="text" id="clicks-search" placeholder="🔍 상품명 검색" oninput="renderClickStats()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:160px;">
-      </div>
-      <div id="clicks-table" style="font-size:13px;"></div>
-    </div>
-  </div>
 
   <!-- 판매 그래프 탭 -->
   <div id="tab-chart" class="tab-content">
@@ -1063,10 +861,15 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_PW_HASH = "2c9645abef2472b54fd98fad9e1f01a0795ef05c539a6b5ae66232bb615e0789";
+const ADMIN_PW = "asia1234";
 const GOOGLE_TRANSLATE_KEY = 'AIzaSyATvGXEnesW4fCsEyals7qipskznXJvn6Q';
 
+const _translateCache = {};
 async function googleTranslate(text, targetLang) {
+  const cacheKey = text + '|' + targetLang;
+  if (_translateCache[cacheKey]) return _translateCache[cacheKey];
+  // 연속 호출 방지 딜레이
+  await new Promise(r => setTimeout(r, 300));
   const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1074,15 +877,13 @@ async function googleTranslate(text, targetLang) {
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return data.data.translations[0].translatedText;
+  const result = data.data.translations[0].translatedText;
+  _translateCache[cacheKey] = result;
+  return result;
 }
-async function doLogin() {
+function doLogin() {
   const pw = document.getElementById('pw-input').value;
-  const msgBuffer = new TextEncoder().encode(pw);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  if (hashHex === ADMIN_PW_HASH) {
+  if (pw === ADMIN_PW) {
     localStorage.setItem('admin_logged_in', 'true');
     showMainPage();
   } else {
@@ -1149,21 +950,11 @@ function switchTab(tab, triggerEl) {
   document.getElementById('tab-' + tab).classList.add('active');
   const btn = triggerEl || document.querySelector(`.tab-btn[onclick*="'${tab}'"]`);
   if (btn) btn.classList.add('active');
-
-  if (!window._tabLoaded) window._tabLoaded = {};
-  // 이미 로딩된 탭은 다시 불러오지 않음 (새로고침 버튼으로만 갱신)
-  if (window._tabLoaded[tab]) return;
-  window._tabLoaded[tab] = true;
-
   if (tab === 'stock')    loadStock();
   if (tab === 'disc' || tab === 'discount') loadDiscount();
   if (tab === 'prod' || tab === 'product')  { loadCatalogForAdmin(); autoFillId(); }
-  if (tab === 'notice')   loadNotice();
   if (tab === 'best')     loadBest();
-  if (tab === 'preorder') loadPreorder();
   if (tab === 'new')      loadNew();
-  if (tab === 'clicks')   loadClickStats();
-  if (tab === 'philippine') loadPhilippine();
   if (tab === 'also')     loadAlso();
   if (tab === 'customer') loadCustomers();
   if (tab === 'category') loadCategories();
@@ -1504,11 +1295,11 @@ async function retranslateAll() {
       bar.style.width = Math.round((done / totalItems) * 100) + '%';
 
       try {
-        const [en, th, lo] = await Promise.all([
-          googleTranslate(ko, 'en'),
-          googleTranslate(ko, 'th'),
-          googleTranslate(ko, 'lo')
-        ]);
+        const en = await googleTranslate(ko, 'en');
+        const th = await googleTranslate(ko, 'th');
+        const lo = await googleTranslate(ko, 'lo');
+        // API rate limit 보호: 상품 간 500ms 대기
+        await new Promise(r => setTimeout(r, 500));
         updates[`catalog/${key}/items/${i}/name_en`] = en;
         updates[`catalog/${key}/items/${i}/name_th`] = th;
         updates[`catalog/${key}/items/${i}/name_lo`] = lo;
@@ -1604,8 +1395,11 @@ const storage = firebase.storage();
 
 // 로그인 상태면 loadAll 실행
 if (localStorage.getItem('admin_logged_in') === 'true') {
-  // window.load 시점에 loadAll이 미정의일 수 있으므로 defer로 안전하게 호출
-  window._pendingInit = true;
+  window.addEventListener('load', function() {
+    if (window.loadAll) window.loadAll();
+    setTimeout(autoFillId, 2000);
+    restoreProductForm();
+  });
 }
 
 // ── 이미지 업로드 (여러 장) ──
@@ -1847,33 +1641,17 @@ function addEditImgUrl() {
 }
 
 async function loadAll() {
-  window._tabLoaded = {}; // 탭별 로딩 여부 초기화
-  window._catalogCache = null;
-  localStorage.removeItem('_catalog_cache'); // 강제 새로고침 시 캐시 무효화
-  // 현재 활성 탭 자동 로드
-  const activeTab = document.querySelector('.tab-content.active');
-  if (activeTab) {
-    const tabId = activeTab.id.replace('tab-', '');
-    switchTab(tabId);
-  } else {
-    switchTab('stock'); // 기본 탭
-  }
-}
-
-// loadAll 정의 완료 후 — 로그인 상태 초기화 실행
-if (window._pendingInit) {
-  window._pendingInit = false;
-  loadAll();
-  setTimeout(autoFillId, 2000);
-  restoreProductForm();
+  await buildAllOptions();
+  // catalog 캐시 저장 (SNS 카드용)
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
+  await loadCatSelect();
+  // 탭별 로드는 switchTab에서 처리 — 초기에는 현재 탭만 로드
+  await loadStock();
 }
 
 async function loadCatSelect() {
   const snap = await db.ref('catalog').get();
-  loadCatSelectFromData(snap.val() || {});
-}
-
-function loadCatSelectFromData(data) {
+  const data = snap.val() || {};
   const sel = document.getElementById('new-cat');
   if (!sel) return;
   sel.innerHTML = '';
@@ -1938,132 +1716,9 @@ function filterProducts(query) {
   }
 }
 
-// ── 중복 이미지 검사 ──
-async function checkDuplicateImages() {
-  const el = document.getElementById('duplicate-image-result');
-  el.style.display = 'block';
-  el.innerHTML = '<div style="padding:10px;font-size:13px;color:#888;">사진 URL 비교 중...</div>';
-
-  const snap = await db.ref('catalog').get();
-  const catalogData = snap.val() || {};
-
-  const imageMap = {};
-  Object.entries(catalogData).forEach(([catKey, cat]) => {
-    const label = cat.label_ko || cat.label_en || catKey;
-    (cat.items || []).forEach(item => {
-      if (!item || !item.id) return;
-      const images = Array.isArray(item.images) ? item.images : (item.image ? [item.image] : []);
-      images.forEach(url => {
-        if (!url) return;
-        if (!imageMap[url]) imageMap[url] = [];
-        imageMap[url].push({ catKey, label, id: item.id, name_ko: item.name_ko || item.name_en || '' });
-      });
-    });
-  });
-
-  const dupes = Object.entries(imageMap).filter(([url, list]) => list.length > 1);
-
-  if (!dupes.length) {
-    el.innerHTML = '<div style="padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;">✅ 중복 사진 없음 — 모든 상품 사진이 고유합니다.</div>';
-    return;
-  }
-
-  let html = '<div style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;">';
-  html += '<div style="font-weight:700;color:#c2410c;margin-bottom:12px;">⚠️ 중복 사진 ' + dupes.length + '건 발견</div>';
-  dupes.forEach(([url, list]) => {
-    html += '<div style="margin-bottom:12px;padding:10px;background:#fff;border:1px solid #fee2e2;border-radius:8px;display:flex;gap:12px;align-items:flex-start;">';
-    html += '<img src="' + url + '" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display=&quot;none&quot;">';
-    html += '<div style="flex:1;">';
-    html += '<div style="font-size:12px;color:#888;margin-bottom:6px;word-break:break-all;">' + url.slice(0, 80) + '...</div>';
-    list.forEach(item => {
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
-      html += '<span style="font-weight:700;color:#0891b2;">' + item.id + '</span>';
-      html += '<span style="color:#444;">' + item.name_ko + '</span>';
-      html += '<span style="font-size:11px;color:#aaa;">[' + item.label + ']</span>';
-      html += '<button onclick="document.getElementById(&quot;product-search&quot;).value=&quot;' + item.id + '&quot;;filterProducts(&quot;' + item.id + '&quot;);" style="margin-left:auto;background:#0891b2;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">보기</button>';
-      html += '<button onclick="confirmDeleteDupItem(&quot;' + item.catKey + '&quot;,&quot;' + item.id + '&quot;)" style="background:#dc2626;border:none;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;cursor:pointer;">삭제</button>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-async function confirmDeleteDupItem(catKey, itemId) {
-  if (!confirm('[' + itemId + '] 상품을 삭제하시겠습니까?')) return;
-  const snap = await db.ref('catalog/' + catKey + '/items').get();
-  const items = snap.val() || [];
-  const filtered = items.filter(item => item && item.id !== itemId);
-  await db.ref('catalog/' + catKey + '/items').set(filtered);
-  showToast('🗑️ [' + itemId + '] 삭제 완료!');
-  checkDuplicateImages();
-  if (typeof loadCatalogForAdmin === 'function') loadCatalogForAdmin();
-}
-
-// ── 중복 ID 검사 ──
-async function checkDuplicateIds() {
-  const el = document.getElementById('duplicate-result');
-  el.style.display = 'block';
-  el.innerHTML = '<div style="padding:10px;font-size:13px;color:#888;">검사 중...</div>';
-
-  const snap = await db.ref('catalog').get();
-  const catalog = snap.val() || {};
-
-  const seen = {};   // id -> [{catKey, catLabel, name_ko}]
-  Object.entries(catalog).forEach(([catKey, cat]) => {
-    const label = (cat.label_ko || cat.label_en || catKey);
-    (cat.items || []).forEach(item => {
-      if (!item || !item.id) return;
-      if (!seen[item.id]) seen[item.id] = [];
-      seen[item.id].push({ catKey, label, name_ko: item.name_ko || item.name_en || '' });
-    });
-  });
-
-  const dupes = Object.entries(seen).filter(([id, list]) => list.length > 1);
-
-  if (!dupes.length) {
-    el.innerHTML = '<div style="padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;">✅ 중복 ID 없음 — 모든 상품 ID가 고유합니다.</div>';
-    return;
-  }
-
-  let html = '<div style="padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;">';
-  html += '<div style="font-weight:700;color:#c2410c;margin-bottom:8px;">⚠️ 중복 ID ' + dupes.length + '건 발견</div>';
-  dupes.forEach(([id, list]) => {
-    html += '<div style="margin-bottom:8px;padding:8px 10px;background:#fff;border:1px solid #fee2e2;border-radius:6px;">';
-    html += '<span style="font-weight:700;color:#dc2626;margin-right:8px;">' + id + '</span>';
-    list.forEach(item => {
-      html += '<span style="display:inline-block;margin-right:8px;color:#555;">[' + item.label + '] ' + item.name_ko + '</span>';
-    });
-    html += '<button onclick="document.getElementById(&quot;product-search&quot;).value=&quot;' + id + '&quot;;filterProducts(&quot;' + id + '&quot;);" '
-          + 'style="float:right;background:#dc2626;border:none;color:#fff;padding:3px 10px;border-radius:4px;font-size:12px;cursor:pointer;">목록에서 보기</button>';
-    html += '</div>';
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-
 async function loadCatalogForAdmin() {
-  if (!window._catalogCache) {
-    // localStorage 캐시 먼저 확인 → 즉시 렌더 후 백그라운드에서 최신화
-    const cached = localStorage.getItem('_catalog_cache');
-    if (cached) {
-      try {
-        window._catalogCache = JSON.parse(cached);
-        renderCatalogAdmin(window._catalogCache); // 즉시 렌더
-      } catch(e) {}
-    }
-    // Firebase에서 최신 데이터 fetch (캐시 유무 관계없이)
-    const snap = await db.ref('catalog').get();
-    const fresh = snap.val() || {};
-    window._catalogCache = fresh;
-    localStorage.setItem('_catalog_cache', JSON.stringify(fresh));
-  }
-  const data = window._catalogCache;
-  // 카테고리 드롭다운 업데이트
-  loadCatSelectFromData(data);
-  buildAllOptionsFromData(data);
+  const snap = await db.ref('catalog').get();
+  const data = snap.val() || {};
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -2078,75 +1733,34 @@ async function loadCatalogForAdmin() {
   const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
 
-  const rows = [];
   ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, catKey);
-    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
-    cat.items.forEach(item => {
-      if (!item) return;
+    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
+    cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr id="prod-row-${item.id}">
+      tbody.innerHTML += `<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
         <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
         <td style="padding:8px 6px;display:flex;gap:4px;">
-          <button onclick="openEditModal('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
+          <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
           <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
-      </tr>`);
+      </tr>`;
     });
   });
-  tbody.innerHTML = rows.join('');
-}
-
-function renderCatalogAdmin(data) {
-  loadCatSelectFromData(data);
-  buildAllOptionsFromData(data);
-  const tbody = document.getElementById('product-tbody');
-  if (!tbody) return;
-  const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
-  const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
-  const rows = [];
-  ordered.forEach(catKey => {
-    const cat = data[catKey];
-    if (!cat || !cat.items) return;
-    const label = getLabel(cat, catKey);
-    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
-    cat.items.forEach(item => {
-      if (!item) return;
-      const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr id="prod-row-${item.id}">
-        <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
-        <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
-        <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
-        <td style="padding:8px 12px;font-size:13px;">₩${(item.price1||0).toLocaleString()}</td>
-        <td style="padding:8px 6px;display:flex;gap:4px;">
-          <button onclick="openEditModal('${catKey}','${item.id}')" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
-          <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
-        </td>
-      </tr>`);
-    });
-  });
-  tbody.innerHTML = rows.join('');
 }
 
 async function loadStock() {
-  // catalog: 메모리 캐시 → localStorage 캐시 → Firebase 순으로 사용
-  if (!window._catalogCache) {
-    const cached = localStorage.getItem('_catalog_cache');
-    if (cached) { try { window._catalogCache = JSON.parse(cached); } catch(e) {} }
-  }
   const [catalogSnap, stockSnap] = await Promise.all([
-    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
+    db.ref('catalog').get(),
     db.ref('stock').get()
   ]);
-  const catalog = window._catalogCache || catalogSnap.val() || {};
-  if (!window._catalogCache) { window._catalogCache = catalog; localStorage.setItem('_catalog_cache', JSON.stringify(catalog)); }
+  const catalog = catalogSnap.val() || {};
   const stock = stockSnap.val() || {};
 
   const fixedOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -2154,18 +1768,18 @@ async function loadStock() {
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
-  const rows = [];
+  tbody.innerHTML = '';
+
   ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    rows.push(`<tr><td colspan="4" class="cat-header">${label}</td></tr>`);
+    tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
-      if (!item) return;
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr>
+      tbody.innerHTML += `<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -2173,19 +1787,17 @@ async function loadStock() {
           <input type="number" min="-1" value="${stockVal}" id="stock_${item.id}" onchange="markChanged('${item.id}','stock')">
           <span class="changed-badge" id="badge_stock_${item.id}" style="display:none;">●</span>
         </td>
-      </tr>`);
+      </tr>`;
     });
   });
-  tbody.innerHTML = rows.join('');
 }
 
 async function loadDiscount() {
   const [catalogSnap, discSnap] = await Promise.all([
-    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
+    db.ref('catalog').get(),
     db.ref('discount').get()
   ]);
-  const catalog = window._catalogCache || catalogSnap.val() || {};
-  if (!window._catalogCache) window._catalogCache = catalog;
+  const catalog = catalogSnap.val() || {};
   const disc = discSnap.val() || {};
 
   const fixedOrder2 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -2462,14 +2074,12 @@ async function autoFillId() {
 // ── 상품 수정 모달 ──
 let _editMeta = {}; // { catKey, oldId, idx }
 
-async function openEditModal(catKey, itemId) {
-  // idx 대신 item.id로 직접 찾기 (필터/삭제로 인한 인덱스 어긋남 방지)
-  const catSnap0 = await db.ref('catalog/' + catKey + '/items').get();
-  const items0 = catSnap0.val() || [];
-  const item = (Array.isArray(items0) ? items0 : Object.values(items0)).find(i => i && i.id === itemId);
+async function openEditModal(catKey, itemId, idx) {
+  const snap = await db.ref('catalog/' + catKey + '/items/' + idx).get();
+  const item = snap.val();
   if (!item) { showToast('상품 정보를 불러올 수 없습니다.'); return; }
 
-  _editMeta = { catKey, oldId: itemId };
+  _editMeta = { catKey, oldId: itemId, idx };
 
   // 카테고리 select 옵션 동적 생성 (A→B→C 순서)
   const catSnap = await db.ref('catalog').get();
@@ -2524,7 +2134,7 @@ async function submitEditProduct() {
   if (!ko)    { alert('한국어 상품명을 입력해주세요.'); return; }
   if (!price) { alert('가격을 입력해주세요.'); return; }
 
-  const { catKey: oldCatKey, oldId } = _editMeta;
+  const { catKey: oldCatKey, oldId, idx } = _editMeta;
   const catChanged = newCatKey !== oldCatKey;
 
   // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
@@ -2558,9 +2168,9 @@ async function submitEditProduct() {
   };
 
   if (catChanged || idChanged) {
-    // 기존 카테고리에서 제거 (idx 대신 id로 찾기)
+    // 기존 카테고리에서 제거
     const oldSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
-    const oldItems = (oldSnap.val() || []).filter(i => i && i.id !== oldId);
+    const oldItems = (oldSnap.val() || []).filter((_, i) => i !== idx);
     await db.ref('catalog/' + oldCatKey + '/items').set(oldItems);
 
     // 새 카테고리에 추가
@@ -2577,22 +2187,19 @@ async function submitEditProduct() {
       await db.ref('discount/' + oldId).remove();
     }
   } else {
-    // 같은 카테고리, 같은 ID → 필드만 업데이트 (id로 실제 인덱스 찾기)
-    const allItemsSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
-    const allItems = allItemsSnap.val() || [];
-    const realIdx = allItems.findIndex(i => i && i.id === oldId);
-    if (realIdx === -1) { showToast('❌ 상품을 찾을 수 없습니다.'); return; }
-    const existing = allItems[realIdx] || {};
+    // 같은 카테고리, 같은 ID → 필드만 업데이트
+    const oldSnap = await db.ref('catalog/' + oldCatKey + '/items/' + idx).get();
+    const existing = oldSnap.val() || {};
     updatedItem.emoji  = existing.emoji || '';
     updatedItem.price2 = existing.price2 || 0;
     updatedItem.price3 = existing.price3 || 0;
-    await db.ref('catalog/' + oldCatKey + '/items/' + realIdx).set(updatedItem);
+    await db.ref('catalog/' + oldCatKey + '/items/' + idx).set(updatedItem);
   }
 
   closeEditModal();
   showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
-  // 캐시 갱신 (가격/상품 수정이 즉시 반영되도록)
-  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; localStorage.setItem('_catalog_cache', JSON.stringify(window._catalogCache)); });
+  // SNS 카드 캐시 갱신 (가격 수정이 카드에 즉시 반영되도록)
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
   await loadCatalogForAdmin();
   autoFillId();
 }
@@ -2690,34 +2297,6 @@ function buildEmojiPicker(currentEmoji) {
   });
 }
 
-async function translateAllCatLabels() {
-  const snap = await db.ref('catalog').get();
-  const catalog = snap.val() || {};
-  const keys = Object.keys(catalog);
-  const toTranslate = keys.filter(k => {
-    const c = catalog[k];
-    const label = typeof c.label === 'string' ? c.label : '';
-    return label && (!c.label_th || !c.label_lo || !c.label_en);
-  });
-  if (!toTranslate.length) { showToast('✅ 모든 카테고리에 다국어가 이미 적용되어 있습니다.'); return; }
-  showToast(`🌐 ${toTranslate.length}개 카테고리 번역 중...`);
-  let done = 0;
-  for (const key of toTranslate) {
-    const label = catalog[key].label;
-    try {
-      const [th, lo, en] = await Promise.all([
-        googleTranslate(label, 'th'),
-        googleTranslate(label, 'lo'),
-        googleTranslate(label, 'en')
-      ]);
-      await db.ref('catalog/' + key).update({ label_ko: label, label_th: th, label_lo: lo, label_en: en });
-      done++;
-    } catch(e) { console.warn('번역 실패:', key, e); }
-  }
-  showToast(`✅ ${done}개 카테고리 다국어 적용 완료!`);
-  loadCategories();
-}
-
 async function saveCatOrder() {
   const tbody = document.getElementById('category-tbody');
   if (!tbody) return;
@@ -2756,11 +2335,10 @@ function initCatDrag() {
 
 async function loadCategories() {
   const [snap, orderSnap] = await Promise.all([
-    window._catalogCache ? Promise.resolve({val:()=>window._catalogCache}) : db.ref('catalog').get(),
+    db.ref('catalog').get(),
     db.ref('catOrder').get()
   ]);
-  const data = window._catalogCache || snap.val() || {};
-  if (!window._catalogCache) window._catalogCache = data;
+  const data = snap.val() || {};
   const savedOrder = orderSnap.val() || [];
   const tbody = document.getElementById('category-tbody');
   if (!tbody) return;
@@ -2873,39 +2451,21 @@ async function submitCatEdit() {
   if (!label) { alert('카테고리 이름을 입력해주세요.'); return; }
 
   const showPriceTags = document.getElementById('cat-show-price').value !== 'false';
-
-  // 1단계: 한글만 즉시 저장 → 모달 닫기
-  const catData = { label, label_ko: label, emoji, showPriceTags };
-  let targetKey = _catEditKey;
-
   if (_catEditKey) {
-    await db.ref('catalog/' + _catEditKey).update(catData);
-    showToast('✅ 저장 완료! 다국어 번역 중...');
+    // 수정
+    await db.ref('catalog/' + _catEditKey).update({ label, emoji, showPriceTags });
+    showToast('✅ 카테고리 수정 완료!');
   } else {
+    // 추가
     const key = document.getElementById('cat-key').value.trim().toLowerCase().replace(/\s/g,'');
     if (!key) { alert('키를 입력해주세요.'); return; }
     const exists = await db.ref('catalog/' + key).get();
     if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
-    await db.ref('catalog/' + key).set({ ...catData, items: [] });
-    targetKey = key;
-    showToast('✅ 추가 완료! 다국어 번역 중...');
+    await db.ref('catalog/' + key).set({ label, emoji, showPriceTags, items: [] });
+    showToast('✅ 카테고리 추가 완료!');
   }
   closeCatModal();
   loadCategories();
-
-  // 2단계: 백그라운드에서 번역 후 조용히 업데이트
-  Promise.all([
-    googleTranslate(label, 'th'),
-    googleTranslate(label, 'lo'),
-    googleTranslate(label, 'en')
-  ]).then(([th, lo, en]) => {
-    // 번역 결과가 있을 때만 저장 (빈 문자열 방지)
-    const updates = {};
-    if (th && th.trim()) updates.label_th = th.trim();
-    if (lo && lo.trim()) updates.label_lo = lo.trim();
-    if (en && en.trim()) updates.label_en = en.trim();
-    if (Object.keys(updates).length) db.ref('catalog/' + targetKey).update(updates);
-  }).catch(e => console.warn('다국어 번역 실패:', e));
 }
 
 async function deleteProduct(catKey, itemId) {
@@ -3112,15 +2672,8 @@ function newSearchSelect(val) {
 let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
 async function buildAllOptions() {
-  if (!window._catalogCache) {
-    const snap = await db.ref('catalog').get();
-    window._catalogCache = snap.val() || {};
-  }
-  window._catalog = window._catalogCache;
-  buildAllOptionsFromData(window._catalogCache);
-}
-
-function buildAllOptionsFromData(catalog) {
+  const snap = await db.ref('catalog').get();
+  const catalog = snap.val() || {};
   const fixedOrder3 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
   ALL_OPTIONS = '';
@@ -3213,317 +2766,7 @@ function updateBestBadge(i, val) {
   badge.innerHTML = historyCountBox(count, '#c84b2f');
 }
 
-
-// ===== 공지사항 =====
-async function loadNotice() {
-  const snap = await db.ref('notice').get();
-  const data = snap.val() || {};
-  document.getElementById('notice-text').value = data.text || '';
-  document.getElementById('notice-url').value = data.url || '';
-  document.getElementById('notice-active').checked = data.active || false;
-
-  // 카테고리 키 목록 표시
-  const catSnap = await db.ref('catalog').get();
-  const cats = catSnap.val() || {};
-  const list = document.getElementById('cat-key-list');
-  if (list) {
-    const items = Object.entries(cats).map(([k,v]) =>
-      `<span style="display:inline-block;background:#fff;border:1px solid #ddd;border-radius:6px;padding:2px 8px;margin:2px;cursor:pointer;font-size:12px;" onclick="document.getElementById('notice-url').value='cat:${k}'">${v.label_ko||v.label||k} → <b>cat:${k}</b></span>`
-    ).join('');
-    list.innerHTML = '클릭하면 자동입력: ' + items;
-  }
-}
-
-async function saveNotice() {
-  const text = document.getElementById('notice-text').value.trim();
-  const url = document.getElementById('notice-url').value.trim();
-  const active = document.getElementById('notice-active').checked;
-  if (!text) { alert('내용을 입력해주세요.'); return; }
-
-  showToast('🌐 번역 중...');
-  let text_th = text, text_lo = text, text_en = text;
-  try {
-    [text_th, text_lo, text_en] = await Promise.all([
-      googleTranslate(text, 'th'),
-      googleTranslate(text, 'lo'),
-      googleTranslate(text, 'en'),
-    ]);
-  } catch(e) { console.log('번역 실패:', e); }
-
-  await db.ref('notice').set({ text, text_th, text_lo, text_en, url, active });
-  showToast('📢 공지사항 저장 완료!');
-}
-
-// ===== 프리오더 =====
-let _preorderHistory = {};
-
-function renderPreorderSlots(selectedIds = []) {
-  const container = document.getElementById('preorder-slots');
-  if (!container) return;
-  container.innerHTML = '';
-  for (let i = 0; i < 10; i++) {
-    const val = selectedIds[i] || '';
-    const histCount = val ? (_preorderHistory[val] || 0) : 0;
-    const histLabel = val && histCount ? ` <span style="color:#888;font-size:11px;">(${histCount}회)</span>` : '';
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;';
-    row.innerHTML = `
-      <span style="font-size:12px;color:#aaa;width:20px;text-align:right;">${i+1}</span>
-      <select id="preorder-slot-${i}" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
-        <option value="">-- 선택 안 함 --</option>
-        ${ALL_OPTIONS}
-      </select>
-      <label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;">
-        <input type="checkbox" id="preorder-chk-${i}"> 선택${histLabel}
-      </label>`;
-    container.appendChild(row);
-    if (val) { const sel = document.getElementById('preorder-slot-'+i); if(sel) sel.value = val; }
-  }
-}
-
-function filterPreorderSearch(q) {
-  const box = document.getElementById('preorder-search-results');
-  if (!q) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  const items = Object.values(window._catalog || {}).flatMap(c => c.items || []).filter(Boolean);
-  const results = items.filter(p => (p.name_ko||p.name||'').includes(q)).slice(0, 20);
-  box.innerHTML = results.map(p =>
-    `<div onclick="addToPreorderSlot('${p.id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f5f5f5;font-size:13px;" onmouseover="this.style.background='#fff8f0'" onmouseout="this.style.background=''">${p.emoji||''} ${p.name_ko||p.name} <span style="color:#aaa;font-size:11px;">${p.id}</span></div>`
-  ).join('') || '<div style="padding:12px;color:#aaa;font-size:13px;">검색 결과 없음</div>';
-}
-
-function addToPreorderSlot(id) {
-  for (let i = 0; i < 10; i++) {
-    const sel = document.getElementById('preorder-slot-'+i);
-    if (sel && !sel.value) { sel.value = id; break; }
-  }
-  document.getElementById('preorder-search-results').style.display = 'none';
-  document.getElementById('preorder-search').value = '';
-}
-
-function toggleAllChecks(type, state) {
-  for (let i = 0; i < 10; i++) {
-    const chk = document.getElementById(type+'-chk-'+i);
-    if (chk) chk.checked = state;
-  }
-}
-
-async function loadPreorder() {
-  if (!ALL_OPTIONS) await buildAllOptions();
-  const [snap, histSnap] = await Promise.all([
-    db.ref('preorder').get(),
-    db.ref('preorderHistory').get()
-  ]);
-  _preorderHistory = histSnap.val() || {};
-  const data = snap.val() || [];
-  renderPreorderSlots(data);
-}
-
-async function resetPreorder() {
-  if (!confirm('프리오더 목록을 전체 초기화하시겠습니까?')) return;
-  await db.ref('preorder').set([]);
-  renderPreorderSlots([]);
-  showToast('🗑️ 프리오더 목록 초기화 완료');
-}
-
-async function savePreorder() {
-  const ids = [];
-  for (let i = 0; i < 10; i++) {
-    const sel = document.getElementById('preorder-slot-'+i);
-    if (sel && sel.value) ids.push(sel.value);
-  }
-  if (new Set(ids).size !== ids.length) {
-    alert('❌ 중복된 상품이 있습니다.'); return;
-  }
-  const histUpdates = {};
-  ids.forEach(id => {
-    _preorderHistory[id] = (_preorderHistory[id] || 0) + 1;
-    histUpdates['preorderHistory/' + id] = _preorderHistory[id];
-  });
-  await db.ref('preorder').set(ids);
-  if (Object.keys(histUpdates).length) await db.ref().update(histUpdates);
-  showToast('💎 프리오더 저장 완료!');
-  setTimeout(() => switchTab('stock'), 1000);
-}
-
-// ===== 클릭 통계 =====
-let _clickData = {};
-
-async function loadClickStats() {
-  if (!window._catalog) await buildAllOptions();
-  const period = document.getElementById('clicks-period').value;
-  const now = new Date();
-  let startKey = '';
-  if (period === 'day') {
-    startKey = now.toISOString().slice(0,10);
-  } else if (period === 'week') {
-    const d = new Date(now); d.setDate(d.getDate()-7);
-    startKey = d.toISOString().slice(0,10);
-  } else if (period === 'month') {
-    startKey = now.toISOString().slice(0,7);
-  } else {
-    startKey = String(now.getFullYear());
-  }
-
-  const snap = await db.ref('clicks').get();
-  const raw = snap.val() || {};
-  // 집계: clicks/{id}/{date} = count
-  _clickData = {};
-  Object.entries(raw).forEach(([id, dates]) => {
-    let total = 0;
-    Object.entries(dates).forEach(([date, cnt]) => {
-      if (date >= startKey) total += (cnt || 0);
-    });
-    if (total > 0) _clickData[id] = total;
-  });
-
-  // 카테고리 필터 옵션 채우기
-  const catSel = document.getElementById('clicks-cat');
-  const cats = Object.entries(window._catalog || {});
-  catSel.innerHTML = '<option value="">전체 카테고리</option>'
-    + cats.map(([k,v]) => `<option value="${k}">${v.label_ko||v.label||k}</option>`).join('');
-
-  renderClickStats();
-}
-
-function renderClickStats() {
-  const sort = document.getElementById('clicks-sort').value;
-  const cat = document.getElementById('clicks-cat').value;
-  const q = (document.getElementById('clicks-search').value||'').trim();
-
-  const allItems = Object.values(window._catalog || {}).flatMap(c => c.items||[]).filter(Boolean);
-  let rows = Object.entries(_clickData).map(([id, cnt]) => {
-    const item = allItems.find(p => String(p.id) === String(id));
-    const catEntry = item ? Object.entries(window._catalog||{}).find(([k,v]) => (v.items||[]).some(p => String(p&&p.id) === String(id))) : null;
-    const catKey = catEntry ? catEntry[0] : '';
-    return { id, cnt, name: item ? (item.name_ko||item.name_en||id) : id, catKey, emoji: item ? (item.emoji||'') : '' };
-  });
-
-  if (cat) rows = rows.filter(r => r.catKey === cat);
-  if (q) rows = rows.filter(r => r.name.includes(q) || r.id.includes(q));
-  rows.sort((a,b) => sort === 'desc' ? b.cnt - a.cnt : a.cnt - b.cnt);
-
-  const container = document.getElementById('clicks-table');
-  if (!rows.length) { container.innerHTML = '<p style="color:#aaa;padding:20px 0;">데이터 없음</p>'; return; }
-
-  container.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:#f9f9f9;border-bottom:2px solid #eee;">
-          <th style="padding:10px 8px;text-align:left;font-size:12px;">순위</th>
-          <th style="padding:10px 8px;text-align:left;font-size:12px;">상품</th>
-          <th style="padding:10px 8px;text-align:left;font-size:12px;">ID</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;">클릭수</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r,i) => `
-          <tr style="border-bottom:1px solid #f0f0f0;">
-            <td style="padding:9px 8px;font-size:13px;color:#aaa;">${i+1}</td>
-            <td style="padding:9px 8px;font-size:13px;">${r.emoji} ${r.name}</td>
-            <td style="padding:9px 8px;font-size:12px;color:#aaa;">${r.id}</td>
-            <td style="padding:9px 8px;font-size:14px;font-weight:700;color:#c84b2f;text-align:right;">${r.cnt.toLocaleString()}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
-}
-
-
-// ===== 필리핀 상품 =====
-let _philippineSlotCount = 0;
-
-async function loadPhilippine() {
-  if (!ALL_OPTIONS) await buildAllOptions();
-  const [snap, linkSnap] = await Promise.all([
-    db.ref('philippine').get(),
-    db.ref('philippineLink').get()
-  ]);
-  const data = snap.val() || [];
-  const link = linkSnap.val() || '';
-  document.getElementById('philippine-link').value = link;
-  _philippineSlotCount = 0;
-  document.getElementById('philippine-slots').innerHTML = '';
-  data.forEach(id => addPhilippineSlot(id));
-  if (!data.length) addPhilippineSlot();
-}
-
-async function savePhilippineLink() {
-  const link = document.getElementById('philippine-link').value.trim();
-  await db.ref('philippineLink').set(link);
-  showToast('🔗 링크 저장 완료!');
-}
-
-function addPhilippineSlot(val = '') {
-  const i = _philippineSlotCount++;
-  const container = document.getElementById('philippine-slots');
-  const row = document.createElement('div');
-  row.id = 'philippine-row-' + i;
-  row.style.cssText = 'display:flex;align-items:center;gap:8px;';
-  row.innerHTML = `
-    <span style="font-size:12px;color:#aaa;width:24px;text-align:right;">${i+1}</span>
-    <select id="philippine-slot-${i}" style="flex:1;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;">
-      <option value="">-- 상품 선택 --</option>
-      ${ALL_OPTIONS}
-    </select>
-    <button onclick="removePhilippineRow(${i})" style="background:#fee2e2;border:none;color:#c84b2f;padding:7px 10px;border-radius:8px;font-size:13px;cursor:pointer;" title="삭제">✕</button>`;
-  container.appendChild(row);
-  if (val) {
-    setTimeout(() => {
-      const sel = document.getElementById('philippine-slot-' + i);
-      if (sel) sel.value = val;
-    }, 50);
-  }
-}
-
-function removePhilippineRow(i) {
-  const row = document.getElementById('philippine-row-' + i);
-  if (row) row.remove();
-}
-
-function filterPhilippineSearch(q) {
-  const box = document.getElementById('philippine-search-results');
-  if (!q) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  const items = Object.values(window._catalog || {}).flatMap(c => c.items || []).filter(Boolean);
-  const results = items.filter(p => (p.name_ko||p.name||'').includes(q)).slice(0, 20);
-  box.innerHTML = results.map(p =>
-    `<div onclick="addPhilippineSlotWithId('${p.id}')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f5f5f5;font-size:13px;" onmouseover="this.style.background='#fff8f0'" onmouseout="this.style.background=''">${p.emoji||''} ${p.name_ko||p.name} <span style="color:#aaa;font-size:11px;">${p.id}</span></div>`
-  ).join('') || '<div style="padding:12px;color:#aaa;font-size:13px;">검색 결과 없음</div>';
-}
-
-function addPhilippineSlotWithId(id) {
-  // 빈 슬롯 있으면 거기에 넣기, 없으면 새 슬롯 추가
-  const slots = document.querySelectorAll('[id^="philippine-slot-"]');
-  for (const sel of slots) {
-    if (!sel.value) { sel.value = id; break; }
-  }
-  document.getElementById('philippine-search-results').style.display = 'none';
-  document.getElementById('philippine-search').value = '';
-}
-
-async function resetPhilippine() {
-  if (!confirm('필리핀 상품 목록을 초기화하시겠습니까?')) return;
-  await db.ref('philippine').set([]);
-  _philippineSlotCount = 0;
-  document.getElementById('philippine-slots').innerHTML = '';
-  addPhilippineSlot();
-  showToast('🗑️ 필리핀 상품 목록 초기화 완료');
-}
-
-async function savePhilippine() {
-  const ids = [];
-  document.querySelectorAll('[id^="philippine-slot-"]').forEach(sel => {
-    if (sel.value) ids.push(sel.value);
-  });
-  if (new Set(ids).size !== ids.length) {
-    alert('❌ 중복된 상품이 있습니다. 확인 후 다시 저장해주세요.'); return;
-  }
-  await db.ref('philippine').set(ids);
-  showToast('🇵🇭 필리핀 상품 저장 완료!');
-}
-
 async function loadBest() {
-  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('best').get(),
     db.ref('bestHistory').get()
@@ -3618,7 +2861,6 @@ function updateNewBadge(i, val) {
 }
 
 async function loadNew() {
-  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('newItems').get(),
     db.ref('newHistory').get()
@@ -3755,7 +2997,6 @@ function updateAlsoBadge(i, val) {
 }
 
 async function loadAlso() {
-  if (!ALL_OPTIONS) await buildAllOptions();
   const [snap, histSnap] = await Promise.all([
     db.ref('alsoItems').get(),
     db.ref('alsoHistory').get()
@@ -3895,8 +3136,9 @@ async function _makeAllCards(type, badgeVal) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(zipBlob);
   a.download = type + '_sns_cards.zip';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
   showToast('✅ ' + ids.length + '개 카드 ZIP 다운로드 완료!');
 }
 
@@ -3913,47 +3155,36 @@ async function downloadTitleCards() {
 
   // 헤더 그리기 공통 함수
   function drawHeader(ctx, H) {
-    const BG_DARK = '#1a0a0a';
-    const GOLD    = '#c8a050';
-    const GOLD_LT = '#e8c878';
-    ctx.fillStyle = BG_DARK;
+    ctx.fillStyle = CREAM;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = GOLD;
-    ctx.fillRect(0, 0, W, 4);
-    ctx.fillStyle = GOLD;
-    ctx.fillRect(0, H - 4, W, 4);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = DARK;
+    ctx.fillRect(0, 0, W, 7);
+    ctx.fillRect(0, H - 7, W, 7);
+    ctx.fillStyle = DARK;
     ctx.textAlign = 'center';
-    ctx.font = 'bold 48px Georgia, serif';
-    ctx.fillText('DUNNAE', W/2, 58);
-    ctx.fillText('ASIA MART', W/2, 106);
-    ctx.font = '15px Arial';
-    ctx.fillStyle = GOLD_LT;
-    ctx.fillText('둔내아시아마트', W/2, 128);
-    ctx.strokeStyle = GOLD + '55';
-    ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.moveTo(60, 138); ctx.lineTo(W-60, 138); ctx.stroke();
+    ctx.font = 'bold 52px Georgia, serif';
+    ctx.fillText('DUNNAE', W/2, 54);
+    ctx.fillText('ASIA MART', W/2, 104);
+    ctx.font = '16px Arial';
+    ctx.fillStyle = ACCENT;
+    ctx.fillText('둔내아시아마트', W/2, 124);
     // 국기
     const flagOrder = ['TH','LA','PH','MM','KH','VN'];
-    const flagW = 38, flagH = 24, flagGap = 10;
+    const flagW = 36, flagH = 22, flagGap = 10;
     const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
     let fx = (W - totalFlagW) / 2;
-    const fy = 148;
+    const fy = 136;
     flagOrder.forEach(code => {
       const fi = window._snsFlags && window._snsFlags[code];
       if (fi && fi.complete && fi.naturalWidth > 0) {
         ctx.save();
-        roundRect(ctx, fx, fy, flagW, flagH, 4);
+        roundRect(ctx, fx, fy, flagW, flagH, 3);
         ctx.clip();
         ctx.drawImage(fi, fx, fy, flagW, flagH);
         ctx.restore();
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-        ctx.lineWidth = 0.8;
-        roundRect(ctx, fx, fy, flagW, flagH, 4);
-        ctx.stroke();
       } else {
-        ctx.fillStyle = '#333';
-        roundRect(ctx, fx, fy, flagW, flagH, 4);
+        ctx.fillStyle = '#ddd';
+        roundRect(ctx, fx, fy, flagW, flagH, 3);
         ctx.fill();
       }
       fx += flagW + flagGap;
@@ -4134,8 +3365,9 @@ async function downloadTitleCards() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(zipBlob);
   a.download = 'title_cards.zip';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
   showToast('✅ 타이틀 카드 3장 다운로드 완료!');
 }
 
@@ -4276,42 +3508,25 @@ function clearSnsProduct() {
   renderSnsCard();
 }
 
-let _snsImgToken = 0; // race condition 방지용 토큰
-
 function loadSnsImage() {
   if (!_snsItem) { renderSnsCard(); return; }
-  const token = ++_snsImgToken;
   let imgSrc = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
   if (!imgSrc) { _snsImgObj = null; renderSnsCard(); return; }
   // Cloudinary URL이면 CORS 허용 파라미터 추가
   if (imgSrc.includes('cloudinary.com') && !imgSrc.includes('fl_attachment')) {
     imgSrc = imgSrc.replace('/upload/', '/upload/fl_attachment/');
   }
-  // 브라우저 캐시 무효화 (상품 이미지 수정 후에도 최신 이미지 반영)
-  const bust = '?_t=' + Date.now();
-  const imgSrcBust = imgSrc + bust;
-  const imgSrcOrig = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
   const img = new Image();
   img.crossOrigin = 'anonymous'; // src 설정 전에 먼저 지정해야 함
-  img.onload = () => {
-    if (token !== _snsImgToken) return; // 더 최신 요청이 있으면 무시
-    _snsImgObj = img; renderSnsCard();
-  };
+  img.onload = () => { _snsImgObj = img; renderSnsCard(); };
   img.onerror = () => {
-    if (token !== _snsImgToken) return;
     // CORS 실패 시 crossOrigin 없이 재시도 (다운로드는 안 되지만 미리보기는 됨)
     const img2 = new Image();
-    img2.onload = () => {
-      if (token !== _snsImgToken) return;
-      _snsImgObj = img2; renderSnsCard();
-    };
-    img2.onerror = () => {
-      if (token !== _snsImgToken) return;
-      _snsImgObj = null; renderSnsCard();
-    };
-    img2.src = imgSrcOrig;
+    img2.onload = () => { _snsImgObj = img2; renderSnsCard(); };
+    img2.onerror = () => { _snsImgObj = null; renderSnsCard(); };
+    img2.src = (_snsItem.images && _snsItem.images[0]) || _snsItem.image || '';
   };
-  img.src = imgSrcBust;
+  img.src = imgSrc;
 }
 
 function snsWrapText(c, text, x, y, maxW, lineH) {
@@ -4337,240 +3552,254 @@ function renderSnsCard() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  // ── 컬러 팔레트 (프리미엄 다크 와인 + 골드) ──
-  const BG_DARK  = '#1a0a0a';   // 헤더 배경 (딥 와인블랙)
-  const GOLD     = '#c8a050';   // 골드 포인트
-  const GOLD_LT  = '#e8c878';   // 밝은 골드 (서브텍스트)
-  const ACCENT   = '#c84b2f';   // 가격 강조 (레드)
-  const BODY_BG  = '#fdfaf6';   // 바디 배경 (아이보리)
-  const TEXT_DARK= '#1a1814';
-  const TEXT_MID = '#555';
-  const TEXT_SUB = '#999';
+  const badge    = document.getElementById('sns-badge')?.value || '';
+  const footer   = document.getElementById('sns-footer')?.value || '';
+  const DARK     = '#7a1a1a';
+  const ACCENT   = '#c84b2f';
+  const CREAM    = '#faf6f0';
+  const BORDER   = '#c8a882';
 
-  const W      = 540;
-  const HDR_H  = 180;
-  const IMG_H  = 430;
-  const INFO_H = 220;  // 고정 정보 영역 높이
-  const FTR_H  = 48;
-  const H      = HDR_H + IMG_H + INFO_H + FTR_H;
+  // ── 전체 캔버스 크기를 내용에 맞게 동적 계산 ──
+  const W       = 540;
+  const HDR_H   = 170;   // 헤더
+  const BADGE_H = 0;     // 배지 없음
+  const IMG_H   = 428;   // 상품 이미지 영역
+  const SEP     = 16;    // 구분선 영역
+  const DEL_H   = 0;     // 무료배송 박스 제거
+  const FTR_H   = 7;     // 푸터
+  const PAD     = 12;    // 상하 여백
+
+  // 텍스트 높이를 먼저 측정해서 캔버스 높이 결정
+  let BODY_H = 60;
+  if (_snsItem) {
+    const tmpC = document.createElement('canvas');
+    tmpC.width = W; tmpC.height = 2000;
+    const tmpCtx = tmpC.getContext('2d');
+    const maxTxtW = W - 48;
+    const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
+    let ty = HDR_H + IMG_H + SEP + 36;
+    tmpCtx.font = 'bold 26px Arial'; tmpCtx.textAlign = 'center';
+    ty += 36 + 26 + 12; // 태국어 한 줄
+    ty += 24 + 12;       // 라오 한 줄
+    ty += 24 + 12;       // 영어 한 줄
+    ty += 72 + 52 + 80;  // 구분선 + 할인 + 가격
+    BODY_H = ty - (HDR_H + IMG_H + SEP);
+  }
+
+  const H = HDR_H + BADGE_H + IMG_H + SEP + BODY_H + PAD + FTR_H;
 
   canvas.width  = W;
   canvas.height = H;
 
-  // ── 헬퍼: 폰트 크기 자동 축소 ──
-  function fitOneLine(c, text, maxW, maxSize, minSize, weight) {
-    let size = maxSize;
-    while (size >= minSize) {
-      c.font = (weight||'') + size + 'px Arial';
-      if (c.measureText(text).width <= maxW) break;
-      size -= 1;
-    }
-    return size;
-  }
-
-  // ── 1. 전체 배경 ──
-  ctx.fillStyle = BODY_BG;
+  // ── 배경 ──
+  ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, W, H);
 
-  // ── 2. 헤더 ──
-  ctx.fillStyle = BG_DARK;
+  // ── 헤더 (코드로 재현) ──
+  // 크림 배경
+  ctx.fillStyle = CREAM;
   ctx.fillRect(0, 0, W, HDR_H);
+  // 위아래 붉은 테두리선만 (내부 선 제거)
+  ctx.fillStyle = DARK;
+  ctx.fillRect(0, 0, W, 7);
+  ctx.fillRect(0, HDR_H - 7, W, 7);
 
-  // 골드 상단 라인
-  ctx.fillStyle = GOLD;
-  ctx.fillRect(0, 0, W, 4);
-
-  // 골드 하단 라인
-  ctx.fillStyle = GOLD;
-  ctx.fillRect(0, HDR_H - 4, W, 4);
-
-  // DUNNAE ASIA MART
-  ctx.fillStyle = '#fff';
+  // DUNNAE 큰 글씨 (위로 올림)
+  ctx.fillStyle = DARK;
   ctx.textAlign = 'center';
-  ctx.font = 'bold 48px Georgia, serif';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('DUNNAE', W/2, 58);
-  ctx.fillText('ASIA MART', W/2, 106);
-  ctx.letterSpacing = '0px';
+  ctx.font = 'bold 52px Georgia, serif';
+  ctx.fillText('DUNNAE', W/2, 54);
+  ctx.fillText('ASIA MART', W/2, 104);
 
-  // 골드 서브라인: 둔내아시아마트
-  ctx.font = '15px Arial';
-  ctx.fillStyle = GOLD_LT;
-  ctx.letterSpacing = '2px';
-  ctx.fillText('둔내아시아마트', W/2, 128);
-  ctx.letterSpacing = '0px';
+  // 한글 부제
+  ctx.font = '16px Arial';
+  ctx.fillStyle = ACCENT;
+  ctx.fillText('둔내아시아마트', W/2, 124);
 
-  // 가는 골드 구분선
-  ctx.strokeStyle = GOLD + '55';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath(); ctx.moveTo(60, 138); ctx.lineTo(W-60, 138); ctx.stroke();
-
-  // 국기
+  // 국기 이미지 (SVG) — 하단바에 닿지 않게 여백 확보
   const flagOrder = ['TH','LA','PH','MM','KH','VN'];
-  const flagW = 38, flagH = 24, flagGap = 10;
+  const flagW = 36, flagH = 22, flagGap = 10;
   const totalFlagW = flagOrder.length * flagW + (flagOrder.length-1) * flagGap;
   let fx = (W - totalFlagW) / 2;
-  const fy = 148;
+  const fy = 136;   // 국기 Y — 하단바(HDR_H-7=163)와 여유 gap 확보
   flagOrder.forEach(code => {
     const fi = window._snsFlags && window._snsFlags[code];
     if (fi && fi.complete && fi.naturalWidth > 0) {
       ctx.save();
-      roundRect(ctx, fx, fy, flagW, flagH, 4);
+      roundRect(ctx, fx, fy, flagW, flagH, 3);
       ctx.clip();
       ctx.drawImage(fi, fx, fy, flagW, flagH);
       ctx.restore();
-      // 국기 테두리
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-      ctx.lineWidth = 0.8;
-      roundRect(ctx, fx, fy, flagW, flagH, 4);
-      ctx.stroke();
     } else {
-      ctx.fillStyle = '#333';
-      roundRect(ctx, fx, fy, flagW, flagH, 4);
+      ctx.fillStyle = '#ddd';
+      roundRect(ctx, fx, fy, flagW, flagH, 3);
       ctx.fill();
     }
     fx += flagW + flagGap;
   });
 
-  // ── 3. 상품 이미지 (풀 블리드, 테두리 없음) ──
-  const imgY = HDR_H;
-  ctx.fillStyle = '#e8e4dc';
-  ctx.fillRect(0, imgY, W, IMG_H);
+  // ── 상품 이미지 영역 ──
+  let curY = HDR_H;
+  const imgY = curY + 8;
+  ctx.fillStyle = CREAM;
+  roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
+  ctx.fill();
+  ctx.strokeStyle = BORDER;
+  ctx.lineWidth = 1;
+  roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
+  ctx.stroke();
 
   if (_snsImgObj) {
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, imgY, W, IMG_H);
+    roundRect(ctx, 16, imgY, W-32, IMG_H, 10);
     ctx.clip();
     const iw = _snsImgObj.width, ih = _snsImgObj.height;
-    const scale = Math.min(W/iw, IMG_H/ih); // contain (전체 보이게)
+    const scale = Math.min((W-32)/iw, IMG_H/ih);
     const dw = iw*scale, dh = ih*scale;
     ctx.drawImage(_snsImgObj, (W-dw)/2, imgY+(IMG_H-dh)/2, dw, dh);
     ctx.restore();
   } else {
     ctx.fillStyle = '#ccc';
-    ctx.font = '48px Arial';
+    ctx.font = '40px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('🖼️', W/2, imgY + IMG_H/2 + 16);
+    ctx.fillText('🖼️', W/2, imgY + IMG_H/2 + 14);
   }
+  curY = imgY + IMG_H;
 
-  // ── 4. 정보 영역 ──
-  const infoY = HDR_H + IMG_H;
-  ctx.fillStyle = BODY_BG;
-  ctx.fillRect(0, infoY, W, INFO_H);
+  // ── 구분선 ──
+  ctx.strokeStyle = ACCENT;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(24, curY+10); ctx.lineTo(W-24, curY+10); ctx.stroke();
+  curY += SEP + 8;
 
-  // 상단 골드 강조선
-  ctx.fillStyle = GOLD;
-  ctx.fillRect(0, infoY, W, 3);
-
+  // ── 상품 정보 ──
   if (_snsItem) {
     const nameTh = (_snsItem.name_th||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const nameLo = (_snsItem.name_lo||'').replace(/^[A-Za-z]\d+\.\s*/,'');
     const nameEn = (_snsItem.name_en||'').replace(/^[A-Za-z]\d+\.\s*/,'');
-    const price  = _snsItem.price1 || 0;
-    const maxW   = W - 48;
+    const price   = _snsItem.price1 || 0;
 
-    // 태국어 (메인 - 가장 크게)
-    ctx.fillStyle = TEXT_DARK;
+    // ── 줄바꿈: 외부 snsWrapText 사용 ──
+
+    const maxTxtW = W - 48;
+
+    // 폰트 크기를 줄여가며 한 줄에 맞추는 헬퍼
+    function fitOneLine(c, text, maxW, maxSize, minSize) {
+      let size = maxSize;
+      while (size >= minSize) {
+        c.font = (size === maxSize ? 'bold ' : '') + size + 'px Arial';
+        if (c.measureText(text).width <= maxW) break;
+        size -= 1;
+      }
+      return size;
+    }
+
+    // 상품명 (태국어) - 한 줄
+    ctx.fillStyle = '#1a1814';
     ctx.textAlign = 'center';
-    const thSize = fitOneLine(ctx, nameTh || nameEn, maxW, 28, 14, 'bold ');
+    const thSize = fitOneLine(ctx, nameTh || nameEn, maxTxtW, 26, 12);
     ctx.font = 'bold ' + thSize + 'px Arial';
-    ctx.fillText(nameTh || nameEn, W/2, infoY + 36);
+    const thEndY = curY + 36;
+    ctx.fillText(nameTh || nameEn, W/2, thEndY);
 
-    // 라오 + 영어 (서브 - 같은 줄 or 두 줄)
-    const loSize = fitOneLine(ctx, nameLo || nameEn, maxW, 20, 12, '');
+    // 라오 - 한 줄
+    ctx.fillStyle = '#1a1814';
+    const loSize = fitOneLine(ctx, nameLo || nameEn, maxTxtW, 24, 12);
     ctx.font = loSize + 'px Arial';
-    ctx.fillStyle = TEXT_MID;
-    ctx.fillText(nameLo || nameEn, W/2, infoY + 36 + thSize + 8);
+    const loEndY = thEndY + loSize + 12;
+    ctx.fillText(nameLo || nameEn, W/2, loEndY);
 
-    const enSize = fitOneLine(ctx, nameEn, maxW, 20, 12, '');
+    // 영문 - 한 줄
+    const enSize = fitOneLine(ctx, nameEn, maxTxtW, 24, 12);
     ctx.font = enSize + 'px Arial';
-    ctx.fillStyle = TEXT_SUB;
-    ctx.fillText(nameEn, W/2, infoY + 36 + thSize + 8 + loSize + 6);
+    const enEndY = loEndY + enSize + 12;
+    ctx.fillText(nameEn, W/2, enEndY);
 
-    // 가는 구분선
-    const sepY = infoY + 36 + thSize + 8 + loSize + 6 + enSize + 16;
-    ctx.strokeStyle = '#d4cdc2';
-    ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.moveTo(40, sepY); ctx.lineTo(W-40, sepY); ctx.stroke();
+    // 가격
+    // 구분선
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(24, enEndY + 24);
+    ctx.lineTo(W - 24, enEndY + 24);
+    ctx.stroke();
 
     const originalPrice = parseInt(document.getElementById('sns-original-price')?.value) || 0;
     const discountVal   = parseInt(document.getElementById('sns-discount-rate')?.value)  || 0;
     const discountType  = document.getElementById('sns-discount-type')?.value || 'rate';
 
-    let priceY2 = sepY + 18;
+    let nextY = enEndY + 32;
 
     if (discountVal > 0) {
-      // 할인 배지 (작은 pill)
+      // ── 할인 적용: 배지 + 취소선 + 할인가 ──
+
+      // 1. 배지
       const badgeText = discountType === 'rate'
         ? discountVal + '% OFF'
         : '₩' + discountVal.toLocaleString() + ' OFF';
-      ctx.font = 'bold 14px Arial';
-      const bw = ctx.measureText(badgeText).width + 20;
+      ctx.font = 'bold 18px Arial';
+      const bw = ctx.measureText(badgeText).width + 24;
       const bx = (W - bw) / 2;
       ctx.fillStyle = ACCENT;
-      roundRect(ctx, bx, priceY2, bw, 24, 12);
+      roundRect(ctx, bx, nextY, bw, 28, 6);
       ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.textAlign = 'center';
-      ctx.fillText(badgeText, W/2, priceY2 + 16);
-      priceY2 += 34;
+      ctx.fillText(badgeText, W/2, nextY + 19);
+      nextY += 28 + 16;
 
-      // 원래 가격 취소선
+      // 2. 원래 가격 취소선
       if (originalPrice > 0) {
-        ctx.font = '22px Arial';
-        ctx.fillStyle = '#bbb';
+        nextY += 28;
+        ctx.font = 'bold 24px Arial';
+        ctx.fillStyle = '#aaa';
         ctx.textAlign = 'center';
         const origText = '₩' + originalPrice.toLocaleString();
         const origW = ctx.measureText(origText).width;
-        ctx.fillText(origText, W/2, priceY2 + 22);
+        ctx.fillText(origText, W/2, nextY);
         ctx.save();
-        ctx.strokeStyle = '#bbb';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#aaa';
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(W/2 - origW/2, priceY2 + 14);
-        ctx.lineTo(W/2 + origW/2, priceY2 + 14);
+        ctx.moveTo(W/2 - origW/2, nextY - 9);
+        ctx.lineTo(W/2 + origW/2, nextY - 9);
         ctx.stroke();
         ctx.restore();
-        priceY2 += 32;
+        nextY += 16;
       }
 
-      // 할인가
+      // 3. 할인가
+      nextY += 16;
       ctx.fillStyle = ACCENT;
-      ctx.font = 'bold 54px Arial';
+      ctx.font = 'bold 52px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('₩' + price.toLocaleString(), W/2, priceY2 + 54);
+      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 52);
+
     } else {
-      // 할인 없음 — 가격 크게 + 골드 언더라인
+      // ── 할인 없음: 가격만 크게 ──
+      nextY += 20;
       ctx.fillStyle = ACCENT;
-      ctx.font = 'bold 62px Arial';
+      ctx.font = 'bold 60px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('₩' + price.toLocaleString(), W/2, priceY2 + 62);
+      ctx.fillText('₩' + price.toLocaleString(), W/2, nextY + 60);
     }
 
+    const priceY = nextY + 52;
+    curY += (priceY - curY) + 16;
+
   } else {
-    ctx.fillStyle = TEXT_SUB;
+    ctx.fillStyle = '#bbb';
     ctx.font = '15px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('상품을 선택하세요', W/2, infoY + 80);
+    ctx.fillText('상품을 선택하세요', W/2, curY + 30);
+    curY += BODY_H + DEL_H + PAD;
   }
 
-  // ── 5. 푸터 ──
-  const ftrY = HDR_H + IMG_H + INFO_H;
-  ctx.fillStyle = BG_DARK;
-  ctx.fillRect(0, ftrY, W, FTR_H);
-  ctx.fillStyle = GOLD;
-  ctx.fillRect(0, ftrY, W, 2);
-
-  // 푸터: 좌측 브랜드 / 우측 URL
-  ctx.font = 'bold 13px Arial';
-  ctx.fillStyle = GOLD;
-  ctx.textAlign = 'left';
-  ctx.fillText('DUNNAE ASIA MART', 20, ftrY + 30);
-  ctx.font = '12px Arial';
-  ctx.fillStyle = '#888';
-  ctx.textAlign = 'right';
-  ctx.fillText('dunnaeasiamart.github.io/asia-mart', W-20, ftrY + 30);
+  // ── 푸터 ──
+  ctx.fillStyle = DARK;
+  ctx.fillRect(0, curY, W, FTR_H);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -4594,7 +3823,9 @@ function downloadSnsCard() {
   const a = document.createElement('a');
   a.download = name;
   a.href = canvas.toDataURL('image/jpeg', 0.92);
+  document.body.appendChild(a);
   a.click();
+  setTimeout(() => document.body.removeChild(a), 1000);
   showToast('📸 이미지 저장 완료!');
 }
 
@@ -5272,700 +4503,6 @@ function downloadSnsCard() {
     if(canvas){ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); }
   }
 
-</script>
-
-</script>
-
-<script>
-// ===== 커버 이미지 메이커 =====
-const _coverImgs = [null, null, null, null];
-
-function onCoverImgSelect(idx, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      _coverImgs[idx] = img;
-      const slot = document.getElementById('cover-slot-' + idx);
-      slot.style.backgroundImage = 'url(' + e.target.result + ')';
-      slot.style.backgroundSize = 'cover';
-      slot.style.backgroundPosition = 'center';
-      slot.innerHTML = '<input type="file" id="cover-file-' + idx + '" accept="image/*" style="display:none;" onchange="onCoverImgSelect(' + idx + ',this)">';
-      renderCoverCard();
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearCoverImgs() {
-  for (let i = 0; i < 4; i++) {
-    _coverImgs[i] = null;
-    const slot = document.getElementById('cover-slot-' + i);
-    if (slot) {
-      slot.style.backgroundImage = '';
-      slot.innerHTML = '<span style="font-size:24px;">📷</span><input type="file" id="cover-file-' + i + '" accept="image/*" style="display:none;" onchange="onCoverImgSelect(' + i + ',this)">';
-    }
-  }
-  renderCoverCard();
-}
-
-function renderCoverCard() {
-  const canvas = document.getElementById('cover-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = 540, H = 960;
-  ctx.clearRect(0, 0, W, H);
-
-  // ── 배경 ──
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0,   '#4a0e00');
-  bg.addColorStop(0.4, '#2a0600');
-  bg.addColorStop(0.7, '#1a0400');
-  bg.addColorStop(1,   '#0d0200');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // ── 금색 이중 테두리 ──
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 7;
-  ctx.strokeRect(12, 12, W - 24, H - 24);
-  ctx.strokeStyle = '#e8c060';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(20, 20, W - 40, H - 40);
-  ctx.strokeStyle = 'rgba(200,151,58,0.35)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(28, 28, W - 56, H - 56);
-
-  // ── 코너 장식 (금색 다이아몬드) ──
-  function drawCornerDiamond(cx, cy) {
-    ctx.save();
-    ctx.fillStyle = '#c8973a';
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - 10);
-    ctx.lineTo(cx + 10, cy);
-    ctx.lineTo(cx, cy + 10);
-    ctx.lineTo(cx - 10, cy);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#e8d080';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-  drawCornerDiamond(12, 12);
-  drawCornerDiamond(W - 12, 12);
-  drawCornerDiamond(12, H - 12);
-  drawCornerDiamond(W - 12, H - 12);
-
-  // ── 금색 덩굴 장식 함수 ──
-  function drawVineRow(y, flip) {
-    ctx.save();
-    ctx.strokeStyle = '#c8973a';
-    ctx.lineWidth = 1.8;
-    ctx.globalAlpha = 0.85;
-    if (flip) { ctx.translate(0, y * 2); ctx.scale(1, -1); }
-    const step = 36;
-    for (let x = 32; x < W - 32; x += step) {
-      // 메인 줄기
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.bezierCurveTo(x + 8, y - 14, x + 28, y - 14, x + step, y);
-      ctx.stroke();
-      // 작은 컬 장식
-      ctx.beginPath();
-      ctx.arc(x + step / 2, y - 10, 5, 0, Math.PI * 1.5);
-      ctx.stroke();
-      // 잎사귀 점
-      ctx.fillStyle = '#e8c060';
-      ctx.globalAlpha = 0.7;
-      ctx.beginPath();
-      ctx.ellipse(x + step / 2, y - 17, 4, 2.5, -0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 0.85;
-    }
-    ctx.restore();
-  }
-
-  // ── 헤더 높이 ──
-  const HEADER_H = 160;
-  const FOOTER_H = 155;
-
-  // ── 헤더 배경 ──
-  const hGrad = ctx.createLinearGradient(0, 0, 0, HEADER_H);
-  hGrad.addColorStop(0, 'rgba(90,20,0,0.95)');
-  hGrad.addColorStop(1, 'rgba(40,8,0,0.7)');
-  ctx.fillStyle = hGrad;
-  ctx.fillRect(0, 0, W, HEADER_H);
-
-  // ── 헤더 상단 덩굴 장식 ──
-  drawVineRow(38, false);
-
-  // ── 헤더 구분선 ──
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(32, 48); ctx.lineTo(W - 32, 48); ctx.stroke();
-
-  // ── 로고 텍스트 ──
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.7)';
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 34px Arial';
-  ctx.fillText('DUNNAE ASIA MART', W / 2, 90);
-  ctx.font = '17px Arial';
-  ctx.fillStyle = '#e8c060';
-  ctx.fillText('문내아시아마트', W / 2, 116);
-  ctx.shadowBlur = 0;
-
-  // 국기
-  ctx.font = '20px Arial';
-  ctx.fillStyle = '#fff';
-  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇲🇲  🇰🇭  🇻🇳', W / 2, 145);
-
-  // ── 헤더 하단 덩굴 장식 ──
-  drawVineRow(HEADER_H - 8, true);
-
-  // ── 헤더/푸터 구분선 ──
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(32, HEADER_H); ctx.lineTo(W - 32, HEADER_H); ctx.stroke();
-
-  // ── 4분할 이미지 영역 ──
-  const IMG_TOP = HEADER_H + 4;
-  const IMG_BOTTOM = H - FOOTER_H - 4;
-  const IMG_H = IMG_BOTTOM - IMG_TOP;
-  const HALF_W = W / 2;
-  const HALF_H = IMG_H / 2;
-  const GAP = 3;
-
-  const slots = [
-    [0, IMG_TOP, HALF_W, HALF_H],
-    [HALF_W, IMG_TOP, HALF_W, HALF_H],
-    [0, IMG_TOP + HALF_H, HALF_W, HALF_H],
-    [HALF_W, IMG_TOP + HALF_H, HALF_W, HALF_H],
-  ];
-
-  slots.forEach(([x, y, sw, sh], i) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
-    ctx.clip();
-    if (_coverImgs[i]) {
-      const img = _coverImgs[i];
-      const scale = Math.max((sw - GAP * 2) / img.width, (sh - GAP * 2) / img.height);
-      const dw = img.width * scale, dh = img.height * scale;
-      const dx = x + GAP + ((sw - GAP * 2) - dw) / 2;
-      const dy = y + GAP + ((sh - GAP * 2) - dh) / 2;
-      ctx.drawImage(img, dx, dy, dw, dh);
-    } else {
-      ctx.fillStyle = '#2a0a00';
-      ctx.fillRect(x + GAP, y + GAP, sw - GAP * 2, sh - GAP * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.12)';
-      ctx.font = '36px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('📷', x + sw / 2, y + sh / 2 + 12);
-    }
-    ctx.restore();
-  });
-
-  // ── 중앙 글귀 박스 ──
-  const t1 = (document.getElementById('cover-text1') || {}).value || '';
-  const t2 = (document.getElementById('cover-text2') || {}).value || '';
-  const t3 = (document.getElementById('cover-text3') || {}).value || '';
-
-  const TEXT_CX = W / 2;
-  const TEXT_CY = IMG_TOP + IMG_H / 2;
-  const BOX_W = 360, BOX_H = 148;
-  const BOX_X = TEXT_CX - BOX_W / 2;
-  const BOX_Y = TEXT_CY - BOX_H / 2;
-
-  // 박스 배경
-  ctx.save();
-  ctx.globalAlpha = 0.88;
-  const bGrad = ctx.createLinearGradient(BOX_X, BOX_Y, BOX_X, BOX_Y + BOX_H);
-  bGrad.addColorStop(0, '#6a1800');
-  bGrad.addColorStop(1, '#3a0800');
-  ctx.fillStyle = bGrad;
-  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 16);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  // 금색 박스 테두리
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 2.5;
-  roundRectCover(ctx, BOX_X, BOX_Y, BOX_W, BOX_H, 16);
-  ctx.stroke();
-  ctx.strokeStyle = 'rgba(232,192,96,0.4)';
-  ctx.lineWidth = 1;
-  roundRectCover(ctx, BOX_X + 6, BOX_Y + 6, BOX_W - 12, BOX_H - 12, 12);
-  ctx.stroke();
-  ctx.restore();
-
-  // 글귀
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
-  ctx.shadowBlur = 6;
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 38px Arial';
-  ctx.fillText(t1, TEXT_CX, BOX_Y + 46);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 38px Arial';
-  ctx.fillText(t2, TEXT_CX, BOX_Y + 90);
-  ctx.fillStyle = '#e8c060';
-  ctx.font = 'bold 24px Arial';
-  ctx.fillText(t3, TEXT_CX, BOX_Y + 128);
-  ctx.shadowBlur = 0;
-
-  // ── 푸터 ──
-  const fGrad = ctx.createLinearGradient(0, H - FOOTER_H, 0, H);
-  fGrad.addColorStop(0, 'rgba(40,8,0,0.7)');
-  fGrad.addColorStop(1, 'rgba(90,20,0,0.95)');
-  ctx.fillStyle = fGrad;
-  ctx.fillRect(0, H - FOOTER_H, W, FOOTER_H);
-
-  // 푸터 상단 구분선
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(32, H - FOOTER_H); ctx.lineTo(W - 32, H - FOOTER_H); ctx.stroke();
-
-  // ── 푸터 상단 덩굴 장식 ──
-  drawVineRow(H - FOOTER_H + 18, false);
-
-  // 푸터 구분선
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(32, H - FOOTER_H + 30); ctx.lineTo(W - 32, H - FOOTER_H + 30); ctx.stroke();
-
-  // 하단 문구 3줄
-  const b1 = (document.getElementById('cover-bottom1') || {}).value || '';
-  const b2 = (document.getElementById('cover-bottom2') || {}).value || '';
-  const b3 = (document.getElementById('cover-bottom3') || {}).value || '';
-
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 4;
-  ctx.fillStyle = '#fff';
-  ctx.font = '15px Arial';
-  ctx.fillText(b1, W / 2, H - FOOTER_H + 58);
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.fillText(b2, W / 2, H - FOOTER_H + 80);
-  ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  ctx.fillText(b3, W / 2, H - FOOTER_H + 102);
-  ctx.shadowBlur = 0;
-
-  // 국기
-  ctx.font = '18px Arial';
-  ctx.fillStyle = '#fff';
-  ctx.fillText('🇹🇭  🇱🇦  🇵🇭  🇲🇲  🇰🇭  🇻🇳', W / 2, H - FOOTER_H + 126);
-
-  // 푸터 하단 덩굴 장식
-  drawVineRow(H - 34, true);
-
-  // 푸터 하단 구분선
-  ctx.strokeStyle = '#c8973a';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(32, H - 46); ctx.lineTo(W - 32, H - 46); ctx.stroke();
-
-  // DUNNAE'S PREMIUM PICK
-  ctx.font = 'bold 13px Arial';
-  ctx.fillStyle = '#e8c060';
-  ctx.fillText("DUNNAE'S PREMIUM PICK! 🛒", W / 2, H - 30);
-}
-
-function roundRectCover(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-function downloadCoverCard() {
-  renderCoverCard();
-  const canvas = document.getElementById('cover-canvas');
-  const a = document.createElement('a');
-  a.download = 'dunnae_cover.jpg';
-  a.href = canvas.toDataURL('image/jpeg', 0.93);
-  a.click();
-  showToast('📸 커버 이미지 저장 완료!');
-}
-
-// 탭 전환 시 커버 초기 렌더
-const _origSwitchTab = window.switchTab;
-window.switchTab = function(tab, btn) {
-  if (_origSwitchTab) _origSwitchTab(tab, btn);
-  if (tab === 'cover') setTimeout(renderCoverCard, 100);
-  if (tab === 'reels') setTimeout(() => { initReelsSlots(); ensureReelsFlags(renderReelsCard); }, 100);
-};
-
-// ── 릴스 커버 메이커 ──
-const _reelsImgs = [null, null, null, null];
-
-// 릴스용 국기 프리로드 (SNS 탭 방문 여부와 무관하게 사용 가능)
-function ensureReelsFlags(callback) {
-  const needed = ['TH','LA','PH','VN'];
-  // 이미 로드됐으면 바로 콜백
-  if (window._snsFlags && needed.every(c => window._snsFlags[c] && window._snsFlags[c].complete && window._snsFlags[c].naturalWidth > 0)) {
-    if (callback) callback();
-    return;
-  }
-  if (!window._snsFlags) window._snsFlags = {};
-  const srcs = {
-    'TH': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjQTUxOTMxIi8+PHJlY3QgeT0iMy4zMyIgd2lkdGg9IjMwIiBoZWlnaHQ9IjEzLjM0IiBmaWxsPSIjRjRGNUY4Ii8+PHJlY3QgeT0iNi42NyIgd2lkdGg9IjMwIiBoZWlnaHQ9IjYuNjYiIGZpbGw9IiMyRDJBNEEiLz48L3N2Zz4=',
-    'LA': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjQ0UxMTI2Ii8+PHJlY3QgeT0iNSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMDAyODY4Ii8+PGNpcmNsZSBjeD0iMTUiIGN5PSIxMCIgcj0iMy41IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==',
-    'PH': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMDAzOEE4Ii8+PHJlY3QgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0NFMTEyNiIvPjxwb2x5Z29uIHBvaW50cz0iMCwwIDEzLDEwIDAsMjAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNCIgY3k9IjUiIHI9IjEuMyIgZmlsbD0iI0ZDRDExNiIvPjxjaXJjbGUgY3g9IjQiIGN5PSIxNSIgcj0iMS4zIiBmaWxsPSIjRkNEMTE2Ii8+PGNpcmNsZSBjeD0iOC41IiBjeT0iMTAiIHI9IjEuMyIgZmlsbD0iI0ZDRDExNiIvPjwvc3ZnPg==',
-    'VN': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAyMCI+PHJlY3Qgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjREEyNTFEIi8+PHBvbHlnb24gcG9pbnRzPSIxNSw0IDE2LjgsOS41IDIyLjUsOS41IDE3LjksMTIuOSAxOS43LDE4LjUgMTUsMTUgMTAuMywxOC41IDEyLjEsMTIuOSA3LjUsOS41IDEzLjIsOS41IiBmaWxsPSIjRkZGRjAwIi8+PC9zdmc+'
-  };
-  let loaded = 0;
-  needed.forEach(code => {
-    if (window._snsFlags[code] && window._snsFlags[code].complete && window._snsFlags[code].naturalWidth > 0) {
-      loaded++;
-      if (loaded === needed.length && callback) callback();
-      return;
-    }
-    const img = new Image();
-    img.onload = () => { loaded++; if (loaded === needed.length && callback) callback(); };
-    img.onerror = () => { loaded++; if (loaded === needed.length && callback) callback(); };
-    img.src = srcs[code];
-    window._snsFlags[code] = img;
-  });
-}
-const _reelsSearchResults = [[], [], [], []];
-
-// 슬롯 UI 초기화
-function initReelsSlots() {
-  const wrap = document.getElementById('reels-slots-wrap');
-  if (!wrap || wrap.children.length > 0) return;
-  for (let i = 0; i < 4; i++) {
-    const div = document.createElement('div');
-    div.style.cssText = 'border:1px solid #eee;border-radius:10px;padding:10px;background:#fafafa;';
-    div.innerHTML = `
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <span style="font-size:12px;font-weight:700;color:#e07b2f;width:20px;">${i+1}</span>
-        <input type="text" id="reels-psearch-${i}" placeholder="🔍 상품명 검색..." oninput="reelsProductSearch(${i},this.value)"
-          style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:7px;font-size:12px;outline:none;">
-        <label style="font-size:12px;color:#888;cursor:pointer;border:1px solid #ddd;border-radius:7px;padding:6px 10px;background:#fff;white-space:nowrap;">
-          📁 파일
-          <input type="file" accept="image/*" style="display:none;" onchange="onReelsImgSelect(${i},this)">
-        </label>
-        <button onclick="clearReelsSlot(${i})" style="background:none;border:1px solid #ddd;border-radius:7px;padding:6px 8px;font-size:12px;color:#aaa;cursor:pointer;">✕</button>
-      </div>
-      <div id="reels-sresults-${i}" style="display:none;max-height:140px;overflow-y:auto;border:1px solid #eee;border-radius:7px;background:#fff;margin-bottom:6px;"></div>
-      <div id="reels-preview-${i}" style="height:54px;border-radius:7px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">사진 없음</div>`;
-    wrap.appendChild(div);
-  }
-}
-
-function reelsProductSearch(idx, q) {
-  const resultsEl = document.getElementById('reels-sresults-' + idx);
-  if (!q.trim()) { resultsEl.style.display = 'none'; return; }
-  const catalog = window._catalogCache || {};
-  const matches = [];
-  Object.values(catalog).forEach(cat => {
-    (cat.items || []).forEach(item => {
-      if (!item) return;
-      const ko = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      const en = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      if (ko.includes(q) || en.includes(q) || (item.id||'').toLowerCase().includes(q.toLowerCase())) {
-        matches.push(item);
-      }
-    });
-  });
-  if (!matches.length) {
-    resultsEl.style.display = 'block';
-    resultsEl.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:#aaa;">결과 없음</div>';
-    return;
-  }
-  resultsEl.style.display = 'block';
-  resultsEl.innerHTML = '';
-  matches.slice(0, 15).forEach(item => {
-    const ko = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-    const imgUrl = (item.images && item.images[0]) || item.image || '';
-    const d = document.createElement('div');
-    d.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-bottom:1px solid #f5f5f5;';
-    d.innerHTML = `<span style="font-size:11px;color:#e07b2f;font-weight:700;">${item.id}</span><span style="font-size:12px;flex:1;">${ko}</span>`;
-    d.onmouseover = () => d.style.background = '#fafafa';
-    d.onmouseout  = () => d.style.background = '';
-    d.onclick = () => reelsSelectProduct(idx, item, imgUrl);
-    resultsEl.appendChild(d);
-  });
-}
-
-function reelsSelectProduct(idx, item, imgUrl) {
-  const resultsEl = document.getElementById('reels-sresults-' + idx);
-  const searchEl  = document.getElementById('reels-psearch-' + idx);
-  const previewEl = document.getElementById('reels-preview-' + idx);
-  const ko = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-  resultsEl.style.display = 'none';
-  if (searchEl) searchEl.value = ko;
-
-  if (!imgUrl) {
-    _reelsImgs[idx] = null;
-    if (previewEl) previewEl.innerHTML = '<span style="font-size:11px;color:#aaa;">이미지 없음</span>';
-    renderReelsCard();
-    return;
-  }
-
-  // 캐시 버스팅 포함해서 로드
-  const bust = imgUrl.includes('cloudinary.com')
-    ? imgUrl.replace('/upload/', '/upload/fl_attachment/') + '?_t=' + Date.now()
-    : imgUrl;
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    _reelsImgs[idx] = img;
-    if (previewEl) {
-      previewEl.style.backgroundImage = 'url(' + imgUrl + ')';
-      previewEl.style.backgroundSize = 'cover';
-      previewEl.style.backgroundPosition = 'center';
-      previewEl.textContent = '';
-    }
-    renderReelsCard();
-  };
-  img.onerror = () => {
-    // crossOrigin 없이 재시도 (미리보기용)
-    const img2 = new Image();
-    img2.onload = () => {
-      _reelsImgs[idx] = img2;
-      if (previewEl) {
-        previewEl.style.backgroundImage = 'url(' + imgUrl + ')';
-        previewEl.style.backgroundSize = 'cover';
-        previewEl.style.backgroundPosition = 'center';
-        previewEl.textContent = '';
-      }
-      renderReelsCard();
-    };
-    img2.onerror = () => { _reelsImgs[idx] = null; renderReelsCard(); };
-    img2.src = imgUrl;
-  };
-  img.src = bust;
-}
-
-function onReelsImgSelect(idx, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      _reelsImgs[idx] = img;
-      const previewEl = document.getElementById('reels-preview-' + idx);
-      if (previewEl) {
-        previewEl.style.backgroundImage = 'url(' + e.target.result + ')';
-        previewEl.style.backgroundSize = 'cover';
-        previewEl.style.backgroundPosition = 'center';
-        previewEl.textContent = '';
-      }
-      renderReelsCard();
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearReelsSlot(idx) {
-  _reelsImgs[idx] = null;
-  const searchEl  = document.getElementById('reels-psearch-' + idx);
-  const resultsEl = document.getElementById('reels-sresults-' + idx);
-  const previewEl = document.getElementById('reels-preview-' + idx);
-  if (searchEl)  searchEl.value = '';
-  if (resultsEl) { resultsEl.style.display = 'none'; resultsEl.innerHTML = ''; }
-  if (previewEl) { previewEl.style.backgroundImage = ''; previewEl.textContent = '사진 없음'; }
-  renderReelsCard();
-}
-
-function clearReelsImgs() {
-  for (let i = 0; i < 4; i++) clearReelsSlot(i);
-}
-
-// 한글 → 태국어/라오어/영어 자동 번역 (기존 googleTranslate 함수 활용)
-async function reelsAutoTranslate() {
-  const ko = (document.getElementById('reels-ko') || {}).value || '';
-  if (!ko.trim()) return;
-  const [th, lo, en] = await Promise.all([
-    googleTranslate(ko, 'th'),
-    googleTranslate(ko, 'lo'),
-    googleTranslate(ko, 'en')
-  ]);
-  const t1 = document.getElementById('reels-text1');
-  const t2 = document.getElementById('reels-text2');
-  const t3 = document.getElementById('reels-text3');
-  if (t1 && th) t1.value = th;
-  if (t2 && lo) t2.value = lo;
-  if (t3 && en) t3.value = en.toUpperCase();
-  renderReelsCard();
-}
-
-function renderReelsCard() {
-  // 슬롯 UI가 아직 없으면 초기화
-  initReelsSlots();
-
-  const canvas = document.getElementById('reels-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = 540, H = 960;
-  ctx.clearRect(0, 0, W, H);
-
-  const DARK  = '#1a0a0a';
-  const CREAM = '#faf6f0';
-  const HDR_H = 210;
-
-  ctx.fillStyle = CREAM;
-  ctx.fillRect(0, 0, W, HDR_H);
-  ctx.fillStyle = DARK;
-  ctx.fillRect(0, 0, W, 7);
-  ctx.fillStyle = DARK;
-  ctx.fillRect(0, HDR_H - 7, W, 7);
-
-  ctx.fillStyle = DARK;
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 56px Georgia, serif';
-  ctx.fillText('DUNNAE', W/2, 68);
-  ctx.fillText('ASIA MART', W/2, 124);
-  ctx.font = '17px Arial';
-  ctx.fillStyle = '#c84b2f';
-  ctx.fillText('둔내아시아마트', W/2, 148);
-
-  // 국기 이미지 (태국, 라오스, 필리핀, 베트남)
-  const reelsFlagCodes = ['TH','LA','PH','VN'];
-  const rfW = 46, rfH = 28, rfGap = 12;
-  const rfTotal = reelsFlagCodes.length * rfW + (reelsFlagCodes.length-1) * rfGap;
-  let rfx = (W - rfTotal) / 2;
-  const rfy = 163;
-  reelsFlagCodes.forEach(code => {
-    const fi = window._snsFlags && window._snsFlags[code];
-    if (fi && fi.complete && fi.naturalWidth > 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(rfx, rfy, rfW, rfH);
-      ctx.clip();
-      ctx.drawImage(fi, rfx, rfy, rfW, rfH);
-      ctx.restore();
-      ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-      ctx.lineWidth = 0.8;
-      ctx.strokeRect(rfx, rfy, rfW, rfH);
-    } else {
-      ctx.fillStyle = '#ddd';
-      ctx.fillRect(rfx, rfy, rfW, rfH);
-    }
-    rfx += rfW + rfGap;
-  });
-
-  // ── 2×2 그리드 ──
-  const IMG_TOP = HDR_H;
-  const IMG_AREA_H = H - HDR_H;
-  const HW = W / 2, HH = IMG_AREA_H / 2;
-  const GAP = 3;
-
-  const slots = [
-    [0,   IMG_TOP,         HW, HH],
-    [HW,  IMG_TOP,         HW, HH],
-    [0,   IMG_TOP + HH,    HW, HH],
-    [HW,  IMG_TOP + HH,    HW, HH],
-  ];
-
-  slots.forEach(([x, y, sw, sh], i) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x + GAP, y + GAP, sw - GAP*2, sh - GAP*2);
-    ctx.clip();
-    if (_reelsImgs[i]) {
-      const img = _reelsImgs[i];
-      const scale = Math.max((sw - GAP*2) / img.width, (sh - GAP*2) / img.height);
-      const dw = img.width * scale, dh = img.height * scale;
-      ctx.drawImage(img, x + GAP + ((sw-GAP*2)-dw)/2, y + GAP + ((sh-GAP*2)-dh)/2, dw, dh);
-    } else {
-      ctx.fillStyle = '#e8e4dc';
-      ctx.fillRect(x + GAP, y + GAP, sw - GAP*2, sh - GAP*2);
-      ctx.fillStyle = 'rgba(0,0,0,0.15)';
-      ctx.font = '40px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('📷', x + sw/2, y + sh/2 + 14);
-    }
-    ctx.restore();
-  });
-
-  // ── 중앙 텍스트 박스 ──
-  const t1 = (document.getElementById('reels-text1')||{}).value || '';
-  const t2 = (document.getElementById('reels-text2')||{}).value || '';
-  const t3 = (document.getElementById('reels-text3')||{}).value || '';
-
-  const CX = W / 2;
-  const CY = IMG_TOP + IMG_AREA_H / 2;
-
-  // 세 줄 모두 같은 폰트 크기로 맞춤 (가장 긴 줄 기준으로 축소)
-  let fontSize = 40;
-  const MAX_TEXT_W = W - 80;
-  while (fontSize > 18) {
-    ctx.font = 'bold ' + fontSize + 'px Arial';
-    const maxW = Math.max(
-      ctx.measureText(t1).width,
-      ctx.measureText(t2).width,
-      ctx.measureText(t3).width
-    );
-    if (maxW <= MAX_TEXT_W) break;
-    fontSize -= 1;
-  }
-  ctx.font = 'bold ' + fontSize + 'px Arial';
-
-  const LINE_H = fontSize + 14;
-  const BOX_PAD_V = 24;
-  const BOX_H = LINE_H * 3 + BOX_PAD_V * 2;
-  const BOX_W = Math.min(
-    Math.max(
-      ctx.measureText(t1).width,
-      ctx.measureText(t2).width,
-      ctx.measureText(t3).width
-    ) + 60, W - 40
-  );
-  const BX = CX - BOX_W/2;
-  const BY = CY - BOX_H/2;
-
-  ctx.save();
-  ctx.globalAlpha = 0.82;
-  ctx.fillStyle = '#5a1008';
-  ctx.beginPath();
-  ctx.roundRect(BX, BY, BOX_W, BOX_H, 12);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  ctx.shadowBlur = 6;
-
-  // 태국어 (흰색)
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold ' + fontSize + 'px Arial';
-  ctx.fillText(t1, CX, BY + BOX_PAD_V + fontSize);
-
-  // 라오어 (흰색)
-  ctx.fillText(t2, CX, BY + BOX_PAD_V + fontSize + LINE_H);
-
-  // 영어 (골드)
-  ctx.fillStyle = '#f0c040';
-  ctx.fillText(t3, CX, BY + BOX_PAD_V + fontSize + LINE_H * 2);
-
-  ctx.shadowBlur = 0;
-}
-
-function downloadReelsCard() {
-  renderReelsCard();
-  const canvas = document.getElementById('reels-canvas');
-  const a = document.createElement('a');
-  a.download = 'dunnae_reels_cover.jpg';
-  a.href = canvas.toDataURL('image/jpeg', 0.93);
-  a.click();
-  showToast('📱 릴스 커버 저장 완료!');
-}
 </script>
 
 <style>
