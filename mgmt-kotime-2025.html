@@ -1752,8 +1752,6 @@ async function loadCatalogForAdmin() {
   const data = snap.val() || {};
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '';
-
   // 로그인 상태 유지 보장
   if (localStorage.getItem('admin_logged_in') === 'true') {
     document.getElementById('login-page').style.display = 'none';
@@ -1764,15 +1762,18 @@ async function loadCatalogForAdmin() {
   const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
 
+  // 성능 최적화: innerHTML += 를 반복 호출하면 매번 전체 HTML을 다시 파싱해서 느려짐.
+  // 배열에 모아뒀다가 마지막에 한 번만 innerHTML에 대입.
+  const rows = [];
   ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, catKey);
-    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
+    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr id="prod-row-${item.id}">
+      rows.push(`<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
@@ -1781,9 +1782,10 @@ async function loadCatalogForAdmin() {
           <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
           <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
-      </tr>`;
+      </tr>`);
     });
   });
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadStock() {
@@ -1799,18 +1801,18 @@ async function loadStock() {
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '';
 
+  const rows = [];
   ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
+    rows.push(`<tr><td colspan="4" class="cat-header">${label}</td></tr>`);
     cat.items.forEach(item => {
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr>
+      rows.push(`<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -1818,9 +1820,10 @@ async function loadStock() {
           <input type="number" min="-1" value="${stockVal}" id="stock_${item.id}" onchange="markChanged('${item.id}','stock')">
           <span class="changed-badge" id="badge_stock_${item.id}" style="display:none;">●</span>
         </td>
-      </tr>`;
+      </tr>`);
     });
   });
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadDiscount() {
@@ -1852,26 +1855,27 @@ async function loadDiscount() {
 
   const tbody = document.getElementById('discount-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '';
 
+  const rows = [];
   ordered2.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    tbody.innerHTML += `<tr><td colspan="5" class="cat-header">${label}</td></tr>`;
+    rows.push(`<tr><td colspan="5" class="cat-header">${label}</td></tr>`);
     cat.items.forEach(item => {
       const d2 = disc[item.id]?.d2 !== undefined ? disc[item.id].d2 : 5;
       const d3 = disc[item.id]?.d3 !== undefined ? disc[item.id].d3 : 10;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      tbody.innerHTML += `<tr>
+      rows.push(`<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${(item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '')}</td>
         <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
         <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
-      </tr>`;
+      </tr>`);
     });
   });
+  tbody.innerHTML = rows.join('');
 }
 
 async function loadProducts() {
@@ -1890,10 +1894,10 @@ async function loadCustomers() {
   const snap = await db.ref('customers').get();
   const data = snap.val() || {};
   const tbody = document.getElementById('customer-tbody');
-  tbody.innerHTML = '';
+  const rows = [];
   Object.entries(data).sort((a,b) => b[1].date - a[1].date).forEach(([key, c]) => {
     const date = new Date(c.date).toLocaleDateString('ko-KR');
-    tbody.innerHTML += `<tr id="row-${key}">
+    rows.push(`<tr id="row-${key}">
       <td style="padding:10px 12px;"><input type="checkbox" class="cust-check" data-phone="${c.phone}" data-name="${c.name}"></td>
       <td id="name-${key}">${c.name}</td>
       <td id="phone-${key}">${c.phone || '-'}</td>
@@ -1904,8 +1908,9 @@ async function loadCustomers() {
         <button class="btn-del" style="color:#f59e0b;border-color:#f59e0b;" onclick="editCustomer('${key}','${c.name}','${c.phone}','${c.note||''}')">✏️ 수정</button>
         <button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button>
       </td>
-    </tr>`;
+    </tr>`);
   });
+  tbody.innerHTML = rows.join('');
 }
 
 function editCustomer(key, name, phone, note) {
