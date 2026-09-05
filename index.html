@@ -1084,8 +1084,8 @@ function setLang(lang) {
 
   // Re-render current tab, best, new, philippine, preorder
   if (window._noticeData) showNoticePopup();
-  renderTab(currentTab);
-  renderBest();
+  (window.renderTab || renderTab)(currentTab);
+  (window.renderBest || renderBest)();
   if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
   if (typeof window.renderPreorder === 'function') window.renderPreorder();
   if (typeof window.renderNew === 'function') window.renderNew();
@@ -1111,27 +1111,27 @@ function setLang(lang) {
 
 // 카테고리명 다국어 매핑
 const CAT_LABELS = {
-  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  ko: '냉동, 냉장 음식' },
-  noodle:                { en: 'Noodles',               th: 'เส้นก๋วยเตี๋ยว',         lo: 'ເສັ້ນກ໋ວຍເຕັ້ຍວ',       ko: '면 종류' },
-  sauce:                 { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
-  sauce_liquid:          { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     ko: '소스 및 조미료' },
-  spice:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
-  other:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', ko: '향신료 및 건조식품' },
-  veggie:                { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
-  produce:               { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    ko: '농산물/채소' },
-  drinks:                { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
-  drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   ko: '음료 및 스낵' },
-  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           ko: '생활용품' },
-  shoes:                 { en: 'Shoes',                 th: 'รองเท้า',                   lo: 'ເກີບ',                    ko: '신발' },
-  clothing:              { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
-  clothes:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
-  apparel:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
-  fashion:               { en: 'Clothing',              th: 'เสื้อผ้า',                lo: 'ເສື້ອຜ້າ',               ko: '의류' },
-  'cigarettes&lighters': { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
-  cigarettes_lighters:   { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
-  tobacco:               { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',        lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        ko: '담배 및 라이타' },
-  phone:                 { en: 'Electronics',            th: 'อุปกรณ์อิเล็กทรอนิกส์',  lo: 'ອຸປະກອນໄຟຟ້າ',            ko: '전자제품' },
-  electronics:           { en: 'Electronics',            th: 'อุปกรณ์อิเล็กทรอนิกส์',  lo: 'ອຸປະກອນໄຟຟ້າ',            ko: '전자제품' },
+  frozen:                { en: 'Frozen & Refrigerated', th: 'อาหารแช่แข็ง/แช่เย็น',  lo: 'ອາຫານແຊ່ແຂງ/ແຊ່ເຢັນ',  km: 'អាហារកក/ត្រជាក់',       ko: '냉동, 냉장 음식' },
+  noodle:                { en: 'Noodles',               th: 'เส้นก๋วยเตี๋ยว',         lo: 'ເສັ້ນກ໋ວຍເຕັ້ຍວ',       km: 'មីនានាប្រភេទ',           ko: '면 종류' },
+  sauce:                 { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     km: 'ទឹកជ្រលក់ និងគ្រឿងទេស', ko: '소스 및 조미료' },
+  sauce_liquid:          { en: 'Sauces & Seasonings',   th: 'ซอสและเครื่องปรุง',      lo: 'ຊອດ ແລະ ເຄື່ອງປຸງ',     km: 'ទឹកជ្រលក់ និងគ្រឿងទេស', ko: '소스 및 조미료' },
+  spice:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', km: 'គ្រឿងទេស និងទំនិញស្ងួត', ko: '향신료 및 건조식품' },
+  other:                 { en: 'Spices & Dried Goods',  th: 'เครื่องเทศและของแห้ง',   lo: 'ເຄື່ອງເທດ ແລະ ຂອງແຫ້ງ', km: 'គ្រឿងទេស និងទំនិញស្ងួត', ko: '향신료 및 건조식품' },
+  veggie:                { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    km: 'បន្លែ និងផ្លែឈើ',        ko: '농산물/채소' },
+  produce:               { en: 'Produce & Processed',   th: 'ผักและผลิตภัณฑ์',        lo: 'ຜັກ ແລະ ຜະລິດຕະພັນ',    km: 'បន្លែ និងផ្លែឈើ',        ko: '농산물/채소' },
+  drinks:                { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   km: 'ភេសជ្ជៈ និងអាហារសម្រន់', ko: '음료 및 스낵' },
+  drinks_snacks:         { en: 'Drinks & Snacks',       th: 'เครื่องดื่มและขนม',      lo: 'ເຄື່ອງດື່ມ ແລະ ຂະໜົມ',   km: 'ភេសជ្ជៈ និងអាហារសម្រន់', ko: '음료 및 스낵' },
+  essentials:            { en: 'Daily Essentials',      th: 'สินค้าอุปโภค',           lo: 'ສິນຄ້າໃຊ້ສອຍ',           km: 'ផលិតផលប្រចាំថ្ងៃ',       ko: '생활용품' },
+  shoes:                 { en: 'Shoes',                 th: 'รองเท้า',                lo: 'ເກີບ',                    km: 'ស្បែកជើង',               ko: '신발' },
+  clothing:              { en: 'Clothing',              th: 'เสื้อผ้า',               lo: 'ເສື້ອຜ້າ',               km: 'សម្លៀកបំពាក់',           ko: '의류' },
+  clothes:               { en: 'Clothing',              th: 'เสื้อผ้า',               lo: 'ເສື້ອຜ້າ',               km: 'សម្លៀកបំពាក់',           ko: '의류' },
+  apparel:               { en: 'Clothing',              th: 'เสื้อผ้า',               lo: 'ເສື້ອຜ້າ',               km: 'សម្លៀកបំពាក់',           ko: '의류' },
+  fashion:               { en: 'Clothing',              th: 'เสื้อผ้า',               lo: 'ເສື້ອຜ້າ',               km: 'សម្លៀកបំពាក់',           ko: '의류' },
+  'cigarettes&lighters': { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',       lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        km: 'បារី និងឡាំប',            ko: '담배 및 라이타' },
+  cigarettes_lighters:   { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',       lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        km: 'បារី និងឡាំប',            ko: '담배 및 라이타' },
+  tobacco:               { en: 'Cigarettes & Lighters', th: 'บุหรี่และไฟแช็ก',       lo: 'ຢາສູບ ແລະ ໄຟຈູດ',        km: 'បារី និងឡាំប',            ko: '담배 및 라이타' },
+  phone:                 { en: 'Electronics',           th: 'อุปกรณ์อิเล็กทรอนิกส์', lo: 'ອຸປະກອນໄຟຟ້າ',            km: 'គ្រឿងអេឡិចត្រូនិច',      ko: '전자제품' },
+  electronics:           { en: 'Electronics',           th: 'อุปกรณ์อิเล็กทรอนิกส์', lo: 'ອຸປະກອນໄຟຟ້າ',            km: 'គ្រឿងអេឡិចត្រូនិច',      ko: '전자제품' },
 };
 
 function getCatLabel(cat, catKey, lang) {
@@ -1702,7 +1702,11 @@ function switchTab(el, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   currentTab = tab;
-  renderTab(tab);
+  (window.renderTab || renderTab)(tab);
+  (window.renderBest || renderBest)();
+  if (typeof window.renderNew === 'function') window.renderNew();
+  if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
+  if (typeof window.renderPreorder === 'function') window.renderPreorder();
 }
 
 function openModal() {
