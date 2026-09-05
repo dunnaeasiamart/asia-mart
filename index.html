@@ -1083,7 +1083,7 @@ function setLang(lang) {
   }
 
   // Re-render current tab, best, new, philippine, preorder
-  if (_noticeData) showNoticePopup();
+  if (window._noticeData) showNoticePopup();
   renderTab(currentTab);
   renderBest();
   if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
@@ -1518,6 +1518,7 @@ function renderTab(tab) {
   container.innerHTML = '';
 
   const cat = catalog[tab];
+  if (!cat || !cat.items) return;
   const section = document.createElement('div');
   const catLabel = getCatLabel(cat, tab, currentLang);
   section.innerHTML = `<div class="section-title">${cat.emoji} ${catLabel}</div>`;
@@ -2639,19 +2640,19 @@ async function loadNewFromFirebase() {
 }
 
 // ===== 공지사항 =====
-let _noticeUrl = '';
-let _noticeData = null;
+window._noticeUrl = '';
+window._noticeData = null;
 
 function showNoticePopup() {
-  if (!_noticeData) return;
+  if (!window._noticeData) return;
   const lang = currentLang || 'en';
-  const textMap = { ko: _noticeData.text, th: _noticeData.text_th, lo: _noticeData.text_lo, en: _noticeData.text_en };
+  const textMap = { ko: window._noticeData.text, th: _noticeData.text_th, lo: _noticeData.text_lo, en: _noticeData.text_en };
   const titleMap = { ko: '공지사항', th: 'ประกาศ', lo: 'ແຈ້ງການ', en: 'Notice' };
   const linkMap = { ko: '🔗 자세히 보기', th: '🔗 ดูเพิ่มเติม', lo: '🔗 ເບິ່ງເພີ່ມ', en: '🔗 View More' };
   document.getElementById('notice-popup-title').textContent = titleMap[lang] || titleMap.en;
-  document.getElementById('notice-popup-text').textContent = textMap[lang] || textMap.en || _noticeData.text;
+  document.getElementById('notice-popup-text').textContent = textMap[lang] || textMap.en || window._noticeData.text;
   const linkBtn = document.getElementById('notice-popup-link-btn');
-  if (_noticeUrl) { linkBtn.style.display = 'block'; linkBtn.textContent = linkMap[lang] || linkMap.en; }
+  if (window._noticeUrl) { linkBtn.style.display = 'block'; linkBtn.textContent = linkMap[lang] || linkMap.en; }
   else linkBtn.style.display = 'none';
   var popup = document.getElementById('notice-popup');
   popup.style.display = 'flex';
@@ -2669,8 +2670,8 @@ async function loadNoticeFromFirebase() {
     const snapshot = await get(ref(db, 'notice'));
     const data = snapshot.val();
     if (data && data.active && data.text) {
-      _noticeData = data;
-      _noticeUrl = data.url || '';
+      window._noticeData = data;
+      window._noticeUrl = data.url || '';
       showNoticePopup();
     }
   } catch(e) {}
@@ -2681,9 +2682,9 @@ function closeNoticePopup() {
 }
 function openNoticeLink() {
   closeNoticePopup();
-  if (!_noticeUrl) return;
+  if (!window._noticeUrl) return;
   // 내부 카테고리 링크인지 확인 (예: "cat:philippine_corner")
-  if (_noticeUrl.toLowerCase().startsWith('cat:')) {
+  if (window._noticeUrl.toLowerCase().startsWith('cat:')) {
     // 필리핀 섹션으로 바로 스크롤
     const section = document.getElementById('philippine-section');
     if (section) {
