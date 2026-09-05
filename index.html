@@ -21,7 +21,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="https://em-content.zobj.net/source/apple/391/shopping-cart_1f6d2.png">
 <title>Asia Mart — Online Order</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Sans+Lao:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Sans+Lao:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,7 +39,7 @@
   }
 
   body {
-    font-family: 'Noto Sans KR', 'Noto Sans Thai', 'Noto Sans Lao', sans-serif;
+    font-family: 'Noto Sans KR', 'Noto Sans Thai', 'Noto Sans Lao', 'Noto Sans Khmer', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -660,6 +660,7 @@
       <button class="lang-btn active" onclick="setLang('en')">EN</button>
       <button class="lang-btn" onclick="setLang('th')">TH</button>
       <button class="lang-btn" onclick="setLang('lo')">LO</button>
+      <button class="lang-btn" onclick="setLang('km')">KH</button>
       <button class="lang-btn" onclick="setLang('ko')">KO</button>
     </div>
 
@@ -991,6 +992,54 @@ const i18n = {
     delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
     parcel_notice: '⚠️ ການສັ່ງພັດສະດຸຕ້ອງຊຳລະລ່ວງໜ້າ. ພວກເຮົາຈະຕິດຕໍ່ທາງ Messenger ພ້ອມລາຍລະອຽດການຊຳລະ',
     frozen_warning: '🧊 ມີສິນຄ້າແຊ່ແຂງໃນຄຳສັ່ງ. ມີຄ່າໃຊ້ຈ່າຍເພີ່ມສຳລັບກ່ອງນ້ຳກ້ອນ',
+  },
+  km: {
+    cart: 'កន្ត្រក', hero_title: 'អាហារអាស៊ីពិតប្រាកដ<br>ការបញ្ជាទិញអនឡាញ',
+    hero_desc: 'ជ្រើសរើសបរិមាណដើម្បីគណនាតម្លៃភ្លាមៗ បញ្ចុះតម្លៃស្វ័យប្រវត្តិនៅពេលទិញ 3 ឬច្រើន!',
+    best_title: 'ផលិតផលដែលលក់ដាច់ជាងគេ',
+    cat_frozen: '🧊 A អាហារកក', cat_noodle: '🍜 B មី',
+    cat_essentials: '🧴 E ផលិតផលប្រចាំថ្ងៃ',
+    cat_veggie: '🥬 F បន្លែ និងផ្លែឈើ',
+    total_label: 'សរុប', select_items: 'សូមជ្រើសរើសផលិតផល',
+    order_btn: 'បញ្ជាទិញឥឡូវ →', order_confirm: 'សង្ខេបការបញ្ជាទិញ',
+    items_selected: (n) => `ជ្រើសរើស ${n} មុខ`,
+    empty_cart: 'កន្ត្រកទទេ<br>សូមជ្រើសរើសផលិតផល',
+    clear_cart: 'សម្អាតកន្ត្រក',
+    field_name: 'ឈ្មោះ', field_phone: 'លេខទូរស័ព្ទ', field_note: 'កំណត់សម្គាល់ (ប្រសិនបើមាន)',
+    field_facebook: 'ឈ្មោះ Facebook', ph_facebook: 'ឈ្មោះដែលបង្ហាញនៅ Facebook របស់អ្នក', optional: 'មិនចាំបាច់',
+    ph_name: 'ឈ្មោះរបស់អ្នក', ph_phone: '010-0000-0000', ph_note: 'សំណើការដឹកជញ្ជូន ។ល។',
+    confirm_btn: 'បញ្ជាក់ការបញ្ជាទិញ', grand_total: 'សរុប',
+    alert_fill: 'សូមបញ្ចូលឈ្មោះ',
+    alert_contact: 'សូមបញ្ចូលលេខទូរស័ព្ទ ឬឈ្មោះ Facebook យ៉ាងហោចណាស់មួយ',
+    order_done_title: 'បញ្ជាទិញបានជោគជ័យ!',
+    order_done_desc: 'យើងបានទទួលការបញ្ជាទិញរបស់អ្នកហើយ សូមផ្ញើសារ Facebook ដើម្បីបញ្ជាក់',
+    order_done_fb: '📘 ចុចខាងក្រោមដើម្បីផ្ញើសាររហាយើងតាម Facebook Messenger',
+    alert_done: (name, phone) => `✅ បញ្ជាទិញបានជោគជ័យ!\n\nឈ្មោះ: ${name}\nទូរស័ព្ទ: ${phone}\n\nយើងនឹងទាក់ទងអ្នកឆាប់ៗ។ អរគុណ!`,
+    pay_title: 'បង់ប្រាក់នៅពេលទទួលទំនិញប៉ុណ្ណោះ',
+    pay_desc: 'ទទួលប្រាក់សស្ និងកាត · គ្មានការបង់ប្រាក់អនឡាញ',
+    pay_modal: '💵 បង់ប្រាក់នៅពេលទទួលទំនិញ (ប្រាក់សស្ ឬកាត)',
+    field_addr: 'រូបភាពអាសយដ្ឋាន (ป้ายถนน)',
+    ph_addr: 'សូមផ្ទុករូបភាពป้ายถนน',
+    btn_camera: 'ថតរូប',
+    btn_gallery: 'ជ្រើសរើសពី Gallery',
+    addr_uploaded: 'ផ្ទុករូបភាពរួចហើយ',
+    addr_example: 'ឧទាហរណ៍',
+    max_qty: '⚠️ អតិបរមា 10 ដុំក្នុងមួយផលិតផល',
+    discount: 'បញ្ចុះ!',
+    total_discount: (n) => `សន្សំសរុប: -${n}`,
+    min_order: (n) => `⚠️ ត្រូវការបន្ថែម ₩${n} (អប្បបរមា ₩50,000)`,
+    min_order_ok: '✅ ដឹកជញ្ជូនឥតគិតថ្លៃ!',
+    update_notice: '✨ ផលិតផលថ្មីបន្ថែមជាប្រចាំ!',
+    new_arrivals: '🆕 ផលិតផលថ្មី',
+    preorder_title: '💎 ព្រីអរដឺ',
+    philippine_title: '🇵🇭 ផលិតផលហ្វីលីពីន',
+    notice_title: 'សេចក្តីជូនដំណឹង',
+    philippine_link: '🔗 មើលផលិតផលហ្វីលីពីនទាំងអស់ →',
+    delivery_type: 'វិធីដឹកជញ្ជូន',
+    delivery_home: '🛵 ដឹកជញ្ជូនដល់ផ្ទះ (បង់ប្រាក់នៅពេលទទួល)',
+    delivery_parcel: '📦 បញ្ជូនដោយក្រុមហ៊ុនដឹក (បង់ប្រាក់ជាមុន)',
+    parcel_notice: '⚠️ ការបញ្ជាទិញតាមក្រុមហ៊ុនដឹកត្រូវបង់ប្រាក់ជាមុន យើងនឹងទាក់ទងតាម Messenger',
+    frozen_warning: '🧊 ការបញ្ជាទិញរបស់អ្នករួមបញ្ចូលទំនិញកក មានថ្លៃបន្ថែមសម្រាប់ប្រអប់ទឹកកក',
   }
 };
 
@@ -1001,6 +1050,7 @@ function detectLang() {
   if (lang === 'lo') return 'lo';
   if (lang === 'th') return 'th';
   if (lang === 'ko') return 'ko';
+  if (lang === 'km') return 'km';
   return 'en';
 }
 let currentLang = detectLang();
@@ -1457,6 +1507,7 @@ function getItemName(item) {
   if (currentLang === 'ko') return (item.name_ko || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   if (currentLang === 'th') return (item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   if (currentLang === 'lo') return (item.name_lo || item.name_th || item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
+  if (currentLang === 'km') return (item.name_km || item.name_en || item.name_th || '').replace(/^[A-Za-z]\d+\.\s*/, '');
   return (item.name_en || item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
 }
 
