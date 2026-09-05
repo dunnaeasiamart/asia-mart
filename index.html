@@ -1083,7 +1083,7 @@ function setLang(lang) {
   }
 
   // Re-render current tab, best, new, philippine, preorder
-  if (window._noticeData) showNoticePopup();
+  if (window._noticeData && typeof window.showNoticePopup === 'function') window.showNoticePopup();
   (window.renderTab || renderTab)(currentTab);
   (window.renderBest || renderBest)();
   if (typeof window.renderPhilippine === 'function') window.renderPhilippine();
@@ -2647,7 +2647,7 @@ async function loadNewFromFirebase() {
 window._noticeUrl = '';
 window._noticeData = null;
 
-function showNoticePopup() {
+window.showNoticePopup = function showNoticePopup() {
   if (!window._noticeData) return;
   const lang = currentLang || 'en';
   const textMap = { ko: window._noticeData.text, th: _noticeData.text_th, lo: _noticeData.text_lo, en: _noticeData.text_en };
@@ -2680,11 +2680,11 @@ async function loadNoticeFromFirebase() {
     }
   } catch(e) {}
 }
-function closeNoticePopup() {
+window.closeNoticePopup = function closeNoticePopup() {
   var p = document.getElementById('notice-popup');
   if (p) { p.style.display = 'none'; p.style.pointerEvents = 'none'; }
 }
-function openNoticeLink() {
+window.openNoticeLink = function openNoticeLink() {
   closeNoticePopup();
   if (!window._noticeUrl) return;
   // 내부 카테고리 링크인지 확인 (예: "cat:philippine_corner")
