@@ -281,6 +281,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
           <input type="text" id="new-lo" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
         </div>
         <div>
+          <label>크메르어명 (자동 입력)</label>
+          <input type="text" id="new-km" placeholder="번역 버튼을 누르세요" style="background:#f9f9f9;">
+        </div>
+        <div>
           <label>1개 가격 (₩)</label>
           <input type="number" id="new-price" placeholder="5000">
         </div>
@@ -788,6 +792,10 @@ td input[type="number"]:focus { border-color: #c84b2f; }
         <input type="text" id="edit-lo">
       </div>
       <div>
+        <label>크메르어명</label>
+        <input type="text" id="edit-km">
+      </div>
+      <div>
         <label>1개 가격 (₩)</label>
         <input type="number" id="edit-price">
       </div>
@@ -864,13 +872,8 @@ td input[type="number"]:focus { border-color: #c84b2f; }
 const ADMIN_PW = "asia1234";
 const GOOGLE_TRANSLATE_KEY = 'AIzaSyATvGXEnesW4fCsEyals7qipskznXJvn6Q';
 
-// 번역 캐시: localStorage에 영구 저장해서 재로그인/재시작해도 재사용 (요청 수 자체를 줄임)
-let _translateCache = {};
-try { _translateCache = JSON.parse(localStorage.getItem('translate_cache_v1') || '{}'); } catch(e) { _translateCache = {}; }
-function _saveTranslateCache() {
-  try { localStorage.setItem('translate_cache_v1', JSON.stringify(_translateCache)); } catch(e) {}
-}
-async function googleTranslate(text, targetLang, _retry) {
+const _translateCache = {};
+async function googleTranslate(text, targetLang) {
   const cacheKey = text + '|' + targetLang;
   if (_translateCache[cacheKey]) return _translateCache[cacheKey];
   // 연속 호출 방지 딜레이
@@ -881,33 +884,11 @@ async function googleTranslate(text, targetLang, _retry) {
     body: JSON.stringify({ q: text, source: 'ko', target: targetLang, format: 'text' })
   });
   const data = await res.json();
-  if (data.error) {
-    // rate limit(429) 등이면 잠깐 대기 후 1회 재시도
-    const isRateLimit = /rate limit|quota|429/i.test(data.error.message || '') || data.error.code === 429;
-    if (isRateLimit && !_retry) {
-      await new Promise(r => setTimeout(r, 3000));
-      return googleTranslate(text, targetLang, true);
-    }
-    throw new Error(data.error.message);
-  }
+  if (data.error) throw new Error(data.error.message);
   const result = data.data.translations[0].translatedText;
   _translateCache[cacheKey] = result;
-  _saveTranslateCache();
   return result;
 }
-
-// ── 카탈로그 캐시: 짧은 시간(15초) 내 반복 요청은 Firebase 재조회 없이 캐시 재사용 ──
-let _catalogCache = null;
-let _catalogCacheAt = 0;
-async function getCatalogSnap(force) {
-  const fresh = _catalogCache && (Date.now() - _catalogCacheAt < 15000);
-  if (!force && fresh) return { val: () => _catalogCache };
-  const snap = await db.ref('catalog').get();
-  _catalogCache = snap.val() || {};
-  _catalogCacheAt = Date.now();
-  return { val: () => _catalogCache };
-}
-function invalidateCatalogCache() { _catalogCache = null; }
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
   if (pw === ADMIN_PW) {
@@ -1034,7 +1015,7 @@ async function downloadExcel(type) {
   let ws, fileName;
 
   if (type === 'products') {
-    const snap = await getCatalogSnap();
+    const snap = await db.ref('catalog').get();
     const catalog = snap.val() || {};
     const rows = [['상품ID','카테고리키','카테고리명','영문명','한국명','태국어명','라오스어명','가격(₩)','이미지URL']];
     const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
@@ -1060,7 +1041,7 @@ async function downloadExcel(type) {
     fileName = 'asia-mart-상품목록.xlsx';
 
   } else if (type === 'stock') {
-    const [catSnap, stockSnap] = await Promise.all([getCatalogSnap(), db.ref('stock').get()]);
+    const [catSnap, stockSnap] = await Promise.all([db.ref('catalog').get(), db.ref('stock').get()]);
     const catalog = catSnap.val() || {};
     const stock = stockSnap.val() || {};
     const rows = [['상품ID','영문명','한국명','재고(-1=무제한)']];
@@ -1074,7 +1055,7 @@ async function downloadExcel(type) {
     fileName = 'asia-mart-재고.xlsx';
 
   } else if (type === 'discount') {
-    const [catSnap, discSnap] = await Promise.all([getCatalogSnap(), db.ref('discount').get()]);
+    const [catSnap, discSnap] = await Promise.all([db.ref('catalog').get(), db.ref('discount').get()]);
     const catalog = catSnap.val() || {};
     const disc = discSnap.val() || {};
     const rows = [['상품ID','영문명','한국명','2개할인율(%)','3개할인율(%)']];
@@ -1152,7 +1133,7 @@ async function uploadExcel(type) {
 
       if (type === 'products') {
         // 카탈로그에 상품 일괄 등록 (ID 자동 생성)
-        const catSnap = await getCatalogSnap();
+        const catSnap = await db.ref('catalog').get();
         const catalog = catSnap.val() || {};
         const updates = {};
         let count = 0;
@@ -1219,7 +1200,6 @@ async function uploadExcel(type) {
         }
 
         await db.ref().update(updates);
-        invalidateCatalogCache();
         statusEl.textContent = `✅ ${count}개 상품 등록 완료! (ID 자동 생성)`;
         statusEl.style.color = '#2d7a4f';
         loadCatalogForAdmin();
@@ -1236,7 +1216,6 @@ async function uploadExcel(type) {
           count++;
         });
         await db.ref().update(updates);
-        invalidateCatalogCache();
         statusEl.textContent = `✅ ${count}개 재고 수정 완료!`;
         statusEl.style.color = '#2d7a4f';
 
@@ -1252,7 +1231,6 @@ async function uploadExcel(type) {
           count++;
         });
         await db.ref().update(updates);
-        invalidateCatalogCache();
         statusEl.textContent = `✅ ${count}개 할인율 수정 완료!`;
         statusEl.style.color = '#2d7a4f';
       }
@@ -1269,7 +1247,7 @@ async function uploadExcel(type) {
 
 // ── 일괄 재번역 ──
 async function loadRetranslateCatSelect() {
-  const snap = await getCatalogSnap();
+  const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
   const sel = document.getElementById('retranslate-cat');
   if (!sel) return;
@@ -1297,7 +1275,7 @@ async function retranslateAll() {
   progress.style.display = 'block';
   bar.style.width = '0%';
 
-  const snap = await getCatalogSnap();
+  const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
 
   // 대상 카테고리 결정
@@ -1328,11 +1306,13 @@ async function retranslateAll() {
         const en = await googleTranslate(ko, 'en');
         const th = await googleTranslate(ko, 'th');
         const lo = await googleTranslate(ko, 'lo');
+        const km = await googleTranslate(ko, 'km');
         // API rate limit 보호: 상품 간 500ms 대기
         await new Promise(r => setTimeout(r, 500));
         updates[`catalog/${key}/items/${i}/name_en`] = en;
         updates[`catalog/${key}/items/${i}/name_th`] = th;
         updates[`catalog/${key}/items/${i}/name_lo`] = lo;
+        updates[`catalog/${key}/items/${i}/name_km`] = km;
       } catch(e) {
         console.error(`번역 실패: ${ko}`, e);
       }
@@ -1343,7 +1323,6 @@ async function retranslateAll() {
   }
 
   await db.ref().update(updates);
-  invalidateCatalogCache();
   bar.style.width = '100%';
   status.textContent = `✅ ${done}개 상품 재번역 완료!`;
   status.style.color = '#2d7a4f';
@@ -1674,14 +1653,14 @@ function addEditImgUrl() {
 async function loadAll() {
   await buildAllOptions();
   // catalog 캐시 저장 (SNS 카드용)
-  getCatalogSnap().then(s => { window._catalogCache = s.val() || {}; });
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
   await loadCatSelect();
   // 탭별 로드는 switchTab에서 처리 — 초기에는 현재 탭만 로드
   await loadStock();
 }
 
 async function loadCatSelect() {
-  const snap = await getCatalogSnap();
+  const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
   const sel = document.getElementById('new-cat');
   if (!sel) return;
@@ -1748,10 +1727,12 @@ function filterProducts(query) {
 }
 
 async function loadCatalogForAdmin() {
-  const snap = await getCatalogSnap();
+  const snap = await db.ref('catalog').get();
   const data = snap.val() || {};
   const tbody = document.getElementById('product-tbody');
   if (!tbody) return;
+  tbody.innerHTML = '';
+
   // 로그인 상태 유지 보장
   if (localStorage.getItem('admin_logged_in') === 'true') {
     document.getElementById('login-page').style.display = 'none';
@@ -1762,18 +1743,15 @@ async function loadCatalogForAdmin() {
   const catOrder = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered = [...catOrder.filter(k=>data[k]), ...Object.keys(data).filter(k=>!catOrder.includes(k)).sort()];
 
-  // 성능 최적화: innerHTML += 를 반복 호출하면 매번 전체 HTML을 다시 파싱해서 느려짐.
-  // 배열에 모아뒀다가 마지막에 한 번만 innerHTML에 대입.
-  const rows = [];
   ordered.forEach(catKey => {
     const cat = data[catKey];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, catKey);
-    rows.push(`<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`);
+    tbody.innerHTML += `<tr><td colspan="8" style="background:#1a1814;color:#fff;padding:10px 12px;font-weight:700;">${label}</td></tr>`;
     cat.items.forEach((item, idx) => {
       const cleanEn = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr id="prod-row-${item.id}">
+      tbody.innerHTML += `<tr id="prod-row-${item.id}">
         <td style="padding:8px 12px;font-size:12px;color:#888;">${item.id}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanEn}</td>
         <td style="padding:8px 12px;font-size:13px;">${cleanKo}</td>
@@ -1782,15 +1760,14 @@ async function loadCatalogForAdmin() {
           <button onclick="openEditModal('${catKey}','${item.id}',${idx})" style="background:#2d7a4f;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">✏️ 수정</button>
           <button onclick="deleteProduct('${catKey}','${item.id}')" style="background:#ff4444;border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">🗑️</button>
         </td>
-      </tr>`);
+      </tr>`;
     });
   });
-  tbody.innerHTML = rows.join('');
 }
 
 async function loadStock() {
   const [catalogSnap, stockSnap] = await Promise.all([
-    getCatalogSnap(),
+    db.ref('catalog').get(),
     db.ref('stock').get()
   ]);
   const catalog = catalogSnap.val() || {};
@@ -1801,18 +1778,18 @@ async function loadStock() {
 
   const tbody = document.getElementById('stock-tbody');
   if (!tbody) return;
+  tbody.innerHTML = '';
 
-  const rows = [];
   ordered.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    rows.push(`<tr><td colspan="4" class="cat-header">${label}</td></tr>`);
+    tbody.innerHTML += `<tr><td colspan="4" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const stockVal = stock[item.id] !== undefined ? stock[item.id] : -1;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
       const cleanKo = (item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr>
+      tbody.innerHTML += `<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${cleanKo}</td>
@@ -1820,15 +1797,14 @@ async function loadStock() {
           <input type="number" min="-1" value="${stockVal}" id="stock_${item.id}" onchange="markChanged('${item.id}','stock')">
           <span class="changed-badge" id="badge_stock_${item.id}" style="display:none;">●</span>
         </td>
-      </tr>`);
+      </tr>`;
     });
   });
-  tbody.innerHTML = rows.join('');
 }
 
 async function loadDiscount() {
   const [catalogSnap, discSnap] = await Promise.all([
-    getCatalogSnap(),
+    db.ref('catalog').get(),
     db.ref('discount').get()
   ]);
   const catalog = catalogSnap.val() || {};
@@ -1855,27 +1831,26 @@ async function loadDiscount() {
 
   const tbody = document.getElementById('discount-tbody');
   if (!tbody) return;
+  tbody.innerHTML = '';
 
-  const rows = [];
   ordered2.forEach(key => {
     const cat = catalog[key];
     if (!cat || !cat.items) return;
     const label = getLabel(cat, key);
-    rows.push(`<tr><td colspan="5" class="cat-header">${label}</td></tr>`);
+    tbody.innerHTML += `<tr><td colspan="5" class="cat-header">${label}</td></tr>`;
     cat.items.forEach(item => {
       const d2 = disc[item.id]?.d2 !== undefined ? disc[item.id].d2 : 5;
       const d3 = disc[item.id]?.d3 !== undefined ? disc[item.id].d3 : 10;
       const cleanName = (item.name_en || '').replace(/^[A-Za-z]\d+\.\s*/, '');
-      rows.push(`<tr>
+      tbody.innerHTML += `<tr>
         <td class="td-id">${item.id}</td>
         <td class="td-name">${cleanName}</td>
         <td class="td-ko">${(item.name_ko || '').replace(/^[A-Za-z]\d+\.\s*/, '')}</td>
         <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d2}" id="disc2_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
         <td class="td-stock"><div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="50" value="${d3}" id="disc3_${item.id}" onchange="markChanged('${item.id}','disc')"><span style="font-size:13px;">%</span></div></td>
-      </tr>`);
+      </tr>`;
     });
   });
-  tbody.innerHTML = rows.join('');
 }
 
 async function loadProducts() {
@@ -1894,10 +1869,10 @@ async function loadCustomers() {
   const snap = await db.ref('customers').get();
   const data = snap.val() || {};
   const tbody = document.getElementById('customer-tbody');
-  const rows = [];
+  tbody.innerHTML = '';
   Object.entries(data).sort((a,b) => b[1].date - a[1].date).forEach(([key, c]) => {
     const date = new Date(c.date).toLocaleDateString('ko-KR');
-    rows.push(`<tr id="row-${key}">
+    tbody.innerHTML += `<tr id="row-${key}">
       <td style="padding:10px 12px;"><input type="checkbox" class="cust-check" data-phone="${c.phone}" data-name="${c.name}"></td>
       <td id="name-${key}">${c.name}</td>
       <td id="phone-${key}">${c.phone || '-'}</td>
@@ -1908,9 +1883,8 @@ async function loadCustomers() {
         <button class="btn-del" style="color:#f59e0b;border-color:#f59e0b;" onclick="editCustomer('${key}','${c.name}','${c.phone}','${c.note||''}')">✏️ 수정</button>
         <button class="btn-del" onclick="deleteCustomer('${key}')">삭제</button>
       </td>
-    </tr>`);
+    </tr>`;
   });
-  tbody.innerHTML = rows.join('');
 }
 
 function editCustomer(key, name, phone, note) {
@@ -1965,7 +1939,7 @@ async function saveAll() {
   // 상품 수정 저장 (catalog에 반영)
   const enInputs = document.querySelectorAll('input[id^="en_"]');
   if (enInputs.length > 0) {
-    const catSnap = await getCatalogSnap();
+    const catSnap = await db.ref('catalog').get();
     const catalog = catSnap.val() || {};
     Object.entries(catalog).forEach(([catKey, cat]) => {
       if (!cat.items) return;
@@ -1983,7 +1957,6 @@ async function saveAll() {
   }
 
   await db.ref().update(updates);
-  invalidateCatalogCache();
   document.querySelectorAll('.changed-badge').forEach(b => b.style.display = 'none');
   showToast('💾 저장 완료!');
 }
@@ -1996,14 +1969,16 @@ async function translateEditName() {
   status.style.color = '#888';
   status.textContent = '🤖 번역 중...';
   try {
-    const [en, th, lo] = await Promise.all([
+    const [en, th, lo, km] = await Promise.all([
       googleTranslate(ko, 'en'),
       googleTranslate(ko, 'th'),
-      googleTranslate(ko, 'lo')
+      googleTranslate(ko, 'lo'),
+      googleTranslate(ko, 'km'),
     ]);
     document.getElementById('edit-en').value = en;
     document.getElementById('edit-th').value = th;
     document.getElementById('edit-lo').value = lo;
+    document.getElementById('edit-km').value = km;
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
@@ -2021,16 +1996,18 @@ async function translateName() {
   status.style.color = '#888';
   status.textContent = '🤖 번역 중...';
   try {
-    const [en, th, lo] = await Promise.all([
+    const [en, th, lo, km] = await Promise.all([
       googleTranslate(ko, 'en'),
       googleTranslate(ko, 'th'),
-      googleTranslate(ko, 'lo')
+      googleTranslate(ko, 'lo'),
+      googleTranslate(ko, 'km'),
     ]);
     const id = document.getElementById('new-id').value.trim().toUpperCase();
     const prefix = id ? id + '. ' : '';
     document.getElementById('new-en').value = prefix + en;
     document.getElementById('new-th').value = prefix + th;
     document.getElementById('new-lo').value = prefix + lo;
+    document.getElementById('new-km').value = prefix + km;
     status.textContent = '✅ 번역 완료! 확인 후 수정 가능합니다.';
     status.style.color = '#2d7a4f';
   } catch(e) {
@@ -2071,7 +2048,7 @@ async function autoFillEditId() {
   const prefix = getCatPrefix(catKey, label);
 
   // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
-  const allSnap = await getCatalogSnap();
+  const allSnap = await db.ref('catalog').get();
   const allCatalog = allSnap.val() || {};
   let maxNum = 0;
   Object.entries(allCatalog).forEach(([key, cat]) => {
@@ -2094,7 +2071,7 @@ async function autoFillId() {
   const prefix = getCatPrefix(catKey, label);
 
   // 같은 prefix를 쓰는 모든 카테고리에서 최대 번호 계산
-  const allSnap = await getCatalogSnap();
+  const allSnap = await db.ref('catalog').get();
   const allCatalog = allSnap.val() || {};
   let maxNum = 0;
   Object.entries(allCatalog).forEach(([key, cat]) => {
@@ -2119,7 +2096,7 @@ async function openEditModal(catKey, itemId, idx) {
   _editMeta = { catKey, oldId: itemId, idx };
 
   // 카테고리 select 옵션 동적 생성 (A→B→C 순서)
-  const catSnap = await getCatalogSnap();
+  const catSnap = await db.ref('catalog').get();
   const catData = catSnap.val() || {};
   const sel = document.getElementById('edit-cat');
   sel.innerHTML = '';
@@ -2141,6 +2118,7 @@ async function openEditModal(catKey, itemId, idx) {
   document.getElementById('edit-en').value    = clean(item.name_en);
   document.getElementById('edit-th').value    = clean(item.name_th);
   document.getElementById('edit-lo').value    = clean(item.name_lo);
+  document.getElementById('edit-km').value    = clean(item.name_km);
   document.getElementById('edit-price').value = item.price1 || '';
   // 기존 이미지 표시
   const existingImgs = item.images || (item.image ? [item.image] : []);
@@ -2163,6 +2141,7 @@ async function submitEditProduct() {
   const en        = document.getElementById('edit-en').value.trim();
   const th        = document.getElementById('edit-th').value.trim();
   const lo        = document.getElementById('edit-lo').value.trim();
+  const km        = document.getElementById('edit-km').value.trim();
   const price     = parseInt(document.getElementById('edit-price').value);
   const imgRaw    = document.getElementById('edit-img').value.trim();
   let images = [];
@@ -2176,7 +2155,7 @@ async function submitEditProduct() {
 
   // 카테고리가 바뀌면 새 카테고리의 다음 번호로 ID 자동 생성
   if (catChanged) {
-    const allSnap = await getCatalogSnap();
+    const allSnap = await db.ref('catalog').get();
     const allCatalog = allSnap.val() || {};
     const newCatData = allCatalog[newCatKey] || {};
     const label = getLabel(newCatData, newCatKey);
@@ -2198,7 +2177,7 @@ async function submitEditProduct() {
   const catEmojis = { frozen:'🧊', noodle:'🍜', sauce:'🥫', other:'🧃', essentials:'🧴', veggie:'🌿' };
   const updatedItem = {
     id: newId, emoji: '',
-    name_en: en || ko, name_ko: ko, name_th: th, name_lo: lo,
+    name_en: en || ko, name_ko: ko, name_th: th, name_lo: lo, name_km: km,
     price1: price, price2: 0, price3: 0,
     image: images[0] || '',
     images: images
@@ -2209,7 +2188,6 @@ async function submitEditProduct() {
     const oldSnap = await db.ref('catalog/' + oldCatKey + '/items').get();
     const oldItems = (oldSnap.val() || []).filter((_, i) => i !== idx);
     await db.ref('catalog/' + oldCatKey + '/items').set(oldItems);
-    invalidateCatalogCache();
 
     // 새 카테고리에 추가
     const newSnap = await db.ref('catalog/' + newCatKey + '/items').get();
@@ -2217,7 +2195,6 @@ async function submitEditProduct() {
     updatedItem.emoji = catEmojis[newCatKey] || '🛒';
     newItems.push(updatedItem);
     await db.ref('catalog/' + newCatKey + '/items').set(newItems);
-    invalidateCatalogCache();
 
     // discount 키도 이동
     const discSnap = await db.ref('discount/' + oldId).get();
@@ -2233,13 +2210,12 @@ async function submitEditProduct() {
     updatedItem.price2 = existing.price2 || 0;
     updatedItem.price3 = existing.price3 || 0;
     await db.ref('catalog/' + oldCatKey + '/items/' + idx).set(updatedItem);
-    invalidateCatalogCache();
   }
 
   closeEditModal();
   showToast(catChanged ? `✅ 이동 완료! ${oldId} → ${newId}` : '✅ 상품 수정 완료!');
   // SNS 카드 캐시 갱신 (가격 수정이 카드에 즉시 반영되도록)
-  getCatalogSnap().then(s => { window._catalogCache = s.val() || {}; });
+  db.ref('catalog').get().then(s => { window._catalogCache = s.val() || {}; });
   await loadCatalogForAdmin();
   autoFillId();
 }
@@ -2284,7 +2260,6 @@ async function migrateClothing() {
   updates['catalog/clothing'] = clothingBase;
 
   await db.ref().update(updates);
-  invalidateCatalogCache();
   showToast(`✅ "중고" 상품 ${toMove.length}개를 의류 카테고리로 이동했습니다!`);
   loadCategories();
 }
@@ -2376,7 +2351,7 @@ function initCatDrag() {
 
 async function loadCategories() {
   const [snap, orderSnap] = await Promise.all([
-    getCatalogSnap(),
+    db.ref('catalog').get(),
     db.ref('catOrder').get()
   ]);
   const data = snap.val() || {};
@@ -2423,7 +2398,6 @@ async function loadCategories() {
 
 async function toggleCatVisible(key, currentVisible) {
   await db.ref('catalog/' + key + '/visible').set(!currentVisible);
-  invalidateCatalogCache();
   showToast(!currentVisible ? `✅ ${key} 카테고리 표시됨` : `🙈 ${key} 카테고리 숨김`);
   loadCategories();
 }
@@ -2496,7 +2470,6 @@ async function submitCatEdit() {
   if (_catEditKey) {
     // 수정
     await db.ref('catalog/' + _catEditKey).update({ label, emoji, showPriceTags });
-    invalidateCatalogCache();
     showToast('✅ 카테고리 수정 완료!');
   } else {
     // 추가
@@ -2505,7 +2478,6 @@ async function submitCatEdit() {
     const exists = await db.ref('catalog/' + key).get();
     if (exists.val()) { alert('이미 존재하는 키입니다.'); return; }
     await db.ref('catalog/' + key).set({ label, emoji, showPriceTags, items: [] });
-    invalidateCatalogCache();
     showToast('✅ 카테고리 추가 완료!');
   }
   closeCatModal();
@@ -2518,7 +2490,6 @@ async function deleteProduct(catKey, itemId) {
   const items = snap.val() || [];
   const newItems = items.filter(item => item.id !== itemId);
   await db.ref('catalog/' + catKey + '/items').set(newItems);
-  invalidateCatalogCache();
   showToast('🗑️ 삭제 완료!');
   loadCatalogForAdmin();
   autoFillId();
@@ -2530,6 +2501,7 @@ async function addProduct() {
   const ko = document.getElementById('new-ko').value.trim();
   const th = document.getElementById('new-th').value.trim();
   const lo = document.getElementById('new-lo').value.trim();
+  const km = document.getElementById('new-km').value.trim();
   const price = parseInt(document.getElementById('new-price').value);
   const imgRaw = document.getElementById('new-img').value.trim();
   let images = [];
@@ -2549,7 +2521,7 @@ async function addProduct() {
   // Firebase catalog에 바로 저장
   const newItem = {
     id, emoji,
-    name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo,
+    name_en: finalEn, name_ko: ko, name_th: th, name_lo: lo, name_km: km,
     price1: price, price2: 0, price3: 0,
     image: images[0] || '',
     images: images
@@ -2562,14 +2534,13 @@ async function addProduct() {
     const defaultD2 = parseFloat(document.getElementById('bulk-disc2')?.value) || 5;
     const defaultD3 = parseFloat(document.getElementById('bulk-disc3')?.value) || 10;
     db.ref('catalog/' + catKey + '/items').set(items).then(() => {
-      invalidateCatalogCache();
       // discount 노드에도 새 상품 기본 할인율 저장
       return db.ref('discount/' + id).set({ d2: defaultD2, d3: defaultD3 });
     }).then(() => {
       showToast('✅ 상품 추가 완료!');
       localStorage.removeItem('product_form_tmp'); // 임시저장 삭제
       // 필드 초기화
-      ['new-en','new-ko','new-th','new-lo','new-price','new-img','new-img-url'].forEach(f => {
+      ['new-en','new-ko','new-th','new-lo','new-km','new-price','new-img','new-img-url'].forEach(f => {
         const el = document.getElementById(f);
         if (el) el.value = '';
       });
@@ -2718,7 +2689,7 @@ function newSearchSelect(val) {
 let ALL_OPTIONS = ''; // Firebase에서 동적 생성
 
 async function buildAllOptions() {
-  const snap = await getCatalogSnap();
+  const snap = await db.ref('catalog').get();
   const catalog = snap.val() || {};
   const fixedOrder3 = ['frozen','sauce_liquid','spice','noodle','veggie','drinks_snacks','essentials','shoes','clothing','cigarettes&lighters'];
   const ordered3 = [...fixedOrder3.filter(k=>catalog[k]), ...Object.keys(catalog).filter(k=>!fixedOrder3.includes(k)).sort()];
@@ -3487,7 +3458,7 @@ function selectSnsProduct(id, name) {
 
   // 상품 찾기 - 항상 Firebase에서 최신 데이터 로드 (가격 수정 즉시 반영)
   _snsItem = null;
-  getCatalogSnap().then(snap => {
+  db.ref('catalog').get().then(snap => {
     const data = snap.val() || {};
     window._catalogCache = data;
     Object.values(data).forEach(cat => {
@@ -3525,7 +3496,7 @@ async function applySnsDiscount() {
     `Firebase price1을 ₩${newPrice.toLocaleString()}으로 업데이트할까요?`
   );
   if (!confirmed) return;
-  const catSnap = await getCatalogSnap();
+  const catSnap = await db.ref('catalog').get();
   const catalog = catSnap.val() || {};
   const updates = {};
   Object.entries(catalog).forEach(([catKey, cat]) => {
@@ -3542,7 +3513,6 @@ async function applySnsDiscount() {
   }
 
   await db.ref().update(updates);
-  invalidateCatalogCache();
   _snsItem.price1 = newPrice;
   showToast(`✅ ₩${newPrice.toLocaleString()}으로 가격 업데이트 완료!`);
   renderSnsCard();
@@ -4451,7 +4421,7 @@ function downloadSnsCard() {
     if(tab==='chart'){
       try {
         if(!window._catalogCache && typeof db !== 'undefined')
-          getCatalogSnap().then(s=>{window._catalogCache=s.val()||{};});
+          db.ref('catalog').get().then(s=>{window._catalogCache=s.val()||{};});
       } catch(e){}
       if(chartItems.length) renderGraphStatic();
     }
