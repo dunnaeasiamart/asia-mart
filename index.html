@@ -657,11 +657,11 @@
   <div class="logo">Asia <span>Mart</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div class="lang-switcher">
-      <button class="lang-btn active" onclick="setLang('en')">EN</button>
-      <button class="lang-btn" onclick="setLang('th')">TH</button>
-      <button class="lang-btn" onclick="setLang('lo')">LO</button>
-      <button class="lang-btn" onclick="setLang('km')">KH</button>
-      <button class="lang-btn" onclick="setLang('ko')">KO</button>
+      <button class="lang-btn active" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('th')">ภาษาไทย</button>
+      <button class="lang-btn" onclick="setLang('lo')">ພາສາລາວ</button>
+      <button class="lang-btn" onclick="setLang('km')">ភាសាខ្មែរ</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
     </div>
 
     <button class="search-btn" onclick="toggleSearch()" id="search-toggle-btn">🔍</button>
@@ -848,6 +848,7 @@ const i18n = {
     delivery_parcel: '📦 Parcel (Prepayment required)',
     parcel_notice: '⚠️ Parcel orders require prepayment. We will contact you via Messenger with payment details.',
     frozen_warning: '🧊 Your order includes frozen items. Additional ice pack & box fee applies.',
+    sold_out: 'Sold Out',
   },
   th: {
     cart: 'ตะกร้า', hero_title: 'อาหารเอเชียแท้<br>สั่งซื้อออนไลน์',
@@ -896,6 +897,7 @@ const i18n = {
     delivery_parcel: '📦 ส่งพัสดุ (ชำระล่วงหน้า)',
     parcel_notice: '⚠️ การสั่งพัสดุต้องชำระเงินล่วงหน้า เราจะติดต่อผ่าน Messenger พร้อมรายละเอียดการชำระ',
     frozen_warning: '🧊 มีสินค้าแช่แข็งในคำสั่ง มีค่าใช้จ่ายเพิ่มเติมสำหรับกล่องน้ำแข็งและสารทำความเย็น',
+    sold_out: 'สินค้าหมด',
   },
   ko: {
     cart: '장바구니', hero_title: '정통 아시아 식품<br>온라인 주문',
@@ -944,6 +946,7 @@ const i18n = {
     delivery_parcel: '📦 택배 (선입금 필요)',
     parcel_notice: '⚠️ 택배 주문은 선입금이 필요합니다. 메신저로 입금 안내를 드릴게요.',
     frozen_warning: '🧊 냉동 상품이 포함되어 있습니다. 아이스박스 및 보냉재 추가 비용이 발생합니다.',
+    sold_out: '품절',
   },
   lo: {
     cart: 'ກະຕ່າ', hero_title: 'ອາຫານເອເຊຍແທ້<br>ສັ່ງຊື້ອອນໄລນ໌',
@@ -992,6 +995,7 @@ const i18n = {
     delivery_parcel: '📦 ສົ່ງພັດສະດຸ (ຊຳລະລ່ວງໜ້າ)',
     parcel_notice: '⚠️ ການສັ່ງພັດສະດຸຕ້ອງຊຳລະລ່ວງໜ້າ. ພວກເຮົາຈະຕິດຕໍ່ທາງ Messenger ພ້ອມລາຍລະອຽດການຊຳລະ',
     frozen_warning: '🧊 ມີສິນຄ້າແຊ່ແຂງໃນຄຳສັ່ງ. ມີຄ່າໃຊ້ຈ່າຍເພີ່ມສຳລັບກ່ອງນ້ຳກ້ອນ',
+    sold_out: 'ໝົດສິນຄ້າ',
   },
   km: {
     cart: 'កន្ត្រក', hero_title: 'អាហារអាស៊ីពិតប្រាកដ<br>ការបញ្ជាទិញអនឡាញ',
@@ -1040,6 +1044,7 @@ const i18n = {
     delivery_parcel: '📦 បញ្ជូនដោយក្រុមហ៊ុនដឹក (បង់ប្រាក់ជាមុន)',
     parcel_notice: '⚠️ ការបញ្ជាទិញតាមក្រុមហ៊ុនដឹកត្រូវបង់ប្រាក់ជាមុន យើងនឹងទាក់ទងតាម Messenger',
     frozen_warning: '🧊 ការបញ្ជាទិញរបស់អ្នករួមបញ្ចូលទំនិញកក មានថ្លៃបន្ថែមសម្រាប់ប្រអប់ទឹកកក',
+    sold_out: 'អស់ស្តុក',
   }
 };
 
@@ -1067,7 +1072,7 @@ function setLang(lang) {
 
   // Update lang buttons
   document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent === lang.toUpperCase());
+    btn.classList.toggle('active', btn.getAttribute('onclick') === `setLang('${lang}')`);
   });
 
   // 카테고리 탭 이름 업데이트 (Firebase에서 동적 생성된 탭 = data-catkey 사용)
@@ -2560,7 +2565,7 @@ window.applyStock = function() {
       const badge = document.createElement('div');
       badge.className = 'sold-out-badge';
       badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;';
-      badge.textContent = '품절 / Sold Out';
+      badge.textContent = i18n[currentLang]?.sold_out || 'Sold Out';
       card.appendChild(badge);
       // 수량 0으로
       quantities[item.id] = 0;
