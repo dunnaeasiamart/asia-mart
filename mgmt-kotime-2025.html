@@ -467,7 +467,7 @@ td input[type="number"]:focus { border-color: #c84b2f; }
       <!-- 일괄 재번역 -->
       <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
         <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">🌐 전체 상품 일괄 재번역</h3>
-        <p style="font-size:13px;color:#888;margin-bottom:8px;">한국어명을 기준으로 영문명, 태국어명, 라오스어명을 Google 번역으로 일괄 업데이트합니다.</p>
+        <p style="font-size:13px;color:#888;margin-bottom:8px;">한국어명을 기준으로 영문명, 태국어명, 라오스어명, 크메르어명을 Google 번역으로 일괄 업데이트합니다.</p>
         <p style="font-size:12px;color:#c84b2f;margin-bottom:16px;">⚠️ 기존 번역이 덮어씌워집니다. 수동으로 수정한 번역도 초기화돼요.</p>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
           <select id="retranslate-cat" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
@@ -2550,6 +2550,12 @@ async function addProduct() {
       document.getElementById('new-img-file').value = '';
       document.getElementById('translate-status').style.display = 'none';
       _newImgUrls = [];
+      // 신상품 목록에 자동 추가 (맨 앞에 추가, 최대 10개 유지)
+      db.ref('newItems').once('value', newSnap => {
+        const currentNew = (newSnap.val() || []).filter(i => i !== id);
+        const updatedNew = [id, ...currentNew].slice(0, 10);
+        db.ref('newItems').set(updatedNew);
+      });
       // 카탈로그 새로고침 완료 후 다음 ID 자동 입력
       setTimeout(() => {
         loadCatalogForAdmin().then(() => autoFillId());
